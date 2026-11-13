@@ -219,7 +219,8 @@ consistent overruns are terminated (error 1102). So I capped the cron at **8 use
   Cloudflare's Metrics > Errors for "Exceeded CPU". If it shows up, lower `max_users_per_tick`
   to 5.
 - **The backup schedule (:37) has not fired yet.** GitHub often waits a while before it
-  starts a brand-new schedule; the 19:37 slot passed without a run. Its skip logic was tested by
+  starts a brand-new schedule; the 19:37 and 20:37 slots passed without a run, though the
+  workflow shows as "active". Its skip logic was tested by
   hand (the 20:09 run above). If it still never fires, nothing breaks, because the Worker is the
   main trigger.
 - **The duplicate check is imperfect** (see Decisions). If repeats annoy you, the next step is a
