@@ -21,6 +21,9 @@ sys.path.insert(0, str(ROOT))
 from scripts.set_secrets import read_env  # noqa: E402
 
 NOT_SECRET = {"GEMINI_MODEL", "GEMINI_FALLBACK_MODEL", "GROQ_MODEL", "DEFAULT_TIMEZONE", "AXIOM_DEBUG_DIR"}
+# Identifiers that are committed on purpose, and only where wrangler needs them. They grant no
+# access on their own (the D1 token does, and it is a secret). Anywhere else they still count.
+ALLOWED_IN = {"D1_DATABASE_ID": "worker/wrangler.toml"}
 SHAPES = {
     "Telegram bot token": r"\b\d{8,10}:AA[A-Za-z0-9_-]{30,}",
     "Google API key": r"\bAIza[0-9A-Za-z_-]{35}\b",
@@ -51,6 +54,15 @@ def main() -> int:
 
     for where, text in texts.items():
         for k, v in values.items():
+            if k in ALLOWED_IN:
+                # history: allowed only inside the diff of the allowed file
+                if where == ALLOWED_IN[k]:
+                    continue
+                if where == "history":
+                    other = re.sub(r"(?ms)^diff --git a/" + re.escape(ALLOWED_IN[k]) + r" .*?(?=^diff --git |^commit |\Z)",
+                                   "", text)
+                    if v not in other:
+                        continue
             if v in text:
                 if where == "history":
                     commits = [c[7:15] for c in re.split(r"(?=^commit [0-9a-f]{40}$)", text, flags=re.M)
