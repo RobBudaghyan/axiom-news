@@ -115,6 +115,12 @@ CREATE TABLE IF NOT EXISTS ai_calls (
   error         TEXT
 );
 
+-- Small key/value state for the Worker (Step 3): last_alert_at, last_alerted_run_id.
+CREATE TABLE IF NOT EXISTS meta (
+  key   TEXT PRIMARY KEY,
+  value TEXT
+) WITHOUT ROWID;
+
 CREATE TABLE IF NOT EXISTS errors (
   id        INTEGER PRIMARY KEY,
   at        INTEGER NOT NULL,

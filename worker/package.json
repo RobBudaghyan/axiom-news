@@ -1,0 +1,14 @@
+{
+  "name": "axiom-news-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test --test-reporter=spec test/",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail --format json",
+    "digest": "node scripts/digest-cli.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "4.155.0"
+  }
+}
