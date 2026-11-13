@@ -127,7 +127,7 @@ sources:
 
   # ---------------- Middle East / Iran ----------------
   - {key: al_jazeera, name: Al Jazeera, url: "https://www.aljazeera.com/xml/rss/all.xml", region: middle_east, language: en, topics: [iran_war, wars_conflicts, politics], paywalled: false, state_owned: true, tier: 2, note: "Funded by the government of Qatar"}
-  - {key: times_of_israel, name: The Times of Israel, url: "https://www.timesofisrael.com/feed/", region: middle_east, language: en, topics: [iran_war, wars_conflicts], paywalled: false, state_owned: false, tier: 2}
+  - {key: times_of_israel, enabled: false, disabled_note: "HTTP 403 from GitHub Actions runners (check-feeds and job run, 2026-11-13); works from the owner PC", name: The Times of Israel, url: "https://www.timesofisrael.com/feed/", region: middle_east, language: en, topics: [iran_war, wars_conflicts], paywalled: false, state_owned: false, tier: 2}
   - {key: jpost, name: The Jerusalem Post, url: "https://www.jpost.com/rss/rssfeedsfrontpage.aspx", region: middle_east, language: en, topics: [iran_war, wars_conflicts], paywalled: false, state_owned: false, tier: 2}
   - {key: haaretz, name: Haaretz, url: "https://www.haaretz.com/srv/haaretz-latest-headlines", region: middle_east, language: en, topics: [iran_war, wars_conflicts, politics], paywalled: true, state_owned: false, tier: 1}
   - {key: al_monitor, name: Al-Monitor, url: "https://www.al-monitor.com/rss", region: middle_east, language: en, topics: [iran_war, politics], paywalled: true, state_owned: false, tier: 2}
