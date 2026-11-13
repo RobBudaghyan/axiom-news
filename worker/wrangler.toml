@@ -16,7 +16,7 @@ database_name = "axiom-d1"
 database_id = "__D1_DATABASE_ID__"
 
 [vars]
-GITHUB_REPO = "__GITHUB_REPO__"
+GITHUB_REPO = "RobBudaghyan/axiom-news"
 GITHUB_WORKFLOW = "hourly.yml"
 GITHUB_REF = "main"
 
