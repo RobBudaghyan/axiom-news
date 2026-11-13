@@ -5,6 +5,7 @@
 //   node scripts/digest-cli.mjs                    dry run: print the owner's next digest, write nothing
 //   node scripts/digest-cli.mjs --format B         dry run in format B
 //   node scripts/digest-cli.mjs --preview A        send a labelled preview to the owner, write nothing
+//                                                   (add --dry to print it without sending)
 //   node scripts/digest-cli.mjs --send             send for real and record it (as the Worker does)
 //   (near-duplicate pairs: venv/Scripts/python -m job.dupes, from the project folder)
 //   node scripts/digest-cli.mjs --length 15        longest-headline 15-story digest: length check
@@ -76,7 +77,10 @@ async function main() {
     id: owner, topics: JSON.stringify(topics.map((t) => t.tag)), max_stories: CONFIG.default_stories,
     timezone: CONFIG.default_timezone, digest_times: JSON.stringify(CONFIG.default_times), last_digest_at: null,
   };
-  const st = candidateStatement(user, now);
+  // A preview shows the format with the last 24 h, as if nothing had been sent yet (id 0 has
+  // no `sent` rows); it is labelled as a preview and writes nothing.
+  const previewing = process.argv.includes("--preview");
+  const st = candidateStatement(previewing ? { ...user, id: 0, last_digest_at: null } : user, now);
   const cands = await db.query(st.sql, st.params);
 
   if (process.argv.includes("--length")) {
@@ -110,10 +114,10 @@ async function main() {
   const preview = arg("--preview", "A");
   const format = preview ?? arg("--format", CONFIG.format);
   const label = preview ? `<i>Preview ${preview}: ${preview === "A" ? "flat list (default)" : "grouped by topic"}</i>` : undefined;
-  const plan = planDigest(user, cands, topics, now, CONFIG, { format, label });
+  const plan = planDigest(previewing ? { ...user, last_digest_at: null } : user, cands, topics, now, CONFIG, { format, label });
   console.log(plan.text);
   console.log(`\n[${plan.stories.length} stories from ${cands.length} candidates, visible length ${visibleLength(plan.text)}]`);
-  if (process.argv.includes("--send") || preview) {
+  if ((process.argv.includes("--send") || preview) && !process.argv.includes("--dry")) {
     const result = await sendHtml(env.TELEGRAM_BOT_TOKEN, owner, plan.text);
     console.log(`[sent: Telegram message_id ${result.message_id}]`);
     if (!preview) {
