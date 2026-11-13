@@ -114,11 +114,16 @@ async function main() {
   }
 
   if (process.argv.includes("--cpu")) {
+    // Worst case: a full candidate list (the last 24 h, ignoring "sent"), 15 stories each.
     const n = Number(arg("--cpu", "20"));
+    const pool = await db.query("SELECT id, summary, best_url, best_source, importance, topics, updated_at FROM stories " +
+      "WHERE updated_at >= ?1 AND importance >= ?2 ORDER BY importance DESC, updated_at DESC, id DESC LIMIT ?3",
+      [now - 86400, CONFIG.min_importance, CONFIG.candidate_limit]);
+    planDigest({ ...user, max_stories: 15 }, pool, topics, now);   // warm-up (JIT), not counted
     const t0 = process.cpuUsage();
-    for (let i = 0; i < n; i++) planDigest({ ...user, max_stories: 15 }, cands, topics, now);
+    for (let i = 0; i < n; i++) planDigest({ ...user, max_stories: 15 }, pool, topics, now);
     const t = process.cpuUsage(t0);
-    console.log(`${n} digests from ${cands.length} candidates: ${((t.user + t.system) / 1000).toFixed(1)} ms CPU ` +
+    console.log(`${n} digests from ${pool.length} candidates: ${((t.user + t.system) / 1000).toFixed(1)} ms CPU ` +
       `(${((t.user + t.system) / 1000 / n).toFixed(2)} ms each, Node on this PC)`);
     return;
   }

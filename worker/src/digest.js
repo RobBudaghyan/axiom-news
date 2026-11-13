@@ -106,32 +106,64 @@ export function idfTable(tokenMaps) {
 
 // Weighted overlap: shared weight divided by the smaller line's total weight (0..1).
 export function similarity(a, b, idf) {
-  let shared = 0, wa = 0, wb = 0;
-  for (const [w, x] of a) {
-    const v = x * (idf.get(w) ?? 1);
-    wa += v;
-    if (b.has(w)) shared += Math.min(x, b.get(w)) * (idf.get(w) ?? 1);
+  return overlap({ map: a, total: totalWeight(a, idf) }, { map: b, total: totalWeight(b, idf) }, idf);
+}
+
+function totalWeight(map, idf) {
+  let t = 0;
+  for (const [w, x] of map) t += x * (idf.get(w) ?? 1);
+  return t;
+}
+
+function overlap(a, b, idf) {
+  const [small, big] = a.map.size <= b.map.size ? [a, b] : [b, a];
+  let shared = 0;
+  for (const [w, x] of small.map) {
+    const y = big.map.get(w);
+    if (y) shared += Math.min(x, y) * (idf.get(w) ?? 1);
   }
-  for (const [w, x] of b) wb += x * (idf.get(w) ?? 1);
-  const small = Math.min(wa, wb);
-  return small > 0 ? shared / small : 0;
+  const lo = Math.min(a.total, b.total);
+  return lo > 0 ? shared / lo : 0;
+}
+
+// Word lists are cached by text: in one cron tick several users share most candidates.
+const tokenCache = new Map();
+function cachedTokens(text) {
+  let m = tokenCache.get(text);
+  if (!m) {
+    if (tokenCache.size > 3000) tokenCache.clear();
+    m = tokens(text);
+    tokenCache.set(text, m);
+  }
+  return m;
+}
+
+// Walks candidates in rank order and checks each against the ones accepted so far (rank
+// order means the more important line of a pair is the one kept). IDF comes from the whole
+// candidate list. `onAccept(c)` returns true to stop early (the digest is full), so a normal
+// digest compares a few dozen pairs instead of all ~5,000.
+function walk(candidates, threshold, onAccept, onDrop) {
+  const maps = candidates.map((c) => cachedTokens(c.summary));
+  const idf = idfTable(maps);
+  const accepted = [];
+  for (let i = 0; i < candidates.length; i++) {
+    const me = { map: maps[i], total: totalWeight(maps[i], idf) };
+    let best = 0, of = null;
+    for (const a of accepted) {
+      const s = overlap(me, a, idf);
+      if (s > best) { best = s; of = a.c; }
+    }
+    if (best >= threshold) { onDrop?.({ story: candidates[i], of, score: best }); continue; }
+    accepted.push({ ...me, c: candidates[i] });
+    if (onAccept(candidates[i], accepted.length - 1)) return;
+  }
 }
 
 // Keeps candidates in order and drops any that is too similar to one already kept.
 // Returns {kept, dropped: [{story, of, score}]}.
 export function dedupe(candidates, threshold = CONFIG.dedupe_threshold) {
-  const maps = candidates.map((c) => tokens(c.summary));
-  const idf = idfTable(maps);
-  const kept = [], keptMaps = [], dropped = [];
-  candidates.forEach((c, i) => {
-    let best = 0, of = null;
-    keptMaps.forEach((m, j) => {
-      const s = similarity(maps[i], m, idf);
-      if (s > best) { best = s; of = kept[j]; }
-    });
-    if (best >= threshold) dropped.push({ story: c, of, score: best });
-    else { kept.push(c); keptMaps.push(maps[i]); }
-  });
+  const kept = [], dropped = [];
+  walk(candidates, threshold, (c) => { kept.push(c); return false; }, (d) => dropped.push(d));
   return { kept, dropped };
 }
 
@@ -140,15 +172,14 @@ export function dedupe(candidates, threshold = CONFIG.dedupe_threshold) {
 // candidates: rows from CANDIDATE_SQL in rank order. Returns up to n stories in rank order,
 // each with `primary` (the topic it counts against).
 export function pickStories(candidates, userTopics, n, cfg = CONFIG) {
-  const { kept } = dedupe(candidates, cfg.dedupe_threshold);
   const cap = topicCap(n, cfg.max_topic_share);
   const counts = new Map();
   const chosen = [], overflow = [];
-  kept.forEach((c, rank) => {
+  walk(candidates, cfg.dedupe_threshold, (c, rank) => {
     const s = { ...c, rank, primary: primaryTopic(parseList(c.topics), userTopics, cfg.topic_specificity) };
-    if (chosen.length >= n) { overflow.push(s); return; }
     const k = counts.get(s.primary) ?? 0;
     if (k < cap) { chosen.push(s); counts.set(s.primary, k + 1); } else overflow.push(s);
+    return chosen.length >= n;
   });
   // The cap left empty slots and nothing else qualifies: fill with the next most important.
   for (const s of overflow) {
