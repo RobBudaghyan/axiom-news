@@ -1,0 +1,68 @@
+# Topic list. Users subscribe to topics; the hourly AI pass tags each story with them.
+#   tag:        internal id, stored in the database. Never rename an existing tag
+#               (users' saved choices refer to it); add a new one instead.
+#   label:      what users see, per language. v1 shows only `en`; `ru` is kept
+#               ready for when Russian is added.
+#   emoji:      shown next to the label in the Mini App.
+#   definition: given to the AI so it knows what belongs here and what doesn't.
+#               (Old-project lesson: a bare label alone caused wrong tags.)
+#   default:    new users start subscribed to it.
+topics:
+  - tag: politics
+    label: {en: "Politics", ru: "Политика"}
+    emoji: "🏛️"
+    default: true
+    definition: >-
+      Government, elections, legislation, diplomacy, sanctions, major court rulings,
+      and economic policy decisions with political weight (central bank moves, trade
+      deals, tariffs). Any country. Not: celebrity news, sports, lifestyle, routine
+      company news.
+
+  - tag: wars_conflicts
+    label: {en: "Wars & Conflicts", ru: "Войны и конфликты"}
+    emoji: "⚔️"
+    default: true
+    definition: >-
+      Armed conflicts, military operations, attacks, terrorism, ceasefires, peace
+      talks, arms deliveries and major military/defence developments anywhere in the
+      world. Stories about the Ukraine war or an Iran war also get this tag.
+
+  - tag: armenia
+    label: {en: "Armenia", ru: "Армения"}
+    emoji: "🇦🇲"
+    default: true
+    definition: >-
+      Armenia's politics, economy, security and foreign relations; Armenia-Azerbaijan
+      relations, border and peace process; Armenia's relations with Russia, Turkey,
+      Iran, Georgia, the EU and the US; the Armenian diaspora when politically
+      significant. Not: news about Azerbaijan or Turkey with no Armenia connection.
+
+  - tag: russia
+    label: {en: "Russia", ru: "Россия"}
+    emoji: "🇷🇺"
+    default: true
+    definition: >-
+      Russia's domestic politics, economy, sanctions, repression, elites and foreign
+      policy. Stories mainly about battlefield events in Ukraine belong to
+      ukraine_war; tag russia too only if they say something significant about
+      Russia itself (mobilisation, economy, Kremlin decisions).
+
+  - tag: iran_war
+    label: {en: "Iran War", ru: "Война в Иране"}
+    emoji: "🇮🇷"
+    default: true
+    definition: >-
+      Military confrontation involving Iran (with Israel, the US or others) and its
+      direct spillover: strikes, interceptions, proxy attacks tied to it (Houthis,
+      Hezbollah, Iraqi militias), shipping attacks in the Gulf/Red Sea, nuclear
+      programme strikes and talks, and incidents in neighbouring countries caused by
+      the conflict. Not: Iranian domestic news with no link to the conflict.
+
+  - tag: ukraine_war
+    label: {en: "Ukraine War", ru: "Война в Украине"}
+    emoji: "🇺🇦"
+    default: true
+    definition: >-
+      Russia's war against Ukraine: front-line events, strikes on cities and
+      infrastructure, military aid, peace negotiations, prisoner exchanges, and
+      war-related sanctions. Not: Ukrainian domestic news with no link to the war.
