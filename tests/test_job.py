@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from job import ai  # noqa: E402
 from job.fetch import normalize_url, select_new  # noqa: E402
 from tests.helpers import (Clock, FakeProvider, FakeResponse, FakeSession, Feeds, entry,  # noqa: E402
-                           grouping_responder, make_job, new_db)
+                           T0, grouping_responder, make_job, new_db)
 
 RATE_LIMIT = ai.AIError("gemini", "HTTP 429: quota", kind="rate_limit", status=429)
 GROQ_DOWN = ai.AIError("groq", "HTTP 503", kind="http", status=503)
@@ -387,3 +387,23 @@ class Providers(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class MinGapAndDisabledFeeds(unittest.TestCase):
+    """Step 3: overlapping triggers (Worker + backup schedule) and disabled feeds."""
+
+    def test_recent_run_blocks_a_second_one(self):
+        from job.run import recent_run_started
+        db = new_db()
+        self.assertIsNone(recent_run_started(db, T0, 20))          # no runs yet
+        db.query("INSERT INTO job_runs (started_at, status) VALUES (?, 'ok')", [T0 - 10 * 60])
+        self.assertEqual(recent_run_started(db, T0, 20), T0 - 10 * 60)
+        self.assertIsNone(recent_run_started(db, T0, 5))           # 10 min ago is outside a 5 min gap
+        self.assertIsNone(recent_run_started(db, T0, 0))           # 0 = always run
+
+    def test_disabled_feeds_are_skipped(self):
+        from job.config import load_sources
+        every = load_sources(include_disabled=True)
+        enabled = load_sources()
+        self.assertEqual(len(enabled), sum(1 for s in every if s.get("enabled", True)))
+        self.assertTrue(all(s.get("enabled", True) for s in enabled))

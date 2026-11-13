@@ -65,8 +65,11 @@ def load_topics() -> list[dict]:
     return yaml.safe_load((ROOT / "config" / "topics.yaml").read_text(encoding="utf-8"))["topics"]
 
 
-def load_sources() -> list[dict]:
-    return yaml.safe_load((ROOT / "config" / "sources.yaml").read_text(encoding="utf-8"))["sources"]
+def load_sources(include_disabled: bool = False) -> list[dict]:
+    """Feeds from config/sources.yaml. A feed with `enabled: false` is skipped (kept in the file
+    with a `disabled_note`, e.g. when it fails from GitHub's servers)."""
+    sources = yaml.safe_load((ROOT / "config" / "sources.yaml").read_text(encoding="utf-8"))["sources"]
+    return sources if include_disabled else [s for s in sources if s.get("enabled", True)]
 
 
 @dataclass

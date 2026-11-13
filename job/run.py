@@ -9,6 +9,7 @@ and are retried next run (docs/ARCHITECTURE.md section 7).
 """
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import sys
@@ -493,11 +494,31 @@ def build_from_env(env: dict[str, str], settings: Settings) -> tuple[D1, list[Pr
     return db, plans
 
 
-def main() -> int:
+def recent_run_started(db, now: int, min_gap_minutes: float) -> int | None:
+    """Start time of a run that began less than `min_gap_minutes` ago, else None. Lets the
+    Worker trigger and the backup GitHub schedule overlap safely: the later one does nothing."""
+    if min_gap_minutes <= 0:
+        return None
+    rows = db.query("SELECT started_at FROM job_runs ORDER BY id DESC LIMIT 1")
+    if rows and now - int(rows[0]["started_at"]) < min_gap_minutes * 60:
+        return int(rows[0]["started_at"])
+    return None
+
+
+def main(argv: list[str] | None = None) -> int:
     for stream in (sys.stdout, sys.stderr):
         stream.reconfigure(encoding="utf-8", errors="replace")
+    parser = argparse.ArgumentParser(description="One hourly run: fetch feeds, AI pass, write stories to D1.")
+    parser.add_argument("--min-gap-minutes", type=float, default=0,
+                        help="do nothing if a run started less than this many minutes ago (default 0: always run)")
+    args = parser.parse_args(argv)
     settings = Settings()
     db, plans = build_from_env(load_env(), settings)
+    started = recent_run_started(db, int(time.time()), args.min_gap_minutes)
+    if started is not None:
+        print(f"skipped: a run started {(int(time.time()) - started) / 60:.0f} min ago "
+              f"(min gap {args.min_gap_minutes:g} min)")
+        return 0
     try:
         Job(db, plans, settings=settings, debug_dir=load_env().get("AXIOM_DEBUG_DIR")).run()
     except Exception:

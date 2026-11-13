@@ -1,0 +1,24 @@
+# Cloudflare Worker for Axiom News (TEST bot during development).
+# Secrets are NOT here. They are set with `wrangler secret put` (scripts/set_secrets.py):
+#   TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, OWNER_TELEGRAM_ID, GITHUB_DISPATCH_TOKEN
+name = "axiom-news"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[triggers]
+# */5: send due digests and check the job's health. 7 * * * *: start the hourly GitHub job.
+crons = ["*/5 * * * *", "7 * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "axiom-d1"
+database_id = "__D1_DATABASE_ID__"
+
+[vars]
+GITHUB_REPO = "__GITHUB_REPO__"
+GITHUB_WORKFLOW = "hourly.yml"
+GITHUB_REF = "main"
+
+[observability]
+enabled = true

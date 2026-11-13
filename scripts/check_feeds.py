@@ -5,7 +5,11 @@ entry is at most --max-age-days old, and at least 80% of entries have an http(s)
 
 Usage (from the project folder):
     venv/Scripts/python scripts/check_feeds.py                 # check config/sources.yaml
+    venv/Scripts/python scripts/check_feeds.py --all           # also re-test disabled feeds
     venv/Scripts/python scripts/check_feeds.py --file other.yaml --json out.json
+
+A feed with `enabled: false` (plus a `disabled_note`) is skipped by the hourly job and, unless
+--all is given, by this check.
 
 Exit code: 0 if every feed is OK, 1 if any failed.
 """
@@ -50,6 +54,10 @@ def validate(sources: list[dict]) -> list[str]:
         for tag in s.get("topics") or []:
             if tag not in topics:
                 problems.append(f"{label}: unknown topic '{tag}'")
+        if "enabled" in s and not isinstance(s["enabled"], bool):
+            problems.append(f"{label}: 'enabled' must be true or false")
+        if s.get("enabled") is False and not s.get("disabled_note"):
+            problems.append(f"{label}: a disabled feed needs a 'disabled_note'")
         for seen, value, what in ((keys, s.get("key"), "key"), (urls, s.get("url"), "url")):
             if value in seen:
                 problems.append(f"{label}: duplicate {what}")
@@ -68,6 +76,7 @@ def entry_time(entry) -> float | None:
 
 def check(source: dict, timeout: float, max_age_days: float) -> dict:
     result = {"key": source.get("key"), "name": source["name"], "url": source["url"],
+              "disabled": source.get("enabled", True) is False,
               "region": source.get("region", ""), "ok": False, "entries": 0,
               "newest_h": None, "last_24h": 0, "note": ""}
     try:
@@ -135,10 +144,13 @@ def main() -> int:
     parser.add_argument("--max-age-days", type=float, default=7)
     parser.add_argument("--workers", type=int, default=16)
     parser.add_argument("--json", help="also write full results to this JSON file")
+    parser.add_argument("--all", action="store_true", help="also check feeds marked enabled: false")
     args = parser.parse_args()
 
     sources = yaml.safe_load(Path(args.file).read_text(encoding="utf-8"))["sources"]
     problems = validate(sources) if Path(args.file).resolve() == DEFAULT_FILE else []
+    if not args.all:
+        sources = [s for s in sources if s.get("enabled", True)]
     for p in problems:
         print(f"CONFIG ERROR: {p}")
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
@@ -148,7 +160,8 @@ def main() -> int:
     for r in results:
         newest = f"{r['newest_h']}h" if r["newest_h"] is not None else "-"
         print(f"{'OK' if r['ok'] else 'FAIL':6} {str(r['key'])[:20]:20} {r['name'][:26]:26} "
-              f"{r['entries']:>5} {newest:>7} {r['last_24h']:>4} {r.get('per_day', 0):>5}  {r['note']}")
+              f"{r['entries']:>5} {newest:>7} {r['last_24h']:>4} {r.get('per_day', 0):>5}  {r['note']}"
+              f"{' (disabled in config)' if r['disabled'] else ''}")
     ok = [r for r in results if r["ok"]]
     print(f"\n{len(ok)}/{len(results)} feeds OK. Across OK feeds: "
           f"{sum(r['last_24h'] for r in ok)} items seen from the last 24h; "

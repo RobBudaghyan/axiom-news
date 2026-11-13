@@ -1,0 +1,56 @@
+# The hourly job: fetch feeds, one AI pass, write stories to D1.
+# Started by the Cloudflare Worker at about minute :07 every hour (workflow_dispatch through
+# the GitHub API), or by backup-schedule.yml, or by hand from the Actions tab.
+# Only one run at a time: a second trigger waits in the queue, and --min-gap-minutes makes it
+# exit at once if a run started recently.
+name: hourly job
+
+on:
+  workflow_dispatch:
+    inputs:
+      min_gap_minutes:
+        description: "Skip if a run started less than this many minutes ago (0 = always run)"
+        required: false
+        default: "20"
+  workflow_call:
+    inputs:
+      min_gap_minutes:
+        type: string
+        required: false
+        default: "20"
+    secrets:
+      GEMINI_API_KEY: { required: true }
+      GROQ_API_KEY: { required: true }
+      CLOUDFLARE_ACCOUNT_ID: { required: true }
+      D1_DATABASE_ID: { required: true }
+      CLOUDFLARE_D1_TOKEN: { required: true }
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    # Job-level, so it also holds when backup-schedule.yml calls this file.
+    concurrency:
+      group: hourly-job
+      cancel-in-progress: false
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Run the hourly job
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+          CLOUDFLARE_D1_TOKEN: ${{ secrets.CLOUDFLARE_D1_TOKEN }}
+          GEMINI_MODEL: gemini-3.5-flash-lite
+          GEMINI_FALLBACK_MODEL: gemini-3.1-flash-lite
+          GROQ_MODEL: openai/gpt-oss-120b
+        run: python -m job.run --min-gap-minutes "${{ inputs.min_gap_minutes || '20' }}"
