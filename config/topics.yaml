@@ -15,8 +15,11 @@ topics:
     definition: >-
       Government, elections, legislation, diplomacy, sanctions, major court rulings,
       and economic policy decisions with political weight (central bank moves, trade
-      deals, tariffs). Any country. Not: celebrity news, sports, lifestyle, routine
-      company news.
+      deals, tariffs). Any country. The core of the story must be a government,
+      election, party, law, court or official policy act. Not: company news (CEO
+      changes, IPOs, earnings, IT outages), market moves (stocks, bonds, currencies,
+      inflation data) unless the story is about a government decision, technology,
+      celebrity news, sports, lifestyle.
 
   - tag: wars_conflicts
     label: {en: "Wars & Conflicts", ru: "Войны и конфликты"}
@@ -56,7 +59,9 @@ topics:
       direct spillover: strikes, interceptions, proxy attacks tied to it (Houthis,
       Hezbollah, Iraqi militias), shipping attacks in the Gulf/Red Sea, nuclear
       programme strikes and talks, and incidents in neighbouring countries caused by
-      the conflict. Not: Iranian domestic news with no link to the conflict.
+      the conflict. Not: Iranian domestic news with no link to the conflict; the
+      Israel-Hamas war in Gaza, the West Bank or Israeli domestic politics when the
+      item does not involve Iran (those are wars_conflicts or politics).
 
   - tag: ukraine_war
     label: {en: "Ukraine War", ru: "Война в Украине"}
