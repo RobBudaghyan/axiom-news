@@ -52,7 +52,8 @@ bot @axiom_news_bot at the end.
   - The hourly job runs on the owner's PC against the real D1 database: 5 real runs; the normal
     hourly run took 60 s.
   - Real AI limits were measured, and 39 tests pass.
-  - One test digest went to the owner through the TEST bot.
+  - One test digest went to the owner through the TEST bot; the owner confirmed it arrived
+    (2026-11-13).
 - Nothing runs automatically yet. Data from the dev runs is in D1, including `sent` rows for the
   owner from the test digest.
 
