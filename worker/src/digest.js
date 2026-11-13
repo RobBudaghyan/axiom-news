@@ -3,6 +3,7 @@
 // (scripts/digest-cli.mjs), so both behave identically. Pure functions only: no I/O.
 // Settings live in config/digest.json.
 import CONFIG from "../../config/digest.json" with { type: "json" };
+import LINE_EMOJI from "../../config/line_emoji.json" with { type: "json" };
 
 export { CONFIG };
 
@@ -150,12 +151,72 @@ function header(count, { now, tz, lastDigestAt }, cfg) {
   return { head: `${hello}. ${when[0].toUpperCase()}${when.slice(1)}, ${n} on your topics:` };
 }
 
+// ------------------------------------------------------------------ line emoji
+
+// The emoji at the start of a line (config/line_emoji.json): the flag of the FIRST country,
+// leader, capital or group the headline names ("Donald Trump's envoys..." gets the US flag); if
+// none, the first subject icon (ceasefire, strike, election, court, ...); if none, the topic's
+// emoji. A dictionary lookup of 1-4 word phrases (a 660-word regex cost 3.6 ms just to build,
+// a third of the Worker's CPU budget); at each word the longest phrase wins.
+const WORDS_RE = /[\p{L}\p{N}][\p{L}\p{N}.'’+]*/gu;   // hyphens split ("US-Iran" -> US, Iran)
+const MAX_PHRASE = 4;
+
+const keyOf = (phrase) => phrase.replace(/-/g, " ");
+
+function buildList(groups, ci) {
+  const map = new Map();
+  for (const g of groups) {
+    for (const w of g.words) {
+      const k = keyOf(ci ? w.toLowerCase() : w);
+      if (!map.has(k)) map.set(k, g.emoji);
+    }
+  }
+  return { map, ci };
+}
+
+// "Russia's" -> "Russia", "U.S." stays (it is in the list), "Russia." -> "Russia", "OPEC+" -> "OPEC"
+function variants(token) {
+  const out = [token];
+  const noPoss = token.replace(/['’]s$/, "");
+  if (noPoss !== token) out.push(noPoss);
+  const trimmed = noPoss.replace(/[.'’+]+$/, "");
+  if (trimmed !== noPoss) out.push(trimmed);
+  return out;
+}
+
+function firstMatch(tokens, list) {
+  for (let i = 0; i < tokens.length; i++) {
+    for (let n = Math.min(MAX_PHRASE, tokens.length - i); n >= 1; n--) {
+      const head = tokens.slice(i, i + n - 1).join(" ");
+      for (const last of variants(tokens[i + n - 1])) {
+        const phrase = head ? `${head} ${last}` : last;
+        const hit = list.map.get(list.ci ? phrase.toLowerCase() : phrase);
+        if (hit) return hit;
+      }
+    }
+  }
+  return null;
+}
+
+let lists = null;
+
+export function lineEmoji(headline, fallback = "") {
+  lists ??= [buildList(LINE_EMOJI.actors, false), buildList(LINE_EMOJI.subjects, true)];
+  const tokens = String(headline ?? "").match(WORDS_RE) ?? [];
+  for (const l of lists) {
+    const hit = firstMatch(tokens, l);
+    if (hit) return hit;
+  }
+  return fallback;
+}
+
 function storyBlock(n, s, emoji) {
   const head = `${n}. ${emoji ? `${emoji} ` : ""}<b>${escapeHtml(s.headline)}</b>`;
   return `${head}\nSource: <a href="${escapeAttr(s.best_url)}">${escapeHtml(s.best_source)}</a>`;
 }
 
-function render(stories, topicInfo, format, head) {
+function render(stories, topicInfo, format, head, perLine = true) {
+  const emojiFor = (s) => (perLine ? lineEmoji(s.headline, topicInfo[s.primary]?.emoji) : topicInfo[s.primary]?.emoji);
   if (format === "B") {
     const groups = new Map();
     for (const s of stories) {
@@ -166,11 +227,11 @@ function render(stories, topicInfo, format, head) {
     for (const [tag, list] of groups) {
       const t = topicInfo[tag] ?? { label: tag, emoji: "" };
       const title = `<b>${t.emoji ? `${t.emoji} ` : ""}${escapeHtml(t.label)}</b>`;
-      parts.push(`${title}\n${list.map((s, i) => storyBlock(i + 1, s, "")).join("\n\n")}`);
+      parts.push(`${title}\n${list.map((s, i) => storyBlock(i + 1, s, perLine ? emojiFor(s) : "")).join("\n\n")}`);
     }
     return parts.join("\n\n");
   }
-  return [head, ...stories.map((s, i) => storyBlock(i + 1, s, topicInfo[s.primary]?.emoji))].join("\n\n");
+  return [head, ...stories.map((s, i) => storyBlock(i + 1, s, emojiFor(s)))].join("\n\n");
 }
 
 // topics: rows of the D1 `topics` table. Returns {tag: {label, emoji}}.
@@ -191,7 +252,7 @@ export function buildMessage(stories, opts, cfg = CONFIG) {
   let text;
   for (;;) {
     const h = header(list.length, opts, cfg);
-    text = h.quiet ?? render(list, topicInfo, format, h.head);
+    text = h.quiet ?? render(list, topicInfo, format, h.head, cfg.line_emoji !== false);
     if (visibleLength(text) <= budget) break;
     if (list.length > 1) { list = list.slice(0, -1); continue; }
     const over = visibleLength(text) - budget;
@@ -199,7 +260,7 @@ export function buildMessage(stories, opts, cfg = CONFIG) {
     const cut = s.headline.slice(0, Math.max(20, s.headline.length - over - 3));
     list = [{ ...s, headline: `${cut.replace(/\s+\S*$/, "")}...` }];
     const h2 = header(1, opts, cfg);
-    text = render(list, topicInfo, format, h2.head);
+    text = render(list, topicInfo, format, h2.head, cfg.line_emoji !== false);
     break;
   }
   if (opts.label) text = `${opts.label}\n\n${text}`;

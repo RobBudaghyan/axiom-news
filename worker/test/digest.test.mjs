@@ -2,7 +2,7 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import {
-  CONFIG, buildMessage, candidateStatement, cleanHeadline, dedupe, digestSince, nextSlot, pickStories,
+  CONFIG, buildMessage, candidateStatement, cleanHeadline, dedupe, digestSince, lineEmoji, nextSlot, pickStories,
   planDigest, primaryTopic, topicCap, topicInfoFrom, visibleLength, zonedToUtc,
 } from "../src/digest.js";
 import { ALL, OWNER, TOPIC_ROWS, TZ, addStory, addUser, fakeD1, yerevan } from "./helpers.mjs";
@@ -141,7 +141,7 @@ describe("near-duplicates (groups come from the job, job/dupes.py)", () => {
 describe("message format", () => {
   const S = (summary, topics, extra) => ({ ...story(summary, topics, 5, extra), primary: primaryTopic(topics, ALL) });
 
-  test("format A: numbered, emoji, bold headline, Source line, blank line between", () => {
+  test("format A: numbered, context emoji, bold headline, Source line, blank line between", () => {
     const { text } = buildMessage([
       S("Israel and Iran agree a 30-day ceasefire — Qatar mediated.", ["iran_war", "wars_conflicts"],
         { best_url: "https://ft.test/a?x=1&y=2", best_source: "Financial Times" }),
@@ -149,22 +149,35 @@ describe("message format", () => {
     ], { now: yerevan(20, 30), tz: TZ, lastDigestAt: yerevan(14), topicInfo: INFO, format: "A" });
     assert.equal(text,
       "Good evening. Since 14:00, 2 stories on your topics:\n\n" +
-      "1. 🇮🇷 <b>Israel and Iran agree a 30-day ceasefire, Qatar mediated</b>\n" +
+      "1. 🇮🇱 <b>Israel and Iran agree a 30-day ceasefire, Qatar mediated</b>\n" +   // first actor named
       'Source: <a href="https://ft.test/a?x=1&amp;y=2">Financial Times</a>\n\n' +
       "2. 🏛️ <b>A &lt;b&gt; &amp; C</b>\n" +
       'Source: <a href="https://x.test/a">Alpha Times</a>');
     assert.doesNotMatch(text, /[—–]/);
   });
 
-  test("format B: bold topic headings with emoji, numbering inside each group", () => {
+  test("format B (default): bold topic headings, numbering inside each group, a context emoji per line", () => {
     const { text } = buildMessage([
-      S("One", ["ukraine_war"]), S("Two", ["armenia"]), S("Three", ["ukraine_war", "wars_conflicts"]),
-    ], { now: yerevan(9), tz: TZ, lastDigestAt: null, topicInfo: INFO, format: "B" });
+      S("Russian drones hit a power plant in Kharkiv", ["ukraine_war"]),
+      S("Pashinyan and Aliyev meet in Abu Dhabi", ["armenia"]),
+      S("Zelensky asks Washington for more Patriots", ["ukraine_war", "wars_conflicts"]),
+      S("Prisoner exchange returns 150 soldiers home", ["ukraine_war"]),
+    ], { now: yerevan(9), tz: TZ, lastDigestAt: null, topicInfo: INFO });
+    const src = '\nSource: <a href="https://x.test/a">Alpha Times</a>';
     assert.equal(text,
-      "Good morning. In the last 24 hours, 3 stories on your topics:\n\n" +
-      "<b>🇺🇦 Ukraine War</b>\n1. <b>One</b>\nSource: <a href=\"https://x.test/a\">Alpha Times</a>\n\n" +
-      "2. <b>Three</b>\nSource: <a href=\"https://x.test/a\">Alpha Times</a>\n\n" +
-      "<b>🇦🇲 Armenia</b>\n1. <b>Two</b>\nSource: <a href=\"https://x.test/a\">Alpha Times</a>");
+      "Good morning. In the last 24 hours, 4 stories on your topics:\n\n" +
+      `<b>🇺🇦 Ukraine War</b>\n1. 🇷🇺 <b>Russian drones hit a power plant in Kharkiv</b>${src}\n\n` +
+      `2. 🇺🇦 <b>Zelensky asks Washington for more Patriots</b>${src}\n\n` +
+      `3. 🇺🇦 <b>Prisoner exchange returns 150 soldiers home</b>${src}\n\n` +   // no actor, no subject: topic emoji
+      `<b>🇦🇲 Armenia</b>\n1. 🇦🇲 <b>Pashinyan and Aliyev meet in Abu Dhabi</b>${src}`);
+  });
+
+  test("line_emoji: false keeps format B plain and format A on topic emojis", () => {
+    const cfg = { ...CONFIG, line_emoji: false };
+    const list = [S("Russian drones hit Kharkiv", ["ukraine_war"])];
+    const opts = { now: yerevan(9), tz: TZ, lastDigestAt: null, topicInfo: INFO };
+    assert.match(buildMessage(list, { ...opts, format: "B" }, cfg).text, /\n1\. <b>Russian/);
+    assert.match(buildMessage(list, { ...opts, format: "A" }, cfg).text, /\n1\. 🇺🇦 <b>Russian/);
   });
 
   test("greetings by local hour, first digest and quiet period", () => {
@@ -214,6 +227,29 @@ describe("message format", () => {
   });
 });
 
+describe("line emoji (config/line_emoji.json)", () => {
+  const cases = [
+    ["Donald Trump's envoys offered Vladimir Putin room to stall", "🇺🇸"],          // first actor named
+    ["Delegations from Russia, Ukraine, and the United States met", "🇷🇺"],
+    ["The US Supreme Court agreed to hear the appeal", "🇺🇸"],
+    ["The U.S. Treasury announced new sanctions", "🇺🇸"],
+    ["IEA analysts warned after the US-Iran war", "🛢️"],                               // hyphen splits
+    ["Iran's foreign minister Abbas Araghchi said", "🇮🇷"],                            // possessive
+    ["Talks continue in St. Petersburg", "🇷🇺"],                                       // multi-word name
+    ["Houthis claim a missile attack on a ship", "🇾🇪"],
+    ["Israeli strikes on Gaza's Nasser Hospital killed six", "🇮🇱"],
+    ["Pashinyan meets Aliyev", "🇦🇲"],
+    ["The International Criminal Court closed its investigation", "⚖️"],
+    ["Ceasefire holds for a third day", "🕊️"],                                         // no actor: subject
+    ["Voters back the pension referendum", "🗳️"],
+    ["Let us know what the court decides", "⚖️"],                                      // lowercase "us" is not the US
+    ["A rescue worker died after a slab collapsed", "·"],                              // nothing: fallback
+  ];
+  for (const [headline, emoji] of cases) {
+    test(`${emoji}  ${headline}`, () => assert.equal(lineEmoji(headline, "·"), emoji));
+  }
+});
+
 describe("time slots", () => {
   test("next slot in Yerevan", () => {
     const times = ["09:00", "14:00", "20:00"];
@@ -244,6 +280,6 @@ describe("planDigest", () => {
     const plan = planDigest(user, [story("Armenia votes on budget", ["armenia"], 6)], TOPICS, yerevan(14, 5));
     assert.equal(plan.stories.length, 1);
     assert.equal(plan.nextAt, yerevan(20));
-    assert.match(plan.text, /^Good afternoon\. In the last 24 hours, 1 story on your topics:\n\n1\. 🇦🇲 <b>/);
+    assert.match(plan.text, /^Good afternoon\. In the last 24 hours, 1 story on your topics:\n\n<b>🇦🇲 Armenia<\/b>\n1\. 🇦🇲 <b>Armenia votes/);
   });
 });

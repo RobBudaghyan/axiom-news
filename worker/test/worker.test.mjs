@@ -101,7 +101,7 @@ describe("digest cron", () => {
     const out = await runTick(db, io, now);
     assert.equal(out.sent, 1);
     assert.equal(outbox.length, 1);
-    assert.match(outbox[0].text, /^Good afternoon\. Since 09:00, 2 stories on your topics:\n\n1\. 🇦🇲 <b>Armenia/);
+    assert.match(outbox[0].text, /^Good afternoon\. Since 09:00, 2 stories on your topics:\n\n<b>🇦🇲 Armenia<\/b>\n1\. 🇦🇲 <b>Armenia/);
     assert.equal(sqlite.prepare("SELECT COUNT(*) AS n FROM sent").get().n, 2);
     const u = sqlite.prepare("SELECT * FROM users").get();
     assert.equal(u.last_digest_at, yerevan(14));   // the slot, so the next header says "Since 14:00"

@@ -1,6 +1,7 @@
 {
   "_comment": "Digest settings shared by the Worker cron and worker/scripts/digest-cli.mjs (one place, same behaviour). Edit here, then redeploy the Worker.",
-  "format": "A",
+  "format": "B",
+  "line_emoji": true,
   "default_stories": 7,
   "min_importance": 4,
   "max_topic_share": 0.4,
