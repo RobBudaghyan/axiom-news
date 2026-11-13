@@ -1,0 +1,29 @@
+# Secrets - never commit
+.env
+.env.*
+!.env.example
+.dev.vars
+*.session
+*.session-journal
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Cloudflare / Node (later steps)
+node_modules/
+.wrangler/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
