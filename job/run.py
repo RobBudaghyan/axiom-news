@@ -427,6 +427,8 @@ class Job:
             self._finish(run_id, now, status, error, stats)
             stats_ms = int((self.clock() - t0) * 1000)
             self.log(self.summary(status, stats, stats_ms))
+            self.log(f"D1: {getattr(self.db, 'calls', 0)} calls, rows read {getattr(self.db, 'rows_read', 0)}, "
+                     f"rows written {getattr(self.db, 'rows_written', 0)}")
         return stats
 
     def _finish(self, run_id: int, now: int, status: str, error: str | None, stats: RunStats) -> None:
