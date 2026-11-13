@@ -1,6 +1,7 @@
 // One cron tick: send the digests that are due, then check the hourly job's health.
 // Subrequests per tick: 1 read batch + 1 candidate batch + 1 Telegram call per due user
-// + 1 write batch (+ 1 alert), well inside the 50 allowed on the free plan for 40 users.
+// + 1 write batch (+ 1 alert): about 12 with the 8 users per tick that the 10 ms CPU limit allows
+// (measured on Cloudflare, see reports/step-03-automation.md).
 import { CONFIG, afterSendStatements, candidateStatement, nextSlot, parseList, planDigest } from "./digest.js";
 import { HEALTH_STATEMENTS, assessHealth } from "./health.js";
 import { errorStatement } from "./db.js";

@@ -12,7 +12,11 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from job.config import load_env  # noqa: E402
-from job.d1 import D1  # noqa: E402
+from job.d1 import D1, D1Error  # noqa: E402
+
+MIGRATIONS = [
+    "ALTER TABLE stories ADD COLUMN dup_group INTEGER",   # Step 3: near-duplicate groups
+]
 
 
 def main() -> int:
@@ -20,6 +24,14 @@ def main() -> int:
     env = load_env()
     db = D1(env["CLOUDFLARE_ACCOUNT_ID"], env["D1_DATABASE_ID"], env["CLOUDFLARE_D1_TOKEN"])
     db.executescript((ROOT / "db" / "schema.sql").read_text(encoding="utf-8"))
+    # Columns added after a table already existed (CREATE TABLE IF NOT EXISTS does not add them).
+    for sql in MIGRATIONS:
+        try:
+            db.query(sql)
+            print(f"migration applied: {sql}")
+        except D1Error as exc:
+            if "duplicate column" not in str(exc):
+                raise
     rows = db.query("SELECT type, name FROM sqlite_master WHERE name NOT LIKE '\\_%' ESCAPE '\\' "
                     "AND name NOT LIKE 'sqlite_%' ORDER BY type, name")
     for r in rows:

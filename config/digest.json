@@ -5,11 +5,11 @@
   "min_importance": 4,
   "max_topic_share": 0.4,
   "topic_specificity": ["ukraine_war", "iran_war", "armenia", "russia", "wars_conflicts", "politics"],
-  "candidate_limit": 100,
+  "candidate_limit": 40,
   "dedupe_threshold": 0.45,
   "max_lookback_hours": 24,
   "message_char_budget": 4000,
-  "max_users_per_tick": 40,
+  "max_users_per_tick": 8,
   "default_timezone": "Asia/Yerevan",
   "default_times": ["09:00", "14:00", "20:00"]
 }

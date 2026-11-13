@@ -12,9 +12,9 @@ const DAY = 86400;
 
 // Candidates for one user: on one of the user's topics, importance >= min, created or updated
 // since the last digest (at most 24 h back), never sent to this user. Most important first,
-// then most recent. The topic cap and dedupe are applied afterwards in JS (pickStories).
+// then most recent. Near-duplicate removal (by dup_group) and the topic cap follow in pickStories.
 export const CANDIDATE_SQL = `
-SELECT s.id, s.summary, s.best_url, s.best_source, s.importance, s.topics, s.updated_at
+SELECT s.id, s.summary, s.best_url, s.best_source, s.importance, s.topics, s.updated_at, s.dup_group
 FROM stories s
 WHERE s.updated_at >= ?3
   AND s.importance >= ?5
@@ -64,123 +64,38 @@ export function primaryTopic(storyTopics, userTopics, specificity = CONFIG.topic
   return [...pool].sort((a, b) => rank(a) - rank(b))[0] ?? null;
 }
 
-// ------------------------------------------------------------------ near-duplicates (no AI)
+// ------------------------------------------------------------------ the pick
 
-const STOP = new Set((
-  "the a an and or but of to in on at for from by with as is are was were be been being has have had " +
-  "its it this that these those their his her they them he she we you who whom which what when where " +
-  "after before over under amid against about into onto than then there here also not no new more most " +
-  "says said say will would could should may might can just one two three four five six first last " +
-  "year years day days week weeks month months people some all any other such while during between " +
-  "since until within without per via told according report reports reported including made make " +
-  "number increase increased increases rose rise rising percent"
-).split(" "));
-
-// Content words, lower-case, accents removed, cut to a 5-letter stem ("strikes" = "strike",
-// "Ukrainian" = "Ukraine"). Capitalised words that are not the first word count double:
-// they are names and places, which say most about which event a line is about.
-export function tokens(text) {
-  const words = String(text ?? "").normalize("NFKD").replace(/[̀-ͯ]/g, "")
-    .match(/[A-Za-z0-9']+/g) ?? [];
-  const out = new Map();
-  words.forEach((raw, i) => {
-    const w = raw.toLowerCase().replace(/'s$|'/g, "");
-    if (w.length < 3 || STOP.has(w)) return;
-    const stem = w.slice(0, 5);
-    const weight = i > 0 && /^[A-Z]/.test(raw) ? 2 : 1;
-    out.set(stem, Math.max(out.get(stem) ?? 0, weight));
-  });
-  return out;
-}
-
-// Inverse document frequency over the candidate pool: a word in every line ("Ukraine") says
-// little, a rare one ("Zaporizhzhia", "Abu Dhabi") says a lot.
-export function idfTable(tokenMaps) {
-  const df = new Map();
-  for (const m of tokenMaps) for (const w of m.keys()) df.set(w, (df.get(w) ?? 0) + 1);
-  const n = tokenMaps.length;
-  const idf = new Map();
-  for (const [w, d] of df) idf.set(w, Math.log(1 + n / d));
-  return idf;
-}
-
-// Weighted overlap: shared weight divided by the smaller line's total weight (0..1).
-export function similarity(a, b, idf) {
-  return overlap({ map: a, total: totalWeight(a, idf) }, { map: b, total: totalWeight(b, idf) }, idf);
-}
-
-function totalWeight(map, idf) {
-  let t = 0;
-  for (const [w, x] of map) t += x * (idf.get(w) ?? 1);
-  return t;
-}
-
-function overlap(a, b, idf) {
-  const [small, big] = a.map.size <= b.map.size ? [a, b] : [b, a];
-  let shared = 0;
-  for (const [w, x] of small.map) {
-    const y = big.map.get(w);
-    if (y) shared += Math.min(x, y) * (idf.get(w) ?? 1);
-  }
-  const lo = Math.min(a.total, b.total);
-  return lo > 0 ? shared / lo : 0;
-}
-
-// Word lists are cached by text: in one cron tick several users share most candidates.
-const tokenCache = new Map();
-function cachedTokens(text) {
-  let m = tokenCache.get(text);
-  if (!m) {
-    if (tokenCache.size > 3000) tokenCache.clear();
-    m = tokens(text);
-    tokenCache.set(text, m);
-  }
-  return m;
-}
-
-// Walks candidates in rank order and checks each against the ones accepted so far (rank
-// order means the more important line of a pair is the one kept). IDF comes from the whole
-// candidate list. `onAccept(c)` returns true to stop early (the digest is full), so a normal
-// digest compares a few dozen pairs instead of all ~5,000.
-function walk(candidates, threshold, onAccept, onDrop) {
-  const maps = candidates.map((c) => cachedTokens(c.summary));
-  const idf = idfTable(maps);
-  const accepted = [];
-  for (let i = 0; i < candidates.length; i++) {
-    const me = { map: maps[i], total: totalWeight(maps[i], idf) };
-    let best = 0, of = null;
-    for (const a of accepted) {
-      const s = overlap(me, a, idf);
-      if (s > best) { best = s; of = a.c; }
-    }
-    if (best >= threshold) { onDrop?.({ story: candidates[i], of, score: best }); continue; }
-    accepted.push({ ...me, c: candidates[i] });
-    if (onAccept(candidates[i], accepted.length - 1)) return;
-  }
-}
-
-// Keeps candidates in order and drops any that is too similar to one already kept.
-// Returns {kept, dropped: [{story, of, score}]}.
-export function dedupe(candidates, threshold = CONFIG.dedupe_threshold) {
+// Near-duplicates are found by the hourly job (job/dupes.py, no AI, no CPU limit there) and
+// stored as stories.dup_group = the id of the group's most important story. Here we only keep
+// the first candidate of each group, which costs almost no CPU in the Worker cron.
+export function dedupe(candidates) {
+  const seen = new Set();
   const kept = [], dropped = [];
-  walk(candidates, threshold, (c) => { kept.push(c); return false; }, (d) => dropped.push(d));
+  for (const c of candidates) {
+    const g = c.dup_group ?? `own:${c.id}`;
+    if (seen.has(g)) dropped.push(c);
+    else { seen.add(g); kept.push(c); }
+  }
   return { kept, dropped };
 }
-
-// ------------------------------------------------------------------ the pick
 
 // candidates: rows from CANDIDATE_SQL in rank order. Returns up to n stories in rank order,
 // each with `primary` (the topic it counts against).
 export function pickStories(candidates, userTopics, n, cfg = CONFIG) {
   const cap = topicCap(n, cfg.max_topic_share);
   const counts = new Map();
+  const seen = new Set();
   const chosen = [], overflow = [];
-  walk(candidates, cfg.dedupe_threshold, (c, rank) => {
+  for (let rank = 0; rank < candidates.length && chosen.length < n; rank++) {
+    const c = candidates[rank];
+    const g = c.dup_group ?? `own:${c.id}`;
+    if (seen.has(g)) continue;          // a near-duplicate of a story already taken
+    seen.add(g);
     const s = { ...c, rank, primary: primaryTopic(parseList(c.topics), userTopics, cfg.topic_specificity) };
     const k = counts.get(s.primary) ?? 0;
     if (k < cap) { chosen.push(s); counts.set(s.primary, k + 1); } else overflow.push(s);
-    return chosen.length >= n;
-  });
+  }
   // The cap left empty slots and nothing else qualifies: fill with the next most important.
   for (const s of overflow) {
     if (chosen.length >= n) break;
@@ -349,12 +264,14 @@ function offsetAt(ts, tz) {
 }
 
 // Local wall-clock time in `tz` to a unix timestamp (DST-safe; a time inside a spring-forward
-// gap comes out one hour later, which is fine for digests).
-export function zonedToUtc(year, month, day, hour, minute, tz) {
+// gap comes out one hour later, which is fine for digests). `hint` is an offset already known
+// for that day, which saves an Intl call (Intl is the costly part on a cold Worker).
+export function zonedToUtc(year, month, day, hour, minute, tz, hint) {
   const guess = Date.UTC(year, month - 1, day, hour, minute) / 1000;
-  let t = guess - offsetAt(guess, tz);
+  const o1 = hint ?? offsetAt(guess, tz);
+  let t = guess - o1;
   const o2 = offsetAt(t, tz);
-  if (guess - o2 !== t) t = guess - o2;
+  if (o2 !== o1) t = guess - o2;
   return t;
 }
 
@@ -362,11 +279,14 @@ export function zonedToUtc(year, month, day, hour, minute, tz) {
 export function nextSlot(now, tz, times) {
   const sorted = [...times].sort();
   const today = localParts(now, tz);
+  const hint = Date.UTC(today.year, today.month - 1, today.day, today.hour, today.minute, today.second) / 1000 - now;
   for (let d = 0; d < 3; d++) {
     const base = new Date(Date.UTC(today.year, today.month - 1, today.day + d));
     for (const t of sorted) {
       const [h, m] = t.split(":").map(Number);
-      const ts = zonedToUtc(base.getUTCFullYear(), base.getUTCMonth() + 1, base.getUTCDate(), h, m, tz);
+      const approx = Date.UTC(base.getUTCFullYear(), base.getUTCMonth(), base.getUTCDate(), h, m) / 1000 - hint;
+      if (approx + 3 * 3600 <= now) continue;   // clearly past even with a DST change: no Intl call
+      const ts = zonedToUtc(base.getUTCFullYear(), base.getUTCMonth() + 1, base.getUTCDate(), h, m, tz, hint);
       if (ts > now) return ts;
     }
   }

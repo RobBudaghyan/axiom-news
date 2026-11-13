@@ -65,7 +65,8 @@ CREATE TABLE IF NOT EXISTS stories (
   best_published_at INTEGER,
   source_count      INTEGER NOT NULL DEFAULT 1,     -- items attached to this story
   created_at        INTEGER NOT NULL,
-  updated_at        INTEGER NOT NULL
+  updated_at        INTEGER NOT NULL,
+  dup_group         INTEGER                         -- near-duplicate group leader (job/dupes.py); NULL = not grouped yet
 );
 CREATE INDEX IF NOT EXISTS idx_stories_updated ON stories(updated_at);
 

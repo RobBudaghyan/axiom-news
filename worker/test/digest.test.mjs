@@ -1,4 +1,4 @@
-// Selection, topic cap, dedupe, message format and time math (src/digest.js).
+// Selection, topic cap, dup_group dedupe, message format and time math (src/digest.js).
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -118,45 +118,23 @@ describe("topic cap", () => {
   });
 });
 
-describe("near-duplicates", () => {
-  // Real lines from the D1 pool on 2026-11-13 (scripts/digest-cli.mjs --dupes).
-  const REAL = [
-    "US Central Command denied Iran's claim of destroying a US radar system in Bahrain.",
-    "US Treasury Secretary Scott Bessent announced he received death threats from Iranian leaders and moved to a military base.",
-    "The number of people injured in the Russian strike on Zaporizhzhia increased to 50 people.",
-    "Russian forces conducted strikes on Ukrainian electrical substations, locomotives, and a vessel transporting military supplies.",
-    "Donald Trump's envoys offered Vladimir Putin room to stall during the Abu Dhabi peace talks.",
-    "EU leaders remain divided over European participation and representation in US-backed Ukraine peace talks.",
-    "Armenia and Azerbaijan foreign ministers meet in Washington to finalise the peace treaty",
-    "Russia's central bank cut its key rate to 15 percent",
-    "Yemeni military accused the Houthis of targeting Aden with ballistic missiles",
-    // same events as lines above, worded differently: must be dropped
-    "US Central Command intercepted two Iranian suicide drones launched toward Bahrain, while Iran claims to have targeted a US radar system.",
-    "US Treasury Secretary Scott Bessent confirmed he temporarily moved to a military base following threats from Iran.",
-    "Russian strikes on Nov 13 hit multiple Ukrainian cities, killing three and injuring many, with casualties rising in Zaporizhzhia",
-    "Russian forces struck a cargo vessel carrying military supplies and two locomotives in the Odessa region.",
-    // different events sharing names or words: must be kept
-    "Treasury Secretary Scott Bessent blamed the Commerce Department for failing to blacklist Megaspeed over Nvidia chip diversions.",
-    "Rosatom plans to increase the number of Russian personnel at Iran's Bushehr nuclear power plant to 300.",
-  ];
-  test("real duplicates are caught, different events with shared names are kept", () => {
-    const { kept, dropped } = dedupe(REAL.map((s) => story(s, ["wars_conflicts"])));
-    const gone = dropped.map((d) => d.story.summary);
-    // the three clear pairs; the cargo-vessel pair (REAL[12]) is borderline: 0.46 in the real
-    // 100-story pool, a little lower in this small one
-    for (const s of REAL.slice(9, 12)) assert.ok(gone.includes(s), `not caught: ${s}`);
-    for (const s of [...REAL.slice(0, 9), ...REAL.slice(13)]) assert.ok(!gone.includes(s), `wrongly dropped: ${s}`);
-    assert.ok(kept.length >= 11);
+describe("near-duplicates (groups come from the job, job/dupes.py)", () => {
+  test("only the first story of each dup_group is used; the more important one wins", () => {
+    const lead = story("Ceasefire agreed between Israel and Hezbollah in Lebanon", ["iran_war"], 8);
+    const dup = story("Israel and Hezbollah agree Lebanon ceasefire", ["iran_war"], 6, { dup_group: lead.id });
+    lead.dup_group = lead.id;
+    const other = story("Armenia sets an election date", ["armenia"], 5);   // dup_group null: never grouped
+    assert.deepEqual(dedupe([lead, dup, other]).kept.map((s) => s.id), [lead.id, other.id]);
+    assert.deepEqual(pickStories([lead, dup, other], ALL, 7).map((s) => s.id), [lead.id, other.id]);
   });
-  test("known miss: the Abu Dhabi talks pair shares only the place name", () => {
-    const pair = ["Donald Trump's envoys offered Vladimir Putin room to stall during the Abu Dhabi peace talks",
-      "Delegations from Russia, Ukraine, and the United States met in Abu Dhabi to discuss ending the war"];
-    assert.equal(dedupe([...REAL.slice(0, 9), pair[1]].map((s) => story(s, ["ukraine_war"]))).dropped.length, 0);
-  });
-  test("the more important line is the one kept", () => {
-    const a = story("Ceasefire agreed between Israel and Hezbollah in Lebanon", ["iran_war"], 8);
-    const b = story("Israel and Hezbollah agree Lebanon ceasefire", ["iran_war"], 6);
-    assert.deepEqual(dedupe([a, b]).kept.map((s) => s.id), [a.id]);
+  test("a duplicate is still dropped when its leader was held back by the topic cap", () => {
+    const ua = UA.slice(0, 3).map((s, i) => story(s, ["ukraine_war"], 9 - i));
+    const lead = story("Kyiv metro station hit by a missile", ["ukraine_war"], 5);
+    const dup = story("Missile hits Kyiv metro station", ["ukraine_war"], 5, { dup_group: lead.id });
+    lead.dup_group = lead.id;
+    const picked = pickStories([...ua, lead, dup], ALL, 7);
+    assert.equal(picked.length, 4);   // 3 by the cap, then the filler: the leader only
+    assert.ok(!picked.some((s) => s.id === dup.id));
   });
 });
 

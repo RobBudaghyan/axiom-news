@@ -118,6 +118,16 @@ describe("digest cron", () => {
     assert.equal(outbox[1].text, "Good afternoon. Quiet period: nothing important on your topics since 14:00.");
   });
 
+  test("at most max_users_per_tick users per tick, the earliest due first; the rest go next tick", async () => {
+    const { db, sqlite, now, outbox, io } = setup();
+    for (let id = 1; id <= 3; id++) addUser(sqlite, { id, next_digest_at: yerevan(14) + id });
+    const cfg = { ...(await import("../src/digest.js")).CONFIG, max_users_per_tick: 2 };
+    assert.equal((await runTick(db, io, now, {}, cfg)).sent, 2);
+    assert.deepEqual(outbox.map((m) => m.id), [1, 2]);
+    assert.equal((await runTick(db, io, now + 300, {}, cfg)).sent, 1);
+    assert.equal(outbox[2].id, 3);
+  });
+
   test("not due, paused or blocked users get nothing", async () => {
     const { db, sqlite, now, outbox, io } = setup();
     addUser(sqlite, { next_digest_at: yerevan(20) });

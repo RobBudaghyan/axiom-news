@@ -20,7 +20,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 from typing import Callable
 
-from job import ai
+from job import ai, dupes
 from job.config import Prompt, Settings, load_env, load_prompt, load_sources, load_topics
 from job.d1 import D1, in_list_statements, insert_statements
 from job.fetch import Entry, FeedResult, candidates, fetch_all, select_new
@@ -412,6 +412,11 @@ class Job:
             left = self.run_ai(pending, now, stats)
             stats.items_left_pending = len(left)
             stats.ai_calls = len(self.calls_log)
+            try:   # a grouping failure must not fail the run; digests then just skip dedupe
+                regrouped = dupes.update_groups(self.db, now)
+                self.log(f"near-duplicate groups: {regrouped} stories changed group")
+            except Exception as exc:
+                stats.ai_errors.append(f"dupes: {type(exc).__name__}: {exc}")
             stats.pruned = self.prune_daily(now)
             processed = stats.items_pending_in - stats.items_left_pending
             if not left:

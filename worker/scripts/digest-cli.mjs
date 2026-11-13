@@ -6,14 +6,13 @@
 //   node scripts/digest-cli.mjs --format B         dry run in format B
 //   node scripts/digest-cli.mjs --preview A        send a labelled preview to the owner, write nothing
 //   node scripts/digest-cli.mjs --send             send for real and record it (as the Worker does)
-//   node scripts/digest-cli.mjs --dupes            list near-duplicate pairs in the current pool
+//   (near-duplicate pairs: venv/Scripts/python -m job.dupes, from the project folder)
 //   node scripts/digest-cli.mjs --length 15        longest-headline 15-story digest: length check
 //   node scripts/digest-cli.mjs --cpu 20           CPU time to build 20 digests from the real pool
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import {
-  CONFIG, afterSendStatements, buildMessage, candidateStatement, dedupe, idfTable, planDigest, similarity,
-  tokens, topicInfoFrom, visibleLength,
+  CONFIG, afterSendStatements, buildMessage, candidateStatement, planDigest, topicInfoFrom, visibleLength,
 } from "../src/digest.js";
 import { sendHtml } from "../src/telegram.js";
 
@@ -80,26 +79,6 @@ async function main() {
   const st = candidateStatement(user, now);
   const cands = await db.query(st.sql, st.params);
 
-  if (process.argv.includes("--dupes")) {
-    // Pool for this check: everything recent, ignoring "sent", so there is enough to look at.
-    const pool = await db.query("SELECT id, summary, importance, topics FROM stories WHERE updated_at >= ?1 " +
-      "AND importance >= ?2 ORDER BY importance DESC, updated_at DESC, id DESC LIMIT ?3",
-      [now - 86400, CONFIG.min_importance, CONFIG.candidate_limit]);
-    const maps = pool.map((s) => tokens(s.summary));
-    const idf = idfTable(maps);
-    const pairs = [];
-    for (let i = 0; i < pool.length; i++) for (let j = 0; j < i; j++) {
-      const s = similarity(maps[i], maps[j], idf);
-      if (s >= Number(arg("--min", "0.3"))) pairs.push([s, pool[j], pool[i]]);
-    }
-    pairs.sort((a, b) => b[0] - a[0]);
-    console.log(`pool ${pool.length} stories; pairs with score >= ${arg("--min", "0.3")}: ${pairs.length}`);
-    for (const [s, a, b] of pairs) console.log(`${s.toFixed(2)}  [${a.id}] ${a.summary}\n      [${b.id}] ${b.summary}`);
-    const { dropped } = dedupe(pool);
-    console.log(`\nat threshold ${CONFIG.dedupe_threshold}: ${dropped.length} of ${pool.length} dropped`);
-    return;
-  }
-
   if (process.argv.includes("--length")) {
     const n = Number(arg("--length", "15"));
     const longest = await db.query("SELECT id, summary, best_url, best_source, topics, importance FROM stories " +
@@ -116,7 +95,7 @@ async function main() {
   if (process.argv.includes("--cpu")) {
     // Worst case: a full candidate list (the last 24 h, ignoring "sent"), 15 stories each.
     const n = Number(arg("--cpu", "20"));
-    const pool = await db.query("SELECT id, summary, best_url, best_source, importance, topics, updated_at FROM stories " +
+    const pool = await db.query("SELECT id, summary, best_url, best_source, importance, topics, updated_at, dup_group FROM stories " +
       "WHERE updated_at >= ?1 AND importance >= ?2 ORDER BY importance DESC, updated_at DESC, id DESC LIMIT ?3",
       [now - 86400, CONFIG.min_importance, CONFIG.candidate_limit]);
     planDigest({ ...user, max_stories: 15 }, pool, topics, now);   // warm-up (JIT), not counted
