@@ -1,20 +1,23 @@
 # Architecture
 
-Status: designed in Step 1, updated in Step 2 (2026-11-13). Built and run locally: the hourly
-job (`job/`), the D1 database and a test-digest script. Not built yet: the GitHub workflow, the
-Worker and the Mini App (Step 3).
+Status: designed in Step 1, updated in Steps 2 and 3 (2026-11-13). Running in the cloud since
+Step 3, still on the TEST bot: the hourly job on GitHub Actions (public repo
+`RobBudaghyan/axiom-news`), the D1 database, and the Worker `axiom-news` (webhook, digest cron,
+hourly job trigger, alerts). Not built yet: the Mini App (Step 4).
 
 ## 1. Components
 
 ```
-                 every hour (GitHub Actions cron)
+   Worker cron "7 * * * *" ──workflow_dispatch──┐   (backup: GitHub schedule at :37,
+                                                ▼    skips if a run started < 45 min ago)
  ┌─────────────────────────────────────────────────────────┐
- │ HOURLY JOB  (Python, runs ~1-2 min, then the VM is gone) │
- │ 1. fetch ~116 RSS feeds (config/sources.yaml)            │
+ │ HOURLY JOB  (Python, ~2 min, then the VM is gone)        │
+ │ 1. fetch ~115 RSS feeds (config/sources.yaml)            │
  │ 2. drop already-seen URLs, keep <= 8 newest per feed     │
  │ 3. AI pass, usually ONE call: group, tag, score, write   │
  │    (Gemini -> 2nd Gemini model -> Groq -> else pending)  │
- │ 4. write stories to D1, prune old rows                   │
+ │ 4. write stories to D1, mark near-duplicates (dup_group),│
+ │    prune old rows (daily)                                │
  └───────────────┬─────────────────────────────────────────┘
                  │ HTTPS: Cloudflare D1 REST API (scoped token)
                  ▼
@@ -24,10 +27,11 @@ Worker and the Mini App (Step 3).
                 │ D1 binding (inside Cloudflare)
  ┌──────────────┴──────────────────────────────────────────┐
  │ CLOUDFLARE WORKER  (JavaScript, one Worker)              │
- │ • POST /telegram   bot webhook (/start, /settings)       │
- │ • /api/*           Mini App API (settings, admin)        │
- │ • static files     Mini App (HTML/CSS/JS, free assets)   │
- │ • cron */5 min     send digests that are due             │
+ │ • POST /telegram   bot webhook (/start, help replies)    │
+ │ • cron */5 min     send due digests (<= 8 users/tick),   │
+ │                    check job health, alert the owner     │
+ │ • cron 7 * * * *   start the hourly GitHub job           │
+ │ • /api/*, static   Mini App API and files (Step 4)       │
  └──────────────┬──────────────────────────────────────────┘
                 │ HTTPS: Telegram Bot API (sendMessage)
                 ▼
@@ -46,8 +50,17 @@ the Worker only when a request or cron tick arrives.
 
 The two halves share **data, not code**. Both read the D1 schema (`db/schema.sql`). The job reads
 `config/*.yaml` and syncs the topic list into D1, and the Worker reads topics from D1. Each piece
-of logic therefore lives in exactly one language. Tools: `wrangler` (Cloudflare CLI) needs Node.js,
-which will be installed in Step 2; it is used to deploy, not as a runtime language.
+of logic lives in exactly one language:
+- **Digest selection, topic cap, format and time slots:** `worker/src/digest.js` only. The Worker
+  and the local tool `worker/scripts/digest-cli.mjs` both import it, so they pick and format
+  exactly the same way.
+- **Near-duplicate grouping:** `job/dupes.py` only. It runs in the job because the job has no CPU
+  limit (see §8); the Worker reads the result (`stories.dup_group`).
+- **Shared settings:** `config/digest.json` is read by both (format, story count, 40% cap,
+  dedupe threshold, users per tick).
+
+Tools: Node.js 26 LTS and `wrangler` (pinned in `worker/package.json`) deploy the Worker;
+`gh` manages the GitHub repo and its secrets.
 
 ## 3. Data flow
 
@@ -89,27 +102,54 @@ which will be installed in Step 2; it is used to deploy, not as a runtime langua
 4. **Write.** Stories and item updates go to D1 in batched REST calls; a D1 batch is
    all-or-nothing (checked 2026-11-13). Old rows are deleted **once a day**, not every hour, to
    save D1 rows read: items and stories after 7 days, and log rows after 30 days.
-5. **Digests.** The Worker cron runs every 5 minutes and finds users whose `next_digest_at <= now`.
-   For each user it selects stories that match their topics, have `importance >= 4`, were created
-   or updated since their last digest (at most 24 h back), and are **not in `sent`**. It sorts
-   them by importance, then by recency, takes the top N and sends one Telegram message. It then
-   inserts `sent` rows and computes the next `next_digest_at`. Building a digest is a database
-   filter and makes no AI call. The selection is one SQL file, `db/digest_query.sql`, shared by
-   the Worker and `scripts/send_test_digest.py`, so both pick the same stories.
+5. **Near-duplicates (job, Step 3).** After the AI pass, `job/dupes.py` groups near-duplicate
+   stories of the last 24 h (importance >= 4) without AI. Each summary becomes a set of content
+   words (lower case, no accents, no stop words, 5-letter stems), weighted by rarity (IDF) over
+   the pool. Similarity is the shared weight over the smaller line's weight. Walking in digest
+   rank order, a story scoring >= 0.45 against an earlier group leader joins its group, so the
+   more important line is the one shown. Only changed rows are written. Tuned on 365 real
+   stories on 2026-11-13: catches about 16 of 23 hand-labelled duplicates and wrongly merged
+   2 of 24 hard look-alikes. Giving names extra weight was tried and rejected, because it merged
+   different stories about the same person.
+6. **Digests.** The Worker cron runs every 5 minutes and takes up to 8 users whose
+   `next_digest_at <= now` (earliest first; the rest go at the next tick). For each user:
+   1. **Candidates (SQL):** on one of their topics, `importance >= 4`, created or updated since
+      the last digest (at most 24 h back), **not in `sent`**, most important first, then most
+      recent; at most 40.
+   2. **Pick (JS, `pickStories`):** skip a story whose `dup_group` was already taken. Count each
+      story against its **most specific topic** among the user's topics (order in
+      `config/digest.json`: ukraine_war, iran_war, armenia, russia, wars_conflicts, politics). No
+      topic may exceed `max(1, ceil(0.4 x N))` stories (3 of 7). If the cap leaves empty slots
+      and nothing else qualifies, they are filled with the next most important stories.
+   3. Send one Telegram message, then write `sent` rows, `last_digest_at` (the slot time) and
+      the next `next_digest_at`.
 
-### Digest message format
+   Building a digest makes no AI call.
 
+### Digest message format (Step 3, owner's choice of the old project's style)
+
+Format **A** (default, `"format": "A"` in `config/digest.json`):
 ```
-Good evening. Since 14:00, 6 stories on your topics:
+Good evening. Since 14:00, 7 stories on your topics:
 
-1. Israel and Iran agree a 30-day ceasefire mediated by Qatar · Financial Times
-2. ...
+1. 🇺🇦 <b>Headline, one short sentence</b>
+Source: <a href="...">Outlet</a>
+
+2. 🏛️ <b>...</b>
+Source: <a href="...">Outlet</a>
 ```
-Each line is `N. <summary> · <source name>`, with the source name linked to the article (HTML
-parse mode, link previews off). Changed in Step 2 at the owner's request: no em dash anywhere in
-user-facing text. The job replaces any em or en dash the AI writes, and the digest code refuses
-to send a message that still contains one. Seven stories came to about 1,900 characters, well
-within Telegram's 4,096-character limit.
+Format **B** groups the same stories under bold topic headings with their emoji
+(`<b>🇺🇦 Ukraine War</b>`), ordered by each group's best story, numbered from 1 inside each
+group, without a per-story emoji. Both use HTML parse mode with link previews off. The emoji is
+the one of the topic the story counts against.
+
+- **No em dash anywhere.** The job replaces any em or en dash the AI writes, the digest code
+  cleans headlines again, and it refuses to send a message that still contains one.
+- **Length.** Telegram's 4,096 limit counts the text after HTML parsing (tags and link URLs do
+  not count). The code measures it that way, in UTF-16 units, against a budget of 4,000. If a
+  message is too long, the lowest-ranked stories are dropped (the header count follows), and a
+  single over-long headline is cut at a word with "...". The 15 longest real headlines came to
+  about 2,600 visible characters (raw HTML ~4,500), so trimming should not happen in practice.
 
 - **The header** depends on history. A first digest, or one after more than 24 h, says "In the
   last 24 hours, N stories on your topics:" instead of "Since HH:MM".
@@ -130,7 +170,10 @@ a story gains new sources after it was sent, it is still never sent again.
   `Intl.DateTimeFormat().resolvedOptions().timeZone` from their device and saves it. Telegram's
   user data does not include a time zone; the official Mini App docs list only id, name, username,
   language, premium and photo. Before the first open, `DEFAULT_TIMEZONE` applies (proposed:
-  `Asia/Yerevan`). `/start` replies with an "Open settings" button so most users open it on day one.
+  `Asia/Yerevan`). In Step 3, `/start` creates the user with the defaults (all default topics,
+09:00/14:00/20:00, `Asia/Yerevan`, 7 stories) and replies with a plain-English welcome naming
+the times and the next digest. Step 4 adds an "Open settings" button so most users open the
+Mini App on day one. Any other message gets a short reply with the times and the next digest.
 - `next_digest_at` is stored as a UTC timestamp. After each send, or after a settings change, the Worker
   computes the next local slot in the user's zone and converts it to UTC with `Intl`. This handles
   daylight-saving changes automatically.
@@ -140,11 +183,24 @@ a story gains new sources after it was sent, it is still never sent again.
   trigger, and 288 runs a day is nothing against the request limit.
 - **Expected delay:** a digest goes out at the first 5-minute tick at or after the chosen time, so
   0-5 minutes late. Cloudflare does not publish an accuracy figure, so add a little more for
-  that. If more users are due at once than one run can handle (see the subrequest budget in §8),
-  the rest go at the next tick, 5 minutes later.
-- **Content freshness:** the pool updates once an hour. The job runs at minute :07, off the
-  hour peak, plus any GitHub delay. A story is typically in the pool 10-70 minutes after the
-  outlet publishes it.
+  that. **At most 8 users per tick** (CPU limit, see §8): with ~20 users all at 09:00, the
+  first 8 get it at about 09:00, the next 8 at 09:05 and the rest at 09:10.
+- **A failing send** (not a block) is logged to `errors` and retried at the next tick; if the
+  slot is more than an hour old it is skipped to the next slot. Telegram 403 (user blocked the
+  bot) sets `blocked = 1`; `/start` clears it.
+- **The hourly job is started by the Worker** (cron `7 * * * *`, GitHub `workflow_dispatch`
+  with a fine-grained token limited to this repo, Actions read/write). A backup GitHub schedule
+  at :37 (`backup-schedule.yml`) calls the same workflow with `--min-gap-minutes 45`, so it does
+  nothing when the :07 run happened. Only one run at a time (job-level concurrency group
+  `hourly-job`); a dispatched run also skips if another started in the last 20 minutes. The
+  backup lives in its own file because GitHub disables scheduled workflows in a public repo after
+  60 days without commits, and that must never disable `hourly.yml` itself.
+- **Content freshness:** the pool updates once an hour, at about :07-:09. A story is typically
+  in the pool 10-70 minutes after the outlet publishes it.
+- **Health alerts** (every 5-minute tick, `src/health.js`): the owner gets a short Telegram
+  message if the newest finished run is `error`/`ai_failed`, a run is stuck in `running` for
+  30+ minutes, there was no `ok`/`partial` run in 3 hours, or the GitHub dispatch failed. At most
+  one alert per 3 hours, and the same failed run is never reported twice (`meta` table).
 - Pause: `paused=1` skips the user. When they resume, the next digest covers at most the last 24 h.
 
 ## 5. Database (Cloudflare D1, SQLite)
@@ -154,7 +210,8 @@ a story gains new sources after it was sent, it is still never sent again.
 | `users` | `id` (Telegram user id) PK, `first_name`, `language`, `timezone`, `tz_detected` 0/1, `digest_times` JSON, `max_stories` (default 7, range 3-15), `topics` JSON, `paused`, `blocked`, `created_at`, `last_digest_at`, `next_digest_at` | index on `next_digest_at`. `blocked=1` when Telegram returns 403 because the user blocked the bot. |
 | `topics` | `tag` PK, `label_en`, `emoji`, `sort`, `is_default` | synced from `config/topics.yaml` by the job, read by the Worker |
 | `items` | `id` PK, `url_hash` UNIQUE, `source_key`, `source_name`, `tier`, `url`, `title`, `snippet`, `published_at`, `fetched_at`, `status` (pending/done/dropped/expired), `story_id` | index on `status`; pruned after 7 days |
-| `stories` | `id` PK, `summary`, `topics` JSON, `importance`, `best_url`, `best_source`, `best_tier`, `best_published_at`, `source_count`, `created_at`, `updated_at` | index on `updated_at`; pruned after 7 days. `best_tier`/`best_published_at` let a merge update the link without re-reading items |
+| `stories` | `id` PK, `summary`, `topics` JSON, `importance`, `best_url`, `best_source`, `best_tier`, `best_published_at`, `source_count`, `created_at`, `updated_at`, `dup_group` | index on `updated_at`; pruned after 7 days. `best_tier`/`best_published_at` let a merge update the link without re-reading items. `dup_group` (Step 3) = id of the near-duplicate group's leader, written by the job |
+| `meta` | `key` PK, `value` | Worker state: `last_alert_at`, `last_alerted_run_id` (Step 3) |
 | `sent` | (`user_id`, `story_id`) PK, `sent_at` | the "never twice" guarantee; pruned with stories |
 | `job_runs` | `id`, `started_at`, `finished_at`, `status` (running/ok/partial/ai_failed/error), counts, `provider`, tokens, `pruned`, `error` | Admin tab |
 | `ai_calls` | `id`, `at`, `provider`, `model`, `ok`, `input_tokens`, `output_tokens`, `ms`, `error` | Admin tab: AI usage |
@@ -163,8 +220,9 @@ a story gains new sources after it was sent, it is still never sent again.
 `sent` is the only per-user table besides `users`, and deleting a user must also delete their `sent`
 rows (lesson 16 in LESSONS.md). Indexes are kept to a minimum because every index update counts as
 an extra "row written" on D1. Times are INTEGER unix seconds. The schema is `db/schema.sql`,
-applied with `scripts/apply_schema.py` through the REST API. No wrangler or Node.js was needed in
-Step 2: the owner created the database (`axiom-d1`) in the dashboard. Note that the REST API
+applied with `scripts/apply_schema.py` through the REST API; columns added to existing tables
+are listed in that script's `MIGRATIONS` (an `ALTER TABLE` whose "duplicate column" error is
+ignored). The owner created the database (`axiom-d1`) in the dashboard. Note that the REST API
 passes numbers as REAL, so INTEGER columns convert them back.
 
 ## 6. Security: how the parts talk
@@ -175,7 +233,9 @@ passes numbers as REAL, so INTEGER columns convert them back.
 | Telegram → Worker webhook | registered with a `secret_token`. The Worker rejects any request whose `X-Telegram-Bot-Api-Secret-Token` header doesn't match `TELEGRAM_WEBHOOK_SECRET`. |
 | Mini App → Worker API | every request carries Telegram's `initData`. The Worker checks it the official way (HMAC-SHA256 of the bot token with key `"WebAppData"`, then HMAC of the sorted data-check-string), compares it to `hash`, and rejects data older than 24 h (`auth_date`). The user id comes only from verified data. |
 | Admin tab / admin API | shown and allowed only when the verified user id equals `OWNER_TELEGRAM_ID`. Hiding the tab is cosmetic; the API checks the id on every admin call. |
-| Secrets | `.env` locally (gitignored). In production: GitHub Actions secrets (AI keys, D1 token, account/database ids) and Cloudflare Worker secrets (bot token, webhook secret, owner id). Each side holds only what it needs. The job never sees the Telegram token, and the Worker never sees the AI keys. |
+| Worker → GitHub | fine-grained personal access token: only `RobBudaghyan/axiom-news`, only "Actions: read and write", no expiration (owner's choice, 2026-11-13). It can start workflows; it cannot read or change code or secrets. A Worker secret. |
+| Secrets | `.env` locally (gitignored). In production: GitHub Actions secrets (`GEMINI_API_KEY`, `GROQ_API_KEY`, `CLOUDFLARE_ACCOUNT_ID`, `D1_DATABASE_ID`, `CLOUDFLARE_D1_TOKEN`) and Cloudflare Worker secrets (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `OWNER_TELEGRAM_ID`, `GITHUB_DISPATCH_TOKEN`). Each side holds only what it needs. The job never sees the Telegram token, and the Worker never sees the AI keys. Values are copied from `.env` by `scripts/set_secrets.py` through stdin, never printed. |
+| Public repo | `scripts/scan_secrets.py` checks every `.env` value and common token shapes against the whole git history and every file before a push (run on its own, never piped). GitHub push protection is on. Commits use the owner's GitHub noreply address. The D1 database id is committed on purpose in `worker/wrangler.toml` (wrangler needs it; it grants nothing without the D1 token). |
 | Data sent to AI | only public news titles and snippets. No user data ever goes to an AI provider. This matters because Gemini's free tier states content is "used to improve our products". |
 
 ## 7. AI design, budget and fallback
@@ -257,51 +317,58 @@ Other free options checked and **rejected** (2026-11-13):
 | Service | Limit | Our expected use | Source |
 |---|---|---|---|
 | Workers Free | 100,000 requests/day | < 1,000/day (288 cron ticks, plus webhook and Mini App calls) | [Workers limits](https://developers.cloudflare.com/workers/platform/limits/) |
-| Workers Free | **10 ms CPU** per HTTP request and per Cron Trigger | light: verify initData, a few queries, build a ≤4 KB message per user | same |
-| Workers Free | 50 subrequests per invocation (D1 calls and `fetch` count) | per cron tick: about 3 D1 calls (one batched read for all due users, one batched write) plus 1 Telegram call per user, so about 40 users per tick; the rest wait 5 min | same; [D1 limits](https://developers.cloudflare.com/d1/platform/limits/) ("a `db.batch()` call counts as one query") |
-| Workers Free | 5 Cron Triggers per account | 1 (`*/5 * * * *`) | Workers limits |
+| Workers Free | **10 ms CPU** per HTTP request and per Cron Trigger. Waiting on D1/fetch does not count. "Each isolate has some built-in flexibility" for infrequent overruns; consistent overruns are terminated (error 1102, `exceededCpu`) | **measured on Cloudflare 2026-11-13** (`wrangler tail` cpuTime): idle tick 4 ms; tick with 1 due user 6 ms; 20 users 10-27 ms; 40 users 46 ms. Hence **8 users per tick** (≈6-12 ms) and dedupe moved into the job | same |
+| Workers Free | 50 subrequests per invocation (D1 calls and `fetch` count) | per cron tick: 1 batched read, 1 batched candidate read, 1 Telegram call per user, 1 batched write (+1 alert): about 12 with 8 users | same; [D1 limits](https://developers.cloudflare.com/d1/platform/limits/) ("a `db.batch()` call counts as one query") |
+| Workers Free | 5 Cron Triggers per account | 2 (`*/5 * * * *`, `7 * * * *`) | Workers limits |
 | Workers static assets | "Requests to static assets are free and unlimited" | Mini App files | [Static assets billing](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/) |
 | D1 Free | 5M rows read/day, 100k rows written/day, 5 GB total, 500 MB per DB; resets 00:00 UTC; when a limit is hit, queries fail until reset | writes about 35k/day (items ~4.6k × ~3 including index rows, stories, sent, plus deletes from pruning); reads well under 0.5M/day with indexes; DB < 50 MB with 7-day pruning | [D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/), [D1 limits](https://developers.cloudflare.com/d1/platform/limits/) |
 | D1 | 100 bound parameters per query, 100 KB per SQL statement | the job batches inserts to stay under both | D1 limits |
 | Cloudflare API | 1,200 requests per 5 min per user | about 10-20 REST calls per hourly run | [API limits](https://developers.cloudflare.com/fundamentals/api/reference/limits/) |
-| GitHub Actions | private repo: $12/month included compute ≈ 2,000 min on standard Linux at $0.006/min; with no payment method, usage is **blocked** (never billed) once used up. Public repos: free and unlimited. Each job is **rounded up to a whole minute** ([runner pricing](https://docs.github.com/en/billing/reference/actions-runner-pricing)) | runs measured on the PC: 75-210 s; a run under 2 min bills 2 min, so 720 runs ≈ 1,440 min/month. Fallback runs take 3-8 min | [Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions) |
-| GitHub Actions schedule | minimum every 5 min; can be delayed or dropped under load; runs on the default branch only; **public repos: schedules auto-disabled after 60 days without repo activity** | hourly at :07 | [Events that trigger workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows) |
+| GitHub Actions | **public repo: standard runners free and unlimited** (our case since Step 3). Private repos: ≈2,000 included min, blocked (never billed) when used up | first run on GitHub: 2 min 0 s (job 114 s, a 2.5 h backlog of 342 items). About 24-25 runs/day | [Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions) |
+| GitHub Actions schedule | minimum every 5 min; can be delayed or dropped under load; runs on the default branch only; **public repos: schedules auto-disabled after 60 days without repo activity** | backup only, at :37, in its own workflow file; the main trigger is the Worker | [Events that trigger workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows) |
 | Gemini free tier | per-model limits shown in AI Studio only; RPD resets at midnight Pacific; free-tier content is used to improve Google's products. Measured 2026-11-13: 29k-token calls accepted, frequent 503 "high demand" | 24 calls/day, about 23k input + 15k output tokens each | [Rate limits](https://aistudio.google.com/docs/rate-limits), [Pricing](https://aistudio.google.com/docs/pricing), [Models](https://aistudio.google.com/docs/models) |
 | Groq free | gpt-oss-120b: 1K RPD and 8K TPM read from response headers 2026-11-13 (TPM counts prompt + reserved reply); 200K TPD per docs | fallback only, ~1 chunk/min | [Groq rate limits](https://console.groq.com/docs/rate-limits) |
 | Telegram Bot API | ≤ 1 message/sec per chat; about 30 messages/sec bulk; 4,096 characters per message | ≤ 20 users per tick, 1 message each | [Bots FAQ](https://core.telegram.org/bots/faq) |
 
-Repo visibility: **private** (owner's decision, 2026-11-13). It fits the 2,000 included minutes
-only if a normal run stays under 2 minutes, because each job is billed in whole minutes.
-On the PC, a normal one-call run took 75 s plus Gemini's 45-85 s answer time. Step 3 must measure
-this on GitHub's runners. A public repo would make the 60-day auto-disable
-a silent outage risk. If usage ever runs out, the job is blocked rather than billed, so the $0 rule
-holds either way.
+Repo visibility: **public** (owner's decision in Step 3, changed from private), for unlimited free
+Actions minutes. The 60-day schedule auto-disable no longer matters for the main trigger, because
+the Worker starts the job through the API; only the backup schedule can be disabled, and the
+Worker's health alert would report missing runs.
 
 ## 9. Repository layout
 
 ```
-config/topics.yaml, config/sources.yaml   shared data (Step 1, done)
-prompts/story_batch.md                    AI prompt template (Step 1, done)
-db/schema.sql                             D1 tables (Step 2, applied via REST: scripts/apply_schema.py)
-db/digest_query.sql                       digest selection, shared by Worker and test script (Step 2)
-job/                                      Python hourly job: config, fetch, ai, d1, run (Step 2)
-tests/                                    unittest suite for the job and the digest (Step 2)
-scripts/check_feeds.py                    feed health check (Step 1)
+config/topics.yaml, config/sources.yaml   shared data (Step 1)
+config/digest.json                        digest settings read by the Worker and the job (Step 3)
+prompts/story_batch.md                    AI prompt template (Step 1)
+db/schema.sql                             D1 tables (applied via REST: scripts/apply_schema.py)
+job/                                      Python hourly job: config, fetch, ai, d1, dupes, run
+tests/                                    unittest suite for the job and the dupes grouping
+scripts/check_feeds.py                    feed health check (--all re-tests disabled feeds)
 scripts/ai_probe.py                       real batch-size test for Gemini and Groq (Step 2)
-scripts/send_test_digest.py               dev tool: owner's digest via the TEST bot (Step 2)
-worker/                                   Cloudflare Worker (src/*.js, public/ Mini App, wrangler.toml) (Step 3)
-.github/workflows/hourly.yml              the schedule (Step 3)
+scripts/set_secrets.py, scan_secrets.py   copy .env to GitHub/Worker secrets; pre-push secret scan
+worker/src/                               the Worker: index, bot, cron, digest, health, github, telegram, db
+worker/test/                              node:test suite (node:sqlite with the real schema)
+worker/scripts/digest-cli.mjs             dev tool: owner's digest / previews / length / CPU checks
+worker/wrangler.toml                      Worker config: D1 binding, crons, vars (no secrets)
+.github/workflows/                        hourly.yml, backup-schedule.yml, check-feeds.yml
 ```
 
 ## 10. Known design risks
 
-- **Feeds checked only from the owner's PC.** GitHub's US runners may be blocked by some sites,
-  especially Russian ones (geo-blocking) or bot protection. Re-run `check_feeds.py` inside GitHub Actions in Step 3.
-- **Worker 10 ms CPU** should be ample for the digest cron, but this has not been measured yet. If
-  it is exceeded, send fewer users per tick.
-- **GitHub schedule delays** only affect pool freshness, not digest timing. If delays get bad, a
-  Worker cron can trigger the workflow through the GitHub API (`workflow_dispatch`) at a precise
-  time; this needs a fine-grained GitHub token.
+- **Feeds from GitHub's runners:** checked in Step 3. 115 of 116 work; The Times of Israel returns
+  403 there and is disabled with a note. Re-run the "check feeds" workflow if many feeds start
+  failing.
+- **Worker 10 ms CPU** is the tightest limit. Measured: 6 ms for one due user, 10-27 ms for 20.
+  Mitigated by doing dedupe in the job, 40 candidates per user and 8 users per tick; with ~20
+  users at the same time some get their digest up to 10 minutes late. The per-tick log line
+  (Workers Logs) shows counts; watch Metrics > Errors for `exceededCpu`.
+- **The GitHub token** has no expiration, but it can be revoked or the owner's account settings
+  can change. A failed dispatch is logged and alerted, and the backup schedule keeps the pool
+  updating in the meantime.
+- **Duplicate check is word-based.** It misses duplicates worded very differently (two lines on
+  the same Abu Dhabi talks share only the place name) and sometimes merges two different stories
+  about the same thing (two separate "undesirable organisation" rulings).
 - **The per-feed cap drops some items** from the biggest Russian state feeds. Major stories still
   arrive through other outlets; minor TASS/RIA items are the main loss, and that is intended.
 - **Gemini overload (HTTP 503)** was frequent on 2026-11-13. A second Gemini model and then Groq
@@ -313,8 +380,5 @@ worker/                                   Cloudflare Worker (src/*.js, public/ M
 
   The prompt and code now guard against both, but grouping stays the weakest part of the
   quality. Watch the first days of real digests.
-- **Run time vs. GitHub minutes.** Each job is billed in whole minutes. A normal run must stay
-  under 2 minutes, or a private repo goes over its ~2,000 included minutes a month (720 runs × 3
-  min = 2,160). Gemini's answer alone takes 45-85 s.
-- **Topic balance.** Many feeds are Russian and Ukrainian, so the Ukraine war fills most of a top-7
-  digest for a user who follows all topics. Ranking is importance only, as specified.
+- **Topic balance.** Many feeds are Russian and Ukrainian. Since Step 3 no topic may take more
+  than 40% of a digest (3 of 7), counted against each story's most specific topic.

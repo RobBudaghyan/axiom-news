@@ -75,3 +75,14 @@ Only lessons that still matter for the v2 design are kept.
     and is checked at the end of every step.
 21. **Verify platform facts against the real thing** (library source, live API, official
     docs) rather than memory, and record the date of checking.
+
+## Learned in v2 (Step 3)
+
+22. **Measure Worker CPU on Cloudflare itself, not in Node.** `wrangler tail --format json`
+    reports `cpuTime` per invocation. Node on the PC was misleading in both directions: a cold
+    time-zone lookup cost 10-17 ms in Node but 1-3 ms on Cloudflare, while a pairwise duplicate
+    check that took 0.2 ms in Node cost several ms on a cold Worker. Heavy work belongs in the
+    GitHub job, which has no CPU limit.
+23. **Never pipe a safety check into another command in a chain.** `scan | tail -1 && git push`
+    pushed even though the scan failed, because the pipe's exit code is `tail`'s. Run the check
+    on its own (or with `set -o pipefail`) and push only after it exits 0.
