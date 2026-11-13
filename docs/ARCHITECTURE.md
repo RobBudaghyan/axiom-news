@@ -128,20 +128,38 @@ Tools: Node.js 26 LTS and `wrangler` (pinned in `worker/package.json`) deploy th
 
 ### Digest message format (Step 3, owner's choice of the old project's style)
 
-Format **A** (default, `"format": "A"` in `config/digest.json`):
+Format **B** (the default since the owner chose it, `"format": "B"` in `config/digest.json`):
 ```
 Good evening. Since 14:00, 7 stories on your topics:
 
-1. 🇺🇦 <b>Headline, one short sentence</b>
+<b>🇺🇦 Ukraine War</b>
+1. 🇷🇺 <b>Headline, one short sentence</b>
 Source: <a href="...">Outlet</a>
 
-2. 🏛️ <b>...</b>
+2. 🇺🇸 <b>...</b>
+Source: <a href="...">Outlet</a>
+
+<b>🏛️ Politics</b>
+1. 🇫🇷 <b>...</b>
 Source: <a href="...">Outlet</a>
 ```
-Format **B** groups the same stories under bold topic headings with their emoji
-(`<b>🇺🇦 Ukraine War</b>`), ordered by each group's best story, numbered from 1 inside each
-group, without a per-story emoji. Both use HTML parse mode with link previews off. The emoji is
-the one of the topic the story counts against.
+Groups are the topic each story counts against, ordered by each group's best story, numbered
+from 1 inside each group. Format **A** is the same lines as one flat numbered list. Both use HTML
+parse mode with link previews off.
+
+**Line emoji** (`"line_emoji": true`, rules in `config/line_emoji.json`, code `lineEmoji` in
+`digest.js`):
+1. the flag of the **first** country, leader, capital, region or group the headline names
+   (case-sensitive whole words and phrases up to 4 words, possessives allowed:
+   "Donald Trump's envoys..." gets 🇺🇸, "Houthis..." 🇾🇪, "EU leaders..." 🇪🇺, NATO 🛡️, the ICC ⚖️);
+2. otherwise the first subject icon: 🕊️ talks/ceasefire, ☢️ nuclear, 💥 strikes, 🗳️ elections,
+   ⚖️ courts/arrests, ⚡ energy, 🛢️ oil/gas, 🌊 disasters, 🌍 climate, 💰 economy, 💻 tech;
+3. otherwise the topic's emoji.
+
+On 400 real headlines (2026-11-14): 378 flags, 17 subject icons, 5 topic fallbacks. It is a
+dictionary lookup (a regex over the ~700 words cost 3.6 ms just to build), under 1 ms to set up
+per Worker instance and ~25 µs per line. Rule-based, so "Russian strike on Zaporizhzhia" gets the
+Russian flag (the actor), not the Ukrainian one (the place).
 
 - **No em dash anywhere.** The job replaces any em or en dash the AI writes, the digest code
   cleans headlines again, and it refuses to send a message that still contains one.

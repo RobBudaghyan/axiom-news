@@ -24,10 +24,12 @@ bot @axiom_news_bot at the end.
 - **Hosting:** GitHub Actions hourly job, plus Cloudflare Worker + D1 (webhook, Mini App API,
   static Mini App, digest cron).
 - **Not in v1:** payments, ads, multiple languages, user-added sources, instant alerts, channels.
-- **Digest format (owner, Step 3):** greeting line, blank line, then per story
-  `N. <topic emoji> <b>headline</b>` and `Source: <linked outlet>`, blank line between stories
-  (format A, default). Format B groups the same stories under bold topic headings. HTML, link
-  previews off, never an em dash. At most 40% of a digest from one topic; near-duplicates removed.
+- **Digest format (owner, Step 3): format B.** Greeting line, then the stories grouped under bold
+  topic headings with the topic emoji (`<b>🇺🇦 Ukraine War</b>`), numbered inside each group:
+  `N. <context emoji> <b>headline</b>` and `Source: <linked outlet>`, blank line between stories.
+  The context emoji is the flag of the first country/leader/group the headline names, else a
+  subject icon, else the topic emoji (`config/line_emoji.json`). HTML, link previews off, never an
+  em dash. At most 40% of a digest from one topic; near-duplicates removed.
 
 ## Decisions (with reasons)
 | Date | Decision | Why |
@@ -53,6 +55,7 @@ bot @axiom_news_bot at the end.
 | 2026-11-13 | The Worker starts the hourly job at :07 (cron `7 * * * *`, fine-grained token: this repo, Actions read/write, no expiration); backup GitHub schedule at :37 in its own file, skipping if a run started < 45 min ago; one run at a time | precise timing; the backup covers a failed trigger; its own file so an inactivity disable never hits `hourly.yml` |
 | 2026-11-13 | Owner alerts: failed run, run stuck 30+ min, no successful run for 3 h, or failed dispatch; at most one per 3 h | the owner learns about outages without watching dashboards |
 | 2026-11-13 | Commits use the owner's GitHub noreply email (history rewritten before the first push, owner) | the repo is public |
+| 2026-11-14 | Format B is the default, with a context emoji on every line (owner) | owner liked B; per-line flags make a grouped digest easy to scan. Word rules, not AI: free, predictable, ~25 µs per line |
 | 2026-11-13 | The Times of Israel feed disabled (`enabled: false`) | HTTP 403 from GitHub's runners; works from the PC |
 
 ## Current status
@@ -82,5 +85,6 @@ auto-detection; Admin tab for the owner), served by the same Worker. Then switch
   `exceededCpu` once there are ~20 users.
 - **Duplicate check is word-based:** it misses duplicates worded very differently (e.g. two lines
   on the same Abu Dhabi talks) and rarely merges two different stories.
-- **Format A or B:** the owner has both previews; A stays the default until he picks.
+- **Line emojis are word rules,** not AI: the first actor named wins, so "Russian strike on
+  Zaporizhzhia" gets the Russian flag. Edit `config/line_emoji.json` to add names.
 - **No usable feeds** from Reuters, AP (both blocked), Armenpress (none found) or ISW (403).

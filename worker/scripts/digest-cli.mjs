@@ -113,7 +113,7 @@ async function main() {
 
   const preview = arg("--preview", "A");
   const format = preview ?? arg("--format", CONFIG.format);
-  const label = preview ? `<i>Preview ${preview}: ${preview === "A" ? "flat list (default)" : "grouped by topic"}</i>` : undefined;
+  const label = preview ? `<i>Preview ${preview}: ${preview === "A" ? "flat list" : "grouped by topic"}${preview === CONFIG.format ? " (default)" : ""}${CONFIG.line_emoji !== false ? ", with line emojis" : ""}</i>` : undefined;
   const plan = planDigest(previewing ? { ...user, last_digest_at: null } : user, cands, topics, now, CONFIG, { format, label });
   console.log(plan.text);
   console.log(`\n[${plan.stories.length} stories from ${cands.length} candidates, visible length ${visibleLength(plan.text)}]`);

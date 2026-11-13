@@ -241,13 +241,32 @@ consistent overruns are terminated (error 1102). So I capped the cron at **8 use
    - **You should get no alert messages.** An alert starts with "Axiom News alert:". If one
      comes, forward it to me (it contains no secrets). Expect at most one every 3 hours.
    - **Send the bot any text** (e.g. "hi"). It should answer with your digest times.
-2. **Pick a format:** look at the two previews from tonight ("Preview A: flat list (default)" and
-   "Preview B: grouped by topic") and tell me **A or B**. A stays the default until you choose.
+2. **Format:** done, B with line emojis (see the follow-up above). Tell me if any flag looks wrong;
+   names are easy to add in `config/line_emoji.json`.
 3. **Tell me if** tonight's forced digest (7 stories, about 23:25), the two previews and the test
    alert (about 23:50) all arrived.
 4. **Nothing to install or pay.** The GitHub token has no expiration. If you ever delete it on
    GitHub, the Worker will alert you and the backup schedule keeps the news flowing until a new
    token is set.
+
+## Follow-up (2026-11-14): format B with a context emoji on every line
+The owner chose **format B** and asked for a fitting emoji at the start of each line.
+- **The rule:** the flag of the **first** country, leader, capital, region or group the headline
+  names (`config/line_emoji.json`, about 100 actors). If none, a subject icon (🕊️ 💥 🗳️ ⚖️ ⚡ 🛢️
+  ☢️ 🌊 🌍 💰 💻). If none, the topic's emoji. The topic heading of format B keeps its emoji.
+- **Real check** (400 headlines from the last 24 h): **378 flags, 17 subject icons, 5 topic
+  fallbacks**. I read the first 70 by hand; they fit ("Mossad chief visited Washington" 🇮🇱,
+  "Finnish Defense Minister..." 🇫🇮, "Houthis..." 🇾🇪). I removed traps found on the way: "Abbas"
+  (would have tagged Iran's minister Abbas Araghchi as Palestinian), "Costa", "Congress", "RSF".
+- **A known quirk:** the first actor wins, so "Russian strike on Zaporizhzhia" shows 🇷🇺 (who
+  acted), not 🇺🇦 (where).
+- **CPU:** a single big regex cost 3.6 ms just to build (a third of the Worker budget), so it is a
+  word/phrase dictionary lookup instead: under 1 ms to set up, ~25 µs per line.
+- **Length:** 15 of the longest headlines in format B with emojis: 2,812 visible characters
+  (limit 4,096).
+- **Tests:** 58 Worker tests (15 new emoji cases plus the format updates) and 34 Python tests pass.
+- A new preview ("Preview B: grouped by topic (default), with line emojis", message id 2443) was
+  sent to the owner. The Worker is redeployed; tomorrow's 09:00 digest uses this format.
 
 ## Suggested next step
 **Step 4: the Mini App.**

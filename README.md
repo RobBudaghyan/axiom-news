@@ -17,7 +17,8 @@ for the design.
 |---|---|
 | `config/topics.yaml` | the 6 topics users can pick |
 | `config/sources.yaml` | the RSS feeds, with region/language/paywall/state-owned/tier labels; `enabled: false` switches one off |
-| `config/digest.json` | digest settings (format A/B, stories, 40% topic cap, dedupe threshold, users per tick) |
+| `config/digest.json` | digest settings (format B, line emojis, stories, 40% topic cap, dedupe threshold, users per tick) |
+| `config/line_emoji.json` | which flag or icon starts each digest line (names, capitals, groups, subjects) |
 | `prompts/story_batch.md` | the hourly AI prompt (group, tag, score, summarize) and its output schema |
 | `db/schema.sql` | D1 tables |
 | `job/` | the hourly job (`python -m job.run`), including near-duplicate grouping (`job/dupes.py`) |
