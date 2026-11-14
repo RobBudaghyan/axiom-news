@@ -18,6 +18,11 @@
 enabled: true
 window: 2h
 timeout_s: 8          # per request; the whole step has its own budget (job/shadow.py)
+# Title similarity (0-1, rarity-weighted shared words) at which a Google result counts as the
+# same article/event as one already in the live pool or found earlier. Tuned by eye on 668 real
+# results on 2026-11-14: 0.5-0.7 was mostly the same event from another outlet, below 0.5 mixed.
+# Every score is stored, so part B can re-judge with another value.
+title_dup_threshold: 0.5
 
 editions:
   en: {hl: en-US, gl: US, ceid: "US:en"}

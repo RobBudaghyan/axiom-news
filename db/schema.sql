@@ -144,3 +144,51 @@ CREATE TABLE IF NOT EXISTS errors (
   component TEXT NOT NULL,                          -- job or worker
   message   TEXT NOT NULL
 );
+
+-- Step 6 coverage experiment (SHADOW MODE, job/shadow.py): Google News search results.
+-- Nothing reads these tables except the experiment's own scripts: not the real job steps, not
+-- the Worker, not digests. Pruned after 3 days by the shadow step itself.
+CREATE TABLE IF NOT EXISTS shadow_items (
+  id            INTEGER PRIMARY KEY,
+  guid          TEXT NOT NULL UNIQUE,               -- Google's article id
+  run_id        INTEGER,                            -- shadow_runs.id of the run that first saw it
+  topic         TEXT NOT NULL,                      -- topic of the first query that found it
+  topics        TEXT NOT NULL,                      -- JSON list: topics of every query that found it
+  query_key     TEXT NOT NULL,                      -- e.g. armenia:ru:4 (topic:edition:index in the config)
+  hits          INTEGER NOT NULL DEFAULT 1,         -- queries that returned it in that run
+  edition       TEXT NOT NULL,                      -- en, ru, ...
+  title         TEXT NOT NULL,                      -- headline without the " - Outlet" suffix
+  source        TEXT,                               -- outlet name
+  source_domain TEXT,                               -- outlet site
+  curated_outlet INTEGER,                           -- 1 = an outlet we already read through RSS
+  link          TEXT NOT NULL,                      -- news.google.com/rss/articles/... (not resolved)
+  published_at  INTEGER,
+  fetched_at    INTEGER NOT NULL,
+  live_sim      REAL,                               -- best title similarity to a live item (last 24 h)
+  live_item_id  INTEGER,                            -- that item
+  shadow_sim    REAL,                               -- best title similarity to an earlier shadow item
+  shadow_dup_of INTEGER,                            -- that shadow item
+  dup           TEXT                                -- NULL unique; 'live' or 'shadow' = title duplicate
+);
+
+CREATE TABLE IF NOT EXISTS shadow_runs (
+  id             INTEGER PRIMARY KEY,
+  at             INTEGER NOT NULL,
+  ms             INTEGER,
+  queries        INTEGER,
+  queries_failed INTEGER,
+  codes          TEXT,                              -- JSON: HTTP status (or error) -> count
+  fetched        INTEGER,                           -- items returned, with repeats across queries
+  distinct_items INTEGER,
+  seen_before    INTEGER,                           -- already stored by an earlier shadow run
+  new_items      INTEGER,
+  dup_live       INTEGER,
+  dup_shadow     INTEGER,
+  unique_items   INTEGER,
+  per_topic      TEXT,                              -- JSON per topic: fetched, new, dup_live, dup_shadow, unique
+  error          TEXT,
+  pruned         INTEGER,
+  first_id       INTEGER,                           -- lowest shadow_items.id written by this run
+  d1_rows_read   INTEGER,
+  d1_rows_written INTEGER
+);

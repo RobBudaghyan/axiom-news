@@ -54,3 +54,15 @@ jobs:
           GEMINI_FALLBACK_MODEL: gemini-3.1-flash-lite
           GROQ_MODEL: openai/gpt-oss-120b
         run: python -m job.run --min-gap-minutes "${{ inputs.min_gap_minutes || '20' }}"
+      # Step 6 coverage experiment, SHADOW MODE: runs after the real job has finished, writes only
+      # to the shadow_* tables, gets no AI keys (so it cannot make an AI call), and can never fail
+      # or hold up the real run (continue-on-error, 2-minute cap, and it always exits 0 itself).
+      - name: Coverage experiment (shadow only)
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+          CLOUDFLARE_D1_TOKEN: ${{ secrets.CLOUDFLARE_D1_TOKEN }}
+        run: python -m job.shadow
