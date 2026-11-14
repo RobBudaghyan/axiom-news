@@ -99,3 +99,27 @@ Only lessons that still matter for the v2 design are kept.
 26. **A Worker instance cannot be trusted to live until the next tick.** A counter that was only
     written "at the next cron tick in the same instance" was missing after the first tick on
     Cloudflare, because that tick ran in a fresh instance. Write per invocation.
+
+## Learned in v2 (Step 5)
+
+27. **An AI editor anchors on any score you show it.** With the first-pass score in the prompt, the
+    editor kept it for almost every story (every 7 stayed a 7). Hiding it made the scores
+    independent and much stricter. Show the model the evidence (titles, snippets), not an earlier
+    verdict.
+28. **"Leave it empty to keep it" needs code that keeps it field by field.** The editor repeated an
+    already-edited headline but left its emojis and description empty, and the code wiped them.
+    A new value should replace an old one only when it is non-empty and valid.
+29. **Guard against roundups in every merge step.** Once in about ten answers the model put dozens
+    of unrelated stories into one "various developments" event. A hard cap on the size of one
+    event (6 stories) plus "retry if under half the candidates are covered" catches it.
+30. **Measure "it looks off" before guessing.** The Mini App's icons sat 6 px low. Measuring the
+    drawn icon against its square in headless Edge found the cause in minutes: the Admin tab's
+    stat boxes and the icon squares shared the CSS class name `tile`, so the icons got the stat
+    boxes' padding. Keep class names unique per component.
+31. **A check script must not write made-up identity data.** `api-check.mjs` opened the app as the
+    owner with the name "Owner", and opening the app saves the Telegram first name, so the real
+    name was overwritten and one preview digest greeted "Owner". Sign test requests with the
+    values already stored.
+32. **Piping a command into `head` does not stop it.** `script --preview | head -4` still sent the
+    Telegram message after `head` had exited. Never pipe a command that has side effects just to
+    shorten its output.

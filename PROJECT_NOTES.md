@@ -11,25 +11,32 @@ bot @axiom_news_bot at the end.
 - **Hourly pool.** Collect ~100 RSS feeds and make ONE AI pass for all users: group duplicates
   into stories, tag topics, score importance 1-10, write a one-line English summary, and use the
   best link (most prestigious outlet; paywalls are fine).
-- **Digests per user** at chosen local times: defaults 09:00/14:00/20:00, top 7, daytime only,
-  time zone auto-detected. Building a digest is a database filter with no AI. The message is a
-  greeting line plus numbered one-line stories with source links, or a short "quiet period"
-  note. The same story is never sent to a user twice.
+- **Editor pass (Step 5):** a second AI call per hour compares the strongest stories of the
+  last 24 h side by side (the best few of every topic always included), merges duplicates, gives
+  a strict final score 1-10, the main topic, a one-sentence headline, a 1-3 sentence description
+  (only facts from the articles) and 2-3 emojis. If it fails, digests use the first-pass data.
+- **Digests per user** at chosen local times (on the hour, 06:00-23:00, 1 to 5; defaults
+  09:00/14:00/20:00), time zone from the phone. No fixed count: stories with a final score of 7+,
+  plus each followed topic's best remaining story if it scores 6+; at most 12; 40% topic cap
+  (at least 2). Building a digest is a database filter with no AI. The same story is never sent
+  to a user twice; if nothing qualifies, a short "quiet period" note.
 - **Topics:** Politics, Wars & Conflicts, Armenia, Russia, Iran war, Ukraine war. English only,
   designed so Russian can be added later.
-- **Telegram Mini App settings:** topics, times, number of stories, pause. An Admin tab, visible
+- **Telegram Mini App settings:** topics, digest times (hourly grid), pause; the time zone is
+  shown read-only (Step 5 removed stories per digest, the format choice and the zone picker). An Admin tab, visible
   only to the owner, shows stats, errors and AI usage, plus a "Send me a digest now" button.
-- **AI:** Gemini free tier, falling back to Groq; if both fail, items wait an hour. Target is
-  about 24-50 calls/day in total, independent of user count.
+- **AI:** Gemini free tier, falling back to Groq; if both fail, items wait an hour. About 48
+  calls/day (24 first pass + 24 editor), independent of user count.
 - **Hosting:** GitHub Actions hourly job, plus Cloudflare Worker + D1 (webhook, Mini App API,
   static Mini App, digest cron).
 - **Not in v1:** payments, ads, multiple languages, user-added sources, instant alerts, channels.
-- **Digest format (owner, Step 3): format B.** Greeting line, then the stories grouped under bold
-  topic headings with the topic emoji (`<b>🇺🇦 Ukraine War</b>`), numbered inside each group:
-  `N. <context emoji> <b>headline</b>` and `Source: <linked outlet>`, blank line between stories.
-  The context emoji is the flag of the first country/leader/group the headline names, else a
-  subject icon, else the topic emoji (`config/line_emoji.json`). HTML, link previews off, never an
-  em dash. At most 40% of a digest from one topic; near-duplicates removed.
+- **Digest format (owner, Step 5): format B for everyone.** "Good evening, Sam. Since 2 PM, 6
+  stories for you:" (12-hour time, first name from Telegram; "In the last 24 hours" the first
+  time). Topic headings: emoji + bold underlined name. Each story: `N. <emojis> <b>headline</b>`,
+  blank line, the description, then the outlet name alone as a link. Numbering runs on across
+  topics. A digest over Telegram's 4,096 characters is split into two messages at a topic heading.
+  HTML, link previews off, never an em dash. The editor's emojis; the word-rule emojis of
+  `config/line_emoji.json` are only a fallback.
 
 ## Decisions (with reasons)
 | Date | Decision | Why |
@@ -62,6 +69,15 @@ bot @axiom_news_bot at the end.
 | 2026-11-14 | Time zone: the phone's zone is saved on every open unless the user picked one by hand (`tz_detected` 2), then the app offers "Use it" | follows the phone when travelling, never overrides a deliberate choice |
 | 2026-11-14 | A digest already due (slot < 15 min ago, not sent yet) survives a settings change | saving at 14:02 must not swallow the 14:00 digest |
 | 2026-11-14 | Feed health is one JSON row in `meta` written by the job each run; the Worker counts its own D1 rows and writes them every tick (~288 rows/day) | per-feed rows would cost ~2,800 writes/day; D1's usage API needs a token the Worker does not have |
+| 2026-11-14 | Editor pass: one more AI call per hourly run (merge, strict score, main topic, headline, description, emojis), same fallback chain; a failure never fails the run (advisor, Step 5) | first-pass scores were inflated (364 of 424 politics stories >= 4) and ranking by them hid 27 Armenia stories; ~30% of duplicates slipped through |
+| 2026-11-14 | The editor does not see the first-pass score | with it, it copied the score for almost every story (lesson 27) |
+| 2026-11-14 | A merge keeps the oldest story and copies `sent` rows to it | the oldest is most likely already sent; never twice across a merge |
+| 2026-11-14 | Fact guard: numbers and names in editor text must appear in the articles | "only facts from the articles" checked in code, not just asked for; 5 of 452 real texts dropped |
+| 2026-11-14 | Bars 7 (editorial) and 6 (topic), max 12, unedited = importance - 2 (`config/digest.json`) | tuned on the real pool: 7/6 gave 9, 9 and 5 stories; 6/6 always 12; 8/6 three |
+| 2026-11-14 | Each followed topic gets its own section with its best *remaining* story | with "its best story" one summit tagged with four topics satisfied all four, and digests had 3-4 stories |
+| 2026-11-14 | The editor names each story's main topic (`stories.main_topic`), used as its section | the first-pass tags put a Trump-Putin-Xi summit under "Iran War" |
+| 2026-11-14 | Format A and the per-user format, stories per digest and the zone picker removed; times on the hour 06:00-23:00; the zone always follows the phone (owner) | simpler; `users.max_stories`/`format` kept unused in the table |
+| 2026-11-14 | Brand red #b1161c; dark mode uses #d0232a fills and #ff6b6b text; Admin failures orange, warnings amber (owner) | #b1161c is only 2.4:1 on a dark cell |
 
 ## Current status
 - **Step 1 done:** repo, docs, topics, prompt, lessons, 116 verified feeds.
@@ -83,11 +99,18 @@ bot @axiom_news_bot at the end.
   - Tested: 115 Worker + 36 Python unit tests, a 23-step click-through in headless Edge, and
     8 checks against the live API (a real settings change saved in D1). Every API call measured
     under 10 ms CPU. Details in `reports/step-04-mini-app.md`.
+- **Step 5 done (2026-11-14): the editor pass, editorial digests, the new format and the Mini App
+  in brand red, still on the TEST bot.** Details in `reports/step-05-editor.md`.
+  - Every hourly run now makes two AI calls; the editor ran on GitHub (60 candidates, 10.1k tokens
+    in, 4.9k out) and over the last ~19 h of stories once from this PC.
+  - Tests: 54 Python + 112 Worker unit tests, 28-step click-through, 9 live API checks, mutation
+    checks for every new rule. One labelled preview digest was sent to the owner.
 - The owner is the only user.
 
 ## Next step
-Owner tries the Mini App on his phone (list in the Step 4 report). Then Step 5: switch to the
-real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, then invite the first users).
+Owner reads the preview and the next real digests, and tries the new Mini App on his phone (list
+in the Step 5 report). Then Step 6: switch to the real bot @axiom_news_bot (new token and webhook,
+`setup-bot.mjs`, then invite the first users).
 
 ## Known issues / open questions
 - **Gemini 503 overloads** were frequent on 2026-11-13; fallback runs are slow (Groq ~1
@@ -96,12 +119,15 @@ real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, then invite th
   prompt and code, but it needs watching.
 - **Worker CPU is the tightest free limit** (10 ms). Watch Cloudflare's Metrics > Errors for
   `exceededCpu` once there are ~20 users.
-- **Duplicate check is word-based:** it misses duplicates worded very differently (e.g. two lines
-  on the same Abu Dhabi talks) and rarely merges two different stories.
-- **Line emojis are word rules,** not AI: the first actor named wins, so "Russian strike on
-  Zaporizhzhia" gets the Russian flag. Edit `config/line_emoji.json` to add names.
+- **Duplicates:** the word-based check misses some; the editor now merges most of the rest
+  (14 merges in its first 45 candidates), but it sees at most 60 stories per run.
+- **The editor decides what users see.** Its scores are whole numbers clustered at 5-6, so one
+  point changes a digest a lot; it sometimes rates big off-topic stories high (the US flight
+  ground stop got a 7). Watch the first week and nudge the bars or prompt examples if needed.
+- **Line emojis** from word rules (`config/line_emoji.json`) are now only a fallback for stories
+  the editor did not write emojis for.
 - **No usable feeds** from Reuters, AP (both blocked), Armenpress (none found) or ISW (403).
-- **The Mini App was only seen in a desktop browser with a stand-in for Telegram.** Real iPhone and
-  Android rendering, haptics and the MainButton still need the owner's eyes.
+- **The Mini App was only seen in a desktop browser with a stand-in for Telegram.** The Step 5
+  version (red, hourly grid) still needs the owner's eyes on a real phone.
 - **Admin "D1 today" for the Worker is a slight undercount** (counts of short-lived Worker instances
   that end between ticks are lost). The job's numbers are exact and are most of the total.

@@ -1,9 +1,11 @@
 # Architecture
 
-Status: designed in Step 1, updated in Steps 2, 3 and 4 (2026-11-14). Running in the cloud since
+Status: designed in Step 1, updated in Steps 2-5 (2026-11-14). Running in the cloud since
 Step 3, still on the TEST bot: the hourly job on GitHub Actions (public repo
 `RobBudaghyan/axiom-news`), the D1 database, and the Worker `axiom-news` (webhook, digest cron,
-hourly job trigger, alerts, and since Step 4 the Mini App and its API, §4a).
+hourly job trigger, alerts, and since Step 4 the Mini App and its API, §4a). Since Step 5 every
+hourly run also makes an **editor** AI call that merges, strictly scores and writes the stories
+digests show (§3, step 6).
 
 ## 1. Components
 
@@ -16,8 +18,11 @@ hourly job trigger, alerts, and since Step 4 the Mini App and its API, §4a).
  │ 2. drop already-seen URLs, keep <= 8 newest per feed     │
  │ 3. AI pass, usually ONE call: group, tag, score, write   │
  │    (Gemini -> 2nd Gemini model -> Groq -> else pending)  │
- │ 4. write stories to D1, mark near-duplicates (dup_group),│
- │    prune old rows (daily)                                │
+ │ 4. write stories to D1, mark near-duplicates (dup_group) │
+ │ 5. EDITOR pass, ONE more call: merge duplicates, strict  │
+ │    score, main topic, headline, description, emojis      │
+ │    (same fallback chain; if it fails, digests use step 3)│
+ │ 6. prune old rows (daily)                                │
  └───────────────┬─────────────────────────────────────────┘
                  │ HTTPS: Cloudflare D1 REST API (scoped token)
                  ▼
@@ -57,8 +62,8 @@ of logic lives in exactly one language:
   exactly the same way.
 - **Near-duplicate grouping:** `job/dupes.py` only. It runs in the job because the job has no CPU
   limit (see §8); the Worker reads the result (`stories.dup_group`).
-- **Shared settings:** `config/digest.json` is read by both (format, story count, 40% cap,
-  dedupe threshold, users per tick).
+- **Shared settings:** `config/digest.json` is read by both (editorial and topic bars, max 12
+  stories, 40% cap, dedupe threshold, users per tick, allowed digest times).
 
 Tools: Node.js 26 LTS and `wrangler` (pinned in `worker/package.json`) deploy the Worker;
 `gh` manages the GitHub repo and its secrets.
@@ -112,88 +117,129 @@ Tools: Node.js 26 LTS and `wrangler` (pinned in `worker/package.json`) deploy th
    stories on 2026-11-13: catches about 16 of 23 hand-labelled duplicates and wrongly merged
    2 of 24 hard look-alikes. Giving names extra weight was tried and rejected, because it merged
    different stories about the same person.
-6. **Digests.** The Worker cron runs every 5 minutes and takes up to 8 users whose
+6. **Editor pass (job, Step 5, `job/editor.py`, prompt `prompts/editor.md`).** One more AI call
+   per run, after the near-duplicate grouping. Why: the first pass scores generously (in 24 h,
+   364 of 424 politics stories scored 4 or more) and word-based grouping misses about 30% of
+   duplicates, so ranking by its score buried small topics such as Armenia.
+   - **Candidates:** stories updated in the last 24 h, first-pass score >= 4, not merged away.
+     First the best 3 not-yet-edited stories of every topic (so Armenia is always seen), then the
+     strongest not-yet-edited ones, up to 45; then up to 15 already-edited stories with their
+     current score and headline, for comparison and merging. Each candidate shows its first-pass
+     summary and its best 3 articles (`source, tier | title :: snippet`). **The first-pass score is
+     not shown:** with it, the editor copied it for almost every story (lesson 27).
+   - **Output** (JSON schema): events, each with the candidate ids it covers (several ids = a
+     merge), a strict `score` 1-10, the main `topic`, a `headline` (present tense, at most 14
+     words), a 1-3 sentence `description` (only facts from the given articles) and 2-4 `emojis`
+     (flags of the main actors, then a subject emoji). The prompt anchors every score level with
+     real examples and says that about 15-25 stories a day worldwide reach 7.
+   - **Checks** (`validate_events`): unknown or repeated ids dropped; an event with more than 6
+     stories is a "roundup" and ignored (seen once: 44 unrelated stories in one event); fewer than
+     half of the candidates covered = a failed answer (one retry, then the next model); score
+     clamped; text cleaned (no em or en dash). **Fact guard:** every number, and (for Latin-script
+     articles) every capitalised name in a headline or description must appear in the articles or
+     the first-pass summary, with acronyms (APEC = Asia-Pacific Economic Cooperation), first names
+     before a known surname and demonyms (Iranian for Iran, Polish for Poland) allowed. A failing
+     description is dropped, a failing headline falls back to the summary. Replayed on 452 real
+     answers: 5 texts dropped. Emojis must be emoji only, at most 4.
+   - **Writes:** a merged group keeps its **oldest** story (the one most likely already sent); the
+     others get `merged_into` and disappear from digests and from the next runs. Users who received
+     a merged-away story get a `sent` row for the kept one, so the event never comes twice. The kept
+     story takes the group's best link (lowest tier), the union of topics and the newest
+     `updated_at`. Each field (headline, description, emojis) keeps its old value unless the answer
+     gives a new valid one (lesson 28). A first-pass merge that changes an edited story's summary
+     sets `edited_at` back to NULL, so the editor looks at it again in the same run.
+   - **Fallback:** the same chain as the first pass. Groq gets a smaller set (10 new stories, 2
+     articles each) to fit its 8k tokens/minute. If every model fails, `job_runs.editor_status` is
+     `failed`, an error row is written, the run itself still counts as ok, and digests use the
+     first-pass data (below).
+   - **Measured** (2026-11-14, Gemini `gemini-3.5-flash-lite`): 45-60 candidates, 6.5-12.5k input
+     and 2.5-6.2k output tokens per call, 10-30 s. On GitHub: 60 candidates, 10.1k in, 4.9k out.
+7. **Digests.** The Worker cron runs every 5 minutes and takes up to 8 users whose
    `next_digest_at <= now` (earliest first; the rest go at the next tick). For each user:
-   1. **Candidates (SQL):** on one of their topics, `importance >= 4`, created or updated since
-      the last digest (at most 24 h back), **not in `sent`**, most important first, then most
-      recent; at most 40.
-   2. **Pick (JS, `pickStories`):** skip a story whose `dup_group` was already taken. Count each
-      story against its **most specific topic** among the user's topics (order in
-      `config/digest.json`: ukraine_war, iran_war, armenia, russia, wars_conflicts, politics). No
-      topic may exceed `max(1, ceil(0.4 x N))` stories (3 of 7). If the cap leaves empty slots
-      and nothing else qualifies, they are filled with the next most important stories.
-   3. Send one Telegram message, then write `sent` rows, `last_digest_at` (the slot time) and
-      the next `next_digest_at`.
+   1. **Candidates (SQL):** on one of their topics, not merged away, a score of at least the
+      **topic bar**, created or updated since the last digest (at most 24 h back), **not in
+      `sent`**, best score first, then most recent; at most 40. The score is the editor's
+      `final_score`; a story the editor has not scored uses its first-pass importance minus
+      `unedited_offset` (2), so digests keep working, more thinly, when the editor is down.
+   2. **Pick (JS, `pickStories`), no fixed count** (`config/digest.json`):
+      - every story that clears the **editorial bar** (7);
+      - every topic the user follows gets its own section: if no story above is shown under it,
+        its best *remaining* story is added if it clears the **topic bar** (6). "Remaining"
+        matters: a Trump-Putin-Xi summit is tagged politics, Russia, Iran war and wars, but it is
+        shown under one topic only;
+      - at most **12** stories, the guaranteed ones first;
+      - no topic may have more than `max(2, ceil(0.4 x N))` stories, N being the size actually
+        picked (recomputed until it holds, so 6 strong Ukraine stories and 2 politics ones give a
+        digest of 2 + 2);
+      - near-duplicates (`dup_group`) only once; nothing qualifies: the quiet note.
+      A story is shown under (and counted against) the editor's **main topic** if the user
+      follows it, otherwise its most specific topic among the user's (order in
+      `config/digest.json`: ukraine_war, iran_war, armenia, russia, wars_conflicts, politics).
+   3. Send the message(s), then write `sent` rows, `last_digest_at` (the slot time) and the next
+      `next_digest_at`.
 
-   Building a digest makes no AI call.
+   **Tuning (2026-11-14, real pool, `node scripts/digest-cli.mjs --windows`).** The pool only
+   reached back 19 h (to 19:17 Yerevan the day before). With bars 7/6 the owner's digests (all six
+   topics) would have had 9 stories at 20:00 (a window holding the first run's 3-hour backlog), 9 at
+   09:00 and 5 by 12:39 for 14:00, with Armenia in each. 6/6 gave 12 (the maximum) every time; 8/6
+   gave 3. The editor's scores are whole numbers and cluster at 5-6, so 7/6 is the only setting
+   near the 4-8 target. Building a digest makes no AI call.
 
-### Digest message format (Step 3, owner's choice of the old project's style)
+### Digest message format (Step 5, the same for everyone)
 
-Format **B** (the default since the owner chose it, `"format": "B"` in `config/digest.json`):
 ```
-Good evening. Since 14:00, 7 stories on your topics:
+Good evening, Sam. Since 2 PM, 6 stories for you:
 
-<b>🇺🇦 Ukraine War</b>
-1. 🇷🇺 <b>Headline, one short sentence</b>
-Source: <a href="...">Outlet</a>
+🇦🇲 <b><u>Armenia</u></b>
 
-2. 🇺🇸 <b>...</b>
-Source: <a href="...">Outlet</a>
+1. 🇦🇲🇹🇷🤝 <b>Armenia and Turkey near a deal to open the border</b>
 
-<b>🏛️ Politics</b>
-1. 🇫🇷 <b>...</b>
-Source: <a href="...">Outlet</a>
+Pashinyan said the two countries are close to full normalisation.
+<a href="...">Interfax</a>
+
+2. ...
 ```
-Groups are the topic each story counts against, ordered by each group's best story, numbered
-from 1 inside each group. Format **A** is the same lines as one flat numbered list. Both use HTML
-parse mode with link previews off.
-
-**Line emoji** (`"line_emoji": true`, rules in `config/line_emoji.json`, code `lineEmoji` in
-`digest.js`):
-1. the flag of the **first** country, leader, capital, region or group the headline names
-   (case-sensitive whole words and phrases up to 4 words, possessives allowed:
-   "Donald Trump's envoys..." gets 🇺🇸, "Houthis..." 🇾🇪, "EU leaders..." 🇪🇺, NATO 🛡️, the ICC ⚖️);
-2. otherwise the first subject icon: 🕊️ talks/ceasefire, ☢️ nuclear, 💥 strikes, 🗳️ elections,
-   ⚖️ courts/arrests, ⚡ energy, 🛢️ oil/gas, 🌊 disasters, 🌍 climate, 💰 economy, 💻 tech;
-3. otherwise the topic's emoji.
-
-On 400 real headlines (2026-11-14): 378 flags, 17 subject icons, 5 topic fallbacks. It is a
-dictionary lookup (a regex over the ~700 words cost 3.6 ms just to build), under 1 ms to set up
-per Worker instance and ~25 µs per line. Rule-based, so "Russian strike on Zaporizhzhia" gets the
-Russian flag (the actor), not the Ukrainian one (the place).
-
-- **No em dash anywhere.** The job replaces any em or en dash the AI writes, the digest code
-  cleans headlines again, and it refuses to send a message that still contains one.
-- **Length.** Telegram's 4,096 limit counts the text after HTML parsing (tags and link URLs do
-  not count). The code measures it that way, in UTF-16 units, against a budget of 4,000. If a
-  message is too long, the lowest-ranked stories are dropped (the header count follows), and a
-  single over-long headline is cut at a word with "...". The 15 longest real headlines came to
-  about 2,600 visible characters (raw HTML ~4,500), so trimming should not happen in practice.
-
-- **The header** depends on history. A first digest, or one after more than 24 h, says "In the
-  last 24 hours, N stories on your topics:" instead of "Since HH:MM".
-- **The quiet note.** If no story qualifies, the user gets one short line: "Good afternoon.
-  Quiet period: nothing important on your topics since 09:00."
-- **The greeting** depends on the local hour: morning before 12:00, afternoon until 18:00,
-  evening after that.
+- **Greeting:** good morning (before 12:00), afternoon (until 18:00) or evening, then the user's
+  first name from Telegram (left out if unknown), then "Since 2 PM" (12-hour clock: "2 PM",
+  "2:30 PM", "12 PM") or, for a first digest or one after more than 24 h, "In the last 24 hours".
+- **Topic headings:** the topic emoji, then the name in bold and underlined. Groups appear in the
+  order of their best story; **numbering runs on across groups.**
+- **Each story:** number, emojis, the headline in bold; a blank line and the description; then the
+  outlet's name alone on its line as the link (no "Source:"). A blank line between stories. A story
+  without editor text uses its first-pass summary and the dictionary emoji (`lineEmoji`,
+  `config/line_emoji.json`: the flag of the first actor named, else a subject icon, else the topic
+  emoji). HTML parse mode, link previews off.
+- **Length:** Telegram's 4,096 limit counts the text after HTML parsing, in UTF-16 units; the
+  budget is 4,000. A longer digest is **split into two (or more) messages at a topic heading**, or
+  between two stories if one topic alone is too long; no story is dropped. If a later message fails
+  to send, the stories already sent are recorded, the slot moves on, and the unsent stories stay
+  eligible for the next digest. The 12 longest real stories (2026-11-14) came to 3,837 visible
+  characters: still one message, but close to the budget, so a full 12-story digest will sometimes
+  arrive as two messages.
+- **The quiet note:** "Good afternoon, Sam. Quiet period: nothing important on your topics since
+  9 AM."
+- **No em dash anywhere.** The job cleans what the AI writes, the digest code cleans again, and it
+  refuses to send a message that still contains an em or en dash.
 
 **Never twice:** `sent` has primary key `(user_id, story_id)`, and stories are filtered against it. If
-a story gains new sources after it was sent, it is still never sent again.
+a story gains new sources after it was sent, it is still never sent again; an editor merge copies
+`sent` rows to the story it keeps.
 
 ## 4. Time zones and scheduling
 
-- Each user has `timezone` (IANA name, e.g. `Asia/Yerevan`) and `digest_times`, a list of local
-  `"HH:MM"` values in 30-minute steps between 07:00 and 22:00 ("daytime only"). The defaults are
-  09:00, 14:00 and 20:00.
+- Each user has `timezone` (IANA name, e.g. `Asia/Yerevan`) and `digest_times`, a list of 1 to 5
+  local `"HH:00"` values **on the hour between 06:00 and 23:00** (Step 5; half hours before that
+  were moved to the nearest hour, 08:30 -> 09:00, by `worker/scripts/migrate-times.mjs`). The
+  defaults are 09:00, 14:00 and 20:00.
 - **Auto-detection:** every time the user opens the Mini App, it sends
   `Intl.DateTimeFormat().resolvedOptions().timeZone` from their device (`POST /api/open`).
   Telegram's user data does not include a time zone; the official Mini App docs list only id,
   name, username, language, premium and photo. `users.tz_detected` says where the zone came from:
-  0 = the default (`Asia/Yerevan`, before the first open), 1 = the device, 2 = chosen by hand in
-  the app. With 0 or 1 the device zone is saved on every open, so the zone follows the phone when
-  the user travels; with 2 it is kept, and the app offers "Use it" if the phone's zone differs.
+  0 = the default (`Asia/Yerevan`, before the first open), 1 = the device. Since Step 5 the device
+  zone is saved on **every** open, so the zone always follows the phone (a zone "chosen by hand",
+  the old value 2, is replaced the next time the app opens). The app shows it read-only.
   `/start` creates the user with the defaults (all default topics, 09:00/14:00/20:00,
-  `Asia/Yerevan`, 7 stories) and replies with a plain-English welcome naming the times, the next
+  `Asia/Yerevan`) and replies with a plain-English welcome naming the times, the next
   digest and an "Open settings" button. Opening the app before `/start` creates the same row.
   `/settings` replies with the same button. Any other message gets a short reply with the times
   and the next digest.
@@ -229,10 +275,10 @@ a story gains new sources after it was sent, it is still never sent again.
   one alert per 3 hours, and the same failed run is never reported twice (`meta` table).
 - Pause: `paused=1` skips the user. When they resume, the next digest covers at most the last 24 h.
 
-## 4a. The Mini App (Step 4)
+## 4a. The Mini App (Steps 4-5)
 
 **Files.** `worker/public/app/` holds `index.html`, `app.css` and `app.js`: plain HTML, CSS and
-JavaScript, no framework, about 64 KB before compression (20 KB gzipped). Cloudflare serves them
+JavaScript, no framework, about 50 KB before compression since Step 5. Cloudflare serves them
 as static assets (free and unlimited) before the Worker code runs, at
 `https://axiom-news.axiom-news-worker.workers.dev/app/`. Cache rules (lesson 12):
 `public/_headers` sends `Cache-Control: no-store` for the page, and the page loads
@@ -244,21 +290,32 @@ calls only to itself.
 
 **Look.** iOS-Settings style: grouped rounded sections on Telegram's `secondary_bg_color`, rows on
 `section_bg_color`, text and hints from the theme, so light and dark both follow Telegram.
-One fixed brand accent `#2f7bf6` for switches, buttons and links (lesson 13: never Telegram's
-`button_color`/`link_color`). System font, 17 px rows, safe-area insets
+The brand red **`#b1161c`** (Step 5, replacing the blue) for switches, chosen times, buttons,
+icons and links; never Telegram's `button_color`/`link_color` (lesson 13). Contrast (WCAG,
+computed): white on `#b1161c` 7.0:1 and `#b1161c` on white 7.0:1, but only 2.4:1 against a dark
+cell, so dark mode uses a brighter fill `#d0232a` (3.2:1 against the cell, white text 5.3:1) and a
+light red `#ff6b6b` for text and icons (6.1:1). Admin warnings are amber and failures orange
+(badge text 5.0-7.7:1), so they never look like the brand. System font, 17 px rows, safe-area insets
 (`--tg-safe-area-inset-*`, `--tg-content-safe-area-inset-*`), subtle 0.25-0.35 s transitions,
 honouring "reduce motion". Telegram haptics on taps (selection on toggles, light impact on
-buttons, success/warning/error on results). The BackButton closes a sub-screen; the MainButton
-(in the accent colour) confirms "Add 18:30" on the time picker. The header and background are set
+buttons, success/warning/error on results). There are no sub-screens any more (Step 5), so the
+BackButton and MainButton are not used. The header and background are set
 to the theme's secondary colour, and vertical swipes are disabled so scrolling never closes it.
 
-**Settings tab (everyone).** Next digest card ("Today at 14:00", or "Paused"); topics (switches
-with emoji, at least one); digest times (remove; add from a 07:00-22:00 grid in 30-minute steps;
-1 to 5 times); stories per digest (stepper 3-15); format B "By topic" or A "Simple list" with a
-small drawing of each; time zone (city and GMT offset, a search over every IANA zone, a short
-"Popular" list); pause. Every change is saved at once (`POST /api/settings`, one request at a
-time, the stepper waits 0.45 s for more taps) and confirmed with a small "Saved" toast; on an
+**Settings tab (everyone, Step 5).** Next digest card ("Today at 14:00", or "Paused"); topics
+(switches with emoji, at least one); **digest times as a grid of 18 hourly buttons** 06:00-23:00
+under Morning / Afternoon / Evening: tap to choose (red), tap again to remove; a 6th time is refused
+("Up to 5 times a day. Remove one first.") and so is removing the last one ("Keep at least one
+digest time"), with a small shake; the server checks the same rules. **Time zone, read-only**:
+"Yerevan time, From your phone, GMT+4", updated from the phone on every open. Pause. (Stories per
+digest, the format choice and the time zone picker were removed in Step 5.) Every change is saved at
+once (`POST /api/settings`, one request at a time) and confirmed with a small "Saved" toast; on an
 error the change is undone and the reason shown.
+
+**Icons** in the rounded squares are block-level SVGs, centred by grid. Until Step 5 they sat 6 px
+low: the Admin stat boxes and the icon squares shared the class name `tile`, so the icons got the
+stat boxes' padding (lesson 30). `ui-check.mjs` now measures every icon's drawn centre against its
+square (0.0 px off, light and dark).
 
 **Admin tab (owner only).** Visible only when the API says `is_owner`; every admin call is
 checked again on the server (403 otherwise). One D1 batch (`src/admin.js`, aggregates done in
@@ -266,8 +323,10 @@ SQL) gives:
 - health: last run (time, status, duration, providers), last successful run, whether the hourly
   trigger is on time (a run started in the last 70 minutes), the last alert in 24 h
   (`meta.last_alert_text`, new);
-- pipeline for 24 h / 7 days: runs, articles, new items, stories created/merged, dropped, AI
-  calls, tokens, failed runs, runs that needed a backup model; and AI calls per model;
+- pipeline for 24 h / 7 days: runs, articles, new items, stories created/merged, dropped, the
+  **editor pass** (runs that edited, failed runs, duplicates merged; Step 5), AI calls, tokens,
+  failed runs, runs that needed a backup model; and AI calls per model, split into first pass and
+  editor;
 - feeds: failing feeds (with the reason in plain words and since when) and silent feeds (no new
   item for 48 h), from `meta.feed_health`, which the job writes each run (one row: per feed the
   last success, newest entry date, current error and how many runs in a row);
@@ -285,9 +344,9 @@ SQL) gives:
 
 | Route | What | CPU on Cloudflare (2026-11-14) |
 |---|---|---|
-| `POST /api/open` `{tz}` | create the user if new, save the device zone, return settings | 3-6 ms (6 = cold start) |
-| `POST /api/settings` | validate (`src/settings.js`), save, recompute `next_digest_at` | 1-5 ms |
-| `GET /api/admin` | owner only: everything above | 0-3 ms; 2 ms with real health data for all 115 feeds (4 calls) |
+| `POST /api/open` `{tz}` | create the user if new, save the device zone, return settings | 3-6 ms (Step 4); 5 and 7 ms after the Step 5 deploy |
+| `POST /api/settings` | validate (`src/settings.js`: topics, digest_times, paused only), save, recompute `next_digest_at` | 1-5 ms; Step 5: 2-5 ms, refusals 1-2 ms |
+| `GET /api/admin` | owner only: everything above | 0-3 ms; Step 5 (with editor stats): 3 ms |
 | `POST /api/admin/digest`, `/run-job` | owner only: the two buttons | not run against production by me |
 
 **Bot.** `/start` and `/settings` carry an inline "Open settings" `web_app` button. The chat menu
@@ -298,7 +357,8 @@ once with `node scripts/setup-bot.mjs` (run again after switching to the real bo
 real API code over an in-memory database with invented demo users and a stand-in for Telegram's
 script (`scripts/dev/mock-telegram.js`). `node scripts/screenshots.mjs` renders it in headless
 Edge at 390 px, light and dark, user and admin (`docs/screenshots/`). `node scripts/ui-check.mjs`
-taps through every setting and both admin buttons and checks the saved values (23 checks).
+taps through every setting and both admin buttons and checks the saved values, the colours and
+the icon centring (28 checks since Step 5).
 `node scripts/api-check.mjs` checks the LIVE API with initData signed by the bot token from
 `.env`.
 
@@ -306,14 +366,14 @@ taps through every setting and both admin buttons and checks the saved values (2
 
 | Table | Key columns | Notes |
 |---|---|---|
-| `users` | `id` (Telegram user id) PK, `first_name`, `language`, `timezone`, `tz_detected` 0/1/2, `digest_times` JSON, `max_stories` (default 7, range 3-15), `topics` JSON, `paused`, `blocked`, `created_at`, `last_digest_at`, `next_digest_at`, `format` (Step 4: `A`/`B`, NULL = config default) | index on `next_digest_at`. `blocked=1` when Telegram returns 403 because the user blocked the bot. `tz_detected`: 0 default, 1 device, 2 chosen by hand (§4) |
+| `users` | `id` (Telegram user id) PK, `first_name`, `language`, `timezone`, `tz_detected` 0/1 (2 = hand-picked before Step 5), `digest_times` JSON (on the hour, 06:00-23:00), `topics` JSON, `paused`, `blocked`, `created_at`, `last_digest_at`, `next_digest_at`; `max_stories` and `format` are unused since Step 5 (kept so no old code can break on them) | index on `next_digest_at`. `blocked=1` when Telegram returns 403 because the user blocked the bot. `tz_detected`: 0 default, 1 device (§4) |
 | `topics` | `tag` PK, `label_en`, `emoji`, `sort`, `is_default` | synced from `config/topics.yaml` by the job, read by the Worker |
 | `items` | `id` PK, `url_hash` UNIQUE, `source_key`, `source_name`, `tier`, `url`, `title`, `snippet`, `published_at`, `fetched_at`, `status` (pending/done/dropped/expired), `story_id` | index on `status`; pruned after 7 days |
-| `stories` | `id` PK, `summary`, `topics` JSON, `importance`, `best_url`, `best_source`, `best_tier`, `best_published_at`, `source_count`, `created_at`, `updated_at`, `dup_group` | index on `updated_at`; pruned after 7 days. `best_tier`/`best_published_at` let a merge update the link without re-reading items. `dup_group` (Step 3) = id of the near-duplicate group's leader, written by the job |
+| `stories` | `id` PK, `summary`, `topics` JSON, `importance`, `best_url`, `best_source`, `best_tier`, `best_published_at`, `source_count`, `created_at`, `updated_at`, `dup_group` | index on `updated_at`; pruned after 7 days. `best_tier`/`best_published_at` let a merge update the link without re-reading items. `dup_group` (Step 3) = id of the near-duplicate group's leader, written by the job. Step 5, written by the editor: `headline`, `description`, `emojis`, `final_score` (1-10, what digests measure), `main_topic`, `edited_at` (NULL = not edited yet or needs it again), `merged_into` (a duplicate of that story; hidden from digests) |
 | `meta` | `key` PK, `value` | Worker: `last_alert_at`, `last_alerted_run_id` (Step 3), `last_alert_text`, `d1_worker` (its D1 rows today, Step 4). Job: `feed_health` (Step 4, one JSON row) |
 | `sent` | (`user_id`, `story_id`) PK, `sent_at` | the "never twice" guarantee; pruned with stories |
-| `job_runs` | `id`, `started_at`, `finished_at`, `status` (running/ok/partial/ai_failed/error), counts, `provider`, tokens, `pruned`, `error`, `d1_rows_read`, `d1_rows_written` (Step 4) | Admin tab |
-| `ai_calls` | `id`, `at`, `provider`, `model`, `ok`, `input_tokens`, `output_tokens`, `ms`, `error` | Admin tab: AI usage |
+| `job_runs` | `id`, `started_at`, `finished_at`, `status` (running/ok/partial/ai_failed/error), counts, `provider`, tokens (both AI calls), `pruned`, `error`, `d1_rows_read`, `d1_rows_written` (Step 4), `editor_status` (ok/failed/skipped), `editor_candidates`, `editor_merged` (Step 5) | Admin tab |
+| `ai_calls` | `id`, `at`, `provider`, `model`, `ok`, `input_tokens`, `output_tokens`, `ms`, `error`, `kind` (Step 5: `batch` or `editor`) | Admin tab: AI usage |
 | `errors` | `id`, `at`, `component` (job/worker), `message` | Admin tab: recent errors |
 
 `sent` is the only per-user table besides `users`, and deleting a user must also delete their `sent`
@@ -371,8 +431,11 @@ an overload like that is per model.
   Rossiyskaya Gazeta, Izvestia, RBC, Interfax, Trend and Anadolu.
 - With the 8-per-feed-per-run cap, a normal hour brings about **70-230 new items**. The first
   run, looking back 3 h, brought 435.
-- Normal operation is **24 calls/day**, one per hour regardless of user count: about 0.55M input
-  and 0.35M output tokens/day. Only a backlog makes 2-4 calls in one run, in chunks of about 25k
+- Normal operation is **48 calls/day** since Step 5: per hour one first-pass call and one editor
+  call, regardless of user count. First pass: about 0.55M input and 0.35M output tokens/day (the
+  first GitHub run with the editor: 13k in, 1.5k out for 44 new items). Editor, measured
+  2026-11-14: 6.5-12.5k input and 2.5-6.2k output tokens per call, so about 0.25M input and 0.12M
+  output tokens/day. Only a backlog makes 2-4 first-pass calls in one run, in chunks of about 25k
   estimated tokens.
 - If the cap proves too low or too high, it is one number in config. Lowering it to 5 per feed
   gives about 3,800 items/day.
@@ -397,8 +460,9 @@ an overload like that is per model.
 - **At most 8 Groq chunks per run** (~240 items, ~8 minutes). A normal hour fits; a bigger
   backlog leaves the rest pending for the next run. 200k tokens/day is about 28 chunks, or 3-4
   full fallback hours a day.
-- **Calls per day:** normally 24. On a day when Gemini is overloaded, the retries, the second
-  model and Groq chunks can bring this to roughly 60-80 calls, above the spec's 24-50 target.
+- **Calls per day:** normally 48 (24 + 24 editor). On a day when Gemini is overloaded, the
+  retries, the second model and Groq chunks can bring this to roughly 80-110 calls, above the
+  spec's target.
   All of these are free calls.
 - **If every provider fails**, items stay `pending` and go into the next run (they are kept up to
   24 h, then `expired`). An empty or safety-blocked response counts as a failure, never as "no
@@ -417,7 +481,7 @@ Other free options checked and **rejected** (2026-11-13):
 | Service | Limit | Our expected use | Source |
 |---|---|---|---|
 | Workers Free | 100,000 requests/day | < 1,000/day (288 cron ticks, plus webhook and Mini App calls) | [Workers limits](https://developers.cloudflare.com/workers/platform/limits/) |
-| Workers Free | **10 ms CPU** per HTTP request and per Cron Trigger. Waiting on D1/fetch does not count. "Each isolate has some built-in flexibility" for infrequent overruns; consistent overruns are terminated (error 1102, `exceededCpu`) | **measured on Cloudflare 2026-11-13** (`wrangler tail` cpuTime): idle tick 4 ms; tick with 1 due user 6 ms; 20 users 10-27 ms; 40 users 46 ms. Hence **8 users per tick** (≈6-12 ms) and dedupe moved into the job. **Mini App API, measured 2026-11-14:** open 3-6 ms, save 1-5 ms, admin data 0-3 ms, 2 ms with all 115 feeds' health (see §4a) | same |
+| Workers Free | **10 ms CPU** per HTTP request and per Cron Trigger. Waiting on D1/fetch does not count. "Each isolate has some built-in flexibility" for infrequent overruns; consistent overruns are terminated (error 1102, `exceededCpu`) | **measured on Cloudflare 2026-11-13** (`wrangler tail` cpuTime): idle tick 4 ms; tick with 1 due user 6 ms; 20 users 10-27 ms; 40 users 46 ms. Hence **8 users per tick** (≈6-12 ms) and dedupe moved into the job. **Mini App API, measured 2026-11-14:** open 3-6 ms, save 1-5 ms, admin data 0-3 ms, 2 ms with all 115 feeds' health (see §4a). **Step 5** (editor text, two-message split): idle tick 3-6 ms; the first real 1-user digest tick 11 ms, then the fallback emoji dictionary was made lazy (see the Step 5 report) | same |
 | Workers Free | 50 subrequests per invocation (D1 calls and `fetch` count) | per cron tick: 1 batched read, 1 batched candidate read, 1 Telegram call per user, 1 batched write (+1 alert): about 12 with 8 users | same; [D1 limits](https://developers.cloudflare.com/d1/platform/limits/) ("a `db.batch()` call counts as one query") |
 | Workers Free | 5 Cron Triggers per account | 2 (`*/5 * * * *`, `7 * * * *`) | Workers limits |
 | Workers static assets | "Requests to static assets are free and unlimited" | Mini App files | [Static assets billing](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/) |
@@ -426,7 +490,7 @@ Other free options checked and **rejected** (2026-11-13):
 | Cloudflare API | 1,200 requests per 5 min per user | about 10-20 REST calls per hourly run | [API limits](https://developers.cloudflare.com/fundamentals/api/reference/limits/) |
 | GitHub Actions | **public repo: standard runners free and unlimited** (our case since Step 3). Private repos: ≈2,000 included min, blocked (never billed) when used up | first run on GitHub: 2 min 0 s (job 114 s, a 2.5 h backlog of 342 items). About 24-25 runs/day | [Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions) |
 | GitHub Actions schedule | minimum every 5 min; can be delayed or dropped under load; runs on the default branch only; **public repos: schedules auto-disabled after 60 days without repo activity** | backup only, at :37, in its own workflow file; the main trigger is the Worker | [Events that trigger workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows) |
-| Gemini free tier | per-model limits shown in AI Studio only; RPD resets at midnight Pacific; free-tier content is used to improve Google's products. Measured 2026-11-13: 29k-token calls accepted, frequent 503 "high demand" | 24 calls/day, about 23k input + 15k output tokens each | [Rate limits](https://aistudio.google.com/docs/rate-limits), [Pricing](https://aistudio.google.com/docs/pricing), [Models](https://aistudio.google.com/docs/models) |
+| Gemini free tier | per-model limits shown in AI Studio only; RPD resets at midnight Pacific; free-tier content is used to improve Google's products. Measured 2026-11-13: 29k-token calls accepted, frequent 503 "high demand" | 48 calls/day: 24 first-pass calls (about 23k input + 15k output tokens each) and 24 editor calls (about 11k input + 5k output) | [Rate limits](https://aistudio.google.com/docs/rate-limits), [Pricing](https://aistudio.google.com/docs/pricing), [Models](https://aistudio.google.com/docs/models) |
 | Groq free | gpt-oss-120b: 1K RPD and 8K TPM read from response headers 2026-11-13 (TPM counts prompt + reserved reply); 200K TPD per docs | fallback only, ~1 chunk/min | [Groq rate limits](https://console.groq.com/docs/rate-limits) |
 | Telegram Bot API | ≤ 1 message/sec per chat; about 30 messages/sec bulk; 4,096 characters per message | ≤ 20 users per tick, 1 message each | [Bots FAQ](https://core.telegram.org/bots/faq) |
 
@@ -440,9 +504,10 @@ Worker's health alert would report missing runs.
 ```
 config/topics.yaml, config/sources.yaml   shared data (Step 1)
 config/digest.json                        digest settings read by the Worker and the job (Step 3)
-prompts/story_batch.md                    AI prompt template (Step 1)
+prompts/story_batch.md                    first AI prompt template (Step 1)
+prompts/editor.md                         editor prompt: merge, strict score, headline, description, emojis (Step 5)
 db/schema.sql                             D1 tables (applied via REST: scripts/apply_schema.py)
-job/                                      Python hourly job: config, fetch, ai, d1, dupes, run
+job/                                      Python hourly job: config, fetch, ai, d1, dupes, editor, run
 tests/                                    unittest suite for the job and the dupes grouping
 scripts/check_feeds.py                    feed health check (--all re-tests disabled feeds)
 scripts/ai_probe.py                       real batch-size test for Gemini and Groq (Step 2)
@@ -457,6 +522,7 @@ worker/scripts/setup-bot.mjs              chat menu button + command list (once 
 worker/scripts/dev-server.mjs, dev/       local Mini App preview with demo data and a Telegram stand-in
 worker/scripts/screenshots.mjs, ui-check.mjs   headless Edge screenshots and click-through check
 worker/scripts/api-check.mjs              checks the live API (signed with the token in .env)
+worker/scripts/migrate-times.mjs          Step 5, once: half-hour digest times -> nearest hour
 worker/wrangler.toml                      Worker config: D1 binding, crons, assets, vars (no secrets)
 docs/screenshots/                         the Mini App at 390 px, light and dark (demo data)
 .github/workflows/                        hourly.yml, backup-schedule.yml, check-feeds.yml
@@ -490,3 +556,12 @@ docs/screenshots/                         the Mini App at 390 px, light and dark
   quality. Watch the first days of real digests.
 - **Topic balance.** Many feeds are Russian and Ukrainian. Since Step 3 no topic may take more
   than 40% of a digest (3 of 7), counted against each story's most specific topic.
+- **The editor pass (Step 5)** decides what users see, so its mistakes matter more:
+  - it can merge two different events, or miss a duplicate (the roundup guard and the
+    "keep apart when unsure" rule help; the 30% word-based miss rate was the reason to add it);
+  - its scores cluster at 5-6 and are whole numbers, so one point moves a digest from 4 to 12
+    stories (§3, tuning); the bars may need a nudge after a week of real digests;
+  - a description can still be wrong in ways the fact guard cannot see (a wrong verb, a mixed-up
+    actor); numbers and names are checked;
+  - it sometimes rates big stories outside our topics higher than the prompt asks (the US flight
+    ground stop got a 7 although the prompt puts flight disruptions at 1-2).
