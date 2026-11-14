@@ -277,7 +277,7 @@ export function planDigest(user, candidates, topics, now, cfg = CONFIG, opts = {
   const tz = user.timezone || cfg.default_timezone;
   const msg = buildMessage(picked, {
     now, tz, lastDigestAt: user.last_digest_at, topicInfo: topicInfoFrom(topics),
-    format: opts.format, label: opts.label,
+    format: opts.format ?? (cfg.formats?.includes(user.format) ? user.format : undefined), label: opts.label,
   }, cfg);
   const times = parseList(user.digest_times, cfg.default_times);
   return { text: msg.text, stories: msg.stories, nextAt: nextSlot(now, tz, times) };

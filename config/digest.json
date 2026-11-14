@@ -12,5 +12,10 @@
   "message_char_budget": 4000,
   "max_users_per_tick": 8,
   "default_timezone": "Asia/Yerevan",
-  "default_times": ["09:00", "14:00", "20:00"]
+  "default_times": ["09:00", "14:00", "20:00"],
+  "formats": ["A", "B"],
+  "settings_limits": {"earliest": "07:00", "latest": "22:00", "step_minutes": 30, "max_times": 5,
+                      "min_stories": 3, "max_stories": 15},
+  "job_min_gap_minutes": 20,
+  "silent_feed_hours": 48
 }

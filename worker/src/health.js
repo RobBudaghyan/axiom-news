@@ -45,5 +45,6 @@ export function assessHealth({ runs, lastOk, meta, extra = [] }, now, tz) {
     sql: "INSERT INTO meta (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
     params: [key, String(value)],
   });
-  return { problems, alert, writes: [put("last_alert_at", now), put("last_alerted_run_id", newestRunId)] };
+  return { problems, alert, writes: [put("last_alert_at", now), put("last_alerted_run_id", newestRunId),
+    put("last_alert_text", problems.join("; "))] };
 }

@@ -159,3 +159,27 @@ def select_new(entries: list[Entry], already_seen: set[str], cap: int) -> list[E
         feed_entries.sort(key=lambda e: e.published_at or 0, reverse=True)
         out.extend(feed_entries[:cap])
     return out
+
+
+def feed_health(prev: dict | None, results: list[FeedResult], now: int) -> dict:
+    """Per-feed health for the Admin tab, kept in one `meta` row (key feed_health) so it costs one
+    row write per run. Per feed key: n = name, ok = last successful fetch, item = newest entry date
+    ever seen (silent feeds: none for 48 h), err = the current error or None, since = when the
+    current error streak began, fails = failed runs in a row. Feeds no longer configured drop out."""
+    old = (prev or {}).get("feeds", {})
+    feeds = {}
+    for r in results:
+        key = r.source["key"]
+        p = old.get(key, {})
+        dated = [e.published_at for e in r.entries if e.published_at]
+        newest = max(dated) if dated else (now if r.entries else None)
+        item = max([t for t in (p.get("item"), newest) if t is not None], default=None)
+        if r.error:
+            streak = bool(p.get("err"))
+            feeds[key] = {"n": r.source["name"], "ok": p.get("ok"), "item": item, "err": r.error,
+                          "since": p.get("since", now) if streak else now,
+                          "fails": (p.get("fails") or 0) + 1 if streak else 1}
+        else:
+            feeds[key] = {"n": r.source["name"], "ok": now, "item": item, "err": None, "since": None,
+                          "fails": 0}
+    return {"at": now, "feeds": feeds}

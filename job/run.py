@@ -23,7 +23,7 @@ from typing import Callable
 from job import ai, dupes
 from job.config import Prompt, Settings, load_env, load_prompt, load_sources, load_topics
 from job.d1 import D1, in_list_statements, insert_statements
-from job.fetch import Entry, FeedResult, candidates, fetch_all, select_new
+from job.fetch import Entry, FeedResult, candidates, feed_health, fetch_all, select_new
 
 # Failures that say nothing about the provider itself, only this one chunk's output:
 # the chunk is left for the next provider, but the same provider keeps going.
@@ -128,6 +128,7 @@ class Job:
         self.clock = clock
         self.log = log
         self.calls_log: list[tuple] = []
+        self.feed_health: dict | None = None   # written to meta.feed_health with the run log
         self.debug_dir = Path(debug_dir) if debug_dir else None   # saves raw prompts/answers
 
     # ------------------------------------------------------------ steps
@@ -148,6 +149,13 @@ class Job:
                   "is_default=excluded.is_default", list(row)) for row in desired]
         stmts += in_list_statements("DELETE FROM topics WHERE tag NOT IN ({qs})", self.topic_order)
         self.db.batch(stmts)
+
+    def load_feed_health(self) -> dict | None:
+        rows = self.db.query("SELECT value FROM meta WHERE key = 'feed_health'")
+        try:
+            return json.loads(rows[0]["value"]) if rows else None
+        except (ValueError, TypeError):
+            return None
 
     def lookback_since(self, now: int) -> int:
         row = self.db.query("SELECT max(started_at) AS t FROM job_runs "
@@ -400,6 +408,7 @@ class Job:
             self.sync_topics()
             since = self.lookback_since(now)
             results = self.fetcher(self.sources, now)
+            self.feed_health = feed_health(self.load_feed_health(), results, now)
             stats.feeds_ok = sum(1 for r in results if not r.error)
             stats.failed_feeds = [f"{r.source['key']} ({r.error})" for r in results if r.error]
             stats.feeds_failed = len(stats.failed_feeds)
@@ -442,11 +451,16 @@ class Job:
             "UPDATE job_runs SET finished_at=?, status=?, feeds_ok=?, feeds_failed=?, items_fetched=?, "
             "items_new=?, items_pending_in=?, stories_created=?, stories_merged=?, items_dropped=?, "
             "items_expired=?, items_left_pending=?, provider=?, ai_calls=?, input_tokens=?, "
-            "output_tokens=?, pruned=?, error=? WHERE id=?",
+            "output_tokens=?, pruned=?, error=?, d1_rows_read=?, d1_rows_written=? WHERE id=?",
             [int(self.clock()), status, stats.feeds_ok, stats.feeds_failed, stats.items_fetched,
              stats.items_new, stats.items_pending_in, stats.stories_created, stats.stories_merged,
              stats.items_dropped, stats.items_expired, stats.items_left_pending, stats.provider,
-             len(self.calls_log), stats.input_tokens, stats.output_tokens, stats.pruned, error, run_id])]
+             len(self.calls_log), stats.input_tokens, stats.output_tokens, stats.pruned, error,
+             getattr(self.db, "rows_read", 0), getattr(self.db, "rows_written", 0), run_id])]
+        if self.feed_health is not None:
+            stmts.append(("INSERT INTO meta (key, value) VALUES ('feed_health', ?) "
+                          "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+                          [json.dumps(self.feed_health, separators=(",", ":"), ensure_ascii=False)]))
         stmts += insert_statements(
             "ai_calls", ("at", "provider", "model", "ok", "items", "input_tokens", "output_tokens", "ms",
                          "error", "run_id"),

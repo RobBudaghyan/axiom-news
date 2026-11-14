@@ -1,6 +1,11 @@
-// Telegram webhook: /start creates the user with default settings; anything else gets a short
-// helpful reply. Replies are plain text (no HTML), never with an em dash.
+// Telegram webhook: /start creates the user with default settings, /settings opens the Mini App;
+// anything else gets a short helpful reply. Replies are plain text (no HTML), never with an em
+// dash. /start and /settings carry an "Open settings" button (web_app).
 import { CONFIG, describeSlot, nextSlot, parseList, zoneLabel } from "./digest.js";
+import { settingsButton } from "./telegram.js";
+
+export const SETTINGS_TEXT = "Choose your topics, digest times and how many stories you get. " +
+  "Changes are saved as soon as you make them.";
 
 function listTimes(times) {
   if (times.length === 1) return times[0];
@@ -22,7 +27,7 @@ export function welcomeText(user, topics, now, isNew) {
   return `${hello}\n\n` +
     `I send you a short digest of the most important news at ${listTimes(times)} (${zoneLabel(tz)} time). ` +
     `Topics: ${topicNames(parseList(user.topics), topics)}.\n\n` +
-    `Your next digest comes ${when}. A settings page to change topics and times is coming soon.`;
+    `Your next digest comes ${when}. Tap Open settings to change topics, times and more.`;
 }
 
 export function helpText(user, now) {
@@ -30,10 +35,12 @@ export function helpText(user, now) {
   if (user.paused) return "Your digests are paused. Send /start to turn them back on.";
   const when = describeSlot(user.next_digest_at, now, user.timezone);
   return `I send news digests at ${listTimes(parseList(user.digest_times))} (${zoneLabel(user.timezone)} time). ` +
-    `Your next one comes ${when}. I can't answer questions yet; the digest is all I do.`;
+    `Your next one comes ${when}. Send /settings to change them. I can't answer questions; the digest is all I do.`;
 }
 
-// ctx: {db, now, reply(chatId, text), cfg}
+const button = (ctx) => (ctx.appUrl ? settingsButton(ctx.appUrl) : undefined);
+
+// ctx: {db, now, reply(chatId, text, extra), cfg, appUrl}
 export async function handleUpdate(update, ctx) {
   const msg = update.message;
   if (!msg?.from || msg.chat?.type !== "private") return { handled: false };
@@ -73,8 +80,13 @@ export async function handleUpdate(update, ctx) {
         params: [user.first_name, language, user.next_digest_at, id],
       }]);
     }
-    await ctx.reply(id, welcomeText(user, topics, now, isNew));
+    await ctx.reply(id, welcomeText(user, topics, now, isNew), button(ctx));
     return { handled: true, command: "start", isNew };
+  }
+
+  if (/^\/settings(@\w+)?(\s|$)/.test(text)) {
+    await ctx.reply(id, SETTINGS_TEXT, button(ctx));
+    return { handled: true, command: "settings" };
   }
 
   await ctx.reply(id, helpText(user, now));

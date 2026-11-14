@@ -4,9 +4,12 @@
   "type": "module",
   "scripts": {
     "test": "node --test --test-reporter=spec test/",
-    "deploy": "wrangler deploy",
+    "deploy": "node scripts/stamp-app.mjs && wrangler deploy",
     "tail": "wrangler tail --format json",
-    "digest": "node scripts/digest-cli.mjs"
+    "digest": "node scripts/digest-cli.mjs",
+    "stamp": "node scripts/stamp-app.mjs",
+    "preview": "node scripts/dev-server.mjs",
+    "screenshots": "node scripts/screenshots.mjs"
   },
   "devDependencies": {
     "wrangler": "4.155.0"

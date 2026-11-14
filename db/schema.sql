@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
   first_name     TEXT,
   language       TEXT NOT NULL DEFAULT 'en',
   timezone       TEXT NOT NULL DEFAULT 'Asia/Yerevan',
-  tz_detected    INTEGER NOT NULL DEFAULT 0,        -- 1 once the Mini App reported the device zone
+  tz_detected    INTEGER NOT NULL DEFAULT 0,        -- 0 default zone, 1 from the device (Mini App), 2 chosen by hand
   digest_times   TEXT NOT NULL DEFAULT '["09:00","14:00","20:00"]',
   max_stories    INTEGER NOT NULL DEFAULT 7,        -- 3..15
   topics         TEXT NOT NULL DEFAULT '[]',        -- JSON list of topic tags
@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS users (
   blocked        INTEGER NOT NULL DEFAULT 0,        -- 1 after Telegram 403 (user blocked the bot)
   created_at     INTEGER NOT NULL,
   last_digest_at INTEGER,
-  next_digest_at INTEGER
+  next_digest_at INTEGER,
+  format         TEXT                               -- 'A' or 'B' (Mini App); NULL = config/digest.json default
 );
 CREATE INDEX IF NOT EXISTS idx_users_next ON users(next_digest_at);
 
@@ -99,7 +100,9 @@ CREATE TABLE IF NOT EXISTS job_runs (
   input_tokens       INTEGER,
   output_tokens      INTEGER,
   pruned             INTEGER,                       -- rows deleted by the daily prune, NULL if skipped
-  error              TEXT
+  error              TEXT,
+  d1_rows_read       INTEGER,                       -- D1's own counts for this run (Admin tab: D1 use today)
+  d1_rows_written    INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS ai_calls (
@@ -116,7 +119,8 @@ CREATE TABLE IF NOT EXISTS ai_calls (
   error         TEXT
 );
 
--- Small key/value state for the Worker (Step 3): last_alert_at, last_alerted_run_id.
+-- Small key/value state. Worker: last_alert_at, last_alerted_run_id, last_alert_text, d1_worker
+-- (its D1 rows today). Job: feed_health (JSON per feed: last ok, newest entry, last error).
 CREATE TABLE IF NOT EXISTS meta (
   key   TEXT PRIMARY KEY,
   value TEXT

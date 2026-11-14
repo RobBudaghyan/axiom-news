@@ -1,0 +1,60 @@
+// Checks the LIVE Mini App API the way the app on a phone uses it. It signs Telegram initData
+// itself with the bot token from ../.env (only possible for whoever holds the token; never
+// printed), then:
+//   1. opens the app as the owner (device time zone sent, like the app does),
+//   2. changes "stories per digest", confirms the new value and next_digest_at in D1 through the
+//      REST API, then restores the old value,
+//   3. loads the Admin data as the owner (200) and as a different, validly signed user (403),
+//   4. sends a request with a tampered signature (401).
+// It does not press "Send me a digest now" or "Run news job now" (those are for the owner to try).
+//   node scripts/api-check.mjs
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { loadEnv, d1Rest } from "./digest-cli.mjs";
+import { signInitData } from "../src/auth.js";
+
+const toml = readFileSync(fileURLToPath(new URL("../wrangler.toml", import.meta.url)), "utf8");
+const BASE = new URL(/^APP_URL\s*=\s*"([^"]+)"/m.exec(toml)[1]).origin;
+const env = loadEnv();
+const owner = Number(env.OWNER_TELEGRAM_ID);
+const db = d1Rest(env);
+const now = () => String(Math.floor(Date.now() / 1000));
+const sign = (id, name) => signInitData({ query_id: "AAcheck", auth_date: now(),
+  user: JSON.stringify({ id, first_name: name, language_code: "en" }) }, env.TELEGRAM_BOT_TOKEN);
+
+let failed = 0;
+const check = (name, ok, detail = "") => { console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? `  (${detail})` : ""}`); if (!ok) failed++; };
+async function api(path, init, body) {
+  const t = Date.now();
+  const res = await fetch(BASE + path, { method: body === undefined ? "GET" : "POST",
+    headers: { authorization: `tma ${init}`, "content-type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
+  return { status: res.status, body: await res.json(), ms: Date.now() - t };
+}
+const row = async () => (await db.query("SELECT first_name, timezone, tz_detected, max_stories, next_digest_at FROM users WHERE id = ?1", [owner]))[0];
+
+const ownerInit = await sign(owner, "Owner");
+const before = await row();
+const opened = await api("/api/open", ownerInit, { tz: "Asia/Yerevan" });
+check("open as owner", opened.status === 200 && opened.body.is_owner === true, `${opened.status}, ${opened.ms} ms, is_owner ${opened.body.is_owner}`);
+
+const old = opened.body.user.max_stories;
+const next = old === 15 ? 14 : old + 1;
+const saved = await api("/api/settings", ownerInit, { max_stories: next });
+const after = await row();
+check("settings change saved in D1", saved.status === 200 && after.max_stories === next, `${old} -> ${after.max_stories}, ${saved.ms} ms`);
+check("next_digest_at returned matches D1", saved.body.user?.next_digest_at === after.next_digest_at,
+  new Date(after.next_digest_at * 1000).toISOString());
+const restored = await api("/api/settings", ownerInit, { max_stories: old });
+check("old value restored", restored.status === 200 && (await row()).max_stories === old, `back to ${old}`);
+const bad = await api("/api/settings", ownerInit, { digest_times: ["23:00"] });
+check("invalid time refused with a friendly message", bad.status === 400, bad.body.error);
+
+const admin = await api("/api/admin", ownerInit);
+check("admin data for the owner", admin.status === 200 && !!admin.body.health, `${admin.ms} ms, level ${admin.body.health?.level}, ` +
+  `${admin.body.users?.count} users, ${admin.body.feeds?.total} feeds, D1 today ${admin.body.d1?.rows_read} read / ${admin.body.d1?.rows_written} written`);
+const stranger = await api("/api/admin", await sign(owner + 1, "Someone"));
+check("admin data for anyone else: 403", stranger.status === 403, stranger.body.error);
+const tampered = await api("/api/admin", ownerInit.replace(/hash=[0-9a-f]/, (m) => m.slice(0, -1) + (m.endsWith("0") ? "1" : "0")));
+check("tampered signature: 401", tampered.status === 401);
+console.log(`owner row before: tz ${before.timezone} (detected ${before.tz_detected}); now: tz ${(await row()).timezone} (detected ${(await row()).tz_detected})`);
+process.exit(failed ? 1 : 0);

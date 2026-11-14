@@ -1,11 +1,13 @@
-// Axiom News Worker: Telegram webhook, digest cron (every 5 min), hourly GitHub job trigger
-// and job health alerts. No Mini App yet.
+// Axiom News Worker: Telegram webhook, Mini App API (/api/*), digest cron (every 5 min), hourly
+// GitHub job trigger and job health alerts. The Mini App files (public/app/) are static assets,
+// served by Cloudflare before this code runs (wrangler.toml [assets]).
 import { CONFIG } from "./digest.js";
 import { d1Binding, logError } from "./db.js";
 import { handleUpdate } from "./bot.js";
 import { runTick } from "./cron.js";
 import { dispatchJob } from "./github.js";
 import { sendHtml, sendPlain } from "./telegram.js";
+import { handleApi, json } from "./api.js";
 
 export const HOURLY_CRON = "7 * * * *";
 
@@ -17,6 +19,7 @@ function sameSecret(a, b) {
 }
 
 const nowS = () => Math.floor(Date.now() / 1000);
+export const appUrl = (env, url) => env.APP_URL || `${url.origin}/app/`;
 
 export default {
   async fetch(request, env) {
@@ -32,12 +35,26 @@ export default {
       const now = nowS();
       try {
         await handleUpdate(update, {
-          db, now, cfg: CONFIG, reply: (chatId, text) => sendPlain(env.TELEGRAM_BOT_TOKEN, chatId, text),
+          db, now, cfg: CONFIG, appUrl: appUrl(env, url),
+          reply: (chatId, text, extra) => sendPlain(env.TELEGRAM_BOT_TOKEN, chatId, text, extra),
         });
       } catch (e) {
         await logError(db, `webhook: ${e.message}`, now);
       }
       return new Response("ok");   // always 200, or Telegram retries the same update
+    }
+    if (url.pathname.startsWith("/api/")) {
+      const db = d1Binding(env.DB);
+      const now = nowS();
+      try {
+        return await handleApi(request, env, db, now, {
+          send: (chatId, html) => sendHtml(env.TELEGRAM_BOT_TOKEN, chatId, html),
+          dispatch: (e) => dispatchJob(e),
+        });
+      } catch (e) {
+        await logError(db, `api ${url.pathname}: ${e.message}`, now);
+        return json(500, { error: "Something went wrong. Please try again in a minute." });
+      }
     }
     if (url.pathname === "/") return new Response("Axiom News bot\n");
     return new Response("not found", { status: 404 });

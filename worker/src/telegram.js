@@ -30,6 +30,11 @@ export function sendHtml(token, chatId, text) {
   });
 }
 
-export function sendPlain(token, chatId, text) {
-  return tgCall(token, "sendMessage", { chat_id: chatId, text, link_preview_options: { is_disabled: true } });
+export function sendPlain(token, chatId, text, extra = {}) {
+  return tgCall(token, "sendMessage", { chat_id: chatId, text, link_preview_options: { is_disabled: true }, ...extra });
+}
+
+// An inline "Open settings" button that opens the Mini App (works in private chats).
+export function settingsButton(appUrl, text = "Open settings") {
+  return { reply_markup: { inline_keyboard: [[{ text, web_app: { url: appUrl } }]] } };
 }

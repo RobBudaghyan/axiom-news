@@ -16,6 +16,9 @@ from job.d1 import D1, D1Error  # noqa: E402
 
 MIGRATIONS = [
     "ALTER TABLE stories ADD COLUMN dup_group INTEGER",   # Step 3: near-duplicate groups
+    "ALTER TABLE users ADD COLUMN format TEXT",           # Step 4: per-user digest format (Mini App)
+    "ALTER TABLE job_runs ADD COLUMN d1_rows_read INTEGER",     # Step 4: Admin tab, D1 use today
+    "ALTER TABLE job_runs ADD COLUMN d1_rows_written INTEGER",
 ]
 
 

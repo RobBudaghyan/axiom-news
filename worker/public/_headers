@@ -1,0 +1,18 @@
+# Cloudflare static-asset headers (Workers assets). Lesson 12: Telegram's WebView caches hard, so
+# the page itself is never cached and the files it loads carry a content hash in their URL.
+/app/
+  Cache-Control: no-store
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://telegram.org; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'
+/app/index.html
+  Cache-Control: no-store
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://telegram.org; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'
+/app/app.js
+  Cache-Control: public, max-age=86400
+  X-Content-Type-Options: nosniff
+/app/app.css
+  Cache-Control: public, max-age=86400
+  X-Content-Type-Options: nosniff

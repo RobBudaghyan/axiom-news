@@ -407,3 +407,53 @@ class MinGapAndDisabledFeeds(unittest.TestCase):
         enabled = load_sources()
         self.assertEqual(len(enabled), sum(1 for s in every if s.get("enabled", True)))
         self.assertTrue(all(s.get("enabled", True) for s in enabled))
+
+
+class FeedHealth(unittest.TestCase):
+    """Step 4: per-feed health for the Admin tab (failing and silent feeds), one meta row per run."""
+
+    def test_errors_start_a_streak_and_recover(self):
+        from job.fetch import FeedResult, feed_health
+        src = {"key": "alpha", "name": "Alpha Times", "tier": 1}
+        e = entry("alpha", "IRAN: something", 30, T0)
+        h1 = feed_health(None, [FeedResult(src, [e])], T0)
+        self.assertEqual(h1["feeds"]["alpha"], {"n": "Alpha Times", "ok": T0, "item": e.published_at,
+                                                "err": None, "since": None, "fails": 0})
+        h2 = feed_health(h1, [FeedResult(src, [], "HTTP 403")], T0 + 3600)
+        self.assertEqual(h2["feeds"]["alpha"]["err"], "HTTP 403")
+        self.assertEqual(h2["feeds"]["alpha"]["since"], T0 + 3600)
+        self.assertEqual(h2["feeds"]["alpha"]["ok"], T0)                  # last success kept
+        self.assertEqual(h2["feeds"]["alpha"]["item"], e.published_at)    # newest entry kept
+        h3 = feed_health(h2, [FeedResult(src, [], "HTTP 500")], T0 + 7200)
+        self.assertEqual((h3["feeds"]["alpha"]["since"], h3["feeds"]["alpha"]["fails"]), (T0 + 3600, 2))
+        h4 = feed_health(h3, [FeedResult(src, [e])], T0 + 10800)
+        self.assertEqual((h4["feeds"]["alpha"]["err"], h4["feeds"]["alpha"]["fails"]), (None, 0))
+        self.assertEqual(h4["feeds"]["alpha"]["ok"], T0 + 10800)
+
+    def test_removed_feeds_drop_out_and_undated_entries_count_as_now(self):
+        from dataclasses import replace
+        from job.fetch import FeedResult, feed_health
+        src = {"key": "beta", "name": "Beta News", "tier": 2}
+        e = replace(entry("beta", "x", 5, T0), published_at=None)
+        h = feed_health({"at": 1, "feeds": {"gone": {"n": "Gone", "item": 1}}}, [FeedResult(src, [e])], T0)
+        self.assertEqual(list(h["feeds"]), ["beta"])
+        self.assertEqual(h["feeds"]["beta"]["item"], T0)
+
+    def test_a_run_writes_feed_health_and_d1_counts(self):
+        from job.fetch import FeedResult
+        db, clock = new_db(), Clock()
+        feeds = Feeds()
+        feeds.entries = [entry("alpha", "IRAN: base strike", 20, clock())]
+        responder = grouping_responder({"IRAN": ["iran_war"]})
+
+        def fetcher(sources, now):   # alpha works, beta fails, gamma returns nothing usable
+            res = feeds(sources, now)
+            return [r if r.source["key"] == "alpha" else FeedResult(r.source, [], "HTTP 404") for r in res]
+
+        make_job(db, FakeProvider("gemini", [responder]), FakeProvider("groq", []), fetcher, clock).run()
+        row = db.query("SELECT value FROM meta WHERE key = 'feed_health'")[0]
+        h = json.loads(row["value"])
+        self.assertIsNone(h["feeds"]["alpha"]["err"])
+        self.assertEqual(h["feeds"]["beta"]["err"], "HTTP 404")
+        run = last_run(db)
+        self.assertIn("d1_rows_read", run)

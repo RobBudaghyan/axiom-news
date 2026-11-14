@@ -4,7 +4,7 @@
 // (measured on Cloudflare, see reports/step-03-automation.md).
 import { CONFIG, afterSendStatements, candidateStatement, nextSlot, parseList, planDigest } from "./digest.js";
 import { HEALTH_STATEMENTS, assessHealth } from "./health.js";
-import { errorStatement } from "./db.js";
+import { errorStatement, takeUsage, usageStatement } from "./db.js";
 
 const DUE_SQL = `SELECT * FROM users
 WHERE next_digest_at IS NOT NULL AND next_digest_at <= ?1 AND paused = 0 AND blocked = 0
@@ -65,6 +65,10 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
       writes.push(errorStatement(`alert to owner failed: ${e.message}`, now));
     }
   }
+  // D1 rows this isolate used so far (this tick's reads plus any Mini App calls it served), for the
+  // Admin tab. Written every tick, about 288 rows a day; the write batch itself is counted next time.
+  const used = takeUsage();
+  if (used.r || used.w) writes.push(usageStatement(used, now));
   if (writes.length) await db.batch(writes);
   return out;
 }
