@@ -327,15 +327,17 @@ export function buildMessage(stories, opts, cfg = CONFIG) {
     return {
       ...s, headline,
       description: s.description ? cut(cleanText(s.description), MAX_DESCRIPTION) : "",
-      fallbackEmoji: lineEmoji(headline, topicInfo[s.primary]?.emoji),
+      // The word-rule dictionary only when the editor gave no emojis: building it costs CPU.
+      fallbackEmoji: s.emojis ? "" : lineEmoji(headline, topicInfo[s.primary]?.emoji),
     };
   });
   const parts = [], partStories = [];
   let text = (opts.label ? `${opts.label}\n\n` : "") + header(list.length, opts, cfg);
+  let size = visibleLength(text);   // kept up to date, so each piece is measured once
   let ids = [];
-  const add = (piece) => { text = text ? `${text}\n\n${piece}` : piece; };
-  const fits = (piece) => visibleLength(text ? `${text}\n\n${piece}` : piece) <= budget;
-  const flush = () => { parts.push(text); partStories.push(ids); text = ""; ids = []; };
+  const add = (piece) => { size += (text ? 2 : 0) + visibleLength(piece); text = text ? `${text}\n\n${piece}` : piece; };
+  const fits = (piece) => size + (text ? 2 : 0) + visibleLength(piece) <= budget;
+  const flush = () => { parts.push(text); partStories.push(ids); text = ""; size = 0; ids = []; };
   for (const g of groupsOf(list, topicInfo)) {
     const whole = [g.heading, ...g.blocks.map((b) => b.text)].join("\n\n");
     if (!fits(whole) && ids.length) flush();        // start a new message at this topic
