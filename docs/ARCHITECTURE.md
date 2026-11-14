@@ -1,9 +1,9 @@
 # Architecture
 
-Status: designed in Step 1, updated in Steps 2 and 3 (2026-11-13). Running in the cloud since
+Status: designed in Step 1, updated in Steps 2, 3 and 4 (2026-11-14). Running in the cloud since
 Step 3, still on the TEST bot: the hourly job on GitHub Actions (public repo
 `RobBudaghyan/axiom-news`), the D1 database, and the Worker `axiom-news` (webhook, digest cron,
-hourly job trigger, alerts). Not built yet: the Mini App (Step 4).
+hourly job trigger, alerts, and since Step 4 the Mini App and its API, §4a).
 
 ## 1. Components
 
@@ -27,11 +27,12 @@ hourly job trigger, alerts). Not built yet: the Mini App (Step 4).
                 │ D1 binding (inside Cloudflare)
  ┌──────────────┴──────────────────────────────────────────┐
  │ CLOUDFLARE WORKER  (JavaScript, one Worker)              │
- │ • POST /telegram   bot webhook (/start, help replies)    │
+ │ • POST /telegram   bot webhook (/start, /settings, help) │
  │ • cron */5 min     send due digests (<= 8 users/tick),   │
  │                    check job health, alert the owner     │
  │ • cron 7 * * * *   start the hourly GitHub job           │
- │ • /api/*, static   Mini App API and files (Step 4)       │
+ │ • /app/            Mini App files (static assets, free)  │
+ │ • /api/*           Mini App API (initData checked)       │
  └──────────────┬──────────────────────────────────────────┘
                 │ HTTPS: Telegram Bot API (sendMessage)
                 ▼
@@ -184,17 +185,24 @@ a story gains new sources after it was sent, it is still never sent again.
 - Each user has `timezone` (IANA name, e.g. `Asia/Yerevan`) and `digest_times`, a list of local
   `"HH:MM"` values in 30-minute steps between 07:00 and 22:00 ("daytime only"). The defaults are
   09:00, 14:00 and 20:00.
-- **Auto-detection:** when the user opens the Mini App, it reads
-  `Intl.DateTimeFormat().resolvedOptions().timeZone` from their device and saves it. Telegram's
-  user data does not include a time zone; the official Mini App docs list only id, name, username,
-  language, premium and photo. Before the first open, `DEFAULT_TIMEZONE` applies (proposed:
-  `Asia/Yerevan`). In Step 3, `/start` creates the user with the defaults (all default topics,
-09:00/14:00/20:00, `Asia/Yerevan`, 7 stories) and replies with a plain-English welcome naming
-the times and the next digest. Step 4 adds an "Open settings" button so most users open the
-Mini App on day one. Any other message gets a short reply with the times and the next digest.
+- **Auto-detection:** every time the user opens the Mini App, it sends
+  `Intl.DateTimeFormat().resolvedOptions().timeZone` from their device (`POST /api/open`).
+  Telegram's user data does not include a time zone; the official Mini App docs list only id,
+  name, username, language, premium and photo. `users.tz_detected` says where the zone came from:
+  0 = the default (`Asia/Yerevan`, before the first open), 1 = the device, 2 = chosen by hand in
+  the app. With 0 or 1 the device zone is saved on every open, so the zone follows the phone when
+  the user travels; with 2 it is kept, and the app offers "Use it" if the phone's zone differs.
+  `/start` creates the user with the defaults (all default topics, 09:00/14:00/20:00,
+  `Asia/Yerevan`, 7 stories) and replies with a plain-English welcome naming the times, the next
+  digest and an "Open settings" button. Opening the app before `/start` creates the same row.
+  `/settings` replies with the same button. Any other message gets a short reply with the times
+  and the next digest.
 - `next_digest_at` is stored as a UTC timestamp. After each send, or after a settings change, the Worker
   computes the next local slot in the user's zone and converts it to UTC with `Intl`. This handles
-  daylight-saving changes automatically.
+  daylight-saving changes automatically. One exception on a settings change
+  (`nextDigestAfterChange`, `src/settings.js`): a digest whose slot passed less than 15 minutes
+  ago and that the 5-minute tick has not sent yet is kept, so saving a setting at 14:02 does not
+  swallow the 14:00 digest. Pausing drops it; resuming starts at the next slot.
 - **Why the Worker cron sends digests instead of GitHub:** GitHub documents that scheduled runs
   "can be delayed during periods of high loads" and that at high load "some queued jobs may
   be dropped", and the start of every hour is a known peak. Cloudflare cron is a separate, cheap
@@ -221,17 +229,90 @@ Mini App on day one. Any other message gets a short reply with the times and the
   one alert per 3 hours, and the same failed run is never reported twice (`meta` table).
 - Pause: `paused=1` skips the user. When they resume, the next digest covers at most the last 24 h.
 
+## 4a. The Mini App (Step 4)
+
+**Files.** `worker/public/app/` holds `index.html`, `app.css` and `app.js`: plain HTML, CSS and
+JavaScript, no framework, about 64 KB before compression (20 KB gzipped). Cloudflare serves them
+as static assets (free and unlimited) before the Worker code runs, at
+`https://axiom-news.axiom-news-worker.workers.dev/app/`. Cache rules (lesson 12):
+`public/_headers` sends `Cache-Control: no-store` for the page, and the page loads
+`app.css?v=<hash>` / `app.js?v=<hash>`. `npm run stamp` (`scripts/stamp-app.mjs`, also run by
+`npm run deploy`) writes the content hash; a test fails if it is stale. No wildcard rule under
+`/app/`, because Cloudflare merges every matching rule and would mix two Cache-Control values.
+The page also gets a Content-Security-Policy: scripts only from itself and telegram.org, API
+calls only to itself.
+
+**Look.** iOS-Settings style: grouped rounded sections on Telegram's `secondary_bg_color`, rows on
+`section_bg_color`, text and hints from the theme, so light and dark both follow Telegram.
+One fixed brand accent `#2f7bf6` for switches, buttons and links (lesson 13: never Telegram's
+`button_color`/`link_color`). System font, 17 px rows, safe-area insets
+(`--tg-safe-area-inset-*`, `--tg-content-safe-area-inset-*`), subtle 0.25-0.35 s transitions,
+honouring "reduce motion". Telegram haptics on taps (selection on toggles, light impact on
+buttons, success/warning/error on results). The BackButton closes a sub-screen; the MainButton
+(in the accent colour) confirms "Add 18:30" on the time picker. The header and background are set
+to the theme's secondary colour, and vertical swipes are disabled so scrolling never closes it.
+
+**Settings tab (everyone).** Next digest card ("Today at 14:00", or "Paused"); topics (switches
+with emoji, at least one); digest times (remove; add from a 07:00-22:00 grid in 30-minute steps;
+1 to 5 times); stories per digest (stepper 3-15); format B "By topic" or A "Simple list" with a
+small drawing of each; time zone (city and GMT offset, a search over every IANA zone, a short
+"Popular" list); pause. Every change is saved at once (`POST /api/settings`, one request at a
+time, the stepper waits 0.45 s for more taps) and confirmed with a small "Saved" toast; on an
+error the change is undone and the reason shown.
+
+**Admin tab (owner only).** Visible only when the API says `is_owner`; every admin call is
+checked again on the server (403 otherwise). One D1 batch (`src/admin.js`, aggregates done in
+SQL) gives:
+- health: last run (time, status, duration, providers), last successful run, whether the hourly
+  trigger is on time (a run started in the last 70 minutes), the last alert in 24 h
+  (`meta.last_alert_text`, new);
+- pipeline for 24 h / 7 days: runs, articles, new items, stories created/merged, dropped, AI
+  calls, tokens, failed runs, runs that needed a backup model; and AI calls per model;
+- feeds: failing feeds (with the reason in plain words and since when) and silent feeds (no new
+  item for 48 h), from `meta.feed_health`, which the job writes each run (one row: per feed the
+  last success, newest entry date, current error and how many runs in a row);
+- users: total/active/paused/blocked and a list (name, zone, times, last digest);
+- the last 50 errors; D1 rows today against the free limits: the job's exact counts
+  (`job_runs.d1_rows_read/_written`, from D1's own per-query meta) plus the Worker's, which the
+  binding adds up and every cron tick writes to `meta.d1_worker` (instances that end between
+  ticks lose their count, so this part can be slightly low);
+- two buttons, each behind a Telegram confirm popup: "Send me a digest now" (a real digest from
+  the current pool, recorded in `sent` like a scheduled one) and "Run news job now" (GitHub
+  dispatch; refused with the time it becomes possible if a run started less than 20 minutes ago,
+  or one is still running).
+
+**API** (`src/api.js`; every request `Authorization: tma <initData>`):
+
+| Route | What | CPU on Cloudflare (2026-11-14) |
+|---|---|---|
+| `POST /api/open` `{tz}` | create the user if new, save the device zone, return settings | 3-6 ms (6 = cold start) |
+| `POST /api/settings` | validate (`src/settings.js`), save, recompute `next_digest_at` | 1-5 ms |
+| `GET /api/admin` | owner only: everything above | see the report for the figure with real data |
+| `POST /api/admin/digest`, `/run-job` | owner only: the two buttons | not run against production by me |
+
+**Bot.** `/start` and `/settings` carry an inline "Open settings" `web_app` button. The chat menu
+button (next to the message box) opens the app for every user; it and the command list are set
+once with `node scripts/setup-bot.mjs` (run again after switching to the real bot).
+
+**Local preview and checks** (no Telegram, no real data): `node scripts/dev-server.mjs` runs the
+real API code over an in-memory database with invented demo users and a stand-in for Telegram's
+script (`scripts/dev/mock-telegram.js`). `node scripts/screenshots.mjs` renders it in headless
+Edge at 390 px, light and dark, user and admin (`docs/screenshots/`). `node scripts/ui-check.mjs`
+taps through every setting and both admin buttons and checks the saved values (23 checks).
+`node scripts/api-check.mjs` checks the LIVE API with initData signed by the bot token from
+`.env`.
+
 ## 5. Database (Cloudflare D1, SQLite)
 
 | Table | Key columns | Notes |
 |---|---|---|
-| `users` | `id` (Telegram user id) PK, `first_name`, `language`, `timezone`, `tz_detected` 0/1, `digest_times` JSON, `max_stories` (default 7, range 3-15), `topics` JSON, `paused`, `blocked`, `created_at`, `last_digest_at`, `next_digest_at` | index on `next_digest_at`. `blocked=1` when Telegram returns 403 because the user blocked the bot. |
+| `users` | `id` (Telegram user id) PK, `first_name`, `language`, `timezone`, `tz_detected` 0/1/2, `digest_times` JSON, `max_stories` (default 7, range 3-15), `topics` JSON, `paused`, `blocked`, `created_at`, `last_digest_at`, `next_digest_at`, `format` (Step 4: `A`/`B`, NULL = config default) | index on `next_digest_at`. `blocked=1` when Telegram returns 403 because the user blocked the bot. `tz_detected`: 0 default, 1 device, 2 chosen by hand (§4) |
 | `topics` | `tag` PK, `label_en`, `emoji`, `sort`, `is_default` | synced from `config/topics.yaml` by the job, read by the Worker |
 | `items` | `id` PK, `url_hash` UNIQUE, `source_key`, `source_name`, `tier`, `url`, `title`, `snippet`, `published_at`, `fetched_at`, `status` (pending/done/dropped/expired), `story_id` | index on `status`; pruned after 7 days |
 | `stories` | `id` PK, `summary`, `topics` JSON, `importance`, `best_url`, `best_source`, `best_tier`, `best_published_at`, `source_count`, `created_at`, `updated_at`, `dup_group` | index on `updated_at`; pruned after 7 days. `best_tier`/`best_published_at` let a merge update the link without re-reading items. `dup_group` (Step 3) = id of the near-duplicate group's leader, written by the job |
-| `meta` | `key` PK, `value` | Worker state: `last_alert_at`, `last_alerted_run_id` (Step 3) |
+| `meta` | `key` PK, `value` | Worker: `last_alert_at`, `last_alerted_run_id` (Step 3), `last_alert_text`, `d1_worker` (its D1 rows today, Step 4). Job: `feed_health` (Step 4, one JSON row) |
 | `sent` | (`user_id`, `story_id`) PK, `sent_at` | the "never twice" guarantee; pruned with stories |
-| `job_runs` | `id`, `started_at`, `finished_at`, `status` (running/ok/partial/ai_failed/error), counts, `provider`, tokens, `pruned`, `error` | Admin tab |
+| `job_runs` | `id`, `started_at`, `finished_at`, `status` (running/ok/partial/ai_failed/error), counts, `provider`, tokens, `pruned`, `error`, `d1_rows_read`, `d1_rows_written` (Step 4) | Admin tab |
 | `ai_calls` | `id`, `at`, `provider`, `model`, `ok`, `input_tokens`, `output_tokens`, `ms`, `error` | Admin tab: AI usage |
 | `errors` | `id`, `at`, `component` (job/worker), `message` | Admin tab: recent errors |
 
@@ -249,8 +330,9 @@ passes numbers as REAL, so INTEGER columns convert them back.
 |---|---|
 | GitHub job → D1 | Cloudflare D1 REST API `POST /accounts/{id}/d1/database/{id}/query`, using an API token limited to **D1 Edit** permission only. Stored as a GitHub Actions secret. The job only connects outward; nothing can call into it. |
 | Telegram → Worker webhook | registered with a `secret_token`. The Worker rejects any request whose `X-Telegram-Bot-Api-Secret-Token` header doesn't match `TELEGRAM_WEBHOOK_SECRET`. |
-| Mini App → Worker API | every request carries Telegram's `initData`. The Worker checks it the official way (HMAC-SHA256 of the bot token with key `"WebAppData"`, then HMAC of the sorted data-check-string), compares it to `hash`, and rejects data older than 24 h (`auth_date`). The user id comes only from verified data. |
-| Admin tab / admin API | shown and allowed only when the verified user id equals `OWNER_TELEGRAM_ID`. Hiding the tab is cosmetic; the API checks the id on every admin call. |
+| Mini App → Worker API | every request carries Telegram's `initData` (`Authorization: tma ...`). The Worker checks it the official way (`src/auth.js`: secret key = HMAC-SHA256 of the bot token with key `"WebAppData"`; the hash must equal the HMAC of every other field, sorted, as `key=value` lines), compares in constant time, and rejects data older than 24 h or dated in the future (`auth_date`). The user id comes only from verified data; the body can never name a user. Wrong data gets 401 "Please close and reopen the settings from the bot." |
+| Admin tab / admin API | shown only when the verified user id equals `OWNER_TELEGRAM_ID`. Hiding the tab is cosmetic; the API checks the id on every admin call and answers 403 to anyone else (tested for all three admin routes, and against the live Worker). |
+| Mini App page | served with a Content-Security-Policy (scripts from itself and telegram.org only, API calls to itself only), `nosniff`, no referrer. All text from the database is HTML-escaped before display. |
 | Worker → GitHub | fine-grained personal access token: only `RobBudaghyan/axiom-news`, only "Actions: read and write", no expiration (owner's choice, 2026-11-13). It can start workflows; it cannot read or change code or secrets. A Worker secret. |
 | Secrets | `.env` locally (gitignored). In production: GitHub Actions secrets (`GEMINI_API_KEY`, `GROQ_API_KEY`, `CLOUDFLARE_ACCOUNT_ID`, `D1_DATABASE_ID`, `CLOUDFLARE_D1_TOKEN`) and Cloudflare Worker secrets (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `OWNER_TELEGRAM_ID`, `GITHUB_DISPATCH_TOKEN`). Each side holds only what it needs. The job never sees the Telegram token, and the Worker never sees the AI keys. Values are copied from `.env` by `scripts/set_secrets.py` through stdin, never printed. |
 | Public repo | `scripts/scan_secrets.py` checks every `.env` value and common token shapes against the whole git history and every file before a push (run on its own, never piped). GitHub push protection is on. Commits use the owner's GitHub noreply address. The D1 database id is committed on purpose in `worker/wrangler.toml` (wrangler needs it; it grants nothing without the D1 token). |
@@ -335,7 +417,7 @@ Other free options checked and **rejected** (2026-11-13):
 | Service | Limit | Our expected use | Source |
 |---|---|---|---|
 | Workers Free | 100,000 requests/day | < 1,000/day (288 cron ticks, plus webhook and Mini App calls) | [Workers limits](https://developers.cloudflare.com/workers/platform/limits/) |
-| Workers Free | **10 ms CPU** per HTTP request and per Cron Trigger. Waiting on D1/fetch does not count. "Each isolate has some built-in flexibility" for infrequent overruns; consistent overruns are terminated (error 1102, `exceededCpu`) | **measured on Cloudflare 2026-11-13** (`wrangler tail` cpuTime): idle tick 4 ms; tick with 1 due user 6 ms; 20 users 10-27 ms; 40 users 46 ms. Hence **8 users per tick** (≈6-12 ms) and dedupe moved into the job | same |
+| Workers Free | **10 ms CPU** per HTTP request and per Cron Trigger. Waiting on D1/fetch does not count. "Each isolate has some built-in flexibility" for infrequent overruns; consistent overruns are terminated (error 1102, `exceededCpu`) | **measured on Cloudflare 2026-11-13** (`wrangler tail` cpuTime): idle tick 4 ms; tick with 1 due user 6 ms; 20 users 10-27 ms; 40 users 46 ms. Hence **8 users per tick** (≈6-12 ms) and dedupe moved into the job. **Mini App API, measured 2026-11-14:** open 3-6 ms, save 1-5 ms, admin data 0-3 ms (see §4a) | same |
 | Workers Free | 50 subrequests per invocation (D1 calls and `fetch` count) | per cron tick: 1 batched read, 1 batched candidate read, 1 Telegram call per user, 1 batched write (+1 alert): about 12 with 8 users | same; [D1 limits](https://developers.cloudflare.com/d1/platform/limits/) ("a `db.batch()` call counts as one query") |
 | Workers Free | 5 Cron Triggers per account | 2 (`*/5 * * * *`, `7 * * * *`) | Workers limits |
 | Workers static assets | "Requests to static assets are free and unlimited" | Mini App files | [Static assets billing](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/) |
@@ -365,10 +447,18 @@ tests/                                    unittest suite for the job and the dup
 scripts/check_feeds.py                    feed health check (--all re-tests disabled feeds)
 scripts/ai_probe.py                       real batch-size test for Gemini and Groq (Step 2)
 scripts/set_secrets.py, scan_secrets.py   copy .env to GitHub/Worker secrets; pre-push secret scan
-worker/src/                               the Worker: index, bot, cron, digest, health, github, telegram, db
+worker/src/                               the Worker: index, bot, cron, digest, health, github, telegram, db,
+                                          and (Step 4) api, auth, settings, admin
+worker/public/app/                        the Mini App: index.html, app.css, app.js; public/_headers (cache)
 worker/test/                              node:test suite (node:sqlite with the real schema)
 worker/scripts/digest-cli.mjs             dev tool: owner's digest / previews / length / CPU checks
-worker/wrangler.toml                      Worker config: D1 binding, crons, vars (no secrets)
+worker/scripts/stamp-app.mjs              content hashes for the Mini App files (run by npm run deploy)
+worker/scripts/setup-bot.mjs              chat menu button + command list (once per bot)
+worker/scripts/dev-server.mjs, dev/       local Mini App preview with demo data and a Telegram stand-in
+worker/scripts/screenshots.mjs, ui-check.mjs   headless Edge screenshots and click-through check
+worker/scripts/api-check.mjs              checks the live API (signed with the token in .env)
+worker/wrangler.toml                      Worker config: D1 binding, crons, assets, vars (no secrets)
+docs/screenshots/                         the Mini App at 390 px, light and dark (demo data)
 .github/workflows/                        hourly.yml, backup-schedule.yml, check-feeds.yml
 ```
 

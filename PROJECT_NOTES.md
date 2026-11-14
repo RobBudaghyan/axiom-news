@@ -57,6 +57,11 @@ bot @axiom_news_bot at the end.
 | 2026-11-13 | Commits use the owner's GitHub noreply email (history rewritten before the first push, owner) | the repo is public |
 | 2026-11-14 | Format B is the default, with a context emoji on every line (owner) | owner liked B; per-line flags make a grouped digest easy to scan. Word rules, not AI: free, predictable, ~25 µs per line |
 | 2026-11-13 | The Times of Israel feed disabled (`enabled: false`) | HTTP 403 from GitHub's runners; works from the PC |
+| 2026-11-14 | Mini App as 3 static files (no framework, no build), served by the same Worker as free static assets; page `no-store`, files with a content hash | small and fast; lesson 12 (Telegram caches hard) |
+| 2026-11-14 | Every setting saves instantly (one request at a time); the format (A/B) became a per-user setting (`users.format`) | spec; the owner's B stays the default |
+| 2026-11-14 | Time zone: the phone's zone is saved on every open unless the user picked one by hand (`tz_detected` 2), then the app offers "Use it" | follows the phone when travelling, never overrides a deliberate choice |
+| 2026-11-14 | A digest already due (slot < 15 min ago, not sent yet) survives a settings change | saving at 14:02 must not swallow the 14:00 digest |
+| 2026-11-14 | Feed health is one JSON row in `meta` written by the job each run; the Worker counts its own D1 rows and writes them every tick (~288 rows/day) | per-feed rows would cost ~2,800 writes/day; D1's usage API needs a token the Worker does not have |
 
 ## Current status
 - **Step 1 done:** repo, docs, topics, prompt, lessons, 116 verified feeds.
@@ -70,11 +75,19 @@ bot @axiom_news_bot at the end.
     health alerts to the owner.
   - Real tests: the owner's `/start`, one forced digest, previews of formats A and B, a
     Worker-started hourly run. Details in `reports/step-03-automation.md`.
-- The owner is the only user. His next digest is due at 09:00 Yerevan time.
+- **Step 4 done (2026-11-14): the Mini App, still on the TEST bot.**
+  - `https://axiom-news.axiom-news-worker.workers.dev/app/`, opened by the chat menu button
+    "Settings", the "Open settings" button under `/start` and the new `/settings` command.
+  - Settings for everyone (topics, times, stories, format, time zone, pause, next digest) and an
+    Admin tab for the owner (health, pipeline stats, feeds, users, errors, D1 use, two buttons).
+  - Tested: 115 Worker + 36 Python unit tests, a 23-step click-through in headless Edge, and
+    8 checks against the live API (a real settings change saved in D1). Every API call measured
+    under 10 ms CPU. Details in `reports/step-04-mini-app.md`.
+- The owner is the only user.
 
 ## Next step
-Step 4: the Mini App (settings: topics, times, number of stories, pause; time zone
-auto-detection; Admin tab for the owner), served by the same Worker. Then switch to the real bot.
+Owner tries the Mini App on his phone (list in the Step 4 report). Then Step 5: switch to the
+real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, then invite the first users).
 
 ## Known issues / open questions
 - **Gemini 503 overloads** were frequent on 2026-11-13; fallback runs are slow (Groq ~1
@@ -88,3 +101,7 @@ auto-detection; Admin tab for the owner), served by the same Worker. Then switch
 - **Line emojis are word rules,** not AI: the first actor named wins, so "Russian strike on
   Zaporizhzhia" gets the Russian flag. Edit `config/line_emoji.json` to add names.
 - **No usable feeds** from Reuters, AP (both blocked), Armenpress (none found) or ISW (403).
+- **The Mini App was only seen in a desktop browser with a stand-in for Telegram.** Real iPhone and
+  Android rendering, haptics and the MainButton still need the owner's eyes.
+- **Admin "D1 today" for the Worker is a slight undercount** (counts of short-lived Worker instances
+  that end between ticks are lost). The job's numbers are exact and are most of the total.

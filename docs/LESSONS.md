@@ -86,3 +86,16 @@ Only lessons that still matter for the v2 design are kept.
 23. **Never pipe a safety check into another command in a chain.** `scan | tail -1 && git push`
     pushed even though the scan failed, because the pipe's exit code is `tail`'s. Run the check
     on its own (or with `set -o pipefail`) and push only after it exits 0.
+
+## Learned in v2 (Step 4)
+
+24. **Check the diff after every scripted text edit.** Some files here have Windows line endings
+    (CRLF). A find-and-replace that assumed `\n` silently changed nothing, twice; once it left the
+    job without its new feed-health code until a test caught it. Read `git diff` (or let a test
+    fail) before trusting an edit made by a script.
+25. **Windows shows flag emoji as letters** ("AM", "RU"); phones show flags. A screenshot taken on
+    the PC is not what users see. The local preview loads a flag-only font for that reason; the
+    real Mini App uses the phone's own emoji.
+26. **A Worker instance cannot be trusted to live until the next tick.** A counter that was only
+    written "at the next cron tick in the same instance" was missing after the first tick on
+    Cloudflare, because that tick ran in a fresh instance. Write per invocation.

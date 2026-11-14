@@ -5,9 +5,10 @@ A Telegram news digest bot for a small private group (~20 people). Every hour it
 digest at their chosen times in their own time zone. It runs on free tiers only
 (GitHub Actions + Cloudflare Workers/D1 + Gemini, with Groq as fallback).
 
-**Status:** Step 3 done. Everything runs in the cloud with the owner's PC off, still on the TEST
-bot: the Cloudflare Worker answers the bot, sends digests every 5 minutes and starts the hourly
-GitHub Actions job at about :07. The Mini App comes in Step 4. See
+**Status:** Step 4 done. Everything runs in the cloud with the owner's PC off, still on the TEST
+bot: the Cloudflare Worker answers the bot, sends digests every 5 minutes, starts the hourly
+GitHub Actions job at about :07, and serves the Telegram Mini App (settings for everyone, an
+Admin tab for the owner; screenshots in [docs/screenshots](docs/screenshots)). See
 [PROJECT_NOTES.md](PROJECT_NOTES.md) for status and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 for the design.
 
@@ -23,7 +24,8 @@ for the design.
 | `db/schema.sql` | D1 tables |
 | `job/` | the hourly job (`python -m job.run`), including near-duplicate grouping (`job/dupes.py`) |
 | `tests/` | Python unit tests for the job |
-| `worker/` | the Cloudflare Worker (`src/`), its tests (`test/`) and `scripts/digest-cli.mjs` |
+| `worker/` | the Cloudflare Worker (`src/`), the Mini App (`public/app/`), tests (`test/`) and tools (`scripts/`) |
+| `docs/screenshots/` | the Mini App at phone width, light and dark, with invented demo data |
 | `.github/workflows/` | `hourly.yml` (started by the Worker), `backup-schedule.yml`, `check-feeds.yml` |
 | `scripts/check_feeds.py` | re-checks every feed and prints a health table |
 | `scripts/apply_schema.py` | applies `db/schema.sql` (and column migrations) to D1 |
@@ -55,7 +57,12 @@ venv/Scripts/python -m job.run                                # one real hourly 
 venv/Scripts/python -m job.dupes                              # show near-duplicate pairs in the pool
 cd worker && node scripts/digest-cli.mjs                      # print the owner's next digest (writes nothing)
 cd worker && node scripts/digest-cli.mjs --preview B --dry    # print a format-B preview
-cd worker && node node_modules/wrangler/bin/wrangler.js deploy  # deploy the Worker
+cd worker && npm run deploy                                   # stamp the Mini App files, deploy the Worker
+cd worker && node scripts/dev-server.mjs                      # Mini App preview with demo data: localhost:8790/app/
+cd worker && node scripts/ui-check.mjs                        # click through the preview (start it first)
+cd worker && node scripts/screenshots.mjs                     # screenshots of the preview -> docs/screenshots
+cd worker && node scripts/api-check.mjs                       # check the live Mini App API (TEST bot)
+cd worker && node scripts/setup-bot.mjs                       # set the bot's menu button and commands
 venv/Scripts/python scripts/scan_secrets.py                   # run before every push
 ```
 
