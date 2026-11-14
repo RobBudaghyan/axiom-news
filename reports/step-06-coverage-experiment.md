@@ -26,6 +26,8 @@ the live story pool, the Mini App and the Admin tab are exactly as before.**
   calls, cannot touch your digests, and if it fails the real run does not notice. The first real
   run: the real job finished normally in 52 seconds, then the shadow step took 6 seconds and
   stored 677 Google articles, of which 232 did not look like anything the live pool already had.
+  The second run (13:07, a normal hour) took 4 seconds and found 432 new Google articles, 180 of
+  them unique (26 about Armenia).
 - **First AI test, in a sandbox (a throwaway copy, not the live pool):** of 120 of those 232
   articles, 54 were not news on our topics (sports, ads, analysis pieces), 34 were events the live
   pool already had in other words, and **32 were real events our feeds had not given us** (30
@@ -148,7 +150,29 @@ by hand; the parser was right, and I fixed the test.
   This first run looked back 2 hours with nothing seen before, so it is bigger than a normal hour.
 - **The live error list** got 4 entries during this run, all from the real job's normal AI checks
   (one answer resent, one fact-guard drop), none from the shadow step.
-- **A normal hour** (articles already seen an hour earlier are skipped): see the 13:07 run below.
+
+### A normal hour: the second run (13:07 UTC, run 43598193597)
+Here articles already stored an hour earlier are skipped, so these are the numbers to expect each hour.
+- **Shadow step:** 13:13:05-13:13:09 (4 s, of which 3.4 s inside the script). 30 searches, all
+  HTTP 200. 756 results, 642 distinct, 210 already seen at 12:07, **432 new**. Headline check:
+  184 look like live-pool articles, 68 like other Google results, **180 unique**. D1: 5,538 rows
+  read, 865 written.
+
+  | Topic | New | Like live | Like Google | Unique |
+  |---|---|---|---|---|
+  | Armenia | 51 | 16 | 9 | 26 |
+  | Russia | 84 | 43 | 10 | 31 |
+  | Ukraine war | 147 | 88 | 21 | 38 |
+  | Iran war | 36 | 19 | 2 | 15 |
+  | Wars & conflicts | 68 | 13 | 19 | 36 |
+  | Politics | 46 | 5 | 7 | 34 |
+
+- **The real job took 5 minutes this hour (309 s, against 52 s at 12:07).** That was the real
+  job's own AI pass: Gemini skipped 48 of 144 articles, and the three resends were rejected by the
+  existing "implausible answer" check, so Groq finished them (13 AI calls instead of the usual
+  2-4). The shadow step started only after the real job had finished and has no AI keys, so it
+  played no part. The run still ended ok, with every article handled. I mention it because part B
+  will compare Gemini error rates, and this hour will show up in them.
 
 ### The one-off AI measurement (sandbox, 12:10 UTC)
 `venv/Scripts/python scripts/shadow_ai_sample.py`: 120 of the 232 unique Google headlines (20 per
@@ -221,13 +245,13 @@ topic), with the live pool's newest 250 stories of the last 24 hours. 2 Gemini c
 - **Noise:** sports ("Armenia vs Cyprus"), ads and opinion pieces come with the searches. The AI
   marked 45% of the unique sample as not news.
 - **Volume and limits:**
-  - D1: the first shadow run wrote 1,355 rows (each article plus its index row). If a normal hour
-    stores about 300-400 articles, that is roughly 15,000-20,000 rows a day, against 100,000 free
-    (the live job uses roughly 20,000-35,000). Fine for an experiment, but it should be switched off
+  - D1: the first shadow run wrote 1,355 rows (each article plus its index row) and the second, a
+    normal hour, 865. That is roughly 20,000 rows written a day, against 100,000 free (the live job
+    uses roughly 20,000-35,000), and about 130,000 rows read a day, against 5 million free. Fine for an experiment, but it should be switched off
     after part B if not adopted (`enabled: false` in `config/gnews_queries.yaml`).
   - The Admin tab's "D1 today" does not include the shadow step's rows (they are in
     `shadow_runs`), so during the experiment it shows slightly less than the real use.
-- **One run is not a day.** The numbers above come from the first run (a 2-hour backlog) and one
+- **One run is not a day.** The numbers above come from two runs (the first a 2-hour backlog) and one
   sample at midday Saturday. Part B uses all runs.
 - **Russian state media** (and Azerbaijani state media) are a large share of Google's Russian
   results, as in our own feeds.
