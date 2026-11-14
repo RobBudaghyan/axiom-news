@@ -80,6 +80,12 @@ bot @axiom_news_bot at the end.
 | 2026-11-14 | Brand red #b1161c; dark mode uses #d0232a fills and #ff6b6b text; Admin failures orange, warnings amber (owner) | #b1161c is only 2.4:1 on a dark cell |
 | 2026-11-14 | Step 6 coverage experiment (Google News search feeds) runs in **shadow mode only**: last step of `hourly.yml`, D1 keys only, `continue-on-error`, own tables `shadow_items`/`shadow_runs` (owner: measure first) | must not change digests, the pool or users; no AI keys = no AI calls possible |
 | 2026-11-14 | Google News searches use `when:2h`; English and Russian editions; Armenian script only "Երևան" | a 1-day window returns the day's 100 most relevant, ~10% of them recent; Armenian-language results are near zero and the hy/AM edition answers in Russian |
+| 2026-11-14 | Google News shadow step **paused** (`enabled: false` in `config/gnews_queries.yaml`); code and `shadow_*` tables kept; the step exits before any D1 or Google request (Step 7) | the gap was our own feeds, not Google; kept for custom topics with no curated feed (e.g. "Colombia") |
+| 2026-11-14 | Eight Armenian feeds added: News.am Russian, Factor.am, Aravot, 168.am, A1+, ArmInfo English, CivilNet and Hetq in Armenian (Step 7) | the pool had only News.am English (1-2 items/h) of the big outlets; News.am Russian/Armenian publish 5-10/h. Armenpress, 1lurer, Panorama, Shamshyan: no RSS; Arka, Mediamax blocked from GitHub; Lragir unreachable |
+| 2026-11-14 | Russian over Armenian-script editions of the same outlet (News.am) | 86% the same articles; Armenian script costs 164 Gemini tokens per item, Russian 89, English 70 |
+| 2026-11-14 | Per-feed cap `max_items` in `sources.yaml` (default 8): News.am Russian and 168.am 20, A1+ 12, Factor.am and Aravot 10; what a cap cuts is logged and kept in `feed_health.cut` | busiest Armenian feeds publish up to ~14 items in an hour; the 8 cap is still right for the rest |
+| 2026-11-14 | Prefer English links (owner): in a merge, the story's current link is scored like a new article, so an English article that matches the summary takes over from a Russian/Armenian one | new stories already ranked a matching English title first; merges assumed the old link was perfect |
+| 2026-11-14 | `ai.estimate_tokens` counts Armenian at 1.6 characters per token | it counted 2.5, 44% too low, so chunks of Armenian items would have been larger than planned |
 
 ## Current status
 - **Step 1 done:** repo, docs, topics, prompt, lessons, 116 verified feeds.
@@ -112,15 +118,30 @@ bot @axiom_news_bot at the end.
   The shadow step collects every hour since 12:07 UTC (first run: 677 articles, 232 unique after
   the headline check). A sandbox AI pass on 120 of them: 54 not news, 34 already in the pool, 32
   new events (9 Armenia, mostly score 4-5). Terms-of-use concern noted for the owner. Details in
-  `reports/step-06-coverage-experiment.md`.
+  `reports/step-06-coverage-experiment.md`. **Paused in Step 7** (part B not run).
+- **Step 7 done (2026-11-14): more Armenian sources and per-feed caps.** 8 feeds added (News.am
+  Russian, Factor.am, Aravot, 168.am, A1+, ArmInfo English, CivilNet and Hetq in Armenian), 123
+  feeds in all, all working from GitHub. Two real runs: Armenia stories 1.6 per run before, 17
+  and then 4 after; first-pass input tokens 31.9k -> 33.8k per run (+6%). None of the new Armenia
+  stories would reach a digest under today's rules (they score 4-5). English links preferred in
+  merges (owner). Details in `reports/step-07-armenia-sources.md`.
 - The owner is the only user.
 
 ## Next step
-**Step 6 part B** (the owner triggers it, from 2026-11-15 00:10 UTC, better after 12:10 UTC):
-report on all shadow runs and recommend the production design; then switch the shadow step off
-(`enabled: false` in `config/gnews_queries.yaml`) or build the recommendation as Step 7. After
-that: switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, then invite
-the first users).
+**Step 8: the dynamic digest.** Owner decisions (2026-11-14):
+- No fixed story count.
+- The editor gives each story a **global score** and a **topic score**.
+- A story is included if its global score is high, OR it belongs to a topic the user follows and
+  its topic score passes a fixed bar.
+- No per-user depth setting.
+- A digest must never be long enough for Telegram to fold it behind "Show more"; the
+  lowest-scored stories are cut to fit.
+Input from Step 7: about 4-17 new Armenia stories an hour, mostly editor score 4-5; the editor sees
+at most 60 stories per run, so many are never scored (12 of 21 after 2 runs).
+
+After that: switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, then
+invite the first users). Later: custom topics (e.g. "Colombia") can reuse the paused Google News
+code (`job/gnews.py`, `job/shadow.py`).
 
 ## Known issues / open questions
 - **Gemini 503 overloads** were frequent on 2026-11-13; fallback runs are slow (Groq ~1
@@ -136,10 +157,18 @@ the first users).
   ground stop got a 7). Watch the first week and nudge the bars or prompt examples if needed.
 - **Line emojis** from word rules (`config/line_emoji.json`) are now only a fallback for stories
   the editor did not write emojis for.
-- **No usable feeds** from Reuters, AP (both blocked), Armenpress (none found) or ISW (403).
+- **No usable feeds** from Reuters, AP (both blocked), Armenpress, 1lurer, Panorama, Shamshyan
+  (none found), Arka, Mediamax (blocked from GitHub), Lragir (unreachable) or ISW (403).
+- **Step 7 wrong merges:** Armenian/Russian articles are sometimes attached to a related but
+  different English story (3 in the first run). The link stays right, but that news is lost as
+  its own story.
+- **News.am and 168.am** (now big Armenia suppliers) were linked by JAMnews (2021) to one
+  opposition bloc; 168.am is tier 3 so it is linked last.
 - **The Mini App was only seen in a desktop browser with a stand-in for Telegram.** The Step 5
   version (red, hourly grid) still needs the owner's eyes on a real phone.
-- **Step 6 shadow step:** its D1 rows (about 15-20k written a day) are not in Admin's "D1 today"; Google News
-  feeds are for "personal, non-commercial use" per their own notice (owner to decide before adoption).
+- **Step 6 shadow step (paused):** if switched on again, its D1 rows (about 15-20k written a day) are not in
+  Admin's "D1 today", and Google News feeds are for "personal, non-commercial use" per their own
+  notice (owner to decide before adoption). Its old rows stay in `shadow_items` (its prune only runs
+  when it is on).
 - **Admin "D1 today" for the Worker is a slight undercount** (counts of short-lived Worker instances
   that end between ticks are lost). The job's numbers are exact and are most of the total.

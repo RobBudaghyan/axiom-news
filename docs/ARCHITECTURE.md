@@ -15,7 +15,7 @@ digests show (§3, step 6).
  ┌─────────────────────────────────────────────────────────┐
  │ HOURLY JOB  (Python, ~2 min, then the VM is gone)        │
  │ 1. fetch ~115 RSS feeds (config/sources.yaml)            │
- │ 2. drop already-seen URLs, keep <= 8 newest per feed     │
+ │ 2. drop already-seen URLs, keep <= 8 newest per feed (*) │
  │ 3. AI pass, usually ONE call: group, tag, score, write   │
  │    (Gemini -> 2nd Gemini model -> Groq -> else pending)  │
  │ 4. write stories to D1, mark near-duplicates (dup_group) │
@@ -75,7 +75,9 @@ Tools: Node.js 26 LTS and `wrangler` (pinned in `worker/package.json`) deploy th
    and similar tracking parameters). Only entries published inside a **lookback window** count:
    back to the last run's start minus 1 h, clamped to 2-24 h (3 h on the very first run). URLs
    already in `items` are skipped, and at most **8 newest unseen entries per feed per run** are
-   kept. This stops the very high-volume Russian state agencies (TASS ~1,600/day, RIA ~1,200/day)
+   kept, unless the feed has its own `max_items` in `config/sources.yaml` ((*) Step 7: News.am
+   Russian and 168.am 20, A1+ 12, Factor.am and Aravot 10). What a cap leaves out is lost; the
+   run log prints it ("cap cut") and `meta.feed_health` keeps it per feed (`cut`). This stops the very high-volume Russian state agencies (TASS ~1,600/day, RIA ~1,200/day)
    from swamping the batch. Each kept entry becomes an `items` row with `status='pending'`, the
    title, and a snippet of about 200 characters with HTML stripped. Pending items left over from
    failed earlier runs are included again; after 24 h they become `expired`.
@@ -226,6 +228,10 @@ a story gains new sources after it was sent, it is still never sent again; an ed
 `sent` rows to the story it keeps.
 
 ## 3a. Coverage experiment: Google News search feeds (Step 6, shadow mode only)
+
+**Paused since 2026-11-14 (Step 7):** `enabled: false` in `config/gnews_queries.yaml`; the
+workflow step stays but `job.shadow` exits before any D1 or Google request. Code and tables are
+kept for later custom topics that have no curated feed.
 
 Goal under test: fewer blind spots (medium-importance news, especially Armenia) by adding
 per-topic Google News RSS searches (`news.google.com/rss/search?q=...`) to the curated feeds.
@@ -467,7 +473,10 @@ an overload like that is per model.
   2026-11-14: 6.5-12.5k input and 2.5-6.2k output tokens per call, so about 0.25M input and 0.12M
   output tokens/day. Only a backlog makes 2-4 first-pass calls in one run, in chunks of about 25k
   estimated tokens.
-- If the cap proves too low or too high, it is one number in config. Lowering it to 5 per feed
+- If the cap proves too low or too high, it is one number in config (plus `max_items` per feed
+  since Step 7). Armenian script costs about 164 Gemini tokens per item with its snippet, Russian
+  89, English 70 (measured on News.am, 2026-11-14); `ai.estimate_tokens` counts Armenian at 1.6
+  characters per token. Lowering it to 5 per feed
   gives about 3,800 items/day.
 
 **Fallback: Groq free plan** (`openai/gpt-oss-120b`).
@@ -556,7 +565,9 @@ worker/scripts/migrate-times.mjs          Step 5, once: half-hour digest times -
 worker/wrangler.toml                      Worker config: D1 binding, crons, assets, vars (no secrets)
 docs/screenshots/                         the Mini App at 390 px, light and dark (demo data)
 .github/workflows/                        hourly.yml, backup-schedule.yml, check-feeds.yml, gnews-probe.yml
-config/gnews_queries.yaml                 Step 6: Google News search terms (shadow experiment)
+config/gnews_queries.yaml                 Step 6: Google News search terms (shadow experiment, paused)
+config/candidates/armenia.yaml            Step 7: tested Armenian feeds (good ones are in sources.yaml)
+scripts/armenia_stats.py, discover_feeds.py, source_dry_run.py, armenia_grouping.py   Step 7 tools
 job/gnews.py, job/shadow.py               Step 6: Google News fetch/parse/resolve; shadow collection
 scripts/gnews_probe.py, shadow_ai_sample.py   Step 6: feasibility probe; sandbox AI sample
 ```
