@@ -78,6 +78,8 @@ bot @axiom_news_bot at the end.
 | 2026-11-14 | The editor names each story's main topic (`stories.main_topic`), used as its section | the first-pass tags put a Trump-Putin-Xi summit under "Iran War" |
 | 2026-11-14 | Format A and the per-user format, stories per digest and the zone picker removed; times on the hour 06:00-23:00; the zone always follows the phone (owner) | simpler; `users.max_stories`/`format` kept unused in the table |
 | 2026-11-14 | Brand red #b1161c; dark mode uses #d0232a fills and #ff6b6b text; Admin failures orange, warnings amber (owner) | #b1161c is only 2.4:1 on a dark cell |
+| 2026-11-14 | Step 6 coverage experiment (Google News search feeds) runs in **shadow mode only**: last step of `hourly.yml`, D1 keys only, `continue-on-error`, own tables `shadow_items`/`shadow_runs` (owner: measure first) | must not change digests, the pool or users; no AI keys = no AI calls possible |
+| 2026-11-14 | Google News searches use `when:2h`; English and Russian editions; Armenian script only "Երևան" | a 1-day window returns the day's 100 most relevant, ~10% of them recent; Armenian-language results are near zero and the hy/AM edition answers in Russian |
 
 ## Current status
 - **Step 1 done:** repo, docs, topics, prompt, lessons, 116 verified feeds.
@@ -105,12 +107,20 @@ bot @axiom_news_bot at the end.
     in, 4.9k out) and over the last ~19 h of stories once from this PC.
   - Tests: 54 Python + 112 Worker unit tests, 28-step click-through, 9 live API checks, mutation
     checks for every new rule. One labelled preview digest was sent to the owner.
+- **Step 6 part A done (2026-11-14): coverage experiment in shadow mode.** Google News RSS works
+  from the PC and GitHub (all 200, no limits seen), titles only, links need 2 requests to resolve.
+  The shadow step collects every hour since 12:07 UTC (first run: 677 articles, 232 unique after
+  the headline check). A sandbox AI pass on 120 of them: 54 not news, 34 already in the pool, 32
+  new events (9 Armenia, mostly score 4-5). Terms-of-use concern noted for the owner. Details in
+  `reports/step-06-coverage-experiment.md`.
 - The owner is the only user.
 
 ## Next step
-Owner reads the preview and the next real digests, and tries the new Mini App on his phone (list
-in the Step 5 report). Then Step 6: switch to the real bot @axiom_news_bot (new token and webhook,
-`setup-bot.mjs`, then invite the first users).
+**Step 6 part B** (the owner triggers it, from 2026-11-15 00:10 UTC, better after 12:10 UTC):
+report on all shadow runs and recommend the production design; then switch the shadow step off
+(`enabled: false` in `config/gnews_queries.yaml`) or build the recommendation as Step 7. After
+that: switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, then invite
+the first users).
 
 ## Known issues / open questions
 - **Gemini 503 overloads** were frequent on 2026-11-13; fallback runs are slow (Groq ~1
@@ -129,5 +139,7 @@ in the Step 5 report). Then Step 6: switch to the real bot @axiom_news_bot (new 
 - **No usable feeds** from Reuters, AP (both blocked), Armenpress (none found) or ISW (403).
 - **The Mini App was only seen in a desktop browser with a stand-in for Telegram.** The Step 5
   version (red, hourly grid) still needs the owner's eyes on a real phone.
+- **Step 6 shadow step:** its D1 rows (about 15-20k written a day) are not in Admin's "D1 today"; Google News
+  feeds are for "personal, non-commercial use" per their own notice (owner to decide before adoption).
 - **Admin "D1 today" for the Worker is a slight undercount** (counts of short-lived Worker instances
   that end between ticks are lost). The job's numbers are exact and are most of the total.

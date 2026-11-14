@@ -1,6 +1,6 @@
 # Architecture
 
-Status: designed in Step 1, updated in Steps 2-5 (2026-11-14). Running in the cloud since
+Status: designed in Step 1, updated in Steps 2-6 (2026-11-14). Running in the cloud since
 Step 3, still on the TEST bot: the hourly job on GitHub Actions (public repo
 `RobBudaghyan/axiom-news`), the D1 database, and the Worker `axiom-news` (webhook, digest cron,
 hourly job trigger, alerts, and since Step 4 the Mini App and its API, §4a). Since Step 5 every
@@ -225,6 +225,35 @@ Pashinyan said the two countries are close to full normalisation.
 a story gains new sources after it was sent, it is still never sent again; an editor merge copies
 `sent` rows to the story it keeps.
 
+## 3a. Coverage experiment: Google News search feeds (Step 6, shadow mode only)
+
+Goal under test: fewer blind spots (medium-importance news, especially Armenia) by adding
+per-topic Google News RSS searches (`news.google.com/rss/search?q=...`) to the curated feeds.
+**Step 6 only measures.** Nothing it collects reaches the live story pool, the AI passes, digests,
+the Admin tab or users.
+
+- **Queries:** `config/gnews_queries.yaml`, 30 queries over the 6 topics (English and Russian
+  editions; one Armenian-script query), each with `when:2h`. Edit there, no code change.
+- **Where it runs:** the last step of `hourly.yml`, after the real job has finished, as its own
+  process with **only the D1 secrets** (no AI keys, so it cannot make an AI call),
+  `continue-on-error`, a 2-minute cap, a 15-second fetch budget, and an exit code that is always 0.
+  It skips if a shadow run happened in the last 40 minutes.
+- **What it does** (`job/shadow.py`, `job/gnews.py`): fetch all queries (8 in parallel; about
+  0.5-3 s), keep one row per Google article id, drop ids already stored, then compare each new
+  title with the live `items` titles of the last 24 h (read only) and the shadow titles of the last
+  24 h: rarity-weighted shared words over the smaller title (`title_dup_threshold` 0.5). The scores
+  are stored, so the threshold can be re-judged later. Writes go only to `shadow_items` and
+  `shadow_runs` (§5); errors to `shadow_runs.error`, never to `errors`. Rows older than 3 days are
+  pruned by the step itself.
+- **What Google gives:** titles only ("Headline - Outlet", no snippet), the outlet's name and
+  site, a date, and a `news.google.com/rss/articles/<id>` link. The real article URL needs two
+  more requests per link (`gnews.resolve`, 0.3-1.7 s), so a production design would resolve only
+  stories that reach a digest. The feed's copyright notice restricts use to "a personal feed
+  reader for personal, non-commercial use" (Step 6 report).
+- **One-off AI measurement:** `scripts/shadow_ai_sample.py` runs the real first pass over a
+  sample of shadow items in an in-memory sandbox, with the live pool's last 24 h of stories copied
+  in as existing stories. Nothing is written to D1.
+
 ## 4. Time zones and scheduling
 
 - Each user has `timezone` (IANA name, e.g. `Asia/Yerevan`) and `digest_times`, a list of 1 to 5
@@ -375,6 +404,7 @@ the icon centring (28 checks since Step 5).
 | `job_runs` | `id`, `started_at`, `finished_at`, `status` (running/ok/partial/ai_failed/error), counts, `provider`, tokens (both AI calls), `pruned`, `error`, `d1_rows_read`, `d1_rows_written` (Step 4), `editor_status` (ok/failed/skipped), `editor_candidates`, `editor_merged` (Step 5) | Admin tab |
 | `ai_calls` | `id`, `at`, `provider`, `model`, `ok`, `input_tokens`, `output_tokens`, `ms`, `error`, `kind` (Step 5: `batch` or `editor`) | Admin tab: AI usage |
 | `errors` | `id`, `at`, `component` (job/worker), `message` | Admin tab: recent errors |
+| `shadow_items`, `shadow_runs` | Step 6 experiment only (§3a): one row per Google News article (title, outlet, link, date, query, title-similarity to the live pool and to earlier shadow rows) and one row per shadow run (counts per topic, HTTP codes, errors, its own D1 rows) | read by nobody but the experiment's scripts; pruned after 3 days (runs after 30) |
 
 `sent` is the only per-user table besides `users`, and deleting a user must also delete their `sent`
 rows (lesson 16 in LESSONS.md). Indexes are kept to a minimum because every index update counts as
@@ -525,7 +555,10 @@ worker/scripts/api-check.mjs              checks the live API (signed with the t
 worker/scripts/migrate-times.mjs          Step 5, once: half-hour digest times -> nearest hour
 worker/wrangler.toml                      Worker config: D1 binding, crons, assets, vars (no secrets)
 docs/screenshots/                         the Mini App at 390 px, light and dark (demo data)
-.github/workflows/                        hourly.yml, backup-schedule.yml, check-feeds.yml
+.github/workflows/                        hourly.yml, backup-schedule.yml, check-feeds.yml, gnews-probe.yml
+config/gnews_queries.yaml                 Step 6: Google News search terms (shadow experiment)
+job/gnews.py, job/shadow.py               Step 6: Google News fetch/parse/resolve; shadow collection
+scripts/gnews_probe.py, shadow_ai_sample.py   Step 6: feasibility probe; sandbox AI sample
 ```
 
 ## 10. Known design risks
