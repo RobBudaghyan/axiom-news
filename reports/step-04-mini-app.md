@@ -20,7 +20,7 @@ Cloudflare Worker, at `https://axiom-news.axiom-news-worker.workers.dev/app/`.
 - **Security:** every request is checked against Telegram's signature on the server. Admin
   requests from anyone but you are refused (403), whatever the app shows.
 - **Speed:** every API call stays well under the 10 ms CPU limit, measured on Cloudflare: open
-  3-6 ms, save 1-5 ms, admin data __ADMIN_CPU__.
+  3-6 ms, save 1-5 ms, admin data 0-3 ms (2 ms with real data for all 115 feeds).
 - **Look:** it follows Telegram's light and dark themes, with one fixed blue accent, iOS-style
   rounded groups, haptic taps, and Telegram's own Back and bottom buttons. Screenshots are in
   `docs/screenshots/`.
@@ -217,6 +217,10 @@ preview's imitation of Telegram's button.
   them."
 - **What I could not do from here:** open the app inside the real Telegram on a phone. Whether
   it renders, vibrates and accepts your signature on your phone is on your list below.
+- **But it looks like you already tried it:** at 07:40 UTC your settings row showed 15 stories
+  and a time zone chosen by hand. My checks never set those values, and they put back whatever
+  they change. A save only gets through with Telegram's signature, so saving from your phone
+  works. Nothing was logged as an error.
 
 ### Worker CPU against the 10 ms limit (measured on Cloudflare, `wrangler tail` cpuTime)
 | Call | Calls measured | CPU |
@@ -224,7 +228,7 @@ preview's imitation of Telegram's button.
 | `POST /api/open` (open the app) | 4 | 3, 3, 4, **6** ms (6 = a cold start) |
 | `POST /api/settings` (save a change) | 12 | 1-5 ms |
 | `GET /api/admin` (Admin tab) | 12 | 0-3 ms (before any feed data existed) |
-| `GET /api/admin` with real feed health | __N_ADMIN2__ | __ADMIN2__ |
+| `GET /api/admin` with real feed health | 4 | 2, 2, 2, 2 ms (wall time 21-27 ms; the 403 and 401 refusals in the same checks took 0 ms) |
 | `POST /telegram` `/settings` | 1 | 2 ms |
 | 5-minute tick (with the new D1 counter) | 2 | 2 ms |
 
@@ -233,7 +237,21 @@ at 6 ms in Step 3. I did not press either admin button on the live system: those
 try (see below).
 
 ### The first hourly run with the new job code
-__RUN__
+- **When:** 06:57 UTC (10:57 in Yerevan), run 18. GitHub's backup schedule started it, 20 minutes
+  after its :37 slot. The last run had started 49 minutes earlier, more than the backup's
+  45-minute rule, so it ran.
+- **Result:** ok in 22 seconds. 115 of 115 feeds fetched, 311 items, 118 new; 8 new stories,
+  19 items merged into existing stories, 70 dropped as not news. One Gemini call (17,309 tokens
+  in, 3,160 out).
+- **New D1 count:** the job recorded its own database use for the first time: 2,838 rows read
+  and 662 written (the free daily limits are 5,000,000 and 100,000).
+- **Feed health:** it wrote the new feed health row (115 feeds, about 12 KB). No feed was
+  failing, and none had been silent for 48 hours. The quietest were four Economist feeds (newest
+  item 41-44 hours old) and War on the Rocks (37 hours). The Times of Israel is switched off, so
+  it is not listed.
+- **No double run:** at 07:07 the Worker started the job as usual, and the job stopped itself as
+  designed: "skipped: a run started 11 min ago (min gap 20 min)".
+- **Admin tab:** this real data is what the 2 ms CPU row above was measured on.
 
 ## Decisions I made and why
 - **No framework, three files.** The whole app is 20 KB compressed and opens instantly. It is
@@ -283,7 +301,11 @@ __RUN__
   calls and then ends loses its count). The job's exact numbers are most of the total.
 - **The session was interrupted once by a restart.** Afterwards I re-checked the working tree and
   re-ran all tests before continuing; nothing was lost.
-- **The backup schedule (:37)** from Step 3 is unchanged by this step.
+- **The backup schedule (:37)** from Step 3 is unchanged by this step. Today it fired for the
+  first time, 20 minutes late, and ran the job at 06:57 because the 06:08 run was 49 minutes
+  old. That made the 07:07 run skip, so the job ran at :57 instead of :07 that hour. Harmless,
+  but if GitHub keeps firing it this late, raising its rule from 45 to 55 minutes would keep it
+  for the case it is meant for: a missed :07 run.
 
 ## What the owner must do
 On your phone, in the chat with the TEST bot **@justatia_bot**:
@@ -306,12 +328,16 @@ On your phone, in the chat with the TEST bot **@justatia_bot**:
    - remove it again with the grey minus;
    - open Add a time once more and leave with Telegram's **Back** arrow (top left): nothing
      should be added.
-5. **Stories per digest:** tap + and then −. It should end where it started.
+5. **Stories per digest:** tap − and then +. It should end where it started (you have 15, the
+   most allowed, so + alone does nothing).
 6. **Format:** tap **Simple list**, then **By topic** again (or keep the one you like; the next
    digest uses it).
-7. **Time zone:** it should say **Yerevan, GMT+4** and "Set automatically from your phone".
+7. **Time zone:** it should say **Yerevan, GMT+4**. Your settings show you already picked a zone
+   by hand, so the line under it says "Chosen by you." If it also says "Your phone is on ... time",
+   please tell me which city it names.
    - Open it, search **London** and pick it. The next digest time should change.
-   - Then tap **Use it** under the row to go back to Yerevan.
+   - Then tap **Use it** under the row (or pick Yerevan again) to go back. Picking your phone's
+     own zone switches it back to "Set automatically from your phone".
 8. **Pause:** switch it on. The top card says "Paused". Switch it off again: the next digest is
    back.
 9. **Admin tab** (the switch at the top, only you have it):

@@ -287,7 +287,7 @@ SQL) gives:
 |---|---|---|
 | `POST /api/open` `{tz}` | create the user if new, save the device zone, return settings | 3-6 ms (6 = cold start) |
 | `POST /api/settings` | validate (`src/settings.js`), save, recompute `next_digest_at` | 1-5 ms |
-| `GET /api/admin` | owner only: everything above | see the report for the figure with real data |
+| `GET /api/admin` | owner only: everything above | 0-3 ms; 2 ms with real health data for all 115 feeds (4 calls) |
 | `POST /api/admin/digest`, `/run-job` | owner only: the two buttons | not run against production by me |
 
 **Bot.** `/start` and `/settings` carry an inline "Open settings" `web_app` button. The chat menu
@@ -417,7 +417,7 @@ Other free options checked and **rejected** (2026-11-13):
 | Service | Limit | Our expected use | Source |
 |---|---|---|---|
 | Workers Free | 100,000 requests/day | < 1,000/day (288 cron ticks, plus webhook and Mini App calls) | [Workers limits](https://developers.cloudflare.com/workers/platform/limits/) |
-| Workers Free | **10 ms CPU** per HTTP request and per Cron Trigger. Waiting on D1/fetch does not count. "Each isolate has some built-in flexibility" for infrequent overruns; consistent overruns are terminated (error 1102, `exceededCpu`) | **measured on Cloudflare 2026-11-13** (`wrangler tail` cpuTime): idle tick 4 ms; tick with 1 due user 6 ms; 20 users 10-27 ms; 40 users 46 ms. Hence **8 users per tick** (≈6-12 ms) and dedupe moved into the job. **Mini App API, measured 2026-11-14:** open 3-6 ms, save 1-5 ms, admin data 0-3 ms (see §4a) | same |
+| Workers Free | **10 ms CPU** per HTTP request and per Cron Trigger. Waiting on D1/fetch does not count. "Each isolate has some built-in flexibility" for infrequent overruns; consistent overruns are terminated (error 1102, `exceededCpu`) | **measured on Cloudflare 2026-11-13** (`wrangler tail` cpuTime): idle tick 4 ms; tick with 1 due user 6 ms; 20 users 10-27 ms; 40 users 46 ms. Hence **8 users per tick** (≈6-12 ms) and dedupe moved into the job. **Mini App API, measured 2026-11-14:** open 3-6 ms, save 1-5 ms, admin data 0-3 ms, 2 ms with all 115 feeds' health (see §4a) | same |
 | Workers Free | 50 subrequests per invocation (D1 calls and `fetch` count) | per cron tick: 1 batched read, 1 batched candidate read, 1 Telegram call per user, 1 batched write (+1 alert): about 12 with 8 users | same; [D1 limits](https://developers.cloudflare.com/d1/platform/limits/) ("a `db.batch()` call counts as one query") |
 | Workers Free | 5 Cron Triggers per account | 2 (`*/5 * * * *`, `7 * * * *`) | Workers limits |
 | Workers static assets | "Requests to static assets are free and unlimited" | Mini App files | [Static assets billing](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/) |
