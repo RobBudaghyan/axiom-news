@@ -15,7 +15,10 @@
 #                ed   the edition to search (a key of `editions`)
 #   enabled    false switches the whole shadow step off.
 
-enabled: true
+# Paused on 2026-11-14 (Step 7): the coverage gap was our own feeds, not Google. The code and the
+# shadow_* tables are kept for later reuse (custom topics such as "Colombia" with no curated feed).
+# With false, the hourly workflow's shadow step exits before any D1 or Google request.
+enabled: false
 window: 2h
 timeout_s: 8          # per request; the whole step has its own budget (job/shadow.py)
 # Title similarity (0-1, rarity-weighted shared words) at which a Google result counts as the

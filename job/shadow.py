@@ -24,6 +24,7 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, wait
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Callable
 
 from job import gnews
@@ -265,15 +266,22 @@ class Shadow:
 def main(argv: list[str] | None = None) -> int:
     """Always exits 0: a shadow failure must never mark the hourly workflow as failed."""
     for stream in (sys.stdout, sys.stderr):
-        stream.reconfigure(encoding="utf-8", errors="replace")
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser(description="Coverage experiment: collect Google News results (shadow only).")
     ap.add_argument("--dry-run", action="store_true", help="fetch and compare, print, write nothing")
     ap.add_argument("--show", type=int, default=0, help="with --dry-run: print this many new titles")
+    ap.add_argument("--config", default=None, help=argparse.SUPPRESS)   # tests: another queries file
     args = ap.parse_args(argv)
     try:
+        cfg = gnews.load_queries(Path(args.config)) if args.config else gnews.load_queries()
+        if not cfg.get("enabled", True):
+            # Paused (Step 7): stop before any D1 or Google request.
+            print("shadow: disabled in config/gnews_queries.yaml (no requests made)")
+            return 0
         env = load_env()
         db = D1(env["CLOUDFLARE_ACCOUNT_ID"], env["D1_DATABASE_ID"], env["CLOUDFLARE_D1_TOKEN"], timeout=20)
-        sh = Shadow(db)
+        sh = Shadow(db, cfg=cfg)
         if not args.dry_run and sh.recent_run(int(time.time())) is not None:
             print("shadow: skipped, a shadow run happened less than 40 min ago")
             return 0

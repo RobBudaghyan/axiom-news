@@ -9,6 +9,10 @@ on:
         description: "Also re-test feeds marked enabled: false"
         type: boolean
         default: true
+      file:
+        description: "Feed list to check (default config/sources.yaml), e.g. config/candidates/armenia.yaml"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -25,7 +29,9 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - name: Check every feed
-        run: python scripts/check_feeds.py ${{ inputs.all && '--all' || '' }} --json feeds.json || true
+        env:
+          FEED_FILE: ${{ inputs.file }}
+        run: python scripts/check_feeds.py ${{ inputs.all && '--all' || '' }} ${FEED_FILE:+--file "$FEED_FILE"} --json feeds.json || true
       - uses: actions/upload-artifact@v4
         with:
           name: feed-check

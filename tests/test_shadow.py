@@ -222,6 +222,29 @@ class TestShadow(unittest.TestCase):
         sh.run()
         self.assertEqual(db.query("SELECT count(*) AS n FROM shadow_runs")[0]["n"], 0)
 
+    def test_disabled_main_makes_no_requests(self):
+        """Step 7 pause: main() must stop before reading .env, creating the D1 client or
+        fetching anything."""
+        import io
+        import tempfile
+        from contextlib import redirect_stdout
+        from pathlib import Path
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "q.yaml"
+            path.write_text("enabled: false\ntopics: {}\n", encoding="utf-8")
+            out = io.StringIO()
+            with mock.patch.object(shadow, "D1") as d1, mock.patch.object(shadow, "load_env") as env, \
+                    mock.patch.object(shadow, "Shadow") as fetch, redirect_stdout(out):
+                self.assertEqual(shadow.main(["--config", str(path)]), 0)
+            d1.assert_not_called()
+            env.assert_not_called()
+            fetch.assert_not_called()
+            self.assertIn("disabled", out.getvalue())
+
+    def test_shipped_config_is_paused(self):
+        self.assertFalse(gnews.load_queries().get("enabled", True))
+
 
 if __name__ == "__main__":
     unittest.main()

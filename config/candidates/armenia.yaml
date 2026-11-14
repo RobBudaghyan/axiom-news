@@ -1,0 +1,23 @@
+# Step 7 candidate Armenian feeds, tested with scripts/check_feeds.py --file (PC) and the
+# "check feeds" workflow with this file (GitHub's runners). Not read by the hourly job.
+# The ones that passed were copied into config/sources.yaml; see reports/step-07-armenia-sources.md.
+sources:
+  - {key: news_am_ru, name: News.am, url: "https://news.am/ru/rss", region: armenia, language: ru, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2}
+  - {key: news_am_hy, name: News.am, url: "https://news.am/hy/rss", region: armenia, language: hy, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2}
+  - {key: factor_am, name: Factor.am, url: "https://factor.am/feed", region: armenia, language: hy, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2}
+  - {key: aravot, name: Aravot, url: "https://www.aravot.am/feed/", region: armenia, language: hy, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2}
+  - {key: am168, name: 168.am, url: "https://168.am/feed", region: armenia, language: hy, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 3}
+  - {key: hraparak, name: Hraparak, url: "https://hraparak.am/rss-feeds", region: armenia, language: hy, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 3}
+  - {key: a1plus, name: A1+, url: "https://www.a1plus.am/hy/rss", region: armenia, language: hy, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2}
+  - {key: arminfo_ru, name: ArmInfo, url: "https://arminfo.info/feeds/russian_rss.xml", region: armenia, language: ru, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2}
+  - {key: arminfo_en, name: ArmInfo, url: "https://arminfo.info/feeds/english_rss.xml", region: armenia, language: en, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2}
+  - {key: pastinfo, name: Pastinfo, url: "https://pastinfo.am/hy/rss.xml", region: armenia, language: hy, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 3}
+  - {key: news24_am, name: 24news.am, url: "https://24news.am/feed/", region: armenia, language: hy, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 3}
+  - {key: golos_armenii, name: Golos Armenii, url: "https://golosarmenii.am/arm/feed/", region: armenia, language: hy, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 3}
+  - {key: mediamax_ru, name: Mediamax, url: "https://mediamax.am/ru/index.rss", region: armenia, language: ru, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2}
+  - {key: mediamax_en, name: Mediamax, url: "https://mediamax.am/en/index.rss", region: armenia, language: en, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2}
+  - {key: civilnet_hy, name: CivilNet, url: "https://civilnet.am/hy/rss", region: armenia, language: hy, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2}
+  - {key: hetq_hy, name: Hetq, url: "https://hetq.am/hy/rss", region: armenia, language: hy, topics: [armenia], paywalled: false, state_owned: false, tier: 2}
+  - {key: azatutyun_ru, name: Azatutyun, url: "https://rus.azatutyun.am/", region: armenia, language: ru, topics: [armenia, politics], paywalled: false, state_owned: true, tier: 2}
+  - {key: arka_ru, name: ARKA, url: "https://arka.am/ru/rss/", region: armenia, language: ru, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2}
+  - {key: lragir, name: Lragir, url: "https://www.lragir.am/feed/", region: armenia, language: hy, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 3}
