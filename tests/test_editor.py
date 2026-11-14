@@ -187,6 +187,15 @@ class Validation(unittest.TestCase):
         s = story(self.db, e)
         self.assertEqual((s["final_score"], s["headline"], s["description"], s["emojis"]), (6, "Old head", "Old desc.", "🏛️"))
 
+    def test_a_repeated_headline_with_empty_fields_does_not_wipe_them(self):
+        e = add_story(self.db, "Edited", ["politics"], edited={"score": 7, "headline": "Old head",
+                                                                 "description": "Old desc.", "emojis": "🏛️"})
+        ed, _ = make_editor(self.db, [FakeProvider("gemini", [lambda p: answer(([e], 7, "Edited", "", ""),
+                                                                                 ([self.a, self.b], 5, "Grain deal", "", "🌾"))])])
+        ed.run(T0)
+        s = story(self.db, e)
+        self.assertEqual((s["headline"], s["description"], s["emojis"]), ("Edited", "Old desc.", "🏛️"))
+
 
 class Writes(unittest.TestCase):
     def setUp(self):

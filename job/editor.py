@@ -446,10 +446,12 @@ def write_statements(events: list[Event], by_id: dict[int, dict], topic_order: l
         tagset = {t for s in group for t in tags(s)}
         best = min(group, key=lambda s: (s["best_tier"], s["best_published_at"] if s["best_published_at"]
                                          is not None else float("inf"), s["id"]))
-        if ev.rewrite:
-            head, desc, emo = ev.headline, ev.description, ev.emojis
-        else:
-            head, desc, emo = leader.get("headline"), leader.get("description"), leader.get("emojis")
+        # Field by field: a new valid value wins, otherwise the story keeps what it had. Seen on
+        # 2026-11-14: the editor repeated an edited story's headline but left its emojis and
+        # description empty, which wiped them.
+        head = ev.headline or leader.get("headline")
+        desc = ev.description or leader.get("description")
+        emo = ev.emojis or leader.get("emojis")
         stmts.append((
             "UPDATE stories SET final_score=?, headline=?, description=?, emojis=?, edited_at=?, topics=?, "
             "best_url=?, best_source=?, best_tier=?, best_published_at=?, updated_at=?, source_count=? "
@@ -511,13 +513,13 @@ class Editor:
         self.log = log
         self.debug_dir = Path(debug_dir) if debug_dir else None
 
-    def pool(self, now: int, min_importance: int | None = None) -> list[dict]:
+    def pool(self, now: int, min_importance: int | None = None, hours: float = 24) -> list[dict]:
         floor = self.s.editor_min_importance if min_importance is None else min_importance
-        return self.db.query(POOL_SQL, [now - DAY, floor])
+        return self.db.query(POOL_SQL, [int(now - hours * 3600), floor])
 
-    def run(self, now: int, min_importance: int | None = None) -> EditorResult:
+    def run(self, now: int, min_importance: int | None = None, hours: float = 24) -> EditorResult:
         out = EditorResult()
-        pool = self.pool(now, min_importance)
+        pool = self.pool(now, min_importance, hours)
         for plan in self.plans:
             p = plan.provider
             small = p.name == "groq"
@@ -596,6 +598,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--backfill", action="store_true", help="repeat until the pool is edited")
     parser.add_argument("--rounds", type=int, default=8, help="max calls in --backfill mode")
     parser.add_argument("--min-importance", type=int, default=None, help="first-pass score floor")
+    parser.add_argument("--hours", type=float, default=24, help="pool window (default 24 h, like the job)")
     parser.add_argument("--debug-dir", default=None, help="save prompts and answers here")
     args = parser.parse_args(argv)
     from job.config import load_env, load_prompt, load_topics
@@ -616,7 +619,7 @@ def main(argv: list[str] | None = None) -> int:
                 debug_dir=args.debug_dir)
     rounds = args.rounds if args.backfill else 1
     for n in range(rounds):
-        res = ed.run(int(time.time()), args.min_importance)
+        res = ed.run(int(time.time()), args.min_importance, args.hours)
         print(f"round {n + 1}: {res.line()}")
         for e in res.errors + res.guard_dropped:
             print(f"  note: {e[:300]}")
