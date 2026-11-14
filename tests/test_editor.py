@@ -155,10 +155,11 @@ class Validation(unittest.TestCase):
 
     def test_fact_guard_accepts_acronyms_first_names_and_demonyms(self):
         src = ("Tayyip Erdogan met officials at the Asia-Pacific Economic Cooperation summit. "
-               "The F.A.A. grounded flights. Iran said so.")
+               "The F.A.A. grounded flights. Iran said so. AI-generated images spread.")
         for text in ["Officials said Recep Tayyip Erdogan spoke at the APEC summit.",
                      "Flights were grounded by The Federal Aviation Administration.",
-                     "Officials said Iranian ships left."]:
+                     "Officials said Iranian ships left.",
+                     "Officials said AI-made images spread."]:
             self.assertEqual(editor.unknown_facts(text, src, True), [], text)
         self.assertEqual(editor.unknown_facts("Officials said Macron came.", src, False), [])  # non-Latin: numbers only
 

@@ -288,8 +288,8 @@ def unknown_facts(text: str, source: str, check_names: bool) -> list[str]:
         if prv and text[prv.end():m.start()] == " " and _stem(prv.group(0)) in known:
             continue
         for part in re.split(r"[-.]", word):
-            if len(part) <= 1 or part in ALWAYS_OK:
-                continue
+            if len(part) <= 1 or part in ALWAYS_OK or not part[0].isupper():
+                continue          # "AI-generated": only capitalised parts can be names
             low = part.lower()
             # a demonym of a name in the source: "Iranian" for "Iran", "Azerbaijani" for "Azerbaijan"
             if _stem(part) not in known and not any(low.startswith(w) for w in roots):
