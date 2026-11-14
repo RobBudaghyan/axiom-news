@@ -59,6 +59,16 @@ class Settings:
     log_retention_days: int = 30         # job_runs, ai_calls, errors
     fetch_workers: int = 16
     fetch_timeout_s: float = 20
+    # Editor pass (Step 5, job/editor.py): one extra AI call per run over the strongest stories.
+    editor_new: int = 45                 # not-yet-edited stories per call
+    editor_per_topic: int = 3            # ...of which the best few of every topic come first
+    editor_compare: int = 15             # already-edited stories shown for comparison and merging
+    editor_items_per_story: int = 3      # article titles/snippets shown per story
+    editor_min_importance: int = 4       # first-pass score floor for candidates
+    editor_groq_new: int = 10            # Groq's 8k tokens/minute (prompt + reply) fits far fewer
+    editor_groq_per_topic: int = 1
+    editor_groq_compare: int = 2
+    editor_groq_items: int = 2
 
 
 def load_topics() -> list[dict]:

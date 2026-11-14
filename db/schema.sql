@@ -12,14 +12,14 @@ CREATE TABLE IF NOT EXISTS users (
   timezone       TEXT NOT NULL DEFAULT 'Asia/Yerevan',
   tz_detected    INTEGER NOT NULL DEFAULT 0,        -- 0 default zone, 1 from the device (Mini App), 2 chosen by hand
   digest_times   TEXT NOT NULL DEFAULT '["09:00","14:00","20:00"]',
-  max_stories    INTEGER NOT NULL DEFAULT 7,        -- 3..15
+  max_stories    INTEGER NOT NULL DEFAULT 7,        -- unused since Step 5 (digests have no fixed count)
   topics         TEXT NOT NULL DEFAULT '[]',        -- JSON list of topic tags
   paused         INTEGER NOT NULL DEFAULT 0,
   blocked        INTEGER NOT NULL DEFAULT 0,        -- 1 after Telegram 403 (user blocked the bot)
   created_at     INTEGER NOT NULL,
   last_digest_at INTEGER,
   next_digest_at INTEGER,
-  format         TEXT                               -- 'A' or 'B' (Mini App); NULL = config/digest.json default
+  format         TEXT                               -- unused since Step 5 (one format for everyone)
 );
 CREATE INDEX IF NOT EXISTS idx_users_next ON users(next_digest_at);
 
@@ -67,7 +67,14 @@ CREATE TABLE IF NOT EXISTS stories (
   source_count      INTEGER NOT NULL DEFAULT 1,     -- items attached to this story
   created_at        INTEGER NOT NULL,
   updated_at        INTEGER NOT NULL,
-  dup_group         INTEGER                         -- near-duplicate group leader (job/dupes.py); NULL = not grouped yet
+  dup_group         INTEGER,                        -- near-duplicate group leader (job/dupes.py); NULL = not grouped yet
+  -- Step 5, written by the editor pass (job/editor.py):
+  headline          TEXT,                           -- one sentence for the digest; NULL = use summary
+  description       TEXT,                           -- 1-3 sentences, only facts from the items
+  emojis            TEXT,                           -- e.g. flags of the main actors + a subject emoji
+  final_score       INTEGER,                        -- strict editorial score 1..10; NULL = not edited
+  edited_at         INTEGER,                        -- NULL = not edited yet, or needs re-editing
+  merged_into       INTEGER                         -- the editor found this is a duplicate of that story
 );
 CREATE INDEX IF NOT EXISTS idx_stories_updated ON stories(updated_at);
 
@@ -102,7 +109,10 @@ CREATE TABLE IF NOT EXISTS job_runs (
   pruned             INTEGER,                       -- rows deleted by the daily prune, NULL if skipped
   error              TEXT,
   d1_rows_read       INTEGER,                       -- D1's own counts for this run (Admin tab: D1 use today)
-  d1_rows_written    INTEGER
+  d1_rows_written    INTEGER,
+  editor_status      TEXT,                          -- Step 5: ok, failed, skipped (no candidates)
+  editor_candidates  INTEGER,
+  editor_merged      INTEGER                        -- stories the editor merged into another
 );
 
 CREATE TABLE IF NOT EXISTS ai_calls (
@@ -116,7 +126,8 @@ CREATE TABLE IF NOT EXISTS ai_calls (
   input_tokens  INTEGER,
   output_tokens INTEGER,
   ms            INTEGER,
-  error         TEXT
+  error         TEXT,
+  kind          TEXT                                -- Step 5: 'batch' (pass 1) or 'editor'; NULL = batch
 );
 
 -- Small key/value state. Worker: last_alert_at, last_alerted_run_id, last_alert_text, d1_worker

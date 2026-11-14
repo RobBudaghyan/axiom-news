@@ -101,6 +101,7 @@ def group(stories: list[dict], threshold: float) -> tuple[dict[int, int], list[t
 
 
 POOL_SQL = ("SELECT id, summary, dup_group FROM stories WHERE updated_at >= ? AND importance >= ? "
+            "AND merged_into IS NULL "
             "ORDER BY importance DESC, updated_at DESC, id DESC")
 
 

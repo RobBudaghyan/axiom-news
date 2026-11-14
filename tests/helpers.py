@@ -138,12 +138,12 @@ class FakeProvider:
         return ai.CallResult(self.name, self.model, r if isinstance(r, str) else json.dumps(r), 1000, 200, 5)
 
 
-def make_job(db, gemini, groq, feeds, clock, **settings_overrides) -> Job:
+def make_job(db, gemini, groq, feeds, clock, editor_enabled=False, **settings_overrides) -> Job:
     s = Settings(**settings_overrides)
     plans = [ProviderPlan(gemini, s.gemini_max_input_tokens, s.existing_max, 4),
              ProviderPlan(groq, s.groq_chunk_tokens, s.groq_existing_max, s.groq_max_chunks_per_run)]
     return Job(db, plans, settings=s, topics=TOPICS, sources=SOURCES, fetcher=feeds, clock=clock,
-               log=lambda _msg: None)
+               log=lambda _msg: None, editor_enabled=editor_enabled)
 
 
 class FakeResponse:

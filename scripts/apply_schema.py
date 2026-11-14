@@ -19,6 +19,17 @@ MIGRATIONS = [
     "ALTER TABLE users ADD COLUMN format TEXT",           # Step 4: per-user digest format (Mini App)
     "ALTER TABLE job_runs ADD COLUMN d1_rows_read INTEGER",     # Step 4: Admin tab, D1 use today
     "ALTER TABLE job_runs ADD COLUMN d1_rows_written INTEGER",
+    # Step 5: the editor pass
+    "ALTER TABLE stories ADD COLUMN headline TEXT",
+    "ALTER TABLE stories ADD COLUMN description TEXT",
+    "ALTER TABLE stories ADD COLUMN emojis TEXT",
+    "ALTER TABLE stories ADD COLUMN final_score INTEGER",
+    "ALTER TABLE stories ADD COLUMN edited_at INTEGER",
+    "ALTER TABLE stories ADD COLUMN merged_into INTEGER",
+    "ALTER TABLE job_runs ADD COLUMN editor_status TEXT",
+    "ALTER TABLE job_runs ADD COLUMN editor_candidates INTEGER",
+    "ALTER TABLE job_runs ADD COLUMN editor_merged INTEGER",
+    "ALTER TABLE ai_calls ADD COLUMN kind TEXT",
 ]
 
 

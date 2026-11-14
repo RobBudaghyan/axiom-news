@@ -20,7 +20,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 from typing import Callable
 
-from job import ai, dupes
+from job import ai, dupes, editor
 from job.config import Prompt, Settings, load_env, load_prompt, load_sources, load_topics
 from job.d1 import D1, in_list_statements, insert_statements
 from job.fetch import Entry, FeedResult, candidates, feed_health, fetch_all, select_new
@@ -65,6 +65,7 @@ class RunStats:
     items_expired: int = 0
     items_left_pending: int = 0
     providers: list[str] = field(default_factory=list)
+    editor: "editor.EditorResult | None" = None
     ai_calls: int = 0
     input_tokens: int = 0
     output_tokens: int = 0
@@ -116,7 +117,7 @@ class Job:
                  prompt: Prompt | None = None,
                  fetcher: Callable[[list[dict], int], list[FeedResult]] | None = None,
                  clock: Callable[[], float] = time.time, log: Callable[[str], None] = print,
-                 debug_dir: str | None = None):
+                 debug_dir: str | None = None, editor_enabled: bool = True):
         self.db = db
         self.plans = plans
         self.s = settings or Settings()
@@ -130,6 +131,7 @@ class Job:
         self.calls_log: list[tuple] = []
         self.feed_health: dict | None = None   # written to meta.feed_health with the run log
         self.debug_dir = Path(debug_dir) if debug_dir else None   # saves raw prompts/answers
+        self.editor_enabled = editor_enabled   # tests of the first pass alone switch it off
 
     # ------------------------------------------------------------ steps
 
@@ -197,7 +199,8 @@ class Job:
         since = int(now - self.s.existing_window_h * 3600)
         return self.db.query(
             "SELECT id, summary, topics, importance, best_url, best_source, best_tier, "
-            "best_published_at FROM stories WHERE updated_at >= ? ORDER BY updated_at DESC LIMIT ?",
+            "best_published_at FROM stories WHERE updated_at >= ? AND merged_into IS NULL "
+            "ORDER BY updated_at DESC LIMIT ?",
             [since, limit])
 
     def render(self, items: list[dict], existing: list[dict], now: int) -> str:
@@ -309,10 +312,11 @@ class Job:
         (self.debug_dir / f"{stem}_prompt.txt").write_text(prompt, encoding="utf-8")
         (self.debug_dir / f"{stem}_answer.json").write_text(text, encoding="utf-8")
 
-    def _log_call(self, p, ok, n_items, res: ai.CallResult | None, error: str | None) -> None:
+    def _log_call(self, p, ok, n_items, res: ai.CallResult | None, error: str | None,
+                  kind: str = "batch") -> None:
         self.calls_log.append((int(self.clock()), p.name, p.model, 1 if ok else 0, n_items,
                                res.input_tokens if res else None, res.output_tokens if res else None,
-                               res.ms if res else None, (error or "")[:500] or None))
+                               res.ms if res else None, (error or "")[:500] or None, kind))
 
     def apply(self, stories: list[ai.StoryOut], chunk: list[dict], existing: list[dict],
               not_news: set[int], now: int, stats: RunStats) -> None:
@@ -351,11 +355,13 @@ class Job:
             else:
                 url, source, tier, pub = (old["best_url"], old["best_source"], old["best_tier"],
                                           old["best_published_at"])
+            # A new core fact (new summary) makes the editor's headline stale: edit it again.
             merge_stmts.append((
                 "UPDATE stories SET summary=?, topics=?, importance=?, best_url=?, best_source=?, "
-                "best_tier=?, best_published_at=?, source_count=source_count+?, updated_at=? WHERE id=?",
+                "best_tier=?, best_published_at=?, source_count=source_count+?, updated_at=?, "
+                "edited_at = CASE WHEN ? THEN NULL ELSE edited_at END WHERE id=?",
                 [summary, json.dumps([t for t in self.topic_order if t in tags]), importance, url,
-                 source, tier, pub, len(items), now, story_id]))
+                 source, tier, pub, len(items), now, 1 if summary != old["summary"] else 0, story_id]))
             item_updates.append((story_id, [i["id"] for i in items]))
 
         results = self.db.batch(inserts + merge_stmts)
@@ -374,6 +380,31 @@ class Job:
         stats.stories_merged += len(merges)
         stats.items_dropped += len(dropped)
         stats.items_unaccounted += sum(1 for i in dropped if i not in not_news)
+
+    # ------------------------------------------------------------ editor pass
+
+    def run_editor(self, now: int, stats: RunStats) -> "editor.EditorResult":
+        """The second AI call (job/editor.py). Never fails the run: if it cannot edit, the
+        stories keep their first-pass data and digests still work from it."""
+        ed = editor.Editor(
+            self.db, self.plans, topics=self.topics, facts=self.prompt.facts,
+            facts_checked=self.prompt.facts_checked, settings=self.s, log=self.log,
+            on_call=lambda p, ok, n, res, err: self._log_call(p, ok, n, res, err, kind="editor"),
+            debug_dir=self.debug_dir)
+        try:
+            res = ed.run(now)
+        except Exception as exc:
+            res = editor.EditorResult(status="failed", errors=[f"editor: {type(exc).__name__}: {exc}"])
+        stats.input_tokens += res.input_tokens
+        stats.output_tokens += res.output_tokens
+        stats.ai_errors += res.errors
+        if res.status == "failed" and not res.errors:
+            stats.ai_errors.append("editor: no provider gave a usable answer")
+        if res.guard_dropped:
+            stats.ai_errors.append(f"editor: fact guard dropped {len(res.guard_dropped)} texts: "
+                                   + "; ".join(res.guard_dropped)[:400])
+        self.log(res.line())
+        return res
 
     # ------------------------------------------------------------ housekeeping
 
@@ -426,6 +457,8 @@ class Job:
                 self.log(f"near-duplicate groups: {regrouped} stories changed group")
             except Exception as exc:
                 stats.ai_errors.append(f"dupes: {type(exc).__name__}: {exc}")
+            stats.editor = self.run_editor(now, stats) if self.editor_enabled else None
+            stats.ai_calls = len(self.calls_log)
             stats.pruned = self.prune_daily(now)
             processed = stats.items_pending_in - stats.items_left_pending
             if not left:
@@ -451,19 +484,23 @@ class Job:
             "UPDATE job_runs SET finished_at=?, status=?, feeds_ok=?, feeds_failed=?, items_fetched=?, "
             "items_new=?, items_pending_in=?, stories_created=?, stories_merged=?, items_dropped=?, "
             "items_expired=?, items_left_pending=?, provider=?, ai_calls=?, input_tokens=?, "
-            "output_tokens=?, pruned=?, error=?, d1_rows_read=?, d1_rows_written=? WHERE id=?",
+            "output_tokens=?, pruned=?, error=?, d1_rows_read=?, d1_rows_written=?, editor_status=?, "
+            "editor_candidates=?, editor_merged=? WHERE id=?",
             [int(self.clock()), status, stats.feeds_ok, stats.feeds_failed, stats.items_fetched,
              stats.items_new, stats.items_pending_in, stats.stories_created, stats.stories_merged,
              stats.items_dropped, stats.items_expired, stats.items_left_pending, stats.provider,
              len(self.calls_log), stats.input_tokens, stats.output_tokens, stats.pruned, error,
-             getattr(self.db, "rows_read", 0), getattr(self.db, "rows_written", 0), run_id])]
+             getattr(self.db, "rows_read", 0), getattr(self.db, "rows_written", 0),
+             stats.editor.status if stats.editor else None,
+             stats.editor.candidates if stats.editor else None,
+             stats.editor.merged if stats.editor else None, run_id])]
         if self.feed_health is not None:
             stmts.append(("INSERT INTO meta (key, value) VALUES ('feed_health', ?) "
                           "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
                           [json.dumps(self.feed_health, separators=(",", ":"), ensure_ascii=False)]))
         stmts += insert_statements(
             "ai_calls", ("at", "provider", "model", "ok", "items", "input_tokens", "output_tokens", "ms",
-                         "error", "run_id"),
+                         "error", "kind", "run_id"),
             [(*c, run_id) for c in self.calls_log])
         errors = list(stats.ai_errors) + ([error] if status == "error" and error else [])
         stmts += insert_statements("errors", ("at", "component", "message"),
@@ -483,6 +520,7 @@ class Job:
             f"items dropped {s.items_dropped} (of which unaccounted {s.items_unaccounted})",
             f"AI: provider {s.provider}, calls {s.ai_calls}, tokens in {s.input_tokens} out {s.output_tokens}"
             f" | pruned {s.pruned}",
+            s.editor.line() if s.editor else "editor: not run",
         ]
         if s.failed_feeds:
             lines.append("failed feeds: " + ", ".join(s.failed_feeds))
