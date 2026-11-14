@@ -32,8 +32,10 @@ async function api(path, init, body) {
 }
 const row = async () => (await db.query("SELECT first_name, timezone, tz_detected, digest_times, next_digest_at FROM users WHERE id = ?1", [owner]))[0];
 
-const ownerInit = await sign(owner, "Owner");
+// Sign as the owner with the name already stored: opening the app saves the Telegram first name
+// (lesson 14), so a made-up name here would overwrite the real one (happened once in Step 5).
 const before = await row();
+const ownerInit = await sign(owner, before?.first_name || "Owner");
 const opened = await api("/api/open", ownerInit, { tz: "Asia/Yerevan" });
 check("open as owner", opened.status === 200 && opened.body.is_owner === true, `${opened.status}, ${opened.ms} ms, is_owner ${opened.body.is_owner}`);
 
