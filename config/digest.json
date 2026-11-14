@@ -1,10 +1,12 @@
 {
-  "_comment": "Digest settings shared by the Worker cron and worker/scripts/digest-cli.mjs (one place, same behaviour). Edit here, then redeploy the Worker.",
-  "format": "B",
-  "line_emoji": true,
-  "default_stories": 7,
+  "_comment": "Digest settings shared by the Worker cron, worker/scripts/digest-cli.mjs and job/dupes.py (one place, same behaviour). Edit here, then redeploy the Worker. Scores: the editor's final_score (job/editor.py); a story the editor has not scored uses its first-pass importance minus unedited_offset.",
+  "editorial_bar": 7,
+  "topic_bar": 6,
+  "unedited_offset": 2,
+  "max_stories": 12,
   "min_importance": 4,
   "max_topic_share": 0.4,
+  "min_topic_cap": 2,
   "topic_specificity": ["ukraine_war", "iran_war", "armenia", "russia", "wars_conflicts", "politics"],
   "candidate_limit": 40,
   "dedupe_threshold": 0.45,
@@ -13,9 +15,7 @@
   "max_users_per_tick": 8,
   "default_timezone": "Asia/Yerevan",
   "default_times": ["09:00", "14:00", "20:00"],
-  "formats": ["A", "B"],
-  "settings_limits": {"earliest": "07:00", "latest": "22:00", "step_minutes": 30, "max_times": 5,
-                      "min_stories": 3, "max_stories": 15},
+  "settings_limits": {"earliest": "06:00", "latest": "23:00", "step_minutes": 60, "max_times": 5},
   "job_min_gap_minutes": 20,
   "silent_feed_hours": 48
 }

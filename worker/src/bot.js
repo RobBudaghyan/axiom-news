@@ -4,7 +4,7 @@
 import { CONFIG, describeSlot, nextSlot, parseList, zoneLabel } from "./digest.js";
 import { settingsButton } from "./telegram.js";
 
-export const SETTINGS_TEXT = "Choose your topics, digest times and how many stories you get. " +
+export const SETTINGS_TEXT = "Choose your topics and when your digests arrive. " +
   "Changes are saved as soon as you make them.";
 
 function listTimes(times) {
@@ -62,14 +62,14 @@ export async function handleUpdate(update, ctx) {
       const defaults = topics.filter((t) => t.is_default).map((t) => t.tag);
       user = {
         id, first_name: firstName, language, timezone: cfg.default_timezone,
-        digest_times: JSON.stringify(cfg.default_times), max_stories: cfg.default_stories,
+        digest_times: JSON.stringify(cfg.default_times),
         topics: JSON.stringify(defaults), paused: 0, created_at: now,
       };
       user.next_digest_at = nextSlot(now, user.timezone, cfg.default_times);
       await db.batch([{
-        sql: "INSERT INTO users (id, first_name, language, timezone, digest_times, max_stories, topics, " +
-             "created_at, next_digest_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9) ON CONFLICT(id) DO NOTHING",
-        params: [id, firstName, language, user.timezone, user.digest_times, user.max_stories, user.topics, now,
+        sql: "INSERT INTO users (id, first_name, language, timezone, digest_times, topics, " +
+             "created_at, next_digest_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) ON CONFLICT(id) DO NOTHING",
+        params: [id, firstName, language, user.timezone, user.digest_times, user.topics, now,
                  user.next_digest_at],
       }]);
     } else {

@@ -3,17 +3,19 @@
 // TEST bot token in .env (docs/LESSONS.md, lesson 11). Never prints secrets.
 //
 //   node scripts/digest-cli.mjs                    dry run: print the owner's next digest, write nothing
-//   node scripts/digest-cli.mjs --format B         dry run in format B
-//   node scripts/digest-cli.mjs --preview A        send a labelled preview to the owner, write nothing
+//   node scripts/digest-cli.mjs --preview          send a labelled preview (last 24 h) to the owner, write nothing
 //                                                   (add --dry to print it without sending)
 //   node scripts/digest-cli.mjs --send             send for real and record it (as the Worker does)
+//   node scripts/digest-cli.mjs --windows          replay the owner's digests of the last 24 h (tuning the bars;
+//                                                   --bars 7,6 tries other bars, --show prints the messages)
 //   (near-duplicate pairs: venv/Scripts/python -m job.dupes, from the project folder)
-//   node scripts/digest-cli.mjs --length 15        longest-headline 15-story digest: length check
+//   node scripts/digest-cli.mjs --length           the 12 longest real stories in one digest: length and split
 //   node scripts/digest-cli.mjs --cpu 20           CPU time to build 20 digests from the real pool
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import {
-  CONFIG, afterSendStatements, buildMessage, candidateStatement, planDigest, topicInfoFrom, visibleLength,
+  CONFIG, afterSendStatements, buildMessage, candidateStatement, hhmm, localParts, parseList, planDigest, storyScore,
+  topicInfoFrom, visibleLength,
 } from "../src/digest.js";
 import { sendHtml } from "../src/telegram.js";
 
@@ -64,6 +66,59 @@ function arg(name, fallback) {
   return v && !v.startsWith("--") ? v : fallback;
 }
 
+const POOL_COLUMNS = "id, summary, headline, description, emojis, main_topic, best_url, best_source, importance, final_score, " +
+  "topics, created_at, updated_at, dup_group";
+
+// The owner's digests of the last 24 h, replayed on the stories as they are now: each story is
+// placed in the window where it first appeared (created_at), and none is shown twice. For tuning
+// the bars:  --windows [--bars 7,6] [--show]
+async function windows(db, user, topics, now, cfg) {
+  const tz = user.timezone || cfg.default_timezone;
+  const times = parseList(user.digest_times, cfg.default_times);
+  const slots = [];   // every digest time of the user in the last 24 h (zones have 15-minute offsets at most)
+  for (let t = Math.ceil((now - 86400) / 900) * 900; t <= now; t += 900) {
+    const p = localParts(t, tz);
+    if (p.minute === 0 && times.includes(hhmm(p))) slots.push(t);
+  }
+  const partial = now - slots[slots.length - 1] > 3600;
+  if (partial) slots.push(now);   // the window that is still open: "so far"
+  const pool = await db.query(`SELECT ${POOL_COLUMNS} FROM stories WHERE created_at >= ?1 AND merged_into IS NULL ` +
+    "AND coalesce(final_score, importance - ?2) >= ?3", [slots[0] - 86400, cfg.unedited_offset, cfg.topic_bar]);
+  const sent = new Set();
+  const userTopics = parseList(user.topics);
+  const summary = [];
+  for (let i = 0; i < slots.length; i++) {
+    const end = slots[i];
+    const from = i ? slots[i - 1] : end - prevGap(end, tz, times);
+    const cands = pool.filter((s) => s.created_at >= from && s.created_at < end && !sent.has(s.id) &&
+      parseList(s.topics).some((t) => userTopics.includes(t)))
+      .sort((a, b) => storyScore(b, cfg) - storyScore(a, cfg) || b.updated_at - a.updated_at);
+    const plan = planDigest({ ...user, last_digest_at: from }, cands, topics, end, cfg);
+    for (const s of plan.stories) sent.add(s.id);
+    const byTopic = {};
+    for (const s of plan.stories) byTopic[s.primary] = (byTopic[s.primary] ?? 0) + 1;
+    const label = partial && i === slots.length - 1 ? `now ${hhmm(localParts(end, tz))} (window still open)` : hhmm(localParts(end, tz));
+    summary.push({ at: label, candidates: cands.length, stories: plan.stories.length, byTopic,
+      parts: plan.parts.length, chars: plan.parts.map(visibleLength) });
+    console.log(`\n=== digest at ${label} (${tz}), window from ${hhmm(localParts(from, tz))}: ` +
+      `${plan.stories.length} stories from ${cands.length} candidates >= topic bar, ${plan.parts.length} message(s)`);
+    for (const s of plan.stories) {
+      console.log(`  [${storyScore(s, cfg)}${s.final_score == null ? " unedited" : ""}${s.guaranteed ? ", topic's best" : ""}] ` +
+        `${s.primary}: ${s.emojis ?? ""} ${s.headline || s.summary}`);
+    }
+    if (process.argv.includes("--show")) console.log(`\n${plan.parts.join("\n\n----- next message -----\n\n")}`);
+  }
+  return summary;
+}
+
+// Gap before a slot: back to the previous digest time of the day (or yesterday's last one).
+function prevGap(end, tz, times) {
+  for (let back = 3600; back <= 86400; back += 3600) {
+    if (times.includes(hhmm(localParts(end - back, tz)))) return back;
+  }
+  return 86400;
+}
+
 async function main() {
   const env = loadEnv();
   const db = d1Rest(env);
@@ -74,54 +129,64 @@ async function main() {
     { sql: "SELECT tag, label_en, emoji, sort, is_default FROM topics ORDER BY sort", params: [] },
   ]);
   const user = users[0] ?? {
-    id: owner, topics: JSON.stringify(topics.map((t) => t.tag)), max_stories: CONFIG.default_stories,
+    id: owner, topics: JSON.stringify(topics.map((t) => t.tag)), first_name: "",
     timezone: CONFIG.default_timezone, digest_times: JSON.stringify(CONFIG.default_times), last_digest_at: null,
   };
-  // A preview shows the format with the last 24 h, as if nothing had been sent yet (id 0 has
-  // no `sent` rows); it is labelled as a preview and writes nothing.
+  const bars = arg("--bars");
+  const cfg = bars ? { ...CONFIG, editorial_bar: Number(bars.split(",")[0]), topic_bar: Number(bars.split(",")[1]) } : CONFIG;
+
+  if (process.argv.includes("--windows")) {
+    const s = await windows(db, user, topics, now, cfg);
+    console.log(`\nbars ${cfg.editorial_bar}/${cfg.topic_bar}: ` + s.map((w) => `${w.at} ${w.stories} (${Object.entries(w.byTopic)
+      .map(([k, v]) => `${k} ${v}`).join(", ")})`).join(" | "));
+    return;
+  }
+
+  // A preview shows the last 24 h as if nothing had been sent yet (id 0 has no `sent` rows); it is
+  // labelled as a preview and writes nothing.
   const previewing = process.argv.includes("--preview");
-  const st = candidateStatement(previewing ? { ...user, id: 0, last_digest_at: null } : user, now);
+  const st = candidateStatement(previewing ? { ...user, id: 0, last_digest_at: null } : user, now, cfg);
   const cands = await db.query(st.sql, st.params);
 
   if (process.argv.includes("--length")) {
-    const n = Number(arg("--length", "15"));
-    const longest = await db.query("SELECT id, summary, best_url, best_source, topics, importance FROM stories " +
-      "ORDER BY length(summary) + length(best_source) DESC LIMIT ?1", [n]);
-    for (const format of ["A", "B"]) {
-      const msg = buildMessage(longest.map((s) => ({ ...s, primary: JSON.parse(s.topics)[0] })),
-        { now, tz: user.timezone, lastDigestAt: null, topicInfo: topicInfoFrom(topics), format });
-      console.log(`format ${format}: ${msg.stories.length} of ${n} longest stories, visible length ` +
-        `${visibleLength(msg.text)} (limit 4096), raw HTML ${msg.text.length}`);
-    }
+    // The 12 longest real headlines and descriptions in one digest: how many messages, how long.
+    const longest = await db.query(`SELECT ${POOL_COLUMNS} FROM stories WHERE final_score IS NOT NULL ` +
+      "ORDER BY length(coalesce(headline, summary)) + length(coalesce(description, '')) DESC LIMIT ?1", [cfg.max_stories]);
+    const msg = buildMessage(longest.map((s) => ({ ...s, primary: JSON.parse(s.topics)[0] })),
+      { now, tz: user.timezone, lastDigestAt: null, name: user.first_name, topicInfo: topicInfoFrom(topics) }, cfg);
+    console.log(`${msg.stories.length} longest stories: ${msg.parts.length} message(s), visible lengths ` +
+      `${msg.parts.map(visibleLength).join(" + ")} (limit 4096 each), raw HTML ${msg.parts.map((p) => p.length).join(" + ")}`);
     return;
   }
 
   if (process.argv.includes("--cpu")) {
-    // Worst case: a full candidate list (the last 24 h, ignoring "sent"), 15 stories each.
+    // Worst case: a full candidate list (the last 24 h, ignoring "sent").
     const n = Number(arg("--cpu", "20"));
-    const pool = await db.query("SELECT id, summary, best_url, best_source, importance, topics, updated_at, dup_group FROM stories " +
-      "WHERE updated_at >= ?1 AND importance >= ?2 ORDER BY importance DESC, updated_at DESC, id DESC LIMIT ?3",
-      [now - 86400, CONFIG.min_importance, CONFIG.candidate_limit]);
-    planDigest({ ...user, max_stories: 15 }, pool, topics, now);   // warm-up (JIT), not counted
+    const pool = await db.query(`SELECT ${POOL_COLUMNS} FROM stories WHERE updated_at >= ?1 AND merged_into IS NULL ` +
+      "ORDER BY coalesce(final_score, importance - ?2) DESC LIMIT ?3", [now - 86400, cfg.unedited_offset, cfg.candidate_limit]);
+    planDigest(user, pool, topics, now, cfg);   // warm-up (JIT), not counted
     const t0 = process.cpuUsage();
-    for (let i = 0; i < n; i++) planDigest({ ...user, max_stories: 15 }, pool, topics, now);
+    for (let i = 0; i < n; i++) planDigest(user, pool, topics, now, cfg);
     const t = process.cpuUsage(t0);
     console.log(`${n} digests from ${pool.length} candidates: ${((t.user + t.system) / 1000).toFixed(1)} ms CPU ` +
       `(${((t.user + t.system) / 1000 / n).toFixed(2)} ms each, Node on this PC)`);
     return;
   }
 
-  const preview = arg("--preview", "A");
-  const format = preview ?? arg("--format", CONFIG.format);
-  const label = preview ? `<i>Preview ${preview}: ${preview === "A" ? "flat list" : "grouped by topic"}${preview === CONFIG.format ? " (default)" : ""}${CONFIG.line_emoji !== false ? ", with line emojis" : ""}</i>` : undefined;
-  const plan = planDigest(previewing ? { ...user, last_digest_at: null } : user, cands, topics, now, CONFIG, { format, label });
-  console.log(plan.text);
-  console.log(`\n[${plan.stories.length} stories from ${cands.length} candidates, visible length ${visibleLength(plan.text)}]`);
-  if ((process.argv.includes("--send") || preview) && !process.argv.includes("--dry")) {
-    const result = await sendHtml(env.TELEGRAM_BOT_TOKEN, owner, plan.text);
-    console.log(`[sent: Telegram message_id ${result.message_id}]`);
-    if (!preview) {
-      await db.batch(afterSendStatements(user, plan.stories.map((s) => s.id), now, plan.nextAt));
+  const label = previewing ? "<i>Preview of the new digest (last 24 hours). Nothing is recorded.</i>" : undefined;
+  const plan = planDigest(previewing ? { ...user, last_digest_at: null } : user, cands, topics, now, cfg, { label });
+  console.log(plan.parts.join("\n\n----- next message -----\n\n"));
+  console.log(`\n[${plan.stories.length} stories from ${cands.length} candidates, ${plan.parts.length} message(s), ` +
+    `visible length ${plan.parts.map(visibleLength).join(" + ")}]`);
+  if ((process.argv.includes("--send") || previewing) && !process.argv.includes("--dry")) {
+    const ids = [];
+    for (let p = 0; p < plan.parts.length; p++) {
+      const result = await sendHtml(env.TELEGRAM_BOT_TOKEN, owner, plan.parts[p]);
+      console.log(`[sent: Telegram message_id ${result.message_id}]`);
+      ids.push(...plan.partStories[p]);
+    }
+    if (!previewing) {
+      await db.batch(afterSendStatements(user, ids, now, plan.nextAt));
       console.log("[recorded: sent rows, last_digest_at, next_digest_at]");
     } else console.log("[preview: nothing written]");
   } else console.log("[dry run: nothing sent, nothing written]");

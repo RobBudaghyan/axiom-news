@@ -25,26 +25,27 @@ function seed() {
   const { binding, sqlite } = fakeD1();
   const now = Math.floor(Date.now() / 1000);
   const H = 3600;
-  const user = sqlite.prepare("INSERT INTO users (id, first_name, timezone, tz_detected, digest_times, max_stories, topics, " +
-    "paused, blocked, created_at, last_digest_at, next_digest_at, format) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+  const user = sqlite.prepare("INSERT INTO users (id, first_name, timezone, tz_detected, digest_times, topics, " +
+    "paused, blocked, created_at, last_digest_at, next_digest_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
   const people = [
-    [OWNER, "Sam", "Asia/Yerevan", 1, ["09:00", "14:00", "20:00"], 7, ALL, 0, 0, null],
-    [101, "Ani", "Asia/Yerevan", 1, ["08:30", "19:00"], 5, ["armenia", "politics", "russia"], 0, 0, null],
-    [102, "David", "Europe/Berlin", 1, ["07:30", "13:00", "21:00"], 10, ALL, 0, 0, "A"],
-    [103, "Mariam", "America/Los_Angeles", 2, ["09:00"], 7, ["iran_war", "wars_conflicts"], 1, 0, null],
-    [104, "Narek", "Asia/Yerevan", 0, ["09:00", "14:00", "20:00"], 7, ALL, 0, 1, null],
-    [105, "Lilit", "Europe/London", 1, ["08:00", "12:30", "18:00", "22:00"], 12, ALL, 0, 0, null],
+    [OWNER, "Sam", "Asia/Yerevan", 1, ["09:00", "14:00", "20:00"], ALL, 0, 0],
+    [101, "Ani", "Asia/Yerevan", 1, ["09:00", "19:00"], ["armenia", "politics", "russia"], 0, 0],
+    [102, "David", "Europe/Berlin", 1, ["07:00", "13:00", "21:00"], ALL, 0, 0],
+    [103, "Mariam", "America/Los_Angeles", 1, ["09:00"], ["iran_war", "wars_conflicts"], 1, 0],
+    [104, "Narek", "Asia/Yerevan", 0, ["09:00", "14:00", "20:00"], ALL, 0, 1],
+    [105, "Lilit", "Europe/London", 1, ["08:00", "12:00", "18:00", "22:00"], ALL, 0, 0],
   ];
-  for (const [id, name, tz, det, times, n, topics, paused, blocked, format] of people) {
-    user.run(id, name, tz, det, JSON.stringify(times), n, JSON.stringify(topics), paused, blocked, now - 9 * 86400,
-      blocked ? now - 5 * 86400 : now - (2 + id % 5) * H, nextSlot(now, tz, times), format);
+  for (const [id, name, tz, det, times, topics, paused, blocked] of people) {
+    user.run(id, name, tz, det, JSON.stringify(times), JSON.stringify(topics), paused, blocked, now - 9 * 86400,
+      blocked ? now - 5 * 86400 : now - (2 + id % 5) * H, nextSlot(now, tz, times));
   }
   // 7 days of hourly runs at about :07
   const run = sqlite.prepare("INSERT INTO job_runs (started_at, finished_at, status, feeds_ok, feeds_failed, items_fetched, " +
     "items_new, items_pending_in, stories_created, stories_merged, items_dropped, items_expired, items_left_pending, provider, " +
-    "ai_calls, input_tokens, output_tokens, d1_rows_read, d1_rows_written, error) VALUES (?,?,?,?,?,?,?,?,?,?,?,0,?,?,?,?,?,?,?,?)");
-  const call = sqlite.prepare("INSERT INTO ai_calls (run_id, at, provider, model, ok, items, input_tokens, output_tokens, ms, error) " +
-    "VALUES (?,?,?,?,?,?,?,?,?,?)");
+    "ai_calls, input_tokens, output_tokens, d1_rows_read, d1_rows_written, error, editor_status, editor_candidates, editor_merged) " +
+    "VALUES (?,?,?,?,?,?,?,?,?,?,?,0,?,?,?,?,?,?,?,?,?,?,?)");
+  const call = sqlite.prepare("INSERT INTO ai_calls (run_id, at, provider, model, ok, items, input_tokens, output_tokens, ms, error, kind) " +
+    "VALUES (?,?,?,?,?,?,?,?,?,?,?)");
   const hourStart = Math.floor(now / H) * H;
   let rnd = 7;
   const r = (a, b) => { rnd = (rnd * 1103515245 + 12345) % 2147483648; return a + (rnd % (b - a + 1)); };
@@ -58,14 +59,19 @@ function seed() {
     const tin = provider ? r(21000, 27000) * calls : 0, tout = provider ? r(9000, 16000) * Math.min(calls, 2) : 0;
     const info = run.run(start, start + r(42, 130), kind, 114, 1, fetched, fresh, fresh, created, kind === "ai_failed" ? 0 : r(9, 26),
       kind === "ai_failed" ? 0 : r(60, 130), kind === "ai_failed" ? fresh : kind === "partial" ? r(5, 30) : 0, provider, calls,
-      tin, tout, r(2600, 4800), r(700, 1300), kind === "ai_failed" ? "every AI provider failed; items wait for the next run" : null);
+      tin, tout, r(2600, 4800), r(700, 1300), kind === "ai_failed" ? "every AI provider failed; items wait for the next run" : null,
+      kind === "ai_failed" || k === 31 ? "failed" : "ok", r(30, 60), r(0, 6));
     const id = Number(info.lastInsertRowid);
     const models = provider ? provider.split("+") : ["gemini", "gemini-fallback"];
     for (const [i, p] of models.entries()) {
       const model = p === "gemini" ? "gemini-3.5-flash-lite" : p === "gemini-fallback" ? "gemini-3.1-flash-lite" : "openai/gpt-oss-120b";
       const ok = kind === "ai_failed" ? 0 : i === models.length - 1 ? 1 : (k % 4 === 0 ? 0 : 1);
       call.run(id, start + 20 + i * 40, p === "gemini-fallback" ? "gemini" : p, model, ok, fresh, ok ? r(20000, 26000) : null,
-        ok ? r(9000, 15000) : null, r(6000, 80000), ok ? null : "HTTP 503: This model is currently experiencing high demand");
+        ok ? r(9000, 15000) : null, r(6000, 80000), ok ? null : "HTTP 503: This model is currently experiencing high demand", "batch");
+    }
+    if (kind !== "ai_failed") {   // the editor pass: one more call per run
+      call.run(id, start + 120, "gemini", "gemini-3.5-flash-lite", k === 31 ? 0 : 1, r(30, 60), k === 31 ? null : r(9500, 12500),
+        k === 31 ? null : r(3500, 6000), r(20000, 45000), k === 31 ? "HTTP 503: This model is currently experiencing high demand" : null, "editor");
     }
   }
   const err = sqlite.prepare("INSERT INTO errors (at, component, message) VALUES (?, ?, ?)");
@@ -92,7 +98,7 @@ function seed() {
   const S = [["Ukraine and Russia agree to a new prisoner exchange", ["ukraine_war", "wars_conflicts"], 8],
     ["Armenian parliament passes the 2027 budget", ["armenia", "politics"], 6],
     ["Iran says talks with the US will resume next week", ["iran_war", "politics"], 7]];
-  for (const [s, t, imp] of S) addStory(sqlite, s, t, imp, now - 1800);
+  for (const [s, t, score] of S) addStory(sqlite, s, t, score, now - 1800, { final_score: score, headline: s, emojis: "🗞️" });
   return binding;
 }
 

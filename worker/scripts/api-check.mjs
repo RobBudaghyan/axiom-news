@@ -2,8 +2,8 @@
 // itself with the bot token from ../.env (only possible for whoever holds the token; never
 // printed), then:
 //   1. opens the app as the owner (device time zone sent, like the app does),
-//   2. changes "stories per digest", confirms the new value and next_digest_at in D1 through the
-//      REST API, then restores the old value,
+//   2. adds a digest time (or removes one), confirms the new value and next_digest_at in D1 through
+//      the REST API, then restores the old times; a half-hour time and a removed setting are refused,
 //   3. loads the Admin data as the owner (200) and as a different, validly signed user (403),
 //   4. sends a request with a tampered signature (401).
 // It does not press "Send me a digest now" or "Run news job now" (those are for the owner to try).
@@ -30,24 +30,28 @@ async function api(path, init, body) {
     headers: { authorization: `tma ${init}`, "content-type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
   return { status: res.status, body: await res.json(), ms: Date.now() - t };
 }
-const row = async () => (await db.query("SELECT first_name, timezone, tz_detected, max_stories, next_digest_at FROM users WHERE id = ?1", [owner]))[0];
+const row = async () => (await db.query("SELECT first_name, timezone, tz_detected, digest_times, next_digest_at FROM users WHERE id = ?1", [owner]))[0];
 
 const ownerInit = await sign(owner, "Owner");
 const before = await row();
 const opened = await api("/api/open", ownerInit, { tz: "Asia/Yerevan" });
 check("open as owner", opened.status === 200 && opened.body.is_owner === true, `${opened.status}, ${opened.ms} ms, is_owner ${opened.body.is_owner}`);
 
-const old = opened.body.user.max_stories;
-const next = old === 15 ? 14 : old + 1;
-const saved = await api("/api/settings", ownerInit, { max_stories: next });
+const old = opened.body.user.digest_times;
+const extra = ["23:00", "06:00", "12:00"].find((t) => !old.includes(t));
+const next = old.length < 5 ? [...old, extra].sort() : old.slice(0, -1);
+const saved = await api("/api/settings", ownerInit, { digest_times: next });
 const after = await row();
-check("settings change saved in D1", saved.status === 200 && after.max_stories === next, `${old} -> ${after.max_stories}, ${saved.ms} ms`);
+check("settings change saved in D1", saved.status === 200 && after.digest_times === JSON.stringify(next),
+  `${old.join(",")} -> ${after.digest_times}, ${saved.ms} ms`);
 check("next_digest_at returned matches D1", saved.body.user?.next_digest_at === after.next_digest_at,
   new Date(after.next_digest_at * 1000).toISOString());
-const restored = await api("/api/settings", ownerInit, { max_stories: old });
-check("old value restored", restored.status === 200 && (await row()).max_stories === old, `back to ${old}`);
-const bad = await api("/api/settings", ownerInit, { digest_times: ["23:00"] });
-check("invalid time refused with a friendly message", bad.status === 400, bad.body.error);
+const restored = await api("/api/settings", ownerInit, { digest_times: old });
+check("old value restored", restored.status === 200 && (await row()).digest_times === JSON.stringify(old), `back to ${old.join(",")}`);
+const bad = await api("/api/settings", ownerInit, { digest_times: ["09:30"] });
+check("a half-hour time is refused with a friendly message", bad.status === 400, bad.body.error);
+const gone = await api("/api/settings", ownerInit, { max_stories: 7 });
+check("a removed setting is refused", gone.status === 400, gone.body.error);
 
 const admin = await api("/api/admin", ownerInit);
 check("admin data for the owner", admin.status === 200 && !!admin.body.health, `${admin.ms} ms, level ${admin.body.health?.level}, ` +

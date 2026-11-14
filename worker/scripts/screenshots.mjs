@@ -12,13 +12,14 @@ const BASE = process.env.PREVIEW_URL || "http://localhost:8790";
 const ADMIN = "click('[data-value=admin]'); await until(() => document.querySelector('.status')); await wait(700);";
 
 // name, query, steps run in the page first, full page (true) or one phone screen (false)
+// The limit message: five times chosen, then one more tap (one phone screen, at the time grid).
+const LIMIT = "for (const t of ['06:00', '11:00', '16:00']) { click('[data-value=\"' + t + '\"]'); await wait(300); }" +
+  " click('[data-value=\"22:00\"]'); await wait(200); document.querySelector('#times').scrollIntoView(); window.scrollBy(0, -60); await wait(300);";
 const SHOTS = [
   ["settings-light", "theme=light&as=friend", "", true],
   ["settings-dark", "theme=dark&as=friend", "", true],
-  ["add-time-light", "theme=light&as=friend", "click('[data-action=add-time]'); await wait(450); click('[data-value=\"18:30\"]'); await wait(250);", false],
-  ["add-time-dark", "theme=dark&as=friend", "click('[data-action=add-time]'); await wait(450); click('[data-value=\"18:30\"]'); await wait(250);", false],
-  ["timezone-light", "theme=light&as=friend", "click('[data-action=open-tz]'); await wait(450);", false],
-  ["timezone-dark", "theme=dark&as=friend", "click('[data-action=open-tz]'); await wait(450);", false],
+  ["times-limit-light", "theme=light&as=owner", LIMIT, false],
+  ["times-limit-dark", "theme=dark&as=friend", LIMIT, false],
   ["admin-light", "theme=light&as=owner", ADMIN, true],
   ["admin-dark", "theme=dark&as=owner", ADMIN, true],
 ];

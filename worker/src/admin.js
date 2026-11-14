@@ -14,15 +14,17 @@ const RUN_STATS_SQL = `SELECT count(*) AS runs,
   sum(items_fetched) AS items_fetched, sum(items_new) AS items_new,
   sum(stories_created) AS stories_created, sum(stories_merged) AS stories_merged,
   sum(items_dropped) AS items_dropped, sum(ai_calls) AS ai_calls,
-  sum(input_tokens) AS input_tokens, sum(output_tokens) AS output_tokens
+  sum(input_tokens) AS input_tokens, sum(output_tokens) AS output_tokens,
+  sum(editor_status = 'ok') AS editor_ok, sum(editor_status = 'failed') AS editor_failed,
+  sum(editor_merged) AS editor_merged
 FROM job_runs WHERE started_at >= ?1`;
 
-const MODELS_SQL = `SELECT provider, model,
+const MODELS_SQL = `SELECT provider, model, coalesce(kind, 'batch') AS kind,
   sum(at >= ?1) AS calls_24h, sum(CASE WHEN at >= ?1 THEN ok ELSE 0 END) AS ok_24h,
   sum(CASE WHEN at >= ?1 THEN input_tokens ELSE 0 END) AS in_24h,
   sum(CASE WHEN at >= ?1 THEN output_tokens ELSE 0 END) AS out_24h,
   count(*) AS calls_7d, sum(ok) AS ok_7d, sum(input_tokens) AS in_7d, sum(output_tokens) AS out_7d
-FROM ai_calls WHERE at >= ?2 GROUP BY provider, model ORDER BY calls_7d DESC`;
+FROM ai_calls WHERE at >= ?2 GROUP BY provider, model, coalesce(kind, 'batch') ORDER BY calls_7d DESC`;
 
 export function adminStatements(now) {
   const dayStart = Math.floor(now / DAY) * DAY;
@@ -46,7 +48,8 @@ const num = (v) => Number(v ?? 0);
 function statsRow(r) {
   const out = {};
   for (const k of ["runs", "failed", "partial", "fallback_runs", "items_fetched", "items_new", "stories_created",
-    "stories_merged", "items_dropped", "ai_calls", "input_tokens", "output_tokens"]) out[k] = num(r?.[k]);
+    "stories_merged", "items_dropped", "ai_calls", "input_tokens", "output_tokens", "editor_ok", "editor_failed",
+    "editor_merged"]) out[k] = num(r?.[k]);
   return out;
 }
 
@@ -112,7 +115,7 @@ export function shapeAdmin(rows, now, cfg = CONFIG) {
     stats: {
       "24h": statsRow(s24), "7d": statsRow(s7),
       models: models.map((m) => ({
-        provider: m.provider, model: m.model,
+        provider: m.provider, model: m.model, kind: m.kind,
         "24h": { calls: num(m.calls_24h), ok: num(m.ok_24h), input_tokens: num(m.in_24h), output_tokens: num(m.out_24h) },
         "7d": { calls: num(m.calls_7d), ok: num(m.ok_7d), input_tokens: num(m.in_7d), output_tokens: num(m.out_7d) },
       })),

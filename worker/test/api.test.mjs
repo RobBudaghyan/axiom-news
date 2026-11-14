@@ -1,11 +1,11 @@
-// Step 4: the Mini App API. initData verification (valid, tampered, expired), admin gating
+// Steps 4-5: the Mini App API. initData verification (valid, tampered, expired), admin gating
 // (owner vs non-owner), settings validation, next_digest_at recompute, the two admin actions,
 // the bot's "Open settings" button and the D1 usage counter.
 import { test, describe, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import worker from "../src/index.js";
 import { signInitData, verifyInitData, dataCheckString } from "../src/auth.js";
-import { SettingsError, TZ_AUTO, TZ_MANUAL, allowedTimes, nextDigestAfterChange, validatePatch } from "../src/settings.js";
+import { SettingsError, TZ_AUTO, TZ_MANUAL, allowedTimes, nextDigestAfterChange, roundTimes, validatePatch } from "../src/settings.js";
 import { feedReport, shapeAdmin, adminStatements } from "../src/admin.js";
 import { CONFIG, nextSlot } from "../src/digest.js";
 import { takeUsage, usageStatement } from "../src/db.js";
@@ -109,22 +109,16 @@ describe("settings validation", () => {
   const tags = ALL;
   test("accepts good values and normalises them", () => {
     assert.deepEqual(validatePatch({ topics: ["armenia", "politics", "armenia"] }, tags), { topics: ["politics", "armenia"] });
-    assert.deepEqual(validatePatch({ digest_times: ["20:00", "07:00", "22:00"] }, tags), { digest_times: ["07:00", "20:00", "22:00"] });
-    assert.deepEqual(validatePatch({ max_stories: 3 }, tags), { max_stories: 3 });
-    assert.deepEqual(validatePatch({ max_stories: 15 }, tags), { max_stories: 15 });
-    assert.deepEqual(validatePatch({ format: "A" }, tags), { format: "A" });
+    assert.deepEqual(validatePatch({ digest_times: ["20:00", "06:00", "23:00"] }, tags), { digest_times: ["06:00", "20:00", "23:00"] });
     assert.deepEqual(validatePatch({ paused: true }, tags), { paused: 1 });
-    assert.deepEqual(validatePatch({ timezone: "Europe/Berlin" }, tags), { timezone: "Europe/Berlin", tz_detected: TZ_MANUAL });
-    assert.deepEqual(validatePatch({ timezone: "America/New_York", tz_auto: true }, tags),
-      { timezone: "America/New_York", tz_detected: TZ_AUTO });
   });
 
-  test("allowed times are 07:00 to 22:00 in 30-minute steps", () => {
+  test("allowed times are 06:00 to 23:00 on the hour", () => {
     const t = allowedTimes();
-    assert.equal(t.length, 31);
-    assert.equal(t[0], "07:00");
-    assert.equal(t[1], "07:30");
-    assert.equal(t.at(-1), "22:00");
+    assert.equal(t.length, 18);
+    assert.equal(t[0], "06:00");
+    assert.equal(t[1], "07:00");
+    assert.equal(t.at(-1), "23:00");
   });
 
   const bad = [
@@ -132,18 +126,14 @@ describe("settings validation", () => {
     [{ topics: ["sports"] }, /does not exist/],
     [{ topics: "politics" }, /must be a list/],
     [{ digest_times: [] }, /at least one digest time/],
-    [{ digest_times: ["06:30"] }, /between 07:00 and 22:00/],
-    [{ digest_times: ["22:30"] }, /between 07:00 and 22:00/],
-    [{ digest_times: ["09:15"] }, /half hour/],
-    [{ digest_times: ["9:00"] }, /between/],
+    [{ digest_times: ["05:00"] }, /between 06:00 and 23:00/],
+    [{ digest_times: ["09:30"] }, /on the hour/],
+    [{ digest_times: ["23:30"] }, /on the hour/],
+    [{ digest_times: ["9:00"] }, /on the hour/],
     [{ digest_times: ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00"] }, /up to 5/],
-    [{ max_stories: 2 }, /between 3 and 15/],
-    [{ max_stories: 16 }, /between 3 and 15/],
-    [{ max_stories: 7.5 }, /between 3 and 15/],
-    [{ max_stories: "7" }, /between 3 and 15/],
-    [{ format: "C" }, /Unknown format/],
-    [{ timezone: "Mars/Olympus" }, /not recognised/],
-    [{ timezone: "Europe/Berlin; DROP TABLE users" }, /not recognised/],
+    [{ max_stories: 7 }, /Unknown setting: max_stories/],          // removed in Step 5
+    [{ format: "B" }, /Unknown setting: format/],
+    [{ timezone: "Europe/Berlin" }, /Unknown setting: timezone/],   // the zone follows the phone
     [{ paused: "yes" }, /on or off/],
     [{ blocked: 0 }, /Unknown setting: blocked/],
     [{ next_digest_at: 1 }, /Unknown setting/],
@@ -164,10 +154,18 @@ describe("settings validation", () => {
   test("a bad value through the API is a 400 with a friendly message, and nothing is written", async () => {
     const { binding, sqlite } = fakeD1();
     addUser(sqlite, { next_digest_at: yerevan(20) });
-    const r = await call(binding, "/api/settings", { init: await initFor(OWNER), body: { digest_times: ["23:00"] } });
+    const r = await call(binding, "/api/settings", { init: await initFor(OWNER), body: { digest_times: ["09:30"] } });
     assert.equal(r.status, 400);
-    assert.match(r.body.error, /between 07:00 and 22:00/);
+    assert.match(r.body.error, /on the hour, between 06:00 and 23:00/);
     assert.equal(sqlite.prepare("SELECT digest_times FROM users").get().digest_times, '["09:00","14:00","20:00"]');
+  });
+
+  test("old half-hour times move to the nearest hour (a half hour rounds up), within 06:00-23:00", () => {
+    assert.deepEqual(roundTimes(["08:30", "14:00", "20:00"]), ["09:00", "14:00", "20:00"]);
+    assert.deepEqual(roundTimes(["07:30", "08:00", "22:30"]), ["08:00", "23:00"]);       // 07:30 and 08:00 merge
+    assert.deepEqual(roundTimes(["05:00", "23:30", "08:15", "12:45"]), ["06:00", "08:00", "13:00", "23:00"]);
+    assert.deepEqual(roundTimes(["07:00"]), ["07:00"]);                                  // unchanged
+    assert.deepEqual(roundTimes([]), CONFIG.default_times);
   });
 });
 
@@ -177,7 +175,7 @@ describe("next_digest_at recompute", () => {
   test("new times: the first new slot after now", () => {
     const now = yerevan(10, 0);
     const before = { ...base, next_digest_at: yerevan(14) };
-    assert.equal(nextDigestAfterChange(before, { ...before, digest_times: '["11:30","21:00"]' }, now), yerevan(11, 30));
+    assert.equal(nextDigestAfterChange(before, { ...before, digest_times: '["11:00","21:00"]' }, now), yerevan(11));
     assert.equal(nextDigestAfterChange(before, { ...before, digest_times: '["07:00"]' }, now), yerevan(7, 0, 14));
   });
 
@@ -192,7 +190,7 @@ describe("next_digest_at recompute", () => {
   test("a digest already due (slot passed < 15 min ago) is kept, not swallowed", () => {
     const now = yerevan(14, 3);
     const before = { ...base, next_digest_at: yerevan(14) };
-    assert.equal(nextDigestAfterChange(before, { ...before, max_stories: 5 }, now), yerevan(14));
+    assert.equal(nextDigestAfterChange(before, { ...before, topics: '["armenia"]' }, now), yerevan(14));
     assert.equal(nextDigestAfterChange(before, { ...before, paused: 1 }, now), yerevan(20));   // pausing drops it
   });
 
@@ -207,32 +205,16 @@ describe("next_digest_at recompute", () => {
     const now = nowS();
     addUser(sqlite, { next_digest_at: now + 3 * 3600 });
     const r = await call(binding, "/api/settings", { init: await initFor(OWNER),
-      body: { digest_times: ["07:00"], max_stories: 12, format: "A", topics: ["armenia"] } });
+      body: { digest_times: ["07:00", "23:00"], topics: ["armenia"] } });
     assert.equal(r.status, 200, JSON.stringify(r.body));
     assert.equal(r.cache, "no-store");
     const u = sqlite.prepare("SELECT * FROM users WHERE id = ?").get(OWNER);
-    assert.equal(u.digest_times, '["07:00"]');
-    assert.equal(u.max_stories, 12);
-    assert.equal(u.format, "A");
+    assert.equal(u.digest_times, '["07:00","23:00"]');
     assert.equal(u.topics, '["armenia"]');
-    assert.equal(u.next_digest_at, nextSlot(now, TZ, ["07:00"]));
+    assert.equal(u.next_digest_at, nextSlot(now, TZ, ["07:00", "23:00"]));
     assert.equal(r.body.user.next_digest_at, u.next_digest_at);
-    assert.deepEqual(r.body.user.digest_times, ["07:00"]);
-  });
-
-  test("the user's format is used by the real digest", async () => {
-    const { binding, sqlite, db } = fakeD1();
-    const now = yerevan(14, 1);
-    addUser(sqlite, { next_digest_at: yerevan(14), last_digest_at: yerevan(9) });
-    sqlite.prepare("UPDATE users SET format = 'A'").run();
-    addStory(sqlite, "Yerevan passes budget", ["armenia"], 7, yerevan(12));
-    addStory(sqlite, "Kyiv talks resume", ["ukraine_war"], 6, yerevan(12));
-    const sent = [];
-    await runTick(db, { send: async (id, html) => sent.push(html), alert: async () => {} }, now);
-    assert.equal(sent.length, 1);
-    assert.doesNotMatch(sent[0], /<b>🇦🇲 Armenia<\/b>\n/);   // format A has no topic headings
-    assert.match(sent[0], /^Good afternoon\. Since 09:00, 2 stories/);
-    void binding;
+    assert.deepEqual(r.body.user.digest_times, ["07:00", "23:00"]);
+    assert.equal("max_stories" in r.body.user || "format" in r.body.user, false);
   });
 });
 
@@ -244,14 +226,13 @@ describe("open: new users and the device time zone", () => {
     const u = sqlite.prepare("SELECT * FROM users WHERE id = ?").get(FRIEND);
     assert.equal(u.timezone, "Europe/Berlin");
     assert.equal(u.tz_detected, TZ_AUTO);
-    assert.equal(u.max_stories, 7);
     assert.deepEqual(JSON.parse(u.topics), ALL);
     assert.equal(r.body.user.tz_source, "device");
     assert.equal(r.body.topics.length, 6);
-    assert.deepEqual(r.body.limits.formats, ["A", "B"]);
+    assert.deepEqual(r.body.limits, CONFIG.settings_limits);
   });
 
-  test("a default zone follows the device; a zone chosen by hand is kept", async () => {
+  test("the zone always follows the phone, also one chosen by hand before Step 5", async () => {
     const { binding, sqlite } = fakeD1();
     addUser(sqlite, { next_digest_at: nowS() + 3600 });
     await call(binding, "/api/open", { init: await initFor(OWNER), body: { tz: "Asia/Tbilisi" } });
@@ -259,17 +240,19 @@ describe("open: new users and the device time zone", () => {
     assert.equal(u.timezone, "Asia/Tbilisi");
     assert.equal(u.tz_detected, TZ_AUTO);
     assert.equal(u.next_digest_at, nextSlot(nowS(), "Asia/Tbilisi", ["09:00", "14:00", "20:00"]));
-    await call(binding, "/api/settings", { init: await initFor(OWNER), body: { timezone: "Europe/Paris" } });
-    await call(binding, "/api/open", { init: await initFor(OWNER), body: { tz: "Asia/Tbilisi" } });
+    sqlite.prepare("UPDATE users SET timezone = 'Europe/Paris', tz_detected = ?").run(TZ_MANUAL);
+    const r = await call(binding, "/api/open", { init: await initFor(OWNER), body: { tz: "Asia/Tbilisi" } });
     u = sqlite.prepare("SELECT * FROM users").get();
-    assert.equal(u.timezone, "Europe/Paris");
-    assert.equal(u.tz_detected, TZ_MANUAL);
+    assert.equal(u.timezone, "Asia/Tbilisi");
+    assert.equal(u.tz_detected, TZ_AUTO);
+    assert.equal(r.body.user.tz_source, "device");
   });
 
   test("a junk device zone is ignored", async () => {
     const { binding, sqlite } = fakeD1();
-    await call(binding, "/api/open", { init: await initFor(FRIEND), body: { tz: "Not/AZone" } });
+    const r = await call(binding, "/api/open", { init: await initFor(FRIEND), body: { tz: "Not/AZone" } });
     assert.equal(sqlite.prepare("SELECT timezone FROM users").get().timezone, CONFIG.default_timezone);
+    assert.equal(r.body.user.tz_source, "default");
   });
 });
 
@@ -388,7 +371,7 @@ describe("bot: Open settings button", () => {
       assert.deepEqual(c.body.reply_markup, { inline_keyboard: [[{ text: "Open settings", web_app: { url: "https://w.test/app/" } }]] });
     }
     assert.match(fetchMock.calls[0].body.text, /Tap Open settings/);
-    assert.match(fetchMock.calls[1].body.text, /^Choose your topics, digest times/);
+    assert.match(fetchMock.calls[1].body.text, /^Choose your topics and when your digests arrive/);
     assert.doesNotMatch(fetchMock.calls.map((c) => c.body.text).join(), /[—–]/);
   });
 

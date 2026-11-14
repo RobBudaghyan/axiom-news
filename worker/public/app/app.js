@@ -3,11 +3,10 @@
 (() => {
   "use strict";
   const tg = window.Telegram && window.Telegram.WebApp;
-  const ACCENT = "#2F7BF6";   // fixed brand accent (lesson 13); surfaces and text follow Telegram's theme
   const app = document.getElementById("app");
   const toastEl = document.getElementById("toast");
-  const S = { st: null, admin: null, adminErr: null, adminLoading: false, tab: "settings", screen: null,
-    pick: null, range: "24h", q: "", allErrors: false, busy: {} };
+  const S = { st: null, admin: null, adminErr: null, adminLoading: false, tab: "settings", range: "24h",
+    allErrors: false, busy: {} };
   const deviceTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || null; } catch { return null; } })();
   const nowS = () => Math.floor(Date.now() / 1000);
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -18,16 +17,7 @@
   const I = {
     clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
     pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="4" height="14" rx="1.3"/><rect x="13.5" y="5" width="4" height="14" rx="1.3"/></svg>',
-    minus: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10"/></svg>',
-    plusS: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3v10M3 8h10"/></svg>',
-    remove: '<svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12 2.5a9.5 9.5 0 1 1 0 19 9.5 9.5 0 0 1 0-19ZM7.5 11.1a.9.9 0 0 0 0 1.8h9a.9.9 0 0 0 0-1.8h-9Z"/></svg>',
-    add: '<svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12 2.5a9.5 9.5 0 1 1 0 19 9.5 9.5 0 0 1 0-19Zm0 4.6a.9.9 0 0 0-.9.9v3.1H8a.9.9 0 0 0 0 1.8h3.1V16a.9.9 0 0 0 1.8 0v-3.1H16a.9.9 0 0 0 0-1.8h-3.1V8a.9.9 0 0 0-.9-.9Z"/></svg>',
-    chev: '<svg class="chev" viewBox="0 0 8 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 1.5 6.5 6.5l-5 5"/></svg>',
-    check: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 8.5 3 3 6-7"/></svg>',
-    checkMark: '<svg class="check-mark" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8.5 3.2 3.2L13 4.5"/></svg>',
-    search: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg>',
     globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3Z"/></svg>',
-    list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor"/><circle cx="4.5" cy="12" r="1" fill="currentColor"/><circle cx="4.5" cy="18" r="1" fill="currentColor"/></svg>',
     paper: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5 4h11v15a1 1 0 0 0 1 1H6a1 1 0 0 1-1-1V4Z"/><path d="M16 9h3v10a1 1 0 0 1-2 0"/><path d="M8 8h5M8 12h5M8 16h3" stroke-linecap="round"/></svg>',
     send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4 18-7Z"/></svg>',
     play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v4h-4"/></svg>',
@@ -59,20 +49,6 @@
       if (tg && ver("6.2")) { try { tg.showConfirm(text, (ok) => resolve(!!ok)); return; } catch { /* fall through */ } }
       resolve(window.confirm(text));
     });
-  }
-
-  function backButton(show) {
-    if (!tg || !ver("6.1")) return;
-    if (show) tg.BackButton.show(); else tg.BackButton.hide();
-  }
-
-  function mainButton() {
-    const mb = tg && tg.MainButton;
-    if (!mb) return;
-    if (S.screen !== "times") { mb.hide(); return; }
-    const p = { color: ACCENT, text_color: "#FFFFFF", is_visible: true, has_shine_effect: false };
-    if (S.pick) mb.setParams({ ...p, text: `Add ${S.pick}`, is_active: true });
-    else mb.setParams({ ...p, text: "Choose a time", is_active: false });
   }
 
   let toastTimer = 0;
@@ -140,7 +116,6 @@
     return `${Math.round(h / 24)} days ago`;
   }
   const city = (tz) => tz.split("/").pop().replace(/_/g, " ");
-  const region = (tz) => tz.split("/").slice(0, -1).join(" / ").replace(/_/g, " ");
   function offset(tz) {
     try {
       const p = fmt(tz, { timeZoneName: "shortOffset" }, "o").formatToParts(new Date()).find((x) => x.type === "timeZoneName");
@@ -213,92 +188,67 @@
     }
     const ts = u.next_digest_at;
     const value = ts ? `${dayName(ts, u.timezone)} at ${hm(ts, u.timezone)}` : "Not scheduled";
-    const sub = `${esc(city(u.timezone))} time · up to ${u.max_stories} stories`;
     return `<div class="group hero" id="hero"><div class="hero-icon">${I.clock}</div><div>
       <div class="hero-label">Next digest</div><div class="hero-value tnum">${esc(value)}</div>
-      <div class="hero-sub">${sub}</div></div></div>`;
+      <div class="hero-sub">${esc(city(u.timezone))} time</div></div></div>`;
   }
   function updateHero() {
     const h = $("#hero");
     if (h) h.outerHTML = heroHTML();
   }
 
-  function fmtPic(kind) {
-    const line = (w) => `<div class="pl"><i></i><b style="width:${w}%"></b></div>`;
-    if (kind === "B") {
-      return `<div class="fmt-pic"><div class="ph"><i></i><b></b></div>${line(78)}${line(64)}
-        <div class="ph"><i></i><b style="width:38%"></b></div>${line(70)}</div>`;
-    }
-    return `<div class="fmt-pic">${line(82)}${line(66)}${line(74)}${line(58)}${line(70)}</div>`;
+  // "09:00, 14:00 and 20:00"
+  const listTimes = (t) => (t.length < 2 ? t.join("") : `${t.slice(0, -1).join(", ")} and ${t[t.length - 1]}`);
+  function timesFoot() {
+    const u = S.st.user, L = S.st.limits;
+    const n = u.digest_times.length;
+    return `${n === 1 ? "One digest a day" : `${n} digests a day`}, at ${listTimes(u.digest_times)}. ` +
+      `Tap a time to add or remove it, up to ${L.max_times}.`;
   }
-  const FORMAT = {
-    B: { name: "By topic", sub: "Grouped under headings", foot: "Stories are grouped under topic headings, most important first." },
-    A: { name: "Simple list", sub: "One numbered list", foot: "One numbered list of stories, most important first." },
-  };
 
-  function tzFoot(u) {
-    let text = u.tz_source === "device" ? "Set automatically from your phone."
-      : u.tz_source === "manual" ? "Chosen by you." : "Using the default time zone.";
-    if (deviceTz && deviceTz !== u.timezone) {
-      text += ` Your phone is on ${esc(city(deviceTz))} time. <button class="link" data-action="use-device-tz">Use it</button>`;
-    }
-    return text;
+  function timesHTML() {
+    const u = S.st.user;
+    const all = allowedTimes(S.st.limits);
+    const block = (label, list) => list.length ? `<div class="times-block"><div class="times-label">${periodEmoji(list[0])} ${label}</div>
+      <div class="chips">${list.map((t) => `<button class="chip-btn tnum" data-action="time" data-value="${t}" aria-pressed="${u.digest_times.includes(t)}"
+        aria-label="${t}">${t}</button>`).join("")}</div></div>` : "";
+    return block("Morning", all.filter((t) => period(t) === "Morning"))
+      + block("Afternoon", all.filter((t) => period(t) === "Afternoon"))
+      + block("Evening", all.filter((t) => period(t) === "Evening"));
+  }
+
+  function tzSub(u) {
+    const off = offset(u.timezone);
+    return u.tz_source === "device" ? `From your phone${off ? ` · ${off}` : ""}` : `Default${off ? ` · ${off}` : ""}`;
   }
 
   function settingsHTML() {
-    const { user: u, topics, limits: L } = S.st;
+    const { user: u, topics } = S.st;
     const topicRows = topics.map((t) => {
       const on = u.topics.includes(t.tag);
       return row({ icon: esc(t.emoji), title: esc(t.label), right: switchEl, tag: "button", cls: "tap",
         attrs: `role="switch" aria-checked="${on}" data-action="topic" data-value="${esc(t.tag)}"` });
     }).join("");
 
-    const one = u.digest_times.length <= 1;
-    const full = u.digest_times.length >= L.max_times;
-    const timeRows = u.digest_times.map((t) => row({ icon: periodEmoji(t), title: `<span class="tnum">${t}</span>`, sub: period(t),
-      right: `<button class="remove" data-action="remove-time" data-value="${t}" aria-label="Remove ${t}" ${one ? "disabled" : ""}>${I.remove}</button>` })).join("")
-      + row({ icon: I.add, title: "Add a time", tag: "button", cls: "action tap", attrs: `data-action="add-time" ${full ? "disabled" : ""}` })
-        .replace('class="row-icon"', 'class="row-icon plus"');
-    const timesFoot = full ? `That's the most: ${L.max_times} digests a day. Remove one to add another.`
-      : one ? `At least one time is needed. You can have up to ${L.max_times}.`
-        : `Up to ${L.max_times} a day, between ${L.earliest} and ${L.latest}.`;
-
-    const stepper = `<div class="stepper" role="group" aria-label="Stories per digest">
-      <button data-action="step" data-value="-1" aria-label="Fewer" ${u.max_stories <= L.min_stories ? "disabled" : ""}>${I.minus}</button>
-      <span class="num tnum" id="stories-num">${u.max_stories}</span>
-      <button data-action="step" data-value="1" aria-label="More" ${u.max_stories >= L.max_stories ? "disabled" : ""}>${I.plusS}</button></div>`;
-
-    const formats = `<div class="formats" role="radiogroup" aria-label="Format">${["B", "A"].map((f) => `
-      <button class="fmt" role="radio" aria-checked="${u.format === f}" data-action="format" data-value="${f}">
-        ${fmtPic(f)}<div class="fmt-name">${FORMAT[f].name}</div><div class="fmt-sub">${FORMAT[f].sub}</div>
-        <span class="check">${I.check}</span></button>`).join("")}</div>`;
-
-    const tzRow = row({ icon: I.globe, tile: true, title: "Time zone", tag: "button", cls: "tap", attrs: 'data-action="open-tz"',
-      right: `<span class="value">${esc(city(u.timezone))}, ${esc(offset(u.timezone))}</span>${I.chev}` });
+    const tzRow = row({ icon: I.globe, tile: true, title: `${esc(city(u.timezone))} time`, sub: esc(tzSub(u)), attrs: 'id="tz-row"' });
 
     const pauseRow = row({ icon: I.pause, tile: true, title: "Pause digests", right: switchEl, tag: "button", cls: "tap",
       attrs: `role="switch" aria-checked="${u.paused}" data-action="pause" id="pause-row"` });
 
     return `<section class="section">${heroHTML()}</section>
       ${section("Topics", topicRows, "Your digest covers the topics you turn on.")}
-      ${section("Digest times", timeRows, timesFoot)}
-      ${section("", row({ icon: I.list, tile: true, title: "Stories per digest", right: stepper }),
-        `The ${u.max_stories} most important stories on your topics, between ${L.min_stories} and ${L.max_stories}.`, 'id="stories"')}
-      ${section("Format", formats, `<span id="fmt-foot">${FORMAT[u.format].foot}</span>`)}
-      ${section("", tzRow, tzFoot(u))}
+      ${section("Digest times", timesHTML(), `<span id="times-foot">${esc(timesFoot())}</span>`, 'id="times"')}
+      ${section("Time zone", tzRow, "Digest times follow your phone's time zone. It updates each time you open this.")}
       ${section("", pauseRow, "While paused you get no digests. Your settings are kept.")}
       <p class="fine">Changes are saved as soon as you make them.</p>`;
   }
 
   // Saves go one after another, so a quick series of taps arrives in order.
   let chain = Promise.resolve();
-  let storiesTimer = 0;
   function save(patch, revert) {
     chain = chain.then(async () => {
       try {
-        const st = await api("/api/settings", patch);
-        if (storiesTimer) st.user.max_stories = S.st.user.max_stories;   // a stepper change is still waiting
-        S.st = st;
+        S.st = await api("/api/settings", patch);
         updateHero();
         toast("Saved");
       } catch (e) {
@@ -311,13 +261,17 @@
     return chain;
   }
 
+  function shake(el) {
+    el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake");
+  }
+
   function toggleTopic(el) {
     const u = S.st.user;
     const tag = el.dataset.value;
     const on = u.topics.includes(tag);
     if (on && u.topics.length === 1) {
       haptic("warning");
-      el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake");
+      shake(el);
       toast("Keep at least one topic", "err");
       return;
     }
@@ -328,30 +282,29 @@
     save({ topics: u.topics }, () => { S.st.user.topics = before; });
   }
 
-  function step(delta) {
+  // Tap an hour to choose it (red), tap again to remove it. 1 to max_times.
+  function toggleTime(el) {
     const u = S.st.user, L = S.st.limits;
-    const next = Math.min(L.max_stories, Math.max(L.min_stories, u.max_stories + delta));
-    if (next === u.max_stories) return;
-    u.max_stories = next;
+    const t = el.dataset.value;
+    const on = u.digest_times.includes(t);
+    if (on && u.digest_times.length === 1) {
+      haptic("warning");
+      shake(el);
+      toast("Keep at least one digest time", "err");
+      return;
+    }
+    if (!on && u.digest_times.length >= L.max_times) {
+      haptic("warning");
+      shake(el);
+      toast(`Up to ${L.max_times} times a day. Remove one first.`, "err", 2600);
+      return;
+    }
+    const before = [...u.digest_times];
+    u.digest_times = on ? u.digest_times.filter((x) => x !== t) : [...u.digest_times, t].sort();
+    el.setAttribute("aria-pressed", String(!on));
+    $("#times-foot").textContent = timesFoot();
     haptic("select");
-    $("#stories-num").textContent = String(next);
-    const [minus, plus] = document.querySelectorAll('[data-action="step"]');
-    minus.disabled = next <= L.min_stories;
-    plus.disabled = next >= L.max_stories;
-    $("#stories .section-foot").textContent = `The ${next} most important stories on your topics, between ${L.min_stories} and ${L.max_stories}.`;
-    clearTimeout(storiesTimer);
-    storiesTimer = setTimeout(() => { storiesTimer = 0; save({ max_stories: S.st.user.max_stories }); }, 450);
-  }
-
-  function setFormat(f) {
-    const u = S.st.user;
-    if (u.format === f) return;
-    const before = u.format;
-    u.format = f;
-    haptic("select");
-    document.querySelectorAll(".fmt").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.value === f)));
-    $("#fmt-foot").textContent = FORMAT[f].foot;
-    save({ format: f }, () => { S.st.user.format = before; });
+    save({ digest_times: u.digest_times }, () => { S.st.user.digest_times = before; });
   }
 
   function togglePause(el) {
@@ -361,134 +314,6 @@
     haptic("impact", "light");
     updateHero();
     save({ paused: u.paused }, () => { S.st.user.paused = !S.st.user.paused; });
-  }
-
-  function removeTime(t) {
-    const u = S.st.user;
-    if (u.digest_times.length <= 1) return;
-    const before = [...u.digest_times];
-    u.digest_times = u.digest_times.filter((x) => x !== t);
-    haptic("impact", "light");
-    renderView();
-    save({ digest_times: u.digest_times }, () => { S.st.user.digest_times = before; });
-  }
-
-  function addTime() {
-    if (!S.pick) return;
-    const u = S.st.user;
-    const before = [...u.digest_times];
-    u.digest_times = [...new Set([...u.digest_times, S.pick])].sort();
-    haptic("success");
-    closeScreen();
-    renderView();
-    save({ digest_times: u.digest_times }, () => { S.st.user.digest_times = before; });
-  }
-
-  function setZone(tz) {
-    const u = S.st.user;
-    if (!tz) return;
-    const before = { timezone: u.timezone, tz_source: u.tz_source };
-    const auto = tz === deviceTz;
-    u.timezone = tz;
-    u.tz_source = auto ? "device" : "manual";
-    haptic("select");
-    closeScreen();
-    renderView();
-    save({ timezone: tz, tz_auto: auto }, () => Object.assign(S.st.user, before));
-  }
-
-  // ---------------------------------------------------------------- sub-screens
-  function openScreen(name) {
-    S.screen = name;
-    S.pick = null;
-    S.q = "";
-    const el = document.createElement("div");
-    el.className = "screen";
-    el.id = "screen";
-    el.innerHTML = `<div class="screen-inner">${name === "tz" ? tzHTML() : timesHTML()}</div>`;
-    document.body.appendChild(el);
-    document.body.classList.add("locked", "screen-open");
-    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("in")));
-    backButton(true);
-    mainButton();
-    haptic("impact", "light");
-  }
-  function closeScreen() {
-    const el = $("#screen");
-    S.screen = null;
-    S.pick = null;
-    backButton(false);
-    mainButton();
-    document.body.classList.remove("locked", "screen-open");
-    if (!el) return;
-    el.classList.remove("in");
-    el.id = "";
-    const done = () => el.remove();
-    el.addEventListener("transitionend", done, { once: true });
-    setTimeout(done, 450);
-  }
-
-  function timesHTML() {
-    const u = S.st.user;
-    const all = allowedTimes(S.st.limits);
-    const group = (label, list) => list.length ? section(label, `<div class="chips">${list.map((t) => {
-      const taken = u.digest_times.includes(t);
-      return `<button class="chip-btn" data-action="pick-time" data-value="${t}" aria-pressed="${S.pick === t}" ${taken ? 'disabled aria-label="Already added"' : ""}>${t}</button>`;
-    }).join("")}</div>`) : "";
-    const fallback = tg && tg.MainButton ? "" : `<div style="text-align:center"><button class="btn" data-action="confirm-time">Add time</button></div>`;
-    return `<h1 class="title">Add a time</h1><p class="screen-sub">When should a digest arrive? Times are in ${esc(city(u.timezone))} time. Greyed out: already added.</p>
-      ${group("Morning", all.filter((t) => period(t) === "Morning"))}
-      ${group("Afternoon", all.filter((t) => period(t) === "Afternoon"))}
-      ${group("Evening", all.filter((t) => period(t) === "Evening"))}${fallback}`;
-  }
-  function pickTime(btn) {
-    S.pick = btn.dataset.value;
-    document.querySelectorAll(".chip-btn").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
-    haptic("select");
-    mainButton();
-  }
-
-  let zones = null;
-  function allZones() {
-    if (!zones) {
-      try { zones = Intl.supportedValuesOf("timeZone"); } catch { zones = []; }
-      if (!zones.length) {
-        zones = ["Asia/Yerevan", "Europe/Moscow", "Europe/London", "Europe/Berlin", "Europe/Paris", "America/New_York",
-          "America/Los_Angeles", "Asia/Dubai", "Asia/Tbilisi", "UTC"];
-      }
-      for (const extra of [deviceTz, S.st.user.timezone]) if (extra && !zones.includes(extra)) zones.push(extra);
-    }
-    return zones;
-  }
-  function zoneRow(tz, sub) {
-    const cur = tz === S.st.user.timezone;
-    return row({ title: esc(city(tz)), sub: esc(sub ?? region(tz)), tag: "button", cls: "tap", attrs: `data-action="pick-tz" data-value="${esc(tz)}"`,
-      right: `<span class="tnum">${esc(offset(tz))}</span>${cur ? I.checkMark : '<span style="width:18px"></span>'}` });
-  }
-  // Without a search, a short list of likely zones; typing searches all of them (~400).
-  const POPULAR = ["Asia/Yerevan", "Asia/Tbilisi", "Europe/Moscow", "Asia/Dubai", "Europe/Istanbul", "Europe/Kyiv",
-    "Europe/Berlin", "Europe/Paris", "Europe/London", "America/New_York", "America/Los_Angeles", "America/Toronto"];
-  function tzListHTML() {
-    const q = S.q.trim().toLowerCase().replace(/\s+/g, "_");
-    if (!q) {
-      const shown = new Set([deviceTz, S.st.user.timezone]);   // already under Suggested
-      return section("Popular", POPULAR.filter((z) => !shown.has(z)).map((z) => zoneRow(z)).join(""),
-        "Type a city to search every time zone.");
-    }
-    const list = allZones().filter((z) => z.toLowerCase().includes(q));
-    const shown = list.slice(0, 60);
-    if (!shown.length) return section("", row({ title: "No match", sub: "Try a city name, like Yerevan or London." }));
-    const more = list.length > shown.length ? `Showing ${shown.length} of ${list.length}. Type a city to find yours.` : "";
-    return section("Results", shown.map((z) => zoneRow(z)).join(""), more);
-  }
-  function tzHTML() {
-    const u = S.st.user;
-    const suggested = [];
-    if (deviceTz) suggested.push(zoneRow(deviceTz, "Your phone's time zone"));
-    if (u.timezone !== deviceTz) suggested.push(zoneRow(u.timezone, "Current setting"));
-    return `<h1 class="title">Time zone</h1><p class="screen-sub">Digest times follow this time zone.</p>
-      <label class="search">${I.search}<input id="tz-q" type="search" placeholder="Search city" autocomplete="off" enterkeyhint="search"></label>
-      ${section("Suggested", suggested.join(""))}<div id="tz-list">${tzListHTML()}</div>`;
   }
 
   // ---------------------------------------------------------------- admin
@@ -560,12 +385,13 @@
     const stats = kv("News job runs", n(s.runs), runsSub) + kv("Articles collected", n(s.items_fetched), `${n(s.items_new)} new`)
       + kv("Stories created", n(s.stories_created), `${n(s.stories_merged)} merged into existing stories`)
       + kv("Dropped as not news", n(s.items_dropped))
+      + kv("Editor pass", `${n(s.editor_ok)} of ${n(s.runs)}`, `runs edited the news${s.editor_failed ? ` · ${s.editor_failed} failed` : ""} · ${plural(s.editor_merged, "duplicate", "duplicates")} merged`)
       + kv("AI calls", n(s.ai_calls), s.fallback_runs ? `${plural(s.fallback_runs, "run", "runs")} needed a backup model` : "No backup model needed")
       + kv("AI tokens", `${compact(s.input_tokens)} in · ${compact(s.output_tokens)} out`);
     const models = A.stats.models.filter((m) => m[S.range].calls).map((m) => {
       const x = m[S.range];
       const failed = x.calls - x.ok;
-      return row({ title: `<span class="ellipsis">${esc(m.model || m.provider)}</span>`, sub: `${esc(PROVIDER[m.provider] || m.provider)} · ${compact(x.input_tokens)} in, ${compact(x.output_tokens)} out`,
+      return row({ title: `<span class="ellipsis">${esc(m.model || m.provider)}</span>`, sub: `${esc(PROVIDER[m.provider] || m.provider)} · ${m.kind === "editor" ? "editor" : "first pass"} · ${compact(x.input_tokens)} in, ${compact(x.output_tokens)} out`,
         right: `<span class="kv-num">${plural(x.calls, "call", "calls")}</span>${failed ? badge(`${failed} failed`, "bad") : ""}` });
     }).join("") || row({ title: "No AI calls in this period" });
 
@@ -584,8 +410,8 @@
     }
 
     const U = A.users;
-    const tiles = `<div class="tiles">${[["Total", U.count], ["Active", U.active], ["Paused", U.paused], ["Blocked", U.blocked]]
-      .map(([k, v]) => `<div class="tile"><b>${n(v)}</b><span>${k}</span></div>`).join("")}</div>`;
+    const tiles = `<div class="stats">${[["Total", U.count], ["Active", U.active], ["Paused", U.paused], ["Blocked", U.blocked]]
+      .map(([k, v]) => `<div class="stat"><b>${n(v)}</b><span>${k}</span></div>`).join("")}</div>`;
     const userRows = U.list.map((x) => row({ icon: `<span class="avatar">${esc((x.name || "?").trim().charAt(0).toUpperCase())}</span>`,
       title: `${esc(x.name)} ${x.blocked ? badge("Blocked", "bad") : x.paused ? badge("Paused", "mute") : ""}`,
       sub: esc(`${city(x.timezone)} · ${x.times.join(", ")}`),
@@ -652,15 +478,7 @@
         window.scrollTo({ top: 0 });
         break;
       case "topic": toggleTopic(el); break;
-      case "remove-time": removeTime(v); break;
-      case "add-time": openScreen("times"); break;
-      case "pick-time": pickTime(el); break;
-      case "confirm-time": addTime(); break;
-      case "step": step(Number(v)); break;
-      case "format": setFormat(v); break;
-      case "open-tz": openScreen("tz"); break;
-      case "pick-tz": setZone(v); break;
-      case "use-device-tz": setZone(deviceTz); break;
+      case "time": toggleTime(el); break;
       case "pause": togglePause(el); break;
       case "range": S.range = v; haptic("select"); renderView(); break;
       case "refresh": haptic("impact", "light"); loadAdmin(true); renderView(); break;
@@ -670,11 +488,6 @@
       case "retry": boot(); break;
       default: break;
     }
-  });
-  document.addEventListener("input", (ev) => {
-    if (ev.target.id !== "tz-q") return;
-    S.q = ev.target.value;
-    $("#tz-list").innerHTML = tzListHTML();
   });
 
   function fatal(title, text, retry) {
@@ -706,10 +519,6 @@
     try { if (ver("7.7")) tg.disableVerticalSwipes(); } catch { /* old client */ }
     applyTheme();
     tg.onEvent("themeChanged", () => { applyTheme(); });
-    if (ver("6.1")) {
-      tg.BackButton.onClick(() => { haptic("impact", "light"); closeScreen(); });
-      tg.MainButton.onClick(() => { if (S.screen === "times") addTime(); });
-    }
   }
   boot();
 })();

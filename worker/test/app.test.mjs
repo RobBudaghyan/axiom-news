@@ -30,5 +30,6 @@ test("no em or en dash anywhere in the Mini App (owner rule)", () => {
 test("the accent is fixed, not taken from Telegram's button or link colour (lesson 13)", () => {
   const css = read("app/app.css");
   assert.doesNotMatch(css, /--tg-theme-(button|link)-color/);
-  assert.match(css, /--accent: #2f7bf6;/);
+  assert.match(css, /--accent: #b1161c;/);                     // the brand red (Step 5)
+  assert.doesNotMatch(`${css}${read("app/app.js")}`, /2f7bf6/i);   // no trace of the old blue
 });

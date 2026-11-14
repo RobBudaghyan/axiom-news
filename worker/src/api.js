@@ -10,9 +10,10 @@
 //   POST /api/admin/run-job             start the hourly GitHub job, min-gap guard (owner only)
 import { verifyInitData } from "./auth.js";
 import { CONFIG, afterSendStatements, candidateStatement, hhmm, localParts, nextSlot, planDigest } from "./digest.js";
-import { SettingsError, TZ_AUTO, TZ_DEFAULT, TZ_MANUAL, nextDigestAfterChange, publicUser, validZone, validatePatch } from "./settings.js";
+import { SettingsError, TZ_AUTO, TZ_DEFAULT, nextDigestAfterChange, publicUser, validZone, validatePatch } from "./settings.js";
 import { adminStatements, shapeAdmin } from "./admin.js";
 import { dispatchJob } from "./github.js";
+import { sendParts } from "./cron.js";
 import { errorStatement } from "./db.js";
 
 const TOPICS_SQL = "SELECT tag, label_en, emoji, sort, is_default FROM topics ORDER BY sort";
@@ -31,7 +32,7 @@ function state(user, topics, isOwner, cfg) {
   return {
     user: publicUser(user, cfg),
     topics: topics.map((t) => ({ tag: t.tag, label: t.label_en, emoji: t.emoji ?? "" })),
-    limits: { ...L, formats: cfg.formats },
+    limits: { ...L },
     is_owner: isOwner,
   };
 }
@@ -56,14 +57,14 @@ async function open(db, tg, body, now, cfg, isOwner) {
     user = {
       id: tg.id, first_name: firstName, language, timezone: deviceTz ?? cfg.default_timezone,
       tz_detected: deviceTz ? TZ_AUTO : TZ_DEFAULT, digest_times: JSON.stringify(cfg.default_times),
-      max_stories: cfg.default_stories, topics: JSON.stringify(topics.filter((t) => t.is_default).map((t) => t.tag)),
-      format: null, paused: 0, blocked: 0, created_at: now,
+      topics: JSON.stringify(topics.filter((t) => t.is_default).map((t) => t.tag)),
+      paused: 0, blocked: 0, created_at: now,
     };
     user.next_digest_at = nextSlot(now, user.timezone, cfg.default_times);
     await db.batch([{
-      sql: "INSERT INTO users (id, first_name, language, timezone, tz_detected, digest_times, max_stories, topics, " +
-           "created_at, next_digest_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10) ON CONFLICT(id) DO NOTHING",
-      params: [user.id, firstName, language, user.timezone, user.tz_detected, user.digest_times, user.max_stories,
+      sql: "INSERT INTO users (id, first_name, language, timezone, tz_detected, digest_times, topics, " +
+           "created_at, next_digest_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9) ON CONFLICT(id) DO NOTHING",
+      params: [user.id, firstName, language, user.timezone, user.tz_detected, user.digest_times,
                user.topics, now, user.next_digest_at],
     }]);
     return state(user, topics, isOwner, cfg);
@@ -71,8 +72,9 @@ async function open(db, tg, body, now, cfg, isOwner) {
   const after = { ...user };
   if (firstName && firstName !== user.first_name) after.first_name = firstName;   // lesson 14
   if (language !== user.language) after.language = language;
-  // The device zone wins unless the user picked a zone by hand (travel: the zone follows the phone).
-  if (deviceTz && user.tz_detected !== TZ_MANUAL && (deviceTz !== user.timezone || user.tz_detected !== TZ_AUTO)) {
+  // The zone always follows the phone (Step 5: there is no hand-picked zone any more), so it
+  // follows the user when they travel.
+  if (deviceTz && (deviceTz !== user.timezone || user.tz_detected !== TZ_AUTO)) {
     after.timezone = deviceTz;
     after.tz_detected = TZ_AUTO;
     if (deviceTz !== user.timezone) after.next_digest_at = nextDigestAfterChange(user, after, now, cfg);
@@ -113,9 +115,10 @@ async function digestNow(db, ownerId, now, cfg, io) {
   if (!user) return fail(404, "Send /start to the bot first.");
   const [cands] = await db.batch([candidateStatement(user, now, cfg)]);
   const plan = planDigest(user, cands, topics, now, cfg);
-  await io.send(user.id, plan.text);
-  await db.batch(afterSendStatements(user, plan.stories.map((s) => s.id), now, plan.nextAt));
-  const n = plan.stories.length;
+  const errors = [];
+  const ids = await sendParts(io, user.id, plan, (msg) => errors.push(errorStatement(msg, now)));
+  await db.batch([...afterSendStatements(user, ids, now, plan.nextAt), ...errors]);
+  const n = ids.length;
   return json(200, {
     ok: true, stories: n,
     message: n ? `Sent: ${n} ${n === 1 ? "story" : "stories"}. Check your chat with the bot.`

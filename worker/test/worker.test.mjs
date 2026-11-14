@@ -40,7 +40,6 @@ describe("webhook", () => {
     assert.equal(u.first_name, "Ruben");
     assert.equal(u.timezone, "Asia/Yerevan");
     assert.equal(u.digest_times, '["09:00","14:00","20:00"]');
-    assert.equal(u.max_stories, 7);
     assert.deepEqual(JSON.parse(u.topics), ALL);
     assert.ok(u.next_digest_at > Date.now() / 1000);
     const reply = fetchMock.calls[0];
@@ -53,11 +52,10 @@ describe("webhook", () => {
 
   test("/start again keeps settings, unblocks, and says welcome back", async () => {
     const { binding, sqlite } = fakeD1();
-    addUser(sqlite, { max_stories: 5, topics: '["armenia"]', blocked: 1, digest_times: '["08:00"]' });
+    addUser(sqlite, { topics: '["armenia"]', blocked: 1, digest_times: '["08:00"]' });
     fetchMock = mockFetch(() => undefined);
     await worker.fetch(post(update("/start")), env(binding));
     const u = sqlite.prepare("SELECT * FROM users WHERE id = ?").get(OWNER);
-    assert.equal(u.max_stories, 5);
     assert.equal(u.topics, '["armenia"]');
     assert.equal(u.blocked, 0);
     assert.match(fetchMock.calls[0].body.text, /^Welcome back, Ruben!/);
@@ -87,8 +85,11 @@ describe("digest cron", () => {
     const { db, sqlite } = fakeD1();
     const now = yerevan(14, 5);
     okRun(sqlite, now - 1800);
-    addStory(sqlite, "Armenia and Azerbaijan sign border deal", ["armenia", "politics"], 7, now - 600);
-    addStory(sqlite, "Iran fires missiles at a tanker in the Gulf", ["iran_war", "wars_conflicts"], 6, now - 300);
+    addStory(sqlite, "Armenia and Azerbaijan sign border deal", ["armenia", "politics"], 7, now - 600,
+      { final_score: 8, headline: "Armenia and Azerbaijan sign a border deal", description: "Both sides signed in Washington.",
+        emojis: "🇦🇲🇦🇿📝" });
+    addStory(sqlite, "Iran fires missiles at a tanker in the Gulf", ["iran_war", "wars_conflicts"], 6, now - 300,
+      { final_score: 7 });
     const outbox = [];
     const io = { send: async (id, text) => { outbox.push({ id, text }); return { message_id: outbox.length }; },
       alert: async (t) => outbox.push({ alert: t }) };
@@ -101,7 +102,12 @@ describe("digest cron", () => {
     const out = await runTick(db, io, now);
     assert.equal(out.sent, 1);
     assert.equal(outbox.length, 1);
-    assert.match(outbox[0].text, /^Good afternoon\. Since 09:00, 2 stories on your topics:\n\n<b>🇦🇲 Armenia<\/b>\n1\. 🇦🇲 <b>Armenia/);
+    assert.equal(outbox[0].text, "Good afternoon, Owner. Since 9 AM, 2 stories for you:\n\n" +
+      "🇦🇲 <b><u>Armenia</u></b>\n\n1. 🇦🇲🇦🇿📝 <b>Armenia and Azerbaijan sign a border deal</b>\n\n" +
+      'Both sides signed in Washington.\n<a href="https://a.test/x">Alpha Times</a>\n\n' +
+      // no editor text: the summary and the dictionary emoji (the first actor named)
+      "🇮🇷 <b><u>Iran War</u></b>\n\n2. 🇮🇷 <b>Iran fires missiles at a tanker in the Gulf</b>\n" +
+      '<a href="https://a.test/x">Alpha Times</a>');
     assert.equal(sqlite.prepare("SELECT COUNT(*) AS n FROM sent").get().n, 2);
     const u = sqlite.prepare("SELECT * FROM users").get();
     assert.equal(u.last_digest_at, yerevan(14));   // the slot, so the next header says "Since 14:00"
@@ -115,7 +121,27 @@ describe("digest cron", () => {
     sqlite.prepare("UPDATE stories SET updated_at = ?").run(now + 60);
     sqlite.prepare("UPDATE users SET next_digest_at = ?").run(now + 100);
     await runTick(db, io, now + 300);
-    assert.equal(outbox[1].text, "Good afternoon. Quiet period: nothing important on your topics since 14:00.");
+    assert.equal(outbox[1].text, "Good afternoon, Owner. Quiet period: nothing important on your topics since 2 PM.");
+  });
+
+  test("a long digest goes out as two messages; a failed second part keeps its stories for later", async () => {
+    const { db, sqlite, now, outbox, io } = setup();
+    addUser(sqlite, { next_digest_at: yerevan(14) });
+    const cfg = { ...(await import("../src/digest.js")).CONFIG, message_char_budget: 200 };
+    await runTick(db, io, now, {}, cfg);
+    assert.equal(outbox.length, 2);
+    assert.match(outbox[0].text, /^Good afternoon, Owner\. In the last 24 hours, 2 stories for you:\n\n🇦🇲 <b><u>Armenia/);
+    assert.match(outbox[1].text, /^🇮🇷 <b><u>Iran War<\/u><\/b>\n\n2\. /);   // split at the topic; numbering runs on
+    assert.equal(sqlite.prepare("SELECT COUNT(*) AS n FROM sent").get().n, 2);
+
+    const t = setup();
+    addUser(t.sqlite, { next_digest_at: yerevan(14) });
+    let n = 0;
+    t.io.send = async () => { if (++n === 2) throw new Error("Telegram sendMessage HTTP 502: bad gateway"); return {}; };
+    await runTick(t.db, t.io, t.now, {}, cfg);
+    assert.deepEqual(t.sqlite.prepare("SELECT story_id FROM sent").all().map((r) => r.story_id), [1]);
+    assert.match(t.sqlite.prepare("SELECT message FROM errors").get().message, /part 2 of 2 not sent/);
+    assert.equal(t.sqlite.prepare("SELECT next_digest_at FROM users").get().next_digest_at, yerevan(20));   // slot moves on
   });
 
   test("at most max_users_per_tick users per tick, the earliest due first; the rest go next tick", async () => {

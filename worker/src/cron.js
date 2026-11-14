@@ -12,6 +12,25 @@ ORDER BY next_digest_at LIMIT ?2`;
 const TOPICS_SQL = "SELECT tag, label_en, emoji, sort, is_default FROM topics ORDER BY sort";
 const GIVE_UP_S = 3600;   // a slot that keeps failing for an hour is skipped
 
+// Sends a digest's messages in order (usually one; a long digest is split at a topic). A failure
+// of the first message is thrown (retried at the next tick, as before). A failure of a later one is
+// reported with `logError`: the stories already sent are recorded and the slot moves on, while the
+// stories of the unsent part stay eligible for the next digest. Returns the ids of stories sent.
+export async function sendParts(io, chatId, plan, logError) {
+  const ids = [];
+  for (let p = 0; p < plan.parts.length; p++) {
+    try {
+      await io.send(chatId, plan.parts[p]);
+    } catch (e) {
+      if (p === 0) throw e;
+      logError(`digest for user ${chatId}: part ${p + 1} of ${plan.parts.length} not sent: ${e.message}`);
+      break;
+    }
+    ids.push(...plan.partStories[p]);
+  }
+  return ids;
+}
+
 // io: {send(chatId, html), alert(text)}. opts: {digests: bool, extraProblems: []}.
 export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
   const digests = opts.digests !== false;
@@ -27,10 +46,10 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
     const cands = await db.batch(due.map((u) => candidateStatement(u, now, cfg)));
     for (let i = 0; i < due.length; i++) {
       const user = due[i];
-      let plan;
+      let plan, sentIds;
       try {
         plan = planDigest(user, cands[i], topics, now, cfg);
-        await io.send(user.id, plan.text);
+        sentIds = await sendParts(io, user.id, plan, (msg) => writes.push(errorStatement(msg, now)));
       } catch (e) {
         out.failed++;
         if (e.status === 403) {   // the user blocked the bot
@@ -48,8 +67,8 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
       }
       out.sent++;
       if (!plan.stories.length) out.quiet++;
-      out.stories += plan.stories.length;
-      writes.push(...afterSendStatements(user, plan.stories.map((s) => s.id), now, plan.nextAt));
+      out.stories += sentIds.length;
+      writes.push(...afterSendStatements(user, sentIds, now, plan.nextAt));
     }
   }
 

@@ -1,23 +1,41 @@
 // User settings from the Mini App: validation and the next digest time. Pure functions, no I/O.
-// Limits live in config/digest.json ("settings_limits").
+// Limits live in config/digest.json ("settings_limits"). Since Step 5 a user sets only topics,
+// digest times (on the hour, 06:00-23:00, 1 to 5) and pause. The time zone always follows the
+// phone (saved on every open, src/api.js); the story count and the format are no longer settings.
 import { CONFIG, nextSlot, parseList } from "./digest.js";
 
-// users.tz_detected: 0 = never reported (default zone), 1 = set from the device, 2 = chosen by hand
+// users.tz_detected: 0 = never reported (default zone), 1 = set from the device.
+// (2 = "chosen by hand" existed until Step 5; such a zone is replaced by the phone's on next open.)
 export const TZ_DEFAULT = 0, TZ_AUTO = 1, TZ_MANUAL = 2;
-const KEYS = new Set(["topics", "digest_times", "max_stories", "format", "timezone", "tz_auto", "paused"]);
+const KEYS = new Set(["topics", "digest_times", "paused"]);
 const KEEP_DUE_S = 15 * 60;   // a digest already due (waiting for the next 5-min tick) is kept
 
 export class SettingsError extends Error {}
 
 const minutes = (hhmm) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
+const fromMinutes = (m) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 
 export function allowedTimes(cfg = CONFIG) {
   const L = cfg.settings_limits;
   const out = [];
-  for (let m = minutes(L.earliest); m <= minutes(L.latest); m += L.step_minutes) {
-    out.push(`${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`);
-  }
+  for (let m = minutes(L.earliest); m <= minutes(L.latest); m += L.step_minutes) out.push(fromMinutes(m));
   return out;
+}
+
+// Step 5 migration: an older time like "08:30" goes to the nearest allowed hour (a half hour
+// rounds up: 08:30 -> 09:00), clamped to the allowed range; duplicates removed, sorted, at most
+// max_times. Used by scripts/migrate-times.mjs.
+export function roundTimes(times, cfg = CONFIG) {
+  const L = cfg.settings_limits;
+  const lo = minutes(L.earliest), hi = minutes(L.latest), step = L.step_minutes;
+  const out = new Set();
+  for (const t of times) {
+    if (typeof t !== "string" || !/^\d{2}:\d{2}$/.test(t)) continue;
+    const m = Math.min(hi, Math.max(lo, Math.floor((minutes(t) + step / 2) / step) * step));
+    out.add(fromMinutes(m));
+  }
+  const list = [...out].sort().slice(0, L.max_times);
+  return list.length ? list : [...cfg.default_times];
 }
 
 // A valid IANA zone name. Building the formatter is also what digest.js does, so the result is
@@ -44,7 +62,7 @@ export function validatePatch(patch, topicTags, cfg = CONFIG) {
     const t = patch.topics;
     if (!Array.isArray(t) || !t.every((x) => typeof x === "string")) throw new SettingsError("Topics must be a list.");
     const uniq = [...new Set(t)];
-    if (!uniq.length) throw new SettingsError("Pick at least one topic.");
+    if (!uniq.length) throw new SettingsError("Keep at least one topic.");
     const bad = uniq.find((x) => !topicTags.includes(x));
     if (bad) throw new SettingsError("That topic does not exist.");
     out.topics = topicTags.filter((x) => uniq.includes(x));   // keep the official order
@@ -57,27 +75,9 @@ export function validatePatch(patch, topicTags, cfg = CONFIG) {
     if (uniq.length > L.max_times) throw new SettingsError(`You can have up to ${L.max_times} digest times.`);
     const ok = allowedTimes(cfg);
     if (uniq.some((x) => !ok.includes(x))) {
-      throw new SettingsError(`Times must be between ${L.earliest} and ${L.latest}, on the hour or half hour.`);
+      throw new SettingsError(`Times must be on the hour, between ${L.earliest} and ${L.latest}.`);
     }
     out.digest_times = uniq;
-  }
-  if ("max_stories" in patch) {
-    const n = patch.max_stories;
-    if (!Number.isInteger(n) || n < L.min_stories || n > L.max_stories) {
-      throw new SettingsError(`Stories per digest must be between ${L.min_stories} and ${L.max_stories}.`);
-    }
-    out.max_stories = n;
-  }
-  if ("format" in patch) {
-    if (!cfg.formats.includes(patch.format)) throw new SettingsError("Unknown format.");
-    out.format = patch.format;
-  }
-  if ("timezone" in patch) {
-    if (!validZone(patch.timezone)) throw new SettingsError("That time zone is not recognised.");
-    out.timezone = patch.timezone;
-    out.tz_detected = patch.tz_auto === true ? TZ_AUTO : TZ_MANUAL;
-  } else if ("tz_auto" in patch) {
-    throw new SettingsError("Time zone missing.");
   }
   if ("paused" in patch) {
     if (typeof patch.paused !== "boolean") throw new SettingsError("Pause must be on or off.");
@@ -103,11 +103,9 @@ export function publicUser(u, cfg = CONFIG) {
   return {
     first_name: u.first_name ?? "",
     timezone: u.timezone || cfg.default_timezone,
-    tz_source: u.tz_detected === TZ_MANUAL ? "manual" : u.tz_detected === TZ_AUTO ? "device" : "default",
+    tz_source: u.tz_detected === TZ_DEFAULT || u.tz_detected == null ? "default" : "device",
     digest_times: parseList(u.digest_times, cfg.default_times),
-    max_stories: u.max_stories || cfg.default_stories,
     topics: parseList(u.topics),
-    format: cfg.formats.includes(u.format) ? u.format : cfg.format,
     paused: !!u.paused,
     next_digest_at: u.next_digest_at ?? null,
   };
