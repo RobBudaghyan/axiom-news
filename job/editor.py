@@ -40,7 +40,7 @@ MAX_EMOJIS = 4
 MAX_EVENT_STORIES = 6       # more stories in one event is a roundup, not one event
 
 POOL_SQL = ("SELECT id, summary, topics, importance, best_url, best_source, best_tier, best_published_at, "
-            "source_count, created_at, updated_at, headline, description, emojis, final_score, edited_at "
+            "source_count, created_at, updated_at, headline, description, emojis, final_score, edited_at, main_topic "
             "FROM stories WHERE updated_at >= ? AND merged_into IS NULL AND importance >= ? "
             "ORDER BY importance DESC, updated_at DESC, id DESC")
 ITEMS_SQL = ("SELECT story_id, source_name, tier, title, snippet, published_at FROM items "
@@ -350,6 +350,7 @@ class Event:
     headline: str | None
     description: str | None
     emojis: str | None
+    topic: str | None = None      # the one topic it is mainly about (its digest section)
     dropped: list[str] = field(default_factory=list)   # fact-guard notes
 
 
@@ -389,8 +390,8 @@ def source_text(stories: list[dict], items: dict[int, list[dict]]) -> tuple[str,
     return "\n".join(parts), latin
 
 
-def validate_events(data: dict, by_id: dict[int, dict],
-                    items: dict[int, list[dict]]) -> tuple[list[Event], list[int]]:
+def validate_events(data: dict, by_id: dict[int, dict], items: dict[int, list[dict]],
+                    topic_order: list[str] | None = None) -> tuple[list[Event], list[int]]:
     """Check one answer. Returns (events, candidate ids the answer left out). Unknown or repeated
     ids are dropped (the first use wins); an event without a usable score is ignored, so its
     stories stay unedited. Text is cleaned and fact-checked against the articles."""
@@ -412,6 +413,8 @@ def validate_events(data: dict, by_id: dict[int, dict],
         raw_head = str(raw.get("headline") or "").strip()
         rewrite = bool(raw_head) or leader.get("edited_at") is None
         ev = Event(ids, score, rewrite, None, None, None)
+        topic = str(raw.get("topic") or "").strip()
+        ev.topic = topic if topic_order and topic in topic_order else None
         if rewrite:
             src, latin = source_text(group, items)
             head = clean_headline(raw_head)
@@ -443,7 +446,8 @@ def write_statements(events: list[Event], by_id: dict[int, dict], topic_order: l
         group = [by_id[i] for i in ev.ids]
         leader = min(group, key=lambda s: (s["created_at"], s["id"]))
         kids = [s for s in group if s is not leader]
-        tagset = {t for s in group for t in tags(s)}
+        tagset = {t for s in group for t in tags(s)} | ({ev.topic} if ev.topic else set())
+        main = ev.topic or leader.get("main_topic")
         best = min(group, key=lambda s: (s["best_tier"], s["best_published_at"] if s["best_published_at"]
                                          is not None else float("inf"), s["id"]))
         # Field by field: a new valid value wins, otherwise the story keeps what it had. Seen on
@@ -454,11 +458,12 @@ def write_statements(events: list[Event], by_id: dict[int, dict], topic_order: l
         emo = ev.emojis or leader.get("emojis")
         stmts.append((
             "UPDATE stories SET final_score=?, headline=?, description=?, emojis=?, edited_at=?, topics=?, "
-            "best_url=?, best_source=?, best_tier=?, best_published_at=?, updated_at=?, source_count=? "
-            "WHERE id=?",
+            "best_url=?, best_source=?, best_tier=?, best_published_at=?, updated_at=?, source_count=?, "
+            "main_topic=? WHERE id=?",
             [ev.score, head, desc, emo, now, json.dumps([t for t in topic_order if t in tagset]),
              best["best_url"], best["best_source"], best["best_tier"], best["best_published_at"],
-             max(s["updated_at"] for s in group), sum(s["source_count"] or 1 for s in group), leader["id"]]))
+             max(s["updated_at"] for s in group), sum(s["source_count"] or 1 for s in group), main,
+             leader["id"]]))
         for k in kids:
             merged += 1
             stmts += [
@@ -553,7 +558,7 @@ class Editor:
                         data = parse_answer(res.text)
                     except ValueError as exc:
                         raise ai.AIError(p.name, f"editor: invalid JSON: {exc}", kind="invalid") from None
-                    events, left_out = validate_events(data, by_id, items)
+                    events, left_out = validate_events(data, by_id, items, self.topic_order)
                     covered = len(cands) - len(left_out)
                     if covered < len(cands) * MIN_COVERED_SHARE:
                         raise ai.AIError(p.name, f"editor: answer covers only {covered} of {len(cands)} "

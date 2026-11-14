@@ -30,6 +30,7 @@ MIGRATIONS = [
     "ALTER TABLE job_runs ADD COLUMN editor_candidates INTEGER",
     "ALTER TABLE job_runs ADD COLUMN editor_merged INTEGER",
     "ALTER TABLE ai_calls ADD COLUMN kind TEXT",
+    "ALTER TABLE stories ADD COLUMN main_topic TEXT",
 ]
 
 

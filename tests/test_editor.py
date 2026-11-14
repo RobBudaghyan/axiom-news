@@ -59,8 +59,8 @@ def make_editor(db, providers, settings=None):
     return ed, calls
 
 
-def answer(*events) -> dict:
-    return {"events": [{"ids": [f"S{i}" for i in ids], "score": score, "headline": head,
+def answer(*events, topic="") -> dict:
+    return {"events": [{"ids": [f"S{i}" for i in ids], "score": score, "headline": head, "topic": topic,
                         "description": desc, "emojis": emo} for ids, score, head, desc, emo in events]}
 
 
@@ -197,6 +197,22 @@ class Validation(unittest.TestCase):
         self.assertEqual((s["headline"], s["description"], s["emojis"]), ("Edited", "Old desc.", "🏛️"))
 
 
+class MainTopic(unittest.TestCase):
+    def test_the_editor_names_the_main_topic_which_is_added_to_the_tags(self):
+        db = new_db()
+        s = add_story(db, "Trump, Putin and Xi to meet in China", ["iran_war", "wars_conflicts"], 8)
+        bad = add_story(db, "Other", ["russia"], 6)
+        ed, _ = make_editor(db, [FakeProvider("gemini", [{"events": [
+            {"ids": [f"S{s}"], "score": 8, "topic": "politics", "headline": "Trump, Putin and Xi to meet in China",
+             "description": "", "emojis": ""},
+            {"ids": [f"S{bad}"], "score": 5, "topic": "sports", "headline": "Other", "description": "", "emojis": ""}]}])])
+        ed.run(T0)
+        row = story(db, s)
+        self.assertEqual(row["main_topic"], "politics")
+        self.assertEqual(json.loads(row["topics"]), ["politics", "wars_conflicts", "iran_war"])
+        self.assertIsNone(story(db, bad)["main_topic"])                # unknown tag ignored
+
+
 class Writes(unittest.TestCase):
     def setUp(self):
         self.db = new_db()
@@ -227,6 +243,7 @@ class Writes(unittest.TestCase):
         self.assertEqual(lead["updated_at"], int(T0 - H))              # the newest of the group
         self.assertEqual(json.loads(lead["topics"]), ["wars_conflicts", "russia", "ukraine_war"])
         self.assertEqual(lead["edited_at"], T0)
+        self.assertIsNone(lead["main_topic"])                          # the answer named no topic
         # user 7 got the merged-away story: the kept one counts as sent too (never twice)
         sent = self.db.query("SELECT story_id, sent_at FROM sent WHERE user_id = 7 ORDER BY story_id")
         self.assertEqual(sent, [{"story_id": self.old, "sent_at": T0 - 600}, {"story_id": self.new, "sent_at": T0 - 600}])

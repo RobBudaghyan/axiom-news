@@ -74,7 +74,8 @@ CREATE TABLE IF NOT EXISTS stories (
   emojis            TEXT,                           -- e.g. flags of the main actors + a subject emoji
   final_score       INTEGER,                        -- strict editorial score 1..10; NULL = not edited
   edited_at         INTEGER,                        -- NULL = not edited yet, or needs re-editing
-  merged_into       INTEGER                         -- the editor found this is a duplicate of that story
+  merged_into       INTEGER,                        -- the editor found this is a duplicate of that story
+  main_topic        TEXT                            -- the one topic it is mainly about (its digest section)
 );
 CREATE INDEX IF NOT EXISTS idx_stories_updated ON stories(updated_at);
 

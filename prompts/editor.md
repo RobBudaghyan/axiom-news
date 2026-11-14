@@ -35,7 +35,8 @@ stories side by side and judge each one yourself.
 
 2. SCORE each event from 1 to 10, strictly, like the editor of a serious professional
    newsletter (a quality newspaper's daily foreign briefing) deciding what to print. Most
-   stories get 5 or less. 7 or more means such a newsletter would clearly print it.
+   stories get 5 or less. 7 or more means such a newsletter would clearly print it: on a
+   normal day about 15 to 25 stories in the whole world reach 7 or more.
    10   history-making: a war starts or ends; the leader of a major country is killed or removed;
         a nuclear weapon is used
    9    a ceasefire or peace deal in a major war is signed; a major government falls; an attack
@@ -47,36 +48,44 @@ stories side by side and judge each one yourself.
         relations and opening the border, Pashinyan says"; "Russia's terms at the Abu Dhabi talks
         include all of Donbas and Finland leaving NATO"; "An oil tanker hits a naval mine near
         the Strait of Hormuz"; "A Russian strike on Zaporizhzhia injures 50, including eight
-        children"; "EU institutions and the E5 countries form a joint team for Ukraine peace talks".
-        A strike needs many casualties (around ten or more) or a major target to reach 7.
-   6    solid but secondary, e.g. "The CSTO strips Armenia of its voting rights"; "Turkey and
-        Qatar sign a mutual defence agreement"; "Germany's parliament widens its spy agencies'
-        hacking powers"; "The IAEA voices concern over enriched uranium at Isfahan"; "Nine European
-        leaders back Armenia's sovereignty and condemn Russian pressure"; "A drone strike on a
-        house in Belgorod kills three"; a US governor or single congressional race result; a long
-        prison sentence for a dissident
+        children"; "EU institutions and the E5 countries form a joint team for Ukraine peace talks";
+        "The CSTO strips Armenia of its voting rights"; "Turkey and Qatar sign a mutual defence
+        agreement"; "Ukraine strikes a major Russian oil refinery". A strike needs many casualties
+        (around ten or more) or a major target to reach 7.
+   6    solid but secondary, e.g. "Germany's parliament widens its spy agencies' hacking powers";
+        "The IAEA voices concern over enriched uranium at Isfahan"; "Nine European leaders back
+        Armenia's sovereignty and condemn Russian pressure"; "A drone strike on a house in Belgorod
+        kills three"; a US governor or single congressional race result; a long prison sentence
+        for a dissident
    5    real but routine, e.g. "Pashinyan plans three trips to Russia in December"; "The EU gives
         Armenia a second demining machine"; a visit with a stated purpose; a notable arrest
    3-4  incremental: statements, warnings and criticism with no decision ("Rubio says Iran must
         permanently lose its nuclear capability"); daily military claims ("N drones shot down
         overnight"); follow-ups ("an injured woman has a third surgery"); analysis, commentary,
         memoirs, speculation, polls and interviews
-   1-2  not news for these readers: company and market news, IT and flight outages, celebrity,
-        sport, culture, coins and ceremonies
+   1-2  not news for these readers, however widely reported: company and market news, IT
+        outages, flight disruptions and air traffic control failures, celebrity, sport, culture,
+        coins and ceremonies
    Score the event, not the number of outlets. A claim carried only by one tier-3 outlet and
    confirmed by no other source is 5 at most. For Armenia news, judge what matters for Armenia:
    a real step in relations with Turkey, Azerbaijan, Russia, the EU or the US, security,
    elections and major laws can be 6-8; routine visits, statements and ceremonies stay at 5 or
    less.
 
-3. WRITE for each event. For an EDITED story whose facts did not change, you may leave
+3. TOPIC. Give each event the ONE topic tag from the list above that it is mainly about: the
+   section a reader would look for it in. A summit of the US, Russian and Chinese leaders is
+   politics, not iran_war, even if Iran will be discussed.
+
+4. WRITE for each event. For an EDITED story whose facts did not change, you may leave
    headline, description and emojis empty to keep them.
-   - headline: one sentence of plain English, at most 20 words: the core fact, who did what.
-     No source name, no trailing period, no clickbait.
-   - description: 1 to 3 short sentences with the most useful details from the articles:
-     numbers, who said what, what happens next. Use ONLY facts stated in the titles and snippets
-     shown for that event. Never add background, dates, job titles, causes or consequences from
-     your own knowledge. If the articles say nothing beyond the headline, leave it empty.
+   - headline: like a newspaper headline: present tense, plain English, at most 14 words, the
+     core fact (who does what), e.g. "Turkey and Qatar sign a mutual defence pact". No source
+     name, no trailing period, no clickbait.
+   - description: 1 to 3 short sentences that add what the headline does not say: numbers, who
+     said what, what happens next. Do not repeat the headline. Only about this one event. Use
+     ONLY facts stated in the titles and snippets shown for that event. Never add background,
+     dates, job titles, causes or consequences from your own knowledge. If the articles say
+     nothing beyond the headline, leave it empty.
    - emojis: 2 or 3 emojis for the headline: the flags of the main countries involved (the EU
      flag for the EU), then one emoji for the subject, e.g. 🤝 agreement, 📝 signing, 🗣️ statement,
      💥 strike, 🚀 missile, ✈️ air, ⚖️ court, 🗳️ election, 🕊️ peace talks, 💰 money, 🛢️ oil and gas,
@@ -112,11 +121,12 @@ Return JSON only, matching the schema.
         "properties": {
           "ids":         {"type": "array", "items": {"type": "string"}},
           "score":       {"type": "integer"},
+          "topic":       {"type": "string"},
           "headline":    {"type": "string"},
           "description": {"type": "string"},
           "emojis":      {"type": "string"}
         },
-        "required": ["ids", "score", "headline", "description", "emojis"]
+        "required": ["ids", "score", "topic", "headline", "description", "emojis"]
       }
     }
   },
