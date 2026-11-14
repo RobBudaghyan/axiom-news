@@ -266,9 +266,11 @@ class GroqProvider:
 
 def estimate_tokens(text: str) -> int:
     """Rough token count: ~4 characters per token for Latin text, ~2.5 for Cyrillic and other
-    scripts. Calibrated against Gemini countTokens in Step 2 (see report)."""
-    non_latin = sum(1 for ch in text if ord(ch) > 0x24F)
-    return int((len(text) - non_latin) / 4 + non_latin / 2.5) + 1
+    scripts (calibrated against Gemini countTokens in Step 2), ~1.6 for Armenian script
+    (Step 7: 40 News.am headlines with snippets were 6,542 Gemini tokens, 1.8x the Russian ones)."""
+    armenian = sum(1 for ch in text if 0x530 <= ord(ch) <= 0x58F)
+    non_latin = sum(1 for ch in text if ord(ch) > 0x24F) - armenian
+    return int((len(text) - non_latin - armenian) / 4 + non_latin / 2.5 + armenian / 1.6) + 1
 
 
 def item_line(item: dict) -> str:

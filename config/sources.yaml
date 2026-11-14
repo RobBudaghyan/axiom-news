@@ -19,8 +19,12 @@
 #                1 = top international prestige, 2 = solid / reputable, 3 = niche,
 #                partisan or state-propaganda outlets (kept for coverage, linked last)
 #   note         optional clarification (ownership, editorial line)
+#   max_items    optional: new items taken from this feed per run (default 8, job/config.py).
+#                Higher for busy Armenian feeds (Step 7), chosen from their measured hourly
+#                volume; the newest items are kept, the rest are lost for good.
 #
-# Checked from the owner's PC on 2026-11-13. Results from GitHub's US servers may differ.
+# Checked from the owner's PC on 2026-11-13 (Step 7 Armenian feeds: PC and GitHub, 2026-11-14).
+# Results from GitHub's US servers may differ.
 
 sources:
   # ---------------- Global / Western ----------------
@@ -109,7 +113,16 @@ sources:
   - {key: the_insider, name: The Insider, url: "https://theins.ru/feed", region: russia, language: ru, topics: [russia, ukraine_war], paywalled: false, state_owned: false, tier: 2, note: "Independent investigative outlet, in exile"}
 
   # ---------------- Armenia / South Caucasus ----------------
-  - {key: news_am_en, name: News.am, url: "https://news.am/eng/rss/", region: armenia, language: en, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2}
+  - {key: news_am_en, name: News.am, url: "https://news.am/eng/rss/", region: armenia, language: en, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2, note: "Private (News am LLC, since 2009), the most-read Armenian news site; JAMnews (2021) listed it among outlets backing Artur Vanetsyan's opposition bloc. Carries much world news"}
+  # Step 7 (2026-11-14): Armenian and Russian-language feeds; checked from the PC and GitHub's runners.
+  - {key: news_am_ru, name: News.am, url: "https://news.am/ru/rss", region: armenia, language: ru, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2, max_items: 20, note: "Private (News am LLC, since 2009), the most-read Armenian news site; JAMnews (2021) listed it among outlets backing Artur Vanetsyan's opposition bloc. Carries much world news"}
+  - {key: factor_am, name: Factor.am, url: "https://factor.am/feed", region: armenia, language: hy, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2, max_items: 10, note: "Run by the Factor Information Center NGO; RSF names it among Armenia's independent watchdog sites"}
+  - {key: aravot, name: Aravot, url: "https://www.aravot.am/feed/", region: armenia, language: hy, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2, max_items: 10, note: "Private daily newspaper (Aravot oratert LLC), editor Aram Abrahamyan; news and opinion"}
+  - {key: am168, name: 168.am, url: "https://168.am/feed", region: armenia, language: hy, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 3, max_items: 20, note: "Private (168 Zham LLC, owned by its founder and editor Satik Seyranyan); JAMnews (2021) listed it with News.am behind Artur Vanetsyan's opposition bloc; many opinion pieces"}
+  - {key: a1plus, name: A1+, url: "https://www.a1plus.am/hy/rss", region: armenia, language: hy, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2, max_items: 12, note: "Private (Meltex LLC, founder Mesrop Movsesyan); A1+ TV lost its broadcast licence in 2002 and works online"}
+  - {key: arminfo_en, name: ArmInfo, url: "https://arminfo.info/feeds/english_rss.xml", region: armenia, language: en, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2, note: "Private news agency founded in 1991; English versions of its Russian wire"}
+  - {key: civilnet_hy, name: CivilNet, url: "https://civilnet.am/hy/rss", region: armenia, language: hy, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2, note: "Armenian edition (more items than the English one)"}
+  - {key: hetq_hy, name: Hetq, url: "https://hetq.am/hy/rss", region: armenia, language: hy, topics: [armenia], paywalled: false, state_owned: false, tier: 2, note: "Investigative journalists' association; Armenian edition (more items than the English one)"}
   - {key: azatutyun, name: Azatutyun, url: "https://www.azatutyun.am/api/ztvv_l-vomx-tpekqky", region: armenia, language: hy, topics: [armenia, politics], paywalled: false, state_owned: true, tier: 2, note: "RFE/RL Armenian service, US-government-funded, editorially independent"}
   - {key: civilnet, name: CivilNet, url: "https://civilnet.am/en/rss", region: armenia, language: en, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2}
   - {key: evn_report, name: EVN Report, url: "https://evnreport.com/feed/", region: armenia, language: en, topics: [armenia, politics], paywalled: false, state_owned: false, tier: 2}

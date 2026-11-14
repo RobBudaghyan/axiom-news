@@ -23,7 +23,8 @@ from typing import Callable
 from job import ai, dupes, editor
 from job.config import Prompt, Settings, load_env, load_prompt, load_sources, load_topics
 from job.d1 import D1, in_list_statements, insert_statements
-from job.fetch import Entry, FeedResult, candidates, feed_health, fetch_all, select_new
+from job.fetch import (Entry, FeedResult, candidates, feed_caps, feed_health, fetch_all, select_new,
+                       url_hash)
 
 # Failures that say nothing about the provider itself, only this one chunk's output:
 # the chunk is left for the next provider, but the same provider keeps going.
@@ -71,6 +72,7 @@ class RunStats:
     output_tokens: int = 0
     pruned: int | None = None
     failed_feeds: list[str] = field(default_factory=list)
+    cap_cut: dict[str, int] = field(default_factory=dict)   # feed key -> new items its cap left out
     ai_errors: list[str] = field(default_factory=list)
 
     @property
@@ -130,6 +132,7 @@ class Job:
         self.log = log
         self.calls_log: list[tuple] = []
         self.feed_health: dict | None = None   # written to meta.feed_health with the run log
+        self.cap_cut: dict[str, int] = {}
         self.debug_dir = Path(debug_dir) if debug_dir else None   # saves raw prompts/answers
         self.editor_enabled = editor_enabled   # tests of the first pass alone switch it off
 
@@ -175,7 +178,8 @@ class Job:
         for rows in self.db.batch(in_list_statements(
                 "SELECT url_hash FROM items WHERE url_hash IN ({qs})", hashes)):
             seen.update(r["url_hash"] for r in rows)
-        new = select_new(entries, seen, self.s.max_items_per_feed)
+        self.cap_cut = {}
+        new = select_new(entries, seen, self.s.max_items_per_feed, feed_caps(self.sources), self.cap_cut)
         rows = [(e.url_hash, e.source_key, e.source_name, e.tier, e.url, e.title, e.snippet,
                  e.published_at, now, "pending") for e in new]
         self.db.batch(insert_statements("items", ITEM_COLUMNS, rows,
@@ -341,6 +345,7 @@ class Job:
                 [summary, json.dumps(s.topics), s.importance, best["url"], best["source_name"],
                  best["tier"], best["published_at"], len(items), now, now]))
         merge_stmts, item_updates = [], []
+        old_items = self.old_best_items(merges, existing_by_id)
         for story_id, outs in merges.items():
             old = existing_by_id[story_id]
             items = [by_id[i] for o in outs for i in o.item_ids]
@@ -348,7 +353,10 @@ class Job:
             summary = next((o.summary for o in outs if o.summary), old["summary"])
             importance = max([old["importance"], *(o.importance for o in outs)])
             cand = best_item(items, summary)
-            old_key = (0, old["best_tier"], old["best_published_at"] if old["best_published_at"] is not None
+            # The old link is scored like a new one (Step 7): an English title that matches the
+            # summary beats a Russian/Armenian one, so a later English article can take over.
+            old_rel = relevance(old_items[story_id], summary) if story_id in old_items else 0
+            old_key = (old_rel, old["best_tier"], old["best_published_at"] if old["best_published_at"] is not None
                        else float("inf"))
             if link_key(cand, summary)[:3] < old_key:
                 url, source, tier, pub = cand["url"], cand["source_name"], cand["tier"], cand["published_at"]
@@ -380,6 +388,19 @@ class Job:
         stats.stories_merged += len(merges)
         stats.items_dropped += len(dropped)
         stats.items_unaccounted += sum(1 for i in dropped if i not in not_news)
+
+    def old_best_items(self, merges: dict, existing_by_id: dict) -> dict[int, dict]:
+        """Title and snippet of the current best link of each story that gains items, looked up
+        by URL hash (indexed; one small read per merged story)."""
+        hashes = {url_hash(existing_by_id[sid]["best_url"]): sid for sid in merges}
+        out: dict[int, dict] = {}
+        if not hashes:
+            return out
+        for rows in self.db.batch(in_list_statements(
+                "SELECT url_hash, title, snippet FROM items WHERE url_hash IN ({qs})", list(hashes))):
+            for r in rows:
+                out[hashes[r["url_hash"]]] = r
+        return out
 
     # ------------------------------------------------------------ editor pass
 
@@ -446,6 +467,10 @@ class Job:
             entries = candidates(results, since)
             stats.items_fetched = len(entries)
             stats.items_new = self.store_new(entries, now)
+            stats.cap_cut = dict(self.cap_cut)
+            for key, n in self.cap_cut.items():   # shown nowhere yet; kept for tuning the caps
+                if key in self.feed_health["feeds"]:
+                    self.feed_health["feeds"][key]["cut"] = n
             stats.items_expired = self.expire_old_pending(now)
             pending = self.load_pending()
             stats.items_pending_in = len(pending)
@@ -524,6 +549,9 @@ class Job:
         ]
         if s.failed_feeds:
             lines.append("failed feeds: " + ", ".join(s.failed_feeds))
+        if s.cap_cut:
+            lines.append("cap cut (new items left out by the per-feed cap): "
+                         + ", ".join(f"{k} {n}" for k, n in sorted(s.cap_cut.items())))
         for e in s.ai_errors:
             lines.append("AI error: " + e[:300])
         return "\n".join(lines)

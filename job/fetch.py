@@ -148,17 +148,28 @@ def candidates(results: list[FeedResult], since: int) -> list[Entry]:
     return out
 
 
-def select_new(entries: list[Entry], already_seen: set[str], cap: int) -> list[Entry]:
-    """Drop URLs already stored, then keep only the `cap` newest entries per feed."""
+def select_new(entries: list[Entry], already_seen: set[str], cap: int,
+               caps: dict[str, int] | None = None, cut: dict[str, int] | None = None) -> list[Entry]:
+    """Drop URLs already stored, then keep only the newest entries per feed: `caps[feed key]`
+    if the feed has its own cap (sources.yaml `max_items`), else `cap`. If `cut` is given, it
+    receives, per feed, how many new entries the cap left out (feeds with none are not listed)."""
     by_feed: dict[str, list[Entry]] = {}
     for e in entries:
         if e.url_hash not in already_seen:
             by_feed.setdefault(e.source_key, []).append(e)
     out = []
-    for feed_entries in by_feed.values():
+    for key, feed_entries in by_feed.items():
+        limit = (caps or {}).get(key) or cap
         feed_entries.sort(key=lambda e: e.published_at or 0, reverse=True)
-        out.extend(feed_entries[:cap])
+        out.extend(feed_entries[:limit])
+        if cut is not None and len(feed_entries) > limit:
+            cut[key] = len(feed_entries) - limit
     return out
+
+
+def feed_caps(sources: list[dict]) -> dict[str, int]:
+    """Per-feed caps from config/sources.yaml (`max_items`); feeds without one use the default."""
+    return {s["key"]: int(s["max_items"]) for s in sources if s.get("max_items")}
 
 
 def feed_health(prev: dict | None, results: list[FeedResult], now: int) -> dict:

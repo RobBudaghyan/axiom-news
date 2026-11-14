@@ -56,6 +56,9 @@ def validate(sources: list[dict]) -> list[str]:
                 problems.append(f"{label}: unknown topic '{tag}'")
         if "enabled" in s and not isinstance(s["enabled"], bool):
             problems.append(f"{label}: 'enabled' must be true or false")
+        if "max_items" in s and not (isinstance(s["max_items"], int) and not isinstance(s["max_items"], bool)
+                                     and 1 <= s["max_items"] <= 100):
+            problems.append(f"{label}: 'max_items' must be a whole number from 1 to 100")
         if s.get("enabled") is False and not s.get("disabled_note"):
             problems.append(f"{label}: a disabled feed needs a 'disabled_note'")
         for seen, value, what in ((keys, s.get("key"), "key"), (urls, s.get("url"), "url")):

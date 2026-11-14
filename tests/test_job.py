@@ -292,6 +292,55 @@ class Merge(Base):
         self.assertEqual(len(self.db.query("SELECT * FROM stories")), 1)
         self.assertEqual(last_run(self.db)["stories_merged"], 0)
 
+    def test_english_link_takes_over_in_a_merge(self):
+        """Step 7, owner: prefer English links. A story first seen in Russian (better tier) gets
+        an English article an hour later: the English one becomes the link."""
+        from dataclasses import replace
+        from tests.helpers import prompt_existing, prompt_items
+        now = self.clock()
+        ru = replace(entry("alpha", "UA: x", 30, now, 1), title="Удар по Харькову: погибли пять человек")
+        self.feeds.entries = [ru]
+
+        def first(prompt):
+            return {"stories": [{"item_ids": list(prompt_items(prompt).values()), "existing_story_id": None,
+                                 "summary": "Strike on Kharkiv kills five", "topics": ["ukraine_war"],
+                                 "importance": 6}], "not_news_ids": []}
+        make_job(self.db, FakeProvider("gemini", [first]), FakeProvider("groq", []), self.feeds, self.clock).run()
+        self.assertEqual(self.db.query("SELECT best_source FROM stories")[0]["best_source"], "Alpha Times")
+
+        self.clock.advance(1)
+        self.feeds.entries.append(entry("gamma", "Kharkiv strike kills five, officials say", 10, self.clock()))
+
+        def merge(prompt):
+            sid = list(prompt_existing(prompt).values())[0]
+            return {"stories": [{"item_ids": list(prompt_items(prompt).values()), "existing_story_id": f"S{sid}",
+                                 "summary": "", "topics": ["ukraine_war"], "importance": 6}], "not_news_ids": []}
+        make_job(self.db, FakeProvider("gemini", [merge]), FakeProvider("groq", []), self.feeds, self.clock).run()
+        s = self.db.query("SELECT best_source, source_count FROM stories")[0]
+        self.assertEqual((s["best_source"], s["source_count"]), ("Gamma Wire", 2))
+
+    def test_english_link_stays_when_a_russian_article_merges(self):
+        from dataclasses import replace
+        from tests.helpers import prompt_existing, prompt_items
+        now = self.clock()
+        self.feeds.entries = [entry("gamma", "Kharkiv strike kills five", 30, now)]
+
+        def first(prompt):
+            return {"stories": [{"item_ids": list(prompt_items(prompt).values()), "existing_story_id": None,
+                                 "summary": "Strike on Kharkiv kills five", "topics": ["ukraine_war"],
+                                 "importance": 6}], "not_news_ids": []}
+        make_job(self.db, FakeProvider("gemini", [first]), FakeProvider("groq", []), self.feeds, self.clock).run()
+        self.clock.advance(1)
+        self.feeds.entries.append(replace(entry("alpha", "UA: y", 10, self.clock(), 2),
+                                          title="Удар по Харькову: погибли пять человек"))
+
+        def merge(prompt):
+            sid = list(prompt_existing(prompt).values())[0]
+            return {"stories": [{"item_ids": list(prompt_items(prompt).values()), "existing_story_id": f"S{sid}",
+                                 "summary": "", "topics": ["ukraine_war"], "importance": 6}], "not_news_ids": []}
+        make_job(self.db, FakeProvider("gemini", [merge]), FakeProvider("groq", []), self.feeds, self.clock).run()
+        self.assertEqual(self.db.query("SELECT best_source FROM stories")[0]["best_source"], "Gamma Wire")
+
 
 def prompt_items_ids(prompt):
     from tests.helpers import prompt_items
@@ -336,6 +385,56 @@ class FeedSelection(unittest.TestCase):
         self.assertEqual([e.title for e in picked], [f"T{n}" for n in range(8)])
         seen = {e.url_hash for e in picked}
         self.assertEqual([e.title for e in select_new(es, seen, 8)], ["T8", "T9", "T10", "T11"])
+
+    def test_per_feed_cap_and_cut_counts(self):
+        now = 1_800_000_000
+        es = [entry("beta", f"B{n}", n, now, n) for n in range(30)] +              [entry("alpha", f"A{n}", n, now, n) for n in range(12)] +              [entry("gamma", f"G{n}", n, now, n) for n in range(3)]
+        cut: dict = {}
+        picked = select_new(es, set(), 8, {"beta": 20}, cut)
+        by = {}
+        for e in picked:
+            by.setdefault(e.source_key, []).append(e.title)
+        self.assertEqual(by["beta"], [f"B{n}" for n in range(20)])     # its own cap, newest first
+        self.assertEqual(len(by["alpha"]), 8)                         # default cap
+        self.assertEqual(len(by["gamma"]), 3)
+        self.assertEqual(cut, {"beta": 10, "alpha": 4})               # gamma lost nothing
+        self.assertEqual(len(select_new(es, set(), 8)), 8 + 8 + 3)    # no caps given: default for all
+
+    def test_feed_caps_from_config_and_validation(self):
+        from job.config import load_sources
+        from job.fetch import feed_caps
+        from scripts.check_feeds import validate
+        self.assertEqual(feed_caps([{"key": "a", "max_items": 20}, {"key": "b"}]), {"a": 20})
+        real = load_sources(include_disabled=True)
+        self.assertEqual(validate(real), [])
+        self.assertTrue(any(s.get("max_items") for s in real))         # Step 7 caps are in the file
+        for bad in (0, -3, "20", 1.5, True, 500):
+            probs = validate([{**real[0], "max_items": bad}])
+            self.assertTrue(any("max_items" in p for p in probs), bad)
+
+    def test_job_uses_the_per_feed_cap_and_records_the_cut(self):
+        from tests.helpers import SOURCES
+        db, clock, feeds = new_db(), Clock(), Feeds()
+        now = clock()
+        feeds.entries = [entry("beta", f"ARM: item {n}", n, now, n) for n in range(15)] +                         [entry("alpha", f"IRAN: item {n}", n, now, n) for n in range(10)]
+        job = make_job(db, FakeProvider("gemini", [grouping_responder({"ARM": ["armenia"], "IRAN": ["iran_war"]})]),
+                       FakeProvider("groq", []), feeds, clock)
+        job.sources = [dict(s, max_items=12) if s["key"] == "beta" else s for s in SOURCES]
+        stats = job.run()
+        counts = {r["source_key"]: r["n"] for r in db.query(
+            "SELECT source_key, count(*) AS n FROM items GROUP BY source_key")}
+        self.assertEqual(counts, {"beta": 12, "alpha": 8})
+        self.assertEqual(stats.cap_cut, {"beta": 3, "alpha": 2})
+        health = json.loads(db.query("SELECT value FROM meta WHERE key = 'feed_health'")[0]["value"])
+        self.assertEqual((health["feeds"]["beta"]["cut"], health["feeds"]["alpha"]["cut"]), (3, 2))
+        self.assertNotIn("cut", health["feeds"]["gamma"])
+        self.assertIn("cap cut", job.summary("ok", stats, 0))
+
+    def test_armenian_token_estimate(self):
+        """Step 7: Armenian script costs ~1.6 characters per Gemini token (Russian ~2.5 estimated)."""
+        hy = "Փաշինյանը հանդիպել է Հնդկաստանի ԱԳ նախարարի հետ" * 10
+        self.assertAlmostEqual(ai.estimate_tokens(hy), len(hy.replace(" ", "")) / 1.6 + hy.count(" ") / 4, delta=3)
+        self.assertGreater(ai.estimate_tokens(hy), ai.estimate_tokens("Пашинян встретился с главой МИД Индии" * 10))
 
     def test_normalize_url(self):
         self.assertEqual(normalize_url("HTTPS://Example.com/a/b/?utm_source=x&id=5#frag"),
