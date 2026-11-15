@@ -245,6 +245,12 @@ class Guards(unittest.TestCase):
         self.assertEqual(self.check("L'Iran lance six drones contre des bases", "", "fr", en6)[2],
                          ["missing number(s) 6"])      # French "six" looks like the English word
 
+    def test_russian_digest_is_always_svodka(self):
+        en = {"headline": "Weekly digest of Armenian news launched", "summary": "", "description": ""}
+        self.assertEqual(self.check("Запущена еженедельная сводка армянских новостей", "", "ru", en)[2], [])
+        self.assertEqual(self.check("Запущен еженедельный Дайджест армянских новостей", "", "ru", en)[2],
+                         ["write сводка, never дайджест"])
+
     def test_armenian_classical_spelling_becomes_reformed(self):
         self.assertEqual(translate.armenian_reformed("Երեւանը եւ Եւրոպան, Գեւորգ. Եւ նա"),
                          "Երևանը և Եվրոպան, Գևորգ. Եվ նա")

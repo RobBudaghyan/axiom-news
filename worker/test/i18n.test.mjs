@@ -132,6 +132,24 @@ describe("never an em dash, in any language", () => {
   });
 });
 
+describe("owner rule: in Russian, digest is always сводка", () => {
+  test("no Russian dictionary string and no Russian outgoing text says дайджест", () => {
+    const bad = /дайджест/i;
+    for (const s of strings({ ...DICTS.ru, _comment: "" })) assert.doesNotMatch(s, bad, s);
+    const now = yerevan(20, 5);
+    const u = user("ru", { next_digest_at: yerevan(9) + 86400, paused: 0 });
+    const s = { ...story("Big news", ["politics"], 8), tr_headline: "Большая новость", tr_description: "Текст." };
+    for (const x of [planDigest(u, [s], TOPICS, now, CONFIG).text, planDigest(u, [], TOPICS, now, CONFIG).text,
+      welcomeText(u, TOPICS, now, true, "ru"), welcomeText(u, TOPICS, now, false, "ru"), helpText(u, now, "ru"),
+      helpText(null, now, "ru"), helpText({ ...u, paused: 1 }, now, "ru"), settingsText("ru")]) assert.doesNotMatch(x, bad, x);
+    assert.doesNotMatch(JSON.stringify(JSON.parse(i18nSource().split(" = ")[1].replace(/;\s*$/, "")).dicts.ru), bad);
+    assert.equal(t("ru", "app.hero_label"), "Следующая сводка");
+    assert.deepEqual(["one", "few", "many"].map((f) => DICTS.ru.app.times_summary[f].split(" ").slice(0, 2).join(" ")),
+      ["Одна сводка", "{count} сводки", "{count} сводок"]);
+    assert.match(welcomeText(u, TOPICS, now, true, "ru"), /Я присылаю короткую сводку самых важных новостей/);
+  });
+});
+
 describe("Russian grammar", () => {
   test("plural forms: 1 история, 2 истории, 5 историй, 11-14 историй, 21 история, 22 истории, 111 историй", () => {
     const cases = { 1: "история", 2: "истории", 4: "истории", 5: "историй", 11: "историй", 12: "историй", 14: "историй",
@@ -320,7 +338,7 @@ describe("language defaults and the language setting", () => {
     assert.equal(langOf(sqlite), "ru");
     assert.match(fetchMock.calls[1].body.text, /^С возвращением, Rob!/);
     await worker.fetch(post("hello", { id: OWNER, first_name: "Rob", language_code: "en" }), env(binding));
-    assert.match(fetchMock.calls[2].body.text, /^Я присылаю дайджесты новостей в 09:00, 14:00 и 20:00/);
+    assert.match(fetchMock.calls[2].body.text, /^Я присылаю сводки новостей в 09:00, 14:00 и 20:00/);
   });
 
   const nowS = () => Math.floor(Date.now() / 1000);
