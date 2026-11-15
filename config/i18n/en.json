@@ -37,11 +37,26 @@
     "and": " and ",
     "zone": "{zone} time",
     "today_at": "today at {time}",
-    "tomorrow_at": "tomorrow at {time}"
+    "tomorrow_at": "tomorrow at {time}",
+    "support": "Axiom News is free, and it stays free. If you like it, you can leave a voluntary tip in Telegram Stars: it helps keep Axiom running. Nothing is locked, and nothing changes for you whether you tip or not. By tipping you agree to the terms: /terms",
+    "support_amount": "{amount} ⭐",
+    "support_test": "1 ⭐ (test)",
+    "tip_title": "Tip for Axiom News",
+    "tip_description": "A voluntary tip that helps keep Axiom News running. Nothing is unlocked: Axiom stays free for everyone.",
+    "tip_label": "Tip",
+    "tip_thanks": "Thank you for your tip of {amount} ⭐! It helps keep Axiom running. Your digests stay exactly the same.",
+    "tip_refunded": "Your tip of {amount} ⭐ was refunded.",
+    "tip_bad": "This tip amount is not available. Please use the buttons under /support.",
+    "paysupport": "A problem with a tip? Send /paysupport followed by a short note, for example: /paysupport 500 Stars by mistake. The owner of Axiom reads it and can refund a tip made by mistake. Telegram support cannot help with payments to bots.",
+    "paysupport_sent": "Thank you, your note was sent to the owner of Axiom. A tip made by mistake is refunded to your Stars balance.",
+    "terms": "Terms for tips. Axiom News is free. A tip in Telegram Stars is voluntary and unlocks nothing; it does not change your digests or settings. As a rule tips are not refunded, but a tip made by mistake is refunded on request through /paysupport. Telegram support cannot help with payments to bots. We keep only who tipped, the amount, Telegram's payment id and the time."
   },
   "commands": {
     "start": "Start (or restart) your news digests",
-    "settings": "Open your settings"
+    "settings": "Open your settings",
+    "support": "Support Axiom with a voluntary tip",
+    "paysupport": "Help with a tip",
+    "terms": "Terms for tips"
   },
   "zones": {
     "Yerevan": "Yerevan", "Moscow": "Moscow", "Tbilisi": "Tbilisi", "Baku": "Baku", "Kyiv": "Kyiv",
@@ -70,7 +85,8 @@
     "server": "Something went wrong. Please try again in a minute.",
     "owner_only": "This is only for the bot's owner.",
     "not_found": "Not found.",
-    "no_user": "Send /start to the bot first."
+    "no_user": "Send /start to the bot first.",
+    "tip_amount": "This tip amount is not available."
   },
   "app": {
     "title": "Settings",
@@ -100,7 +116,7 @@
     "pause": "Pause digests",
     "pause_foot": "While paused you get no digests. Your settings are kept.",
     "sec_language": "Language",
-    "language_foot": "Digests, bot messages and these settings appear in this language. A digest with stories that are not translated yet comes in English.",
+    "language_foot": "Digests, bot messages and these settings appear in this language. A story that is not translated yet comes in a later digest.",
     "fine": "Changes are saved as soon as you make them.",
     "saved": "Saved",
     "keep_topic": "Keep at least one topic",
@@ -113,6 +129,14 @@
     "reopen_title": "Please reopen",
     "load_failed": "Could not load your settings",
     "try_again": "Try again",
-    "loading": "Loading"
+    "loading": "Loading",
+    "sec_support": "Support Axiom",
+    "support_button": "Support Axiom ⭐",
+    "support_foot": "Axiom is free. Tips are voluntary and help keep it running; nothing is locked. By tipping you agree to the terms (send /terms to the bot).",
+    "tip_amount": "{amount} ⭐",
+    "tip_test": "1 ⭐ test",
+    "tip_thanks": "Thank you for your tip!",
+    "tip_failed": "The payment did not go through.",
+    "tip_unavailable": "Tips need a newer version of Telegram."
   }
 }

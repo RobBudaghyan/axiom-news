@@ -1,6 +1,7 @@
 // One-time bot setup through the Bot API (token from ../.env, never printed):
 //  - the chat menu button (next to the message box) opens the Mini App, for every user;
-//  - the command list shows /start and /settings, in English by default and (Step 9) in every
+//  - the command list shows /start, /settings and (Step 10) /support, /paysupport and /terms (Telegram's
+//    rule for bots that take Stars), in English by default and (Step 9) in every
 //    other enabled language for people whose Telegram app is in that language
 //    (setMyCommands with language_code; a language hidden from the picker gets its list removed).
 // A user who picks a language in the Mini App also gets a per-chat menu label and command list

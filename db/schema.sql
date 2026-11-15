@@ -123,6 +123,18 @@ CREATE TABLE IF NOT EXISTS digest_holds (
   PRIMARY KEY (user_id, story_id)
 ) WITHOUT ROWID;
 
+-- Step 10: voluntary tips in Telegram Stars. Only who tipped, the amount, Telegram's charge id
+-- (needed for a refund) and the time; refunded_at is set when the owner refunds it from Admin.
+-- The UNIQUE charge id makes a repeated successful_payment update count once.
+CREATE TABLE IF NOT EXISTS tips (
+  id          INTEGER PRIMARY KEY,
+  user_id     INTEGER NOT NULL,
+  amount      INTEGER NOT NULL,
+  charge_id   TEXT NOT NULL UNIQUE,
+  at          INTEGER NOT NULL,
+  refunded_at INTEGER
+);
+
 -- One row per hourly job run (Admin tab stats).
 CREATE TABLE IF NOT EXISTS job_runs (
   id                 INTEGER PRIMARY KEY,

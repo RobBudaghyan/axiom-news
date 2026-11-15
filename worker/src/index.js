@@ -36,7 +36,7 @@ export default {
       const now = nowS();
       try {
         await handleUpdate(update, {
-          db, now, cfg: CONFIG, appUrl: appUrl(env, url),
+          db, now, cfg: CONFIG, appUrl: appUrl(env, url), ownerId: env.OWNER_TELEGRAM_ID,
           reply: (chatId, text, extra) => sendPlain(env.TELEGRAM_BOT_TOKEN, chatId, text, extra),
           tg: (method, body) => tgCall(env.TELEGRAM_BOT_TOKEN, method, body),
         });

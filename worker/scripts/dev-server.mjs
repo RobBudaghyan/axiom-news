@@ -99,6 +99,11 @@ function seed() {
     ["Armenian parliament passes the 2027 budget", ["armenia", "politics"], 6],
     ["Iran says talks with the US will resume next week", ["iran_war", "politics"], 7]];
   for (const [s, t, score] of S) addStory(sqlite, s, t, score, now - 1800, { final_score: score, headline: s, emojis: "🗞️" });
+  // Step 10: three made-up tips (one refunded) for the Admin "Tips" section
+  const tip = sqlite.prepare("INSERT INTO tips (user_id, amount, charge_id, at, refunded_at) VALUES (?,?,?,?,?)");
+  tip.run(FRIEND, 100, "demo_1", now - 26 * H, null);
+  tip.run(FRIEND, 50, "demo_2", now - 5 * H, now - 4 * H);
+  tip.run(OWNER, 250, "demo_3", now - 2 * H, null);
   return binding;
 }
 
@@ -110,6 +115,7 @@ const env = { DB, TELEGRAM_BOT_TOKEN: TOKEN, TELEGRAM_WEBHOOK_SECRET: "x".repeat
 const realFetch = globalThis.fetch;
 globalThis.fetch = async (url, init) => {
   const u = String(url);
+  if (u.endsWith("/createInvoiceLink")) return new Response(JSON.stringify({ ok: true, result: "https://t.me/$demo-invoice" }));
   if (u.startsWith("https://api.telegram.org/")) return new Response(JSON.stringify({ ok: true, result: { message_id: 1 } }));
   if (u.startsWith("https://api.github.com/")) return new Response(null, { status: 204 });
   return realFetch(url, init);
@@ -120,7 +126,8 @@ async function page(query) {
   const name = as === OWNER ? "Sam" : "Ani";
   const initData = await signInitData({ query_id: "AAHdev", auth_date: String(Math.floor(Date.now() / 1000)),
     user: JSON.stringify({ id: as, first_name: name, language_code: "en" }) }, TOKEN);
-  const mock = { initData, theme: query.get("theme") === "dark" ? "dark" : "light", confirm: query.get("confirm") !== "0" };
+  const mock = { initData, theme: query.get("theme") === "dark" ? "dark" : "light", confirm: query.get("confirm") !== "0",
+    pay: query.get("pay") !== "0" };
   return readFileSync(join(PUBLIC, "app", "index.html"), "utf8").replace(
     /<script src="https:\/\/telegram\.org\/js\/telegram-web-app\.js[^"]*"><\/script>/,
     `<script>window.__MOCK=${JSON.stringify(mock)}</script><script src="/__mock/telegram.js"></script>`);

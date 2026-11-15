@@ -81,6 +81,8 @@
     MainButton,
     showConfirm(msg, cb) { log("confirm", msg); setTimeout(() => cb(M.confirm !== false), 0); },
     showAlert(msg, cb) { log("alert", msg); cb && cb(); },
+    // Step 10: the payment sheet; answers "paid" (or "cancelled" with ?pay=0)
+    openInvoice(url, cb) { log("openInvoice", url); setTimeout(() => cb && cb(M.pay === false ? "cancelled" : "paid"), 0); },
     __back: () => handlers.back.forEach((f) => f()),
   } };
 })();

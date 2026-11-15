@@ -59,6 +59,7 @@
     play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v4h-4"/></svg>',
     warn: '<svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm0 4a1 1 0 0 0-1 1v4a1 1 0 1 0 2 0V7a1 1 0 0 0-1-1Zm0 7.2a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Z"/></svg>',
     check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+    star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3.2 2.6 5.5 6 .8-4.4 4.1 1.1 5.9L12 16.6l-5.3 2.9 1.1-5.9-4.4-4.1 6-.8L12 3.2Z"/></svg>',
     okC: '<svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm3.7 5.3a.9.9 0 0 0-1.3.1l-3.3 4-1.6-1.6a.9.9 0 1 0-1.3 1.3l2.3 2.3c.4.4 1 .3 1.3-.1l4-4.7a.9.9 0 0 0-.1-1.3Z"/></svg>',
   };
 
@@ -287,7 +288,40 @@
       ${langs.length > 1 ? section(esc(tr("app.sec_language")), langRows, esc(tr("app.language_foot")), 'id="language" role="radiogroup"') : ""}
       ${section(esc(tr("app.sec_zone")), tzRow, esc(tr("app.zone_foot")))}
       ${section("", pauseRow, esc(tr("app.pause_foot")))}
+      ${supportHTML()}
       <p class="fine">${esc(tr("app.fine"))}</p>`;
+  }
+
+  // Step 10: "Support Axiom ⭐", a voluntary tip in Telegram Stars. Tapping the button shows the
+  // amounts; an amount opens Telegram's own payment sheet. A tip changes nothing else.
+  function supportHTML() {
+    const amounts = (S.st.tips && S.st.tips.amounts) || [];
+    if (!amounts.length) return "";
+    const btn = row({ icon: I.star, tile: true, title: esc(tr("app.support_button")), tag: "button", cls: "action tap",
+      attrs: `data-action="support" aria-expanded="${!!S.tipOpen}" id="support-row"` });
+    const chips = S.tipOpen ? `<div class="times-block"><div class="chips">${amounts.map((a) =>
+      `<button class="chip-btn tnum" data-action="tip" data-value="${a}" ${S.busy.tip ? "disabled" : ""}>${
+        esc(a === 1 ? tr("app.tip_test") : tr("app.tip_amount", { amount: a }))}</button>`).join("")}</div></div>` : "";
+    return section(esc(tr("app.sec_support")), btn + chips, esc(tr("app.support_foot")), 'id="support"');
+  }
+
+  async function payTip(amount) {
+    if (!tg || !ver("6.1") || typeof tg.openInvoice !== "function") { toast(tr("app.tip_unavailable"), "err", 3200); return; }
+    S.busy.tip = true;
+    renderView();
+    try {
+      const r = await api("/api/tip", { amount, lang: LANG });
+      haptic("impact", "light");
+      tg.openInvoice(r.link, (status) => {
+        if (status === "paid") { haptic("success"); toast(tr("app.tip_thanks"), "ok", 3200); }
+        else if (status === "failed") { haptic("error"); toast(tr("app.tip_failed"), "err", 3200); }
+      });
+    } catch (e) {
+      haptic("error");
+      toast(e.message, "err", 3200);
+    }
+    S.busy = {};
+    renderView();
   }
 
   // Saves go one after another, so a quick series of taps arrives in order.
@@ -492,6 +526,14 @@
       right: l.code === "en" ? "" : l.fallbacks_24h ? badge(`${plural(l.fallbacks_24h, "digest", "digests")} fully in English`, "warn")
         : badge("No English fallback") })).join("");
 
+    // Step 10: tips (Telegram Stars), the last 10 with a refund button each.
+    const T = A.tips || { stars: 0, tips: 0, refunded: 0, last: [] };
+    const tipRows = kv("Stars received", `${n(T.stars)} ⭐`, `${plural(T.tips, "tip", "tips")}` +
+        (T.refunded ? ` · ${plural(T.refunded, "refund", "refunds")} (${n(T.refunded_stars)} ⭐) not counted` : ""))
+      + T.last.map((x) => row({ title: `${esc(x.name)} · ${n(x.amount)} ⭐`, sub: esc(when(x.at, tz)),
+        right: x.refunded_at ? badge("Refunded", "mute")
+          : `<button class="link" data-action="refund" data-value="${x.id}" data-amount="${x.amount}" data-name="${esc(x.name)}" ${S.busy.refund ? "disabled" : ""}>Refund</button>` })).join("");
+
     const D = A.d1;
     const meter = (label, used, limit) => {
       const pct = Math.min(100, (used / limit) * 100);
@@ -513,6 +555,7 @@
       ${section("AI by model", models)}
       ${feeds}
       ${section("Users", tiles + userRows)}
+      ${section("Tips", tipRows, T.last.length ? "Last 10 tips. Refund returns the Stars to the person (asks first)." : "No tips yet.")}
       ${section("Languages, last 24 h", langRowsA || row({ title: "No data" }), "A story with no translation yet is held: left out of the digest and sent in a later one once translated. A digest goes out fully in English only when none of its stories is translated; the badge counts those.")}
       ${section("Database today", d1, "Free limits per day, reset at 00:00 UTC. The news job's counts are exact; the bot server's are counted every 5 minutes and can be slightly low.")}
       ${section("Recent errors", errRows || row({ title: "No errors" }), A.errors.length ? "Newest first. Notes from the news job about skipped items are normal." : "")}`;
@@ -538,6 +581,24 @@
     loadAdmin(true);
   }
 
+  async function refundAction(el) {
+    const name = el.dataset.name || "this person", amount = el.dataset.amount;
+    haptic("impact", "medium");
+    if (!(await confirmBox(`Refund ${amount} ⭐ to ${name}? Telegram returns the Stars to their balance. This cannot be undone.`))) return;
+    S.busy.refund = true;
+    renderView();
+    try {
+      const r = await api("/api/admin/refund", { id: Number(el.dataset.value) });
+      haptic("success");
+      toast(r.message, "ok", 3600);
+    } catch (e) {
+      haptic("error");
+      toast(e.message, "err", 4200);
+    }
+    S.busy = {};
+    loadAdmin(true);
+  }
+
   // ---------------------------------------------------------------- events
   document.addEventListener("click", (ev) => {
     const el = ev.target.closest("[data-action]");
@@ -557,6 +618,9 @@
       case "time": toggleTime(el); break;
       case "pause": togglePause(el); break;
       case "lang": chooseLanguage(el); break;
+      case "support": S.tipOpen = !S.tipOpen; haptic("select"); renderView(); break;
+      case "tip": payTip(Number(v)); break;
+      case "refund": refundAction(el); break;
       case "range": S.range = v; haptic("select"); renderView(); break;
       case "refresh": haptic("impact", "light"); loadAdmin(true); renderView(); break;
       case "all-errors": S.allErrors = true; renderView(); break;

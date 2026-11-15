@@ -8,6 +8,8 @@
 //   GET  /api/admin                     health, stats, feeds, users, errors, D1 use (owner only)
 //   POST /api/admin/digest              send the owner a real digest now (owner only)
 //   POST /api/admin/run-job             start the hourly GitHub job, min-gap guard (owner only)
+//   POST /api/tip             {amount}  a Telegram Stars invoice link for a voluntary tip (Step 10)
+//   POST /api/admin/refund    {id}      refund one tip through the Bot API (owner only)
 import { verifyInitData } from "./auth.js";
 import { CONFIG, candidateStatement, hhmm, localParts, nextSlot, planDigest } from "./digest.js";
 import { SettingsError, TZ_AUTO, TZ_DEFAULT, nextDigestAfterChange, publicUser, validZone, validatePatch } from "./settings.js";
@@ -17,6 +19,7 @@ import { digestWrites, sendDigest } from "./cron.js";
 import { errorStatement } from "./db.js";
 import { LANGS, chooseLang, effectiveLang, t, topicLabel } from "./i18n.js";
 import { setChatLanguage } from "./bot.js";
+import { allowedAmount, amountsFor, invoiceFields, refundTip, tipsStatements, shapeTips } from "./tips.js";
 
 const TOPICS_SQL = "SELECT tag, label_en, emoji, sort, is_default FROM topics ORDER BY sort";
 const USER_SQL = "SELECT * FROM users WHERE id = ?1";
@@ -39,6 +42,7 @@ function state(user, topics, isOwner, cfg) {
     topics: topics.map((x) => ({ tag: x.tag, label: topicLabel(lang, x.tag, x.label_en), emoji: x.emoji ?? "" })),
     languages: LANGS.enabled.map((code) => ({ code, name: LANGS.names[code] ?? code })),   // the picker (Step 9)
     limits: { ...L },
+    tips: { amounts: amountsFor(isOwner) },   // Step 10 (the owner also sees the 1-Star test amount)
     is_owner: isOwner,
   };
 }
@@ -156,6 +160,30 @@ async function runJobNow(db, env, now, cfg, io) {
   return json(200, { ok: true, message: "Started. New stories usually arrive within 2 minutes." });
 }
 
+// ------------------------------------------------------------------ tips (Step 10)
+
+// A tip changes nothing for the user: no user row is read or written.
+async function tipLink(tgUser, body, isOwner, io) {
+  const amount = Number(body?.amount);
+  const lang = chooseLang(tgUser.language_code);   // only for the invoice texts
+  if (!allowedAmount(amount, isOwner)) return fail(400, "tip_amount");
+  if (!io?.tg) return fail(500, "server");
+  const link = await io.tg("createInvoiceLink", invoiceFields(body?.lang && LANGS.enabled.includes(body.lang) ? body.lang : lang, amount));
+  return json(200, { ok: true, link, amount });
+}
+
+async function refund(db, body, now, io) {
+  const id = Number(body?.id);
+  if (!Number.isInteger(id) || id <= 0) return json(400, { ok: false, message: "Which tip? (missing id)" });
+  const r = await refundTip(db, io.tg, id, now);
+  if (r.status === 200) {   // a short note to the user, in their language
+    const [[u]] = await db.batch([{ sql: USER_SQL, params: [r.body.user_id] }]);
+    try { await io.tg("sendMessage", { chat_id: r.body.user_id, text: t(effectiveLang(u), "bot.tip_refunded", { amount: r.body.amount }) }); }
+    catch (e) { await db.batch([errorStatement(`refund note to ${r.body.user_id}: ${e.message}`, now)]); }
+  }
+  return json(r.status, { ok: r.body.ok, message: r.body.message });
+}
+
 // ------------------------------------------------------------------ router
 
 // io (tests replace it): {send(chatId, html), dispatch(env), tg(method, body)?, appUrl?}
@@ -174,12 +202,21 @@ export async function handleApi(request, env, db, now, io, cfg = CONFIG) {
     switch (route) {
       case "POST /api/open": return json(200, await open(db, tg, body, now, cfg, isOwner));
       case "POST /api/settings": return await saveSettings(db, tg, body, now, cfg, isOwner, io);
+      case "POST /api/tip": return await tipLink(tg, body, isOwner, io);
       case "GET /api/admin":
       case "POST /api/admin/digest":
-      case "POST /api/admin/run-job": {
+      case "POST /api/admin/run-job":
+      case "POST /api/admin/refund": {
         if (!isOwner) return fail(403, "owner_only");
-        if (route === "GET /api/admin") return json(200, shapeAdmin(await db.batch(adminStatements(now)), now, cfg));
+        if (route === "GET /api/admin") {
+          const st = [...adminStatements(now), ...tipsStatements()];
+          const rows = await db.batch(st);
+          const out = shapeAdmin(rows.slice(0, -2), now, cfg);
+          out.tips = shapeTips(...rows.slice(-2));
+          return json(200, out);
+        }
         if (route === "POST /api/admin/digest") return await digestNow(db, tg.id, now, cfg, io);
+        if (route === "POST /api/admin/refund") return await refund(db, body, now, io);
         return await runJobNow(db, env, now, cfg, io);
       }
       default: return fail(404, "not_found");

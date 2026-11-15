@@ -9,6 +9,7 @@ import { CONFIG, describeSlot, nextSlot, parseList } from "./digest.js";
 import { chooseLang, commandList, effectiveLang, listJoin, t, topicLabel, zoneName } from "./i18n.js";
 import { settingsButton } from "./telegram.js";
 import { errorStatement } from "./db.js";
+import { amountOf, amountsFor, allowedAmount, answerPreCheckout, invoiceFields, isOwnerId, recordPayment } from "./tips.js";
 
 export function settingsText(lang = "en") {
   return t(lang, "bot.settings");
@@ -58,14 +59,48 @@ export async function setChatLanguage(tg, chatId, lang, appUrl) {
   return problems;
 }
 
-// ctx: {db, now, reply(chatId, text, extra), tg(method, body)?, cfg, appUrl}
+// Step 10: the /support reply's amount buttons (callback "tip:<n>"); the owner also gets the hidden
+// 1-Star test amount.
+export function supportKeyboard(lang, isOwner) {
+  const btn = (a) => ({ text: a === 1 ? t(lang, "bot.support_test") : t(lang, "bot.support_amount", { amount: a }),
+                        callback_data: `tip:${a}` });
+  const list = amountsFor(isOwner);
+  const rows = [list.slice(0, 2).map(btn), list.slice(2, 4).map(btn)];
+  if (list.length > 4) rows.push(list.slice(4).map(btn));
+  return { reply_markup: { inline_keyboard: rows } };
+}
+
+const userLang = async (db, id, code) => {
+  const [rows] = await db.batch([{ sql: "SELECT lang FROM users WHERE id = ?1", params: [id] }]);
+  return effectiveLang(rows[0] ?? { lang: chooseLang(code) });
+};
+
+// ctx: {db, now, reply(chatId, text, extra), tg(method, body)?, cfg, appUrl, ownerId}
 export async function handleUpdate(update, ctx) {
+  // Step 10: Telegram cancels a payment that is not confirmed within 10 seconds, so this is
+  // answered first and without any database read.
+  if (update.pre_checkout_query) {
+    const q = update.pre_checkout_query;
+    const ok = await answerPreCheckout(q, ctx.tg, ctx.ownerId, chooseLang(q.from?.language_code));
+    return { handled: true, command: "pre_checkout", ok };
+  }
+  if (update.callback_query) return handleCallback(update.callback_query, ctx);
   const msg = update.message;
   if (!msg?.from || msg.chat?.type !== "private") return { handled: false };
   const cfg = ctx.cfg ?? CONFIG;
   const { db, now } = ctx;
   const id = msg.from.id;
   const text = (msg.text ?? "").trim();
+  if (msg.refunded_payment) {   // Telegram's note of a refund (ours from Admin, already marked)
+    await db.batch([{ sql: "UPDATE tips SET refunded_at = ?1 WHERE charge_id = ?2 AND refunded_at IS NULL",
+                      params: [now, String(msg.refunded_payment.telegram_payment_charge_id)] }]);
+    return { handled: true, command: "refunded_payment" };
+  }
+  if (msg.successful_payment) {
+    const r = await recordPayment(db, id, msg.successful_payment, now);
+    if (r.stored) await ctx.reply(id, t(await userLang(db, id, msg.from.language_code), "bot.tip_thanks", { amount: r.amount }));
+    return { handled: true, command: "successful_payment", stored: r.stored };
+  }
   const [rows, topics] = await db.batch([
     { sql: "SELECT * FROM users WHERE id = ?1", params: [id] },
     { sql: "SELECT tag, label_en, emoji, sort, is_default FROM topics ORDER BY sort", params: [] },
@@ -113,7 +148,46 @@ export async function handleUpdate(update, ctx) {
     await ctx.reply(id, settingsText(lang), button(ctx, lang));
     return { handled: true, command: "settings", lang };
   }
+  if (/^\/support(@\w+)?(\s|$)/.test(text)) {
+    await ctx.reply(id, t(lang, "bot.support"), supportKeyboard(lang, isOwnerId(id, ctx.ownerId)));
+    return { handled: true, command: "support", lang };
+  }
+  if (/^\/terms(@\w+)?(\s|$)/.test(text)) {
+    await ctx.reply(id, t(lang, "bot.terms"));
+    return { handled: true, command: "terms", lang };
+  }
+  const ps = /^\/paysupport(@\w+)?(?:\s+([\s\S]*))?$/.exec(text);
+  if (ps) {
+    const note = (ps[2] ?? "").trim().slice(0, 800);
+    if (!note) {
+      await ctx.reply(id, t(lang, "bot.paysupport"));
+      return { handled: true, command: "paysupport", lang };
+    }
+    // To the owner (English, like every owner message): who asked, and the note as written.
+    if (ctx.ownerId) await ctx.reply(Number(ctx.ownerId), `Payment support request from ${msg.from.first_name || "a user"} ` +
+      `(id ${id}${msg.from.username ? `, @${msg.from.username}` : ""}):
+${note}
+
+Their tips are in Admin, under Tips.`);
+    await ctx.reply(id, t(lang, "bot.paysupport_sent"));
+    return { handled: true, command: "paysupport", lang, forwarded: true };
+  }
 
   await ctx.reply(id, helpText(user, now, lang));
   return { handled: true, command: "help", lang };
+}
+
+// A tap on an amount under /support: an invoice in the chat (sendInvoice). Other buttons: ignored.
+async function handleCallback(cq, ctx) {
+  const amount = amountOf(cq.data);
+  const chatId = cq.message?.chat?.id ?? cq.from?.id;
+  try { await ctx.tg("answerCallbackQuery", { callback_query_id: cq.id }); } catch { /* the button just stops spinning later */ }
+  if (amount == null || cq.message?.chat?.type !== "private") return { handled: false };
+  const lang = await userLang(ctx.db, cq.from.id, cq.from.language_code);
+  if (!allowedAmount(amount, isOwnerId(cq.from.id, ctx.ownerId))) {
+    await ctx.reply(chatId, t(lang, "bot.tip_bad"));
+    return { handled: true, command: "tip", ok: false };
+  }
+  await ctx.tg("sendInvoice", { chat_id: chatId, ...invoiceFields(lang, amount) });
+  return { handled: true, command: "tip", ok: true, amount };
 }

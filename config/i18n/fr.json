@@ -37,11 +37,26 @@
     "and": " et ",
     "zone": "fuseau horaire : {zone}",
     "today_at": "aujourd'hui à {time}",
-    "tomorrow_at": "demain à {time}"
+    "tomorrow_at": "demain à {time}",
+    "support": "Axiom News est gratuit et le restera. Si vous l'aimez, vous pouvez laisser un pourboire volontaire en Telegram Stars : il aide à faire fonctionner Axiom. Rien n'est bloqué, et rien ne change pour vous, que vous donniez ou non. En donnant un pourboire, vous acceptez les conditions : /terms",
+    "support_amount": "{amount} ⭐",
+    "support_test": "1 ⭐ (test)",
+    "tip_title": "Pourboire pour Axiom News",
+    "tip_description": "Un pourboire volontaire qui aide à faire fonctionner Axiom News. Rien n'est débloqué : Axiom reste gratuit pour tous.",
+    "tip_label": "Pourboire",
+    "tip_thanks": "Merci pour votre pourboire de {amount} ⭐ ! Il aide à faire fonctionner Axiom. Vos résumés restent exactement les mêmes.",
+    "tip_refunded": "Votre pourboire de {amount} ⭐ a été remboursé.",
+    "tip_bad": "Ce montant n'est pas disponible. Utilisez les boutons sous /support.",
+    "paysupport": "Un problème avec un pourboire ? Envoyez /paysupport suivi d'un court message, par exemple : /paysupport 500 étoiles par erreur. Le propriétaire d'Axiom le lit et peut rembourser un pourboire fait par erreur. Le support de Telegram ne peut pas aider pour les paiements aux bots.",
+    "paysupport_sent": "Merci, votre message a été envoyé au propriétaire d'Axiom. Un pourboire fait par erreur est remboursé sur votre solde de Stars.",
+    "terms": "Conditions des pourboires. Axiom News est gratuit. Un pourboire en Telegram Stars est volontaire et ne débloque rien ; il ne change ni vos résumés ni vos réglages. En règle générale, les pourboires ne sont pas remboursés, mais un pourboire fait par erreur est remboursé sur demande via /paysupport. Le support de Telegram ne peut pas aider pour les paiements aux bots. Nous gardons seulement qui a donné, le montant, l'identifiant de paiement Telegram et l'heure."
   },
   "commands": {
     "start": "Démarrer (ou redémarrer) vos résumés de l'actualité",
-    "settings": "Ouvrir vos réglages"
+    "settings": "Ouvrir vos réglages",
+    "support": "Soutenir Axiom par un pourboire volontaire",
+    "paysupport": "Aide pour un pourboire",
+    "terms": "Conditions des pourboires"
   },
   "zones": {
     "Yerevan": "Erevan", "Moscow": "Moscou", "Tbilisi": "Tbilissi", "Baku": "Bakou", "Kyiv": "Kyiv",
@@ -70,7 +85,8 @@
     "server": "Une erreur s'est produite. Veuillez réessayer dans une minute.",
     "owner_only": "Réservé au propriétaire du bot.",
     "not_found": "Introuvable.",
-    "no_user": "Envoyez d'abord /start au bot."
+    "no_user": "Envoyez d'abord /start au bot.",
+    "tip_amount": "Ce montant n'est pas disponible."
   },
   "app": {
     "title": "Réglages",
@@ -100,7 +116,7 @@
     "pause": "Mettre les résumés en pause",
     "pause_foot": "Pendant la pause, vous ne recevez aucun résumé. Vos réglages sont conservés.",
     "sec_language": "Langue",
-    "language_foot": "Les résumés, les messages du bot et ces réglages s'affichent dans cette langue. Si des actualités ne sont pas encore traduites, le résumé arrive en anglais.",
+    "language_foot": "Les résumés, les messages du bot et ces réglages s'affichent dans cette langue. Une actualité pas encore traduite arrive dans un prochain résumé.",
     "fine": "Les changements sont enregistrés immédiatement.",
     "saved": "Enregistré",
     "keep_topic": "Gardez au moins un sujet",
@@ -113,6 +129,14 @@
     "reopen_title": "Veuillez rouvrir",
     "load_failed": "Impossible de charger vos réglages",
     "try_again": "Réessayer",
-    "loading": "Chargement"
+    "loading": "Chargement",
+    "sec_support": "Soutenir Axiom",
+    "support_button": "Soutenir Axiom ⭐",
+    "support_foot": "Axiom est gratuit. Les pourboires sont volontaires et aident à le faire fonctionner ; rien n'est bloqué. En donnant, vous acceptez les conditions (envoyez /terms au bot).",
+    "tip_amount": "{amount} ⭐",
+    "tip_test": "1 ⭐ test",
+    "tip_thanks": "Merci pour votre pourboire !",
+    "tip_failed": "Le paiement n'a pas abouti.",
+    "tip_unavailable": "Les pourboires demandent une version plus récente de Telegram."
   }
 }

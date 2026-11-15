@@ -113,5 +113,8 @@ export function commandList(lang) {
   return [
     { command: "start", description: t(lang, "commands.start") },
     { command: "settings", description: t(lang, "commands.settings") },
+    { command: "support", description: t(lang, "commands.support") },     // Step 10: tips
+    { command: "paysupport", description: t(lang, "commands.paysupport") },   // Telegram's rule for Stars
+    { command: "terms", description: t(lang, "commands.terms") },
   ];
 }
