@@ -1,46 +1,64 @@
 // Telegram webhook: /start creates the user with default settings, /settings opens the Mini App;
 // anything else gets a short helpful reply. Replies are plain text (no HTML), never with an em
-// dash. /start and /settings carry an "Open settings" button (web_app).
-import { CONFIG, describeSlot, nextSlot, parseList, zoneLabel } from "./digest.js";
+// dash, in the user's language (Step 9: config/i18n/<lang>.json). /start and /settings carry an
+// "Open settings" button (web_app).
+//
+// Language (Step 9): a NEW user starts in Telegram's language_code if we support it, else English
+// (chooseLang). After that only the Mini App changes users.lang: /start never does.
+import { CONFIG, describeSlot, nextSlot, parseList } from "./digest.js";
+import { chooseLang, commandList, effectiveLang, listJoin, t, topicLabel, zoneName } from "./i18n.js";
 import { settingsButton } from "./telegram.js";
+import { errorStatement } from "./db.js";
 
-export const SETTINGS_TEXT = "Choose your topics and when your digests arrive. " +
-  "Changes are saved as soon as you make them.";
-
-function listTimes(times) {
-  if (times.length === 1) return times[0];
-  return `${times.slice(0, -1).join(", ")} and ${times[times.length - 1]}`;
+export function settingsText(lang = "en") {
+  return t(lang, "bot.settings");
 }
 
-function topicNames(tags, topics) {
-  const names = tags.map((t) => topics.find((x) => x.tag === t)?.label_en ?? t);
-  if (names.length <= 1) return names.join("");
-  return `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+function topicNames(tags, topics, lang) {
+  return listJoin(lang, tags.map((tag) => topicLabel(lang, tag, topics.find((x) => x.tag === tag)?.label_en ?? tag)));
 }
 
-export function welcomeText(user, topics, now, isNew) {
+const zoneText = (lang, tz) => t(lang, "bot.zone", { zone: zoneName(lang, tz) });
+
+export function welcomeText(user, topics, now, isNew, lang = effectiveLang(user)) {
   const tz = user.timezone;
-  const times = parseList(user.digest_times);
-  const when = describeSlot(user.next_digest_at, now, tz);
-  const hello = isNew ? `Welcome to Axiom News, ${user.first_name || "friend"}!` :
-    `Welcome back, ${user.first_name || "friend"}!`;
+  const name = user.first_name || t(lang, "bot.friend");
+  const hello = t(lang, isNew ? "bot.welcome_new" : "bot.welcome_back", { name });
   return `${hello}\n\n` +
-    `I send you a short digest of the most important news at ${listTimes(times)} (${zoneLabel(tz)} time). ` +
-    `Topics: ${topicNames(parseList(user.topics), topics)}.\n\n` +
-    `Your next digest comes ${when}. Tap Open settings to change topics, times and more.`;
+    `${t(lang, "bot.welcome_times", { times: listJoin(lang, parseList(user.digest_times)), zone: zoneText(lang, tz) })} ` +
+    `${t(lang, "bot.welcome_topics", { topics: topicNames(parseList(user.topics), topics, lang) })}\n\n` +
+    t(lang, "bot.welcome_next", { when: describeSlot(user.next_digest_at, now, tz, lang), button: t(lang, "bot.button") });
 }
 
-export function helpText(user, now) {
-  if (!user) return "Hi! Send /start and I will send you short news digests three times a day.";
-  if (user.paused) return "Your digests are paused. Send /start to turn them back on.";
-  const when = describeSlot(user.next_digest_at, now, user.timezone);
-  return `I send news digests at ${listTimes(parseList(user.digest_times))} (${zoneLabel(user.timezone)} time). ` +
-    `Your next one comes ${when}. Send /settings to change them. I can't answer questions; the digest is all I do.`;
+export function helpText(user, now, lang = effectiveLang(user)) {
+  if (!user) return t(lang, "bot.help_new");
+  if (user.paused) return t(lang, "bot.help_paused");
+  return t(lang, "bot.help", {
+    times: listJoin(lang, parseList(user.digest_times)), zone: zoneText(lang, user.timezone),
+    when: describeSlot(user.next_digest_at, now, user.timezone, lang),
+  });
 }
 
-const button = (ctx) => (ctx.appUrl ? settingsButton(ctx.appUrl) : undefined);
+const button = (ctx, lang) => (ctx.appUrl ? settingsButton(ctx.appUrl, t(lang, "bot.button")) : undefined);
 
-// ctx: {db, now, reply(chatId, text, extra), cfg, appUrl}
+// The chat menu button label and the command list for ONE chat, in its language (Step 9). The
+// bot-wide defaults (setup-bot.mjs) follow Telegram's app language; a per-chat setting follows
+// the language the user chose. A Telegram failure is logged and never fails the caller.
+export async function setChatLanguage(tg, chatId, lang, appUrl) {
+  if (!tg) return [];
+  const problems = [];
+  const calls = [
+    ["setMyCommands", { commands: commandList(lang), scope: { type: "chat", chat_id: chatId } }],
+    ...(appUrl ? [["setChatMenuButton", { chat_id: chatId,
+      menu_button: { type: "web_app", text: t(lang, "bot.menu_button"), web_app: { url: appUrl } } }]] : []),
+  ];
+  for (const [method, body] of calls) {
+    try { await tg(method, body); } catch (e) { problems.push(`${method} for ${chatId}: ${e.message}`); }
+  }
+  return problems;
+}
+
+// ctx: {db, now, reply(chatId, text, extra), tg(method, body)?, cfg, appUrl}
 export async function handleUpdate(update, ctx) {
   const msg = update.message;
   if (!msg?.from || msg.chat?.type !== "private") return { handled: false };
@@ -59,20 +77,21 @@ export async function handleUpdate(update, ctx) {
     const firstName = (msg.from.first_name ?? "").slice(0, 64);
     const language = (msg.from.language_code ?? "en").slice(0, 8);
     if (isNew) {
-      const defaults = topics.filter((t) => t.is_default).map((t) => t.tag);
+      const defaults = topics.filter((x) => x.is_default).map((x) => x.tag);
       user = {
-        id, first_name: firstName, language, timezone: cfg.default_timezone,
+        id, first_name: firstName, language, lang: chooseLang(language), timezone: cfg.default_timezone,
         digest_times: JSON.stringify(cfg.default_times),
         topics: JSON.stringify(defaults), paused: 0, created_at: now,
       };
       user.next_digest_at = nextSlot(now, user.timezone, cfg.default_times);
       await db.batch([{
-        sql: "INSERT INTO users (id, first_name, language, timezone, digest_times, topics, " +
-             "created_at, next_digest_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) ON CONFLICT(id) DO NOTHING",
-        params: [id, firstName, language, user.timezone, user.digest_times, user.topics, now,
+        sql: "INSERT INTO users (id, first_name, language, lang, timezone, digest_times, topics, " +
+             "created_at, next_digest_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9) ON CONFLICT(id) DO NOTHING",
+        params: [id, firstName, language, user.lang, user.timezone, user.digest_times, user.topics, now,
                  user.next_digest_at],
       }]);
     } else {
+      // `language` (Telegram's) is refreshed; `lang` (the user's choice) is left alone.
       user = { ...user, first_name: firstName || user.first_name, language, paused: 0, blocked: 0 };
       user.next_digest_at = nextSlot(now, user.timezone, parseList(user.digest_times, cfg.default_times));
       await db.batch([{
@@ -80,15 +99,21 @@ export async function handleUpdate(update, ctx) {
         params: [user.first_name, language, user.next_digest_at, id],
       }]);
     }
-    await ctx.reply(id, welcomeText(user, topics, now, isNew), button(ctx));
-    return { handled: true, command: "start", isNew };
+    const lang = effectiveLang(user);
+    await ctx.reply(id, welcomeText(user, topics, now, isNew, lang), button(ctx, lang));
+    if (isNew && lang !== "en") {
+      const problems = await setChatLanguage(ctx.tg, id, lang, ctx.appUrl);
+      if (problems.length) await db.batch(problems.map((p) => errorStatement(p, now)));
+    }
+    return { handled: true, command: "start", isNew, lang };
   }
 
+  const lang = effectiveLang(user ?? { lang: chooseLang(msg.from.language_code) });
   if (/^\/settings(@\w+)?(\s|$)/.test(text)) {
-    await ctx.reply(id, SETTINGS_TEXT, button(ctx));
-    return { handled: true, command: "settings" };
+    await ctx.reply(id, settingsText(lang), button(ctx, lang));
+    return { handled: true, command: "settings", lang };
   }
 
-  await ctx.reply(id, helpText(user, now));
-  return { handled: true, command: "help" };
+  await ctx.reply(id, helpText(user, now, lang));
+  return { handled: true, command: "help", lang };
 }

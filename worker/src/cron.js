@@ -12,6 +12,14 @@ ORDER BY next_digest_at LIMIT ?2`;
 const TOPICS_SQL = "SELECT tag, label_en, emoji, sort, is_default FROM topics ORDER BY sort";
 const GIVE_UP_S = 3600;   // a slot that keeps failing for an hour is skipped
 
+// Step 9: a digest that went out in English because some of its stories had no translation into
+// the reader's language yet. Logged in `errors` (component "digest"); Admin counts them per language.
+export const FALLBACK_PREFIX = "language fallback";
+export function fallbackStatement(userId, fb, now) {
+  return errorStatement(`${FALLBACK_PREFIX} (${fb.lang}): user ${userId} got English, ${fb.missing} of ${fb.of} ` +
+    `stories have no ${fb.lang} translation yet`, now, "digest");
+}
+
 // Sends a digest: always ONE message since Step 8 (planDigest cuts it to fit). A failure is
 // thrown (retried at the next tick). Returns the ids of the stories sent.
 export async function sendDigest(io, chatId, plan) {
@@ -55,6 +63,10 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
       }
       out.sent++;
       if (!plan.stories.length) out.quiet++;
+      if (plan.fallback) {                  // Step 9: never mixed; the whole digest went out in English
+        out.lang_fallback = (out.lang_fallback ?? 0) + 1;
+        writes.push(fallbackStatement(user.id, plan.fallback, now));
+      }
       out.stories += sentIds.length;
       out.cut += plan.cut ?? 0;            // stories that qualified but did not fit (Step 8)
       writes.push(...afterSendStatements(user, sentIds, now, plan.nextAt));

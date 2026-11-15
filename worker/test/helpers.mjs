@@ -74,10 +74,18 @@ export function addUser(sqlite, fields = {}) {
     ...fields,
   };
   sqlite.prepare("INSERT INTO users (id, first_name, timezone, digest_times, topics, created_at, " +
-    "last_digest_at, next_digest_at, paused, blocked) VALUES (?,?,?,?,?,?,?,?,?,?)")
+    "last_digest_at, next_digest_at, paused, blocked, lang) VALUES (?,?,?,?,?,?,?,?,?,?,?)")
     .run(u.id, u.first_name, u.timezone, u.digest_times, u.topics, u.created_at,
-      u.last_digest_at, u.next_digest_at, u.paused, u.blocked);
+      u.last_digest_at, u.next_digest_at, u.paused, u.blocked, u.lang ?? "en");
   return u;
+}
+
+// Step 9: a translation row as the hourly job writes it (src = the story's English text now).
+export function addTranslation(sqlite, storyId, lang, headline, description = null, { ok = 1, src } = {}) {
+  const s = sqlite.prepare("SELECT coalesce(headline, summary) || char(10) || coalesce(description, '') AS src FROM stories WHERE id = ?")
+    .get(storyId);
+  sqlite.prepare("INSERT INTO story_translations (story_id, lang, ok, headline, description, src, created_at) " +
+    "VALUES (?,?,?,?,?,?,1)").run(storyId, lang, ok, headline, description, src ?? s.src);
 }
 
 // Replaces global fetch. handler(url, init) returns {status, body}. Records every call.

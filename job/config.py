@@ -73,6 +73,10 @@ class Settings:
     editor_groq_per_topic: int = 1
     editor_groq_compare: int = 2
     editor_groq_items: int = 2
+    # Step 9 translation pass (job/translate.py): one call per reader language per run.
+    translate_batch: int = 80            # stories per Gemini call (a normal hour has 2-6; a catch-up about 70)
+    translate_groq_batch: int = 12       # Groq's 8k tokens/minute fits far fewer
+    translate_groq_max_chunks: int = 3
 
 
 def load_topics() -> list[dict]:

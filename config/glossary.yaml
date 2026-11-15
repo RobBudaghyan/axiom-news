@@ -1,0 +1,38 @@
+# Step 9: how common names are written in each reader language (job/translate.py).
+#   en:    the English spellings to look for (whole words, case-sensitive).
+#   ru/hy/fr: the form the translation must use. The entries whose English name appears in a
+#          batch are put into the translation prompt.
+#   check: a stem the translation must contain (Russian and Armenian decline names: Пашинян,
+#          Пашиняна, Пашиняну all contain "Пашинян"). Defaults to the form itself.
+# A translation that has the English name but not the stem is dropped and redone next hour.
+names:
+  - {en: [Pashinyan, Pashinian], ru: Пашинян, hy: Փաշինյան, fr: Pachinian}
+  - {en: [Aliyev, Aliev], ru: Алиев, hy: Ալիև, fr: Aliev}
+  - {en: [Zelensky, Zelenskyy], ru: Зеленский, ru_check: Зеленск, hy: Զելենսկի, hy_check: Զելենսկ, fr: Zelensky}
+  - {en: [Putin], ru: Путин, hy: Պուտին, fr: Poutine, fr_check: Poutine}
+  - {en: [Karabakh], ru: Карабах, hy: Ղարաբաղ, fr: Karabakh}
+  - {en: [Yerevan], ru: Ереван, hy: Երևան, fr: Erevan}
+  - {en: [Syunik], ru: Сюник, hy: Սյունիք, fr: Syunik}
+  - {en: [Zangezur], ru: Зангезур, hy: Զանգեզուր, fr: Zanguezour}
+  - {en: [Lavrov], ru: Лавров, hy: Լավրով, fr: Lavrov}
+  - {en: [Peskov], ru: Песков, hy: Պեսկով, fr: Peskov}
+  - {en: [Zakharova], ru: Захарова, ru_check: Захаров, hy: Զախարովա, hy_check: Զախարով, fr: Zakharova}
+  - {en: [Erdogan, Erdoğan], ru: Эрдоган, hy: Էրդողան, fr: Erdogan}
+  - {en: [Kallas], ru: Каллас, hy: Կալաս, fr: Kallas}
+  - {en: [Khamenei], ru: Хаменеи, hy: Խամենեի, fr: Khamenei}
+  - {en: [Trump], ru: Трамп, hy: Թրամփ, fr: Trump}
+  - {en: [Macron], ru: Макрон, hy: Մակրոն, fr: Macron}
+  - {en: [Merz], ru: Мерц, hy: Մերց, fr: Merz}
+  - {en: [Starmer], ru: Стармер, hy: Սթարմեր, fr: Starmer}
+  - {en: [Rubio], ru: Рубио, hy: Ռուբիո, fr: Rubio}
+  - {en: [Vance], ru: Вэнс, hy: Վենս, fr: Vance}
+  - {en: [Witkoff], ru: Уиткофф, hy: Ուիթքոֆ, fr: Witkoff}
+  - {en: [Netanyahu], ru: Нетаньяху, hy: Նեթանյահու, fr: Netanyahou}
+  - {en: [Lukashenko], ru: Лукашенко, hy: Լուկաշենկո, fr: Loukachenko}
+  - {en: [Mirzoyan], ru: Мирзоян, hy: Միրզոյան, fr: Mirzoyan}
+  - {en: [Kocharyan], ru: Кочарян, hy: Քոչարյան, fr: Kotcharian}
+  - {en: [Sargsyan], ru: Саргсян, hy: Սարգսյան, fr: Sargsian}
+  - {en: [Karapetyan], ru: Карапетян, hy: Կարապետյան, fr: Karapetian}
+  - {en: [Ter-Petrosyan], ru: Тер-Петросян, hy: Տեր-Պետրոսյան, fr: Ter-Petrossian}
+  - {en: [Simonyan], ru: Симонян, hy: Սիմոնյան, fr: Simonian}
+  - {en: [CSTO], ru: ОДКБ, hy: ՀԱՊԿ, fr: OTSC}

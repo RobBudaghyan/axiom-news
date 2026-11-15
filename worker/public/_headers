@@ -13,6 +13,9 @@
 /app/app.js
   Cache-Control: public, max-age=86400
   X-Content-Type-Options: nosniff
+/app/i18n.js
+  Cache-Control: public, max-age=86400
+  X-Content-Type-Options: nosniff
 /app/app.css
   Cache-Control: public, max-age=86400
   X-Content-Type-Options: nosniff

@@ -34,6 +34,8 @@ MIGRATIONS = [
     # Step 8: the dynamic digest
     "ALTER TABLE stories ADD COLUMN topic_score INTEGER",
     "ALTER TABLE stories ADD COLUMN scored_at INTEGER",
+    # Step 9: reader languages (story_translations is a new table, created above)
+    "ALTER TABLE users ADD COLUMN lang TEXT NOT NULL DEFAULT 'en'",
 ]
 
 

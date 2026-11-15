@@ -346,6 +346,18 @@ def clean_summary(text: str) -> str:
     return text[:300].strip()
 
 
+def parse_json_object(text: str, key: str) -> dict:
+    """A JSON object (fences allowed) whose `key` is a list; ValueError otherwise."""
+    text = text.strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```[a-zA-Z]*\s*", "", text)
+        text = re.sub(r"\s*```$", "", text)
+    data = json.loads(text)
+    if not isinstance(data, dict) or not isinstance(data.get(key), list):
+        raise ValueError(f"JSON has no '{key}' list")
+    return data
+
+
 def parse_json(text: str) -> dict:
     text = text.strip()
     if text.startswith("```"):

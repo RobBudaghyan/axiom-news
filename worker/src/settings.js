@@ -1,16 +1,25 @@
 // User settings from the Mini App: validation and the next digest time. Pure functions, no I/O.
 // Limits live in config/digest.json ("settings_limits"). Since Step 5 a user sets only topics,
-// digest times (on the hour, 06:00-23:00, 1 to 5) and pause. The time zone always follows the
+// digest times (on the hour, 06:00-23:00, 1 to 5) and pause; Step 9 adds the language. The time zone always follows the
 // phone (saved on every open, src/api.js); the story count and the format are no longer settings.
 import { CONFIG, nextSlot, parseList } from "./digest.js";
+import { LANGS, effectiveLang, t } from "./i18n.js";
 
 // users.tz_detected: 0 = never reported (default zone), 1 = set from the device.
 // (2 = "chosen by hand" existed until Step 5; such a zone is replaced by the phone's on next open.)
 export const TZ_DEFAULT = 0, TZ_AUTO = 1, TZ_MANUAL = 2;
-const KEYS = new Set(["topics", "digest_times", "paused"]);
+const KEYS = new Set(["topics", "digest_times", "paused", "lang"]);
 const KEEP_DUE_S = 15 * 60;   // a digest already due (waiting for the next 5-min tick) is kept
 
-export class SettingsError extends Error {}
+// A refused setting: `code` names the message in config/i18n (errors.<code>), so the Mini App can
+// show it in the user's language; `message` is the English text (Step 9).
+export class SettingsError extends Error {
+  constructor(code, vars = {}) {
+    super(t("en", `errors.${code}`, vars));
+    this.code = code;
+    this.vars = vars;
+  }
+}
 
 const minutes = (hhmm) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
 const fromMinutes = (m) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
@@ -53,37 +62,41 @@ export function validZone(tz) {
 // patch: what the Mini App sends (any subset). topicTags: the known topic tags.
 // Returns the clean column values to write. Throws SettingsError with a friendly message.
 export function validatePatch(patch, topicTags, cfg = CONFIG) {
-  if (!patch || typeof patch !== "object" || Array.isArray(patch)) throw new SettingsError("Nothing to save.");
+  if (!patch || typeof patch !== "object" || Array.isArray(patch)) throw new SettingsError("nothing");
   const unknown = Object.keys(patch).filter((k) => !KEYS.has(k));
-  if (unknown.length) throw new SettingsError(`Unknown setting: ${unknown[0]}.`);
+  if (unknown.length) throw new SettingsError("unknown_setting", { key: unknown[0] });
   const L = cfg.settings_limits;
   const out = {};
   if ("topics" in patch) {
     const t = patch.topics;
-    if (!Array.isArray(t) || !t.every((x) => typeof x === "string")) throw new SettingsError("Topics must be a list.");
+    if (!Array.isArray(t) || !t.every((x) => typeof x === "string")) throw new SettingsError("topics_list");
     const uniq = [...new Set(t)];
-    if (!uniq.length) throw new SettingsError("Keep at least one topic.");
+    if (!uniq.length) throw new SettingsError("keep_topic");
     const bad = uniq.find((x) => !topicTags.includes(x));
-    if (bad) throw new SettingsError("That topic does not exist.");
+    if (bad) throw new SettingsError("no_topic");
     out.topics = topicTags.filter((x) => uniq.includes(x));   // keep the official order
   }
   if ("digest_times" in patch) {
     const t = patch.digest_times;
-    if (!Array.isArray(t) || !t.every((x) => typeof x === "string")) throw new SettingsError("Times must be a list.");
+    if (!Array.isArray(t) || !t.every((x) => typeof x === "string")) throw new SettingsError("times_list");
     const uniq = [...new Set(t)].sort();
-    if (!uniq.length) throw new SettingsError("Keep at least one digest time.");
-    if (uniq.length > L.max_times) throw new SettingsError(`You can have up to ${L.max_times} digest times.`);
+    if (!uniq.length) throw new SettingsError("keep_time");
+    if (uniq.length > L.max_times) throw new SettingsError("max_times", { max: L.max_times });
     const ok = allowedTimes(cfg);
     if (uniq.some((x) => !ok.includes(x))) {
-      throw new SettingsError(`Times must be on the hour, between ${L.earliest} and ${L.latest}.`);
+      throw new SettingsError("times_hour", { from: L.earliest, to: L.latest });
     }
     out.digest_times = uniq;
   }
   if ("paused" in patch) {
-    if (typeof patch.paused !== "boolean") throw new SettingsError("Pause must be on or off.");
+    if (typeof patch.paused !== "boolean") throw new SettingsError("pause_bool");
     out.paused = patch.paused ? 1 : 0;
   }
-  if (!Object.keys(out).length) throw new SettingsError("Nothing to save.");
+  if ("lang" in patch) {   // Step 9: only a language in the picker (config/languages.json "enabled")
+    if (typeof patch.lang !== "string" || !LANGS.enabled.includes(patch.lang)) throw new SettingsError("lang_bad");
+    out.lang = patch.lang;
+  }
+  if (!Object.keys(out).length) throw new SettingsError("nothing");
   return out;
 }
 
@@ -108,5 +121,6 @@ export function publicUser(u, cfg = CONFIG) {
     topics: parseList(u.topics),
     paused: !!u.paused,
     next_digest_at: u.next_digest_at ?? null,
+    lang: effectiveLang(u),            // Step 9: a language that is not enabled shows as English
   };
 }

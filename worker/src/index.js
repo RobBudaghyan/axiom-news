@@ -6,8 +6,9 @@ import { d1Binding, logError } from "./db.js";
 import { handleUpdate } from "./bot.js";
 import { runTick } from "./cron.js";
 import { dispatchJob } from "./github.js";
-import { sendHtml, sendPlain } from "./telegram.js";
+import { sendHtml, sendPlain, tgCall } from "./telegram.js";
 import { handleApi, json } from "./api.js";
+import { t } from "./i18n.js";
 
 export const HOURLY_CRON = "7 * * * *";
 
@@ -37,6 +38,7 @@ export default {
         await handleUpdate(update, {
           db, now, cfg: CONFIG, appUrl: appUrl(env, url),
           reply: (chatId, text, extra) => sendPlain(env.TELEGRAM_BOT_TOKEN, chatId, text, extra),
+          tg: (method, body) => tgCall(env.TELEGRAM_BOT_TOKEN, method, body),
         });
       } catch (e) {
         await logError(db, `webhook: ${e.message}`, now);
@@ -50,10 +52,12 @@ export default {
         return await handleApi(request, env, db, now, {
           send: (chatId, html) => sendHtml(env.TELEGRAM_BOT_TOKEN, chatId, html),
           dispatch: (e) => dispatchJob(e),
+          tg: (method, body) => tgCall(env.TELEGRAM_BOT_TOKEN, method, body),
+          appUrl: appUrl(env, url),
         });
       } catch (e) {
         await logError(db, `api ${url.pathname}: ${e.message}`, now);
-        return json(500, { error: "Something went wrong. Please try again in a minute." });
+        return json(500, { error: t("en", "errors.server"), code: "server" });
       }
     }
     if (url.pathname === "/") return new Response("Axiom News bot\n");

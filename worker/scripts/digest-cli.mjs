@@ -11,6 +11,7 @@
 //        --verbose lists every story, --show prints the messages
 //   (near-duplicate pairs: venv/Scripts/python -m job.dupes, from the project folder)
 //   node scripts/digest-cli.mjs --cpu 8            CPU time to build 8 digests (the four profiles) from full pools
+//        --lang ru: the same in Russian (Step 9), every story with a stand-in Cyrillic translation 20% longer
 //   --bars and --limit work with every mode; --label "..." changes the preview's label
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -194,11 +195,18 @@ async function main() {
       const st = candidateStatement({ ...u, id: 0, last_digest_at: null }, now, cfg);
       pools.push(await db.query(st.sql, st.params));
     }
-    for (let i = 0; i < list.length; i++) planDigest(list[i], pools[i], topics, now, cfg);   // warm-up (JIT), not counted
+    const lang = arg("--lang", "en");
+    if (lang !== "en") {   // Step 9: stand-in translations, about 20% longer, Cyrillic, same numbers
+      const fake = (s) => (s ? `${s} ${"перевод ".repeat(Math.ceil(s.length / 40))}`.replace(/[A-Za-z]/g, "ж") : s);
+      for (const p of pools) for (const s of p) { s.tr_headline = fake(s.headline || s.summary); s.tr_description = fake(s.description); }
+    }
+    const opts = { lang };
+    for (let i = 0; i < list.length; i++) planDigest(list[i], pools[i], topics, now, cfg, opts);   // warm-up (JIT), not counted
     const t0 = process.cpuUsage();
-    for (let i = 0; i < n; i++) planDigest(list[i % list.length], pools[i % list.length], topics, now, cfg);
+    let langs = new Set();
+    for (let i = 0; i < n; i++) langs.add(planDigest(list[i % list.length], pools[i % list.length], topics, now, cfg, opts).lang);
     const t = process.cpuUsage(t0);
-    console.log(`${n} digests from ${pools.map((p) => p.length).join("/")} candidates: ${((t.user + t.system) / 1000).toFixed(1)} ms CPU ` +
+    console.log(`${n} digests (${[...langs].join("/")}) from ${pools.map((p) => p.length).join("/")} candidates: ${((t.user + t.system) / 1000).toFixed(1)} ms CPU ` +
       `(${((t.user + t.system) / 1000 / n).toFixed(2)} ms each, Node on this PC)`);
     return;
   }

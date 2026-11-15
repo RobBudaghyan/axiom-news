@@ -1,0 +1,9 @@
+{
+  "_comment": "Step 9: reader languages. 'enabled' = shown in the Mini App picker, chosen by default from Telegram's language on a user's first /start, and translated by the hourly job (only if an active user reads it). 'available' = every language with a dictionary (config/i18n/<code>.json); a language not enabled keeps its code but is hidden, and a user whose language is not enabled gets English everywhere. English is the fallback for every missing key and for any digest with an untranslated story. Edit here, then redeploy the Worker and push (the job reads it too).",
+  "default": "en",
+  "enabled": ["en", "ru"],
+  "available": ["en", "ru", "hy", "fr"],
+  "names": {"en": "English", "ru": "Русский", "hy": "Հայերեն", "fr": "Français"},
+  "english_names": {"en": "English", "ru": "Russian", "hy": "Armenian", "fr": "French"},
+  "locale": {"en": "en-GB", "ru": "ru-RU", "hy": "hy-AM", "fr": "fr-FR"}
+}

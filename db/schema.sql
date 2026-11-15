@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS users (
   created_at     INTEGER NOT NULL,
   last_digest_at INTEGER,
   next_digest_at INTEGER,
-  format         TEXT                               -- unused since Step 5 (one format for everyone)
+  format         TEXT,                              -- unused since Step 5 (one format for everyone)
+  lang           TEXT NOT NULL DEFAULT 'en'         -- Step 9: the reader's language (config/languages.json). `language`
+                                                    -- above is Telegram's code, refreshed on every /start and open;
+                                                    -- `lang` is set once on creation and then only by the Mini App
 );
 CREATE INDEX IF NOT EXISTS idx_users_next ON users(next_digest_at);
 
@@ -81,6 +84,24 @@ CREATE TABLE IF NOT EXISTS stories (
   scored_at         INTEGER                         -- when the editor first scored it (digest window: a late score still counts)
 );
 CREATE INDEX IF NOT EXISTS idx_stories_updated ON stories(updated_at);
+
+-- Step 9: a story's headline and description in a reader language, written by the hourly job
+-- (job/translate.py) for stories that could reach a digest, in the languages active users read.
+-- A row counts only while `src` equals the story's current English text (compared in SQL by the
+-- digest query), so a re-edited headline makes it stale at once. ok = 0: a guard rejected the
+-- last attempt (note says why); it is redone next run.
+CREATE TABLE IF NOT EXISTS story_translations (
+  story_id    INTEGER NOT NULL,
+  lang        TEXT NOT NULL,
+  ok          INTEGER NOT NULL,
+  headline    TEXT,
+  description TEXT,
+  src         TEXT NOT NULL,                        -- coalesce(headline, summary) || char(10) || coalesce(description, '')
+  note        TEXT,
+  provider    TEXT,
+  created_at  INTEGER NOT NULL,
+  PRIMARY KEY (story_id, lang)
+) WITHOUT ROWID;
 
 -- "Never send the same story twice": one row per (user, story) delivered.
 CREATE TABLE IF NOT EXISTS sent (

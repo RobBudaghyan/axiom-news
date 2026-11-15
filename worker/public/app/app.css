@@ -279,3 +279,7 @@ button.row:active, .tap:active { background: var(--press); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* Step 9: the language picker: a check mark on the chosen language */
+.row-right .check { display: inline-flex; color: var(--accent-text); line-height: 0; }
+.row-right .check svg { width: 22px; height: 22px; }

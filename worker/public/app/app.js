@@ -1,8 +1,44 @@
 // Axiom News Mini App: Settings for everyone, Admin for the owner. No framework.
 // Every API call sends Telegram's initData; the Worker verifies it and takes the user id from it.
+// Step 9: every Settings string comes from i18n.js (generated from config/i18n/<lang>.json by
+// scripts/stamp-app.mjs) in the user's language, English for a missing key. The Admin tab stays
+// English (owner only).
 (() => {
   "use strict";
   const tg = window.Telegram && window.Telegram.WebApp;
+  const L10N = window.AXIOM_I18N || { enabled: ["en"], default: "en", names: {}, locale: {}, dicts: { en: {} } };
+  let LANG = "en";
+  const look = (d, key) => key.split(".").reduce((v, k) => (v == null ? undefined : v[k]), d);
+  const fill = (s, vars = {}) => String(s).replace(/\{(\w+)\}/g, (m, k) => (k in vars ? String(vars[k]) : m));
+  function tr(key, vars) {
+    let v = look(L10N.dicts[LANG], key);
+    if (v === undefined) v = look(L10N.dicts.en, key);
+    return typeof v === "string" ? fill(v, vars) : key;
+  }
+  // Same plural rules as worker/src/i18n.js: Russian one/few/many, French and Armenian 0-1 singular.
+  function pluralCat(n) {
+    const i = Math.abs(Math.trunc(n));
+    if (LANG === "ru") {
+      const a = i % 10, b = i % 100;
+      if (a === 1 && b !== 11) return "one";
+      return a >= 2 && a <= 4 && (b < 12 || b > 14) ? "few" : "many";
+    }
+    if (LANG === "fr" || LANG === "hy") return i <= 1 ? "one" : "other";
+    return i === 1 ? "one" : "other";
+  }
+  function trn(key, count, vars = {}) {
+    const forms = look(L10N.dicts[LANG], key) || look(L10N.dicts.en, key) || {};
+    const s = forms[pluralCat(count)] ?? forms.other ?? forms.many ?? forms.one ?? key;
+    return fill(s, { count, ...vars });
+  }
+  function setLang(code) {
+    const primary = String(code || "").toLowerCase().split(/[-_]/)[0];
+    LANG = L10N.enabled.includes(primary) ? primary : L10N.default || "en";
+    document.documentElement.lang = LANG;
+  }
+  const locale = () => (L10N.locale && L10N.locale[LANG]) || "en-GB";
+  const zoneName = (tz) => { const c = city(tz); const v = look(L10N.dicts[LANG], `zones.${c}`); return typeof v === "string" ? v : c; };
+  const cap = (s) => (s ? s.charAt(0).toLocaleUpperCase(locale()) + s.slice(1) : s);
   const app = document.getElementById("app");
   const toastEl = document.getElementById("toast");
   const S = { st: null, admin: null, adminErr: null, adminLoading: false, tab: "settings", range: "24h",
@@ -22,6 +58,7 @@
     send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4 18-7Z"/></svg>',
     play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v4h-4"/></svg>',
     warn: '<svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm0 4a1 1 0 0 0-1 1v4a1 1 0 1 0 2 0V7a1 1 0 0 0-1-1Zm0 7.2a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Z"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
     okC: '<svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm3.7 5.3a.9.9 0 0 0-1.3.1l-3.3 4-1.6-1.6a.9.9 0 1 0-1.3 1.3l2.3 2.3c.4.4 1 .3 1.3-.1l4-4.7a.9.9 0 0 0-.1-1.3Z"/></svg>',
   };
 
@@ -65,11 +102,13 @@
     const opt = { method: body === undefined ? "GET" : "POST", headers: { authorization: `tma ${tg ? tg.initData : ""}` } };
     if (body !== undefined) { opt.headers["content-type"] = "application/json"; opt.body = JSON.stringify(body); }
     let res;
-    try { res = await fetch(path, opt); } catch { throw Object.assign(new Error("No connection. Check your internet and try again."), { status: 0 }); }
+    try { res = await fetch(path, opt); } catch { throw Object.assign(new Error(tr("app.no_connection")), { status: 0 }); }
     let data = {};
     try { data = await res.json(); } catch { /* not JSON */ }
     if (!res.ok) {
-      throw Object.assign(new Error(data.error || data.message || "Something went wrong. Please try again."),
+      // A Settings error carries a code: shown in the user's language (Step 9). Admin messages stay English.
+      const known = data.code && look(L10N.dicts.en, `errors.${data.code}`) !== undefined;
+      throw Object.assign(new Error(known ? tr(`errors.${data.code}`, data.vars) : data.error || data.message || tr("app.generic_error")),
         { status: res.status, data });
     }
     return data;
@@ -95,9 +134,11 @@
   }
   function dayName(ts, tz) {
     const d = dayDiff(ts, tz);
-    if (d === 0) return "Today";
-    if (d === 1) return "Tomorrow";
-    return fmt(tz, { weekday: "long" }, "w").format(new Date(ts * 1000));
+    if (d === 0) return tr("app.today");
+    if (d === 1) return tr("app.tomorrow");
+    const k = `${tz}|w|${locale()}`;
+    if (!fmts.has(k)) fmts.set(k, new Intl.DateTimeFormat(locale(), { timeZone: tz, weekday: "long" }));
+    return cap(fmts.get(k).format(new Date(ts * 1000)));
   }
   function when(ts, tz) {
     if (!ts) return "Never";
@@ -159,13 +200,13 @@
     app.innerHTML = `<header class="top"><h1 class="title" id="title"></h1>${owner ? `
       <div class="seg" role="tablist" id="tabs">
         <span class="seg-thumb" style="width:calc(50% - 2px)"></span>
-        <button role="tab" data-action="tab" data-value="settings">Settings</button>
+        <button role="tab" data-action="tab" data-value="settings">${esc(tr("app.tab_settings"))}</button>
         <button role="tab" data-action="tab" data-value="admin">Admin</button>
       </div>` : ""}</header><main id="view" class="view"></main>`;
     syncTabs();
   }
   function syncTabs() {
-    $("#title").textContent = S.tab === "admin" ? "Admin" : "Settings";
+    $("#title").textContent = S.tab === "admin" ? "Admin" : tr("app.title");
     const tabs = $("#tabs");
     if (!tabs) return;
     tabs.querySelectorAll("button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.value === S.tab)));
@@ -183,14 +224,14 @@
     const u = S.st.user;
     if (u.paused) {
       return `<div class="group hero paused" id="hero"><div class="hero-icon">${I.pause}</div><div>
-        <div class="hero-label">Digests</div><div class="hero-value">Paused</div>
-        <div class="hero-sub">Turn off Pause at the bottom to start again.</div></div></div>`;
+        <div class="hero-label">${esc(tr("app.hero_paused_label"))}</div><div class="hero-value">${esc(tr("app.hero_paused"))}</div>
+        <div class="hero-sub">${esc(tr("app.hero_paused_sub"))}</div></div></div>`;
     }
     const ts = u.next_digest_at;
-    const value = ts ? `${dayName(ts, u.timezone)} at ${hm(ts, u.timezone)}` : "Not scheduled";
+    const value = ts ? tr("app.day_at", { day: dayName(ts, u.timezone), time: hm(ts, u.timezone) }) : tr("app.not_scheduled");
     return `<div class="group hero" id="hero"><div class="hero-icon">${I.clock}</div><div>
-      <div class="hero-label">Next digest</div><div class="hero-value tnum">${esc(value)}</div>
-      <div class="hero-sub">${esc(city(u.timezone))} time</div></div></div>`;
+      <div class="hero-label">${esc(tr("app.hero_label"))}</div><div class="hero-value tnum">${esc(value)}</div>
+      <div class="hero-sub">${esc(tr("app.zone_time", { zone: zoneName(u.timezone) }))}</div></div></div>`;
   }
   function updateHero() {
     const h = $("#hero");
@@ -198,12 +239,11 @@
   }
 
   // "09:00, 14:00 and 20:00"
-  const listTimes = (t) => (t.length < 2 ? t.join("") : `${t.slice(0, -1).join(", ")} and ${t[t.length - 1]}`);
+  const listTimes = (t) => (t.length < 2 ? t.join("") : `${t.slice(0, -1).join(", ")}${tr("app.and")}${t[t.length - 1]}`);
   function timesFoot() {
     const u = S.st.user, L = S.st.limits;
-    const n = u.digest_times.length;
-    return `${n === 1 ? "One digest a day" : `${n} digests a day`}, at ${listTimes(u.digest_times)}. ` +
-      `Tap a time to add or remove it, up to ${L.max_times}.`;
+    return `${trn("app.times_summary", u.digest_times.length, { times: listTimes(u.digest_times) })} ` +
+      tr("app.times_hint", { max: L.max_times });
   }
 
   function timesHTML() {
@@ -212,14 +252,14 @@
     const block = (label, list) => list.length ? `<div class="times-block"><div class="times-label">${periodEmoji(list[0])} ${label}</div>
       <div class="chips">${list.map((t) => `<button class="chip-btn tnum" data-action="time" data-value="${t}" aria-pressed="${u.digest_times.includes(t)}"
         aria-label="${t}">${t}</button>`).join("")}</div></div>` : "";
-    return block("Morning", all.filter((t) => period(t) === "Morning"))
-      + block("Afternoon", all.filter((t) => period(t) === "Afternoon"))
-      + block("Evening", all.filter((t) => period(t) === "Evening"));
+    return block(esc(tr("app.morning")), all.filter((t) => period(t) === "Morning"))
+      + block(esc(tr("app.afternoon")), all.filter((t) => period(t) === "Afternoon"))
+      + block(esc(tr("app.evening")), all.filter((t) => period(t) === "Evening"));
   }
 
   function tzSub(u) {
     const off = offset(u.timezone);
-    return u.tz_source === "device" ? `From your phone${off ? ` · ${off}` : ""}` : `Default${off ? ` · ${off}` : ""}`;
+    return `${tr(u.tz_source === "device" ? "app.tz_device" : "app.tz_default")}${off ? ` · ${off}` : ""}`;
   }
 
   function settingsHTML() {
@@ -230,17 +270,24 @@
         attrs: `role="switch" aria-checked="${on}" data-action="topic" data-value="${esc(t.tag)}"` });
     }).join("");
 
-    const tzRow = row({ icon: I.globe, tile: true, title: `${esc(city(u.timezone))} time`, sub: esc(tzSub(u)), attrs: 'id="tz-row"' });
+    const tzRow = row({ icon: I.globe, tile: true, title: esc(tr("app.zone_time", { zone: zoneName(u.timezone) })), sub: esc(tzSub(u)), attrs: 'id="tz-row"' });
 
-    const pauseRow = row({ icon: I.pause, tile: true, title: "Pause digests", right: switchEl, tag: "button", cls: "tap",
+    const pauseRow = row({ icon: I.pause, tile: true, title: esc(tr("app.pause")), right: switchEl, tag: "button", cls: "tap",
       attrs: `role="switch" aria-checked="${u.paused}" data-action="pause" id="pause-row"` });
 
+    // Step 9: the language picker (only the enabled languages, each in its own name).
+    const langs = S.st.languages || [];
+    const langRows = langs.map((l) => row({ title: `<span lang="${esc(l.code)}">${esc(l.name)}</span>`,
+      right: l.code === u.lang ? `<span class="check" aria-hidden="true">${I.check}</span>` : "", tag: "button", cls: "tap",
+      attrs: `role="radio" aria-checked="${l.code === u.lang}" data-action="lang" data-value="${esc(l.code)}"` })).join("");
+
     return `<section class="section">${heroHTML()}</section>
-      ${section("Topics", topicRows, "Your digest covers the topics you turn on.")}
-      ${section("Digest times", timesHTML(), `<span id="times-foot">${esc(timesFoot())}</span>`, 'id="times"')}
-      ${section("Time zone", tzRow, "Digest times follow your phone's time zone. It updates each time you open this.")}
-      ${section("", pauseRow, "While paused you get no digests. Your settings are kept.")}
-      <p class="fine">Changes are saved as soon as you make them.</p>`;
+      ${section(esc(tr("app.sec_topics")), topicRows, esc(tr("app.topics_foot")))}
+      ${section(esc(tr("app.sec_times")), timesHTML(), `<span id="times-foot">${esc(timesFoot())}</span>`, 'id="times"')}
+      ${langs.length > 1 ? section(esc(tr("app.sec_language")), langRows, esc(tr("app.language_foot")), 'id="language" role="radiogroup"') : ""}
+      ${section(esc(tr("app.sec_zone")), tzRow, esc(tr("app.zone_foot")))}
+      ${section("", pauseRow, esc(tr("app.pause_foot")))}
+      <p class="fine">${esc(tr("app.fine"))}</p>`;
   }
 
   // Saves go one after another, so a quick series of taps arrives in order.
@@ -249,8 +296,9 @@
     chain = chain.then(async () => {
       try {
         S.st = await api("/api/settings", patch);
-        updateHero();
-        toast("Saved");
+        if ("lang" in patch) { setLang(S.st.user.lang); renderShell(); renderView(); }   // topic names come back translated
+        else updateHero();
+        toast(tr("app.saved"));
       } catch (e) {
         if (revert) revert();
         haptic("error");
@@ -272,7 +320,7 @@
     if (on && u.topics.length === 1) {
       haptic("warning");
       shake(el);
-      toast("Keep at least one topic", "err");
+      toast(tr("app.keep_topic"), "err");
       return;
     }
     const before = [...u.topics];
@@ -290,13 +338,13 @@
     if (on && u.digest_times.length === 1) {
       haptic("warning");
       shake(el);
-      toast("Keep at least one digest time", "err");
+      toast(tr("app.keep_time"), "err");
       return;
     }
     if (!on && u.digest_times.length >= L.max_times) {
       haptic("warning");
       shake(el);
-      toast(`Up to ${L.max_times} times a day. Remove one first.`, "err", 2600);
+      toast(tr("app.max_times", { max: L.max_times }), "err", 2600);
       return;
     }
     const before = [...u.digest_times];
@@ -314,6 +362,20 @@
     haptic("impact", "light");
     updateHero();
     save({ paused: u.paused }, () => { S.st.user.paused = !S.st.user.paused; });
+  }
+
+  // Step 9: a new language applies to the whole page at once; saved instantly like every setting.
+  function chooseLanguage(el) {
+    const u = S.st.user;
+    const code = el.dataset.value;
+    if (!code || code === u.lang) return;
+    const before = u.lang;
+    u.lang = code;
+    setLang(code);
+    haptic("select");
+    renderShell();
+    renderView();
+    save({ lang: code }, () => { S.st.user.lang = before; setLang(before); renderShell(); });
   }
 
   // ---------------------------------------------------------------- admin
@@ -414,9 +476,18 @@
       .map(([k, v]) => `<div class="stat"><b>${n(v)}</b><span>${k}</span></div>`).join("")}</div>`;
     const userRows = U.list.map((x) => row({ icon: `<span class="avatar">${esc((x.name || "?").trim().charAt(0).toUpperCase())}</span>`,
       title: `${esc(x.name)} ${x.blocked ? badge("Blocked", "bad") : x.paused ? badge("Paused", "mute") : ""}`,
-      sub: esc(`${city(x.timezone)} · ${x.times.join(", ")}` +
+      sub: esc(`${(x.lang || "en").toUpperCase()} · ${city(x.timezone)} · ${x.times.join(", ")}` +
         (x.digests_24h ? ` · avg ${x.avg_stories_24h} stories (${x.digests_24h} ${x.digests_24h === 1 ? "digest" : "digests"}, 24 h)` : "")),
       right: `<span class="tnum" style="font-size:15px">${x.last_digest_at ? esc(ago(x.last_digest_at)) : "No digest yet"}</span>` })).join("");
+
+    // Step 9: reader languages (Admin stays English).
+    const langRowsA = (A.languages || []).map((l) => row({
+      title: `${esc(l.name)} ${l.enabled ? "" : badge("Hidden", "mute")}`,
+      sub: esc(l.code === "en" ? `${plural(l.active, "active reader", "active readers")} · no translation needed`
+        : `${plural(l.active, "active reader", "active readers")} · ${plural(l.translated_24h, "story", "stories")} translated` +
+          `${l.rejected_24h ? ` (${l.rejected_24h} rejected by checks)` : ""} · ${plural(l.calls_24h, "call", "calls")}, ` +
+          `${compact(l.input_tokens_24h)} in, ${compact(l.output_tokens_24h)} out`),
+      right: l.code === "en" ? "" : l.fallbacks_24h ? badge(`${l.fallbacks_24h} in English`, "warn") : badge("No fallback") })).join("");
 
     const D = A.d1;
     const meter = (label, used, limit) => {
@@ -439,6 +510,7 @@
       ${section("AI by model", models)}
       ${feeds}
       ${section("Users", tiles + userRows)}
+      ${section("Languages, last 24 h", langRowsA || row({ title: "No data" }), "A digest goes out in English when any of its stories has no translation yet; the badge counts those.")}
       ${section("Database today", d1, "Free limits per day, reset at 00:00 UTC. The news job's counts are exact; the bot server's are counted every 5 minutes and can be slightly low.")}
       ${section("Recent errors", errRows || row({ title: "No errors" }), A.errors.length ? "Newest first. Notes from the news job about skipped items are normal." : "")}`;
   }
@@ -481,6 +553,7 @@
       case "topic": toggleTopic(el); break;
       case "time": toggleTime(el); break;
       case "pause": togglePause(el); break;
+      case "lang": chooseLanguage(el); break;
       case "range": S.range = v; haptic("select"); renderView(); break;
       case "refresh": haptic("impact", "light"); loadAdmin(true); renderView(); break;
       case "all-errors": S.allErrors = true; renderView(); break;
@@ -494,22 +567,25 @@
   function fatal(title, text, retry) {
     app.removeAttribute("aria-busy");
     app.innerHTML = `<div class="empty"><div class="empty-icon">${I.paper}</div><h1>${esc(title)}</h1><p>${esc(text)}</p>
-      ${retry ? '<button class="btn" data-action="retry">Try again</button>' : ""}</div>`;
+      ${retry ? `<button class="btn" data-action="retry">${esc(tr("app.try_again"))}</button>` : ""}</div>`;
   }
 
   async function boot() {
+    // Until the server says which language the user chose: Telegram's app language, if we have it.
+    setLang(tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.language_code);
     if (!tg || !tg.initData) {
-      fatal("Open this in Telegram", "These settings open from the Axiom News bot. Send /settings to the bot and tap Open settings.");
+      fatal(tr("app.open_in_telegram_title"), tr("app.open_in_telegram"));
       return;
     }
-    app.innerHTML = '<div class="loading"><span class="spinner" aria-label="Loading"></span></div>';
+    app.innerHTML = `<div class="loading"><span class="spinner" aria-label="${esc(tr("app.loading"))}"></span></div>`;
     try {
       S.st = await api("/api/open", { tz: deviceTz });
     } catch (e) {
-      if (e.status === 401) fatal("Please reopen", e.message, false);
-      else fatal("Could not load your settings", e.message, true);
+      if (e.status === 401) fatal(tr("app.reopen_title"), e.message, false);
+      else fatal(tr("app.load_failed"), e.message, true);
       return;
     }
+    setLang(S.st.user.lang);
     renderShell();
     renderView();
   }

@@ -9,6 +9,7 @@
 // digests still work, just less well, when the editor is down.
 import CONFIG from "../../config/digest.json" with { type: "json" };
 import LINE_EMOJI from "../../config/line_emoji.json" with { type: "json" };
+import { FORBIDDEN, effectiveLang, plural, t, timeText, topicLabel } from "./i18n.js";
 
 export { CONFIG };
 
@@ -28,15 +29,20 @@ const DAY = 86400;
 // editor's first score time (scored_at): a story scored after a digest went out still reaches the
 // next one. Best relevance first: t if the main topic is followed, otherwise g. The same rule is
 // in topicScore/qualifies below (the tests check both agree).
+// Step 9: each row also carries its translation into the reader's language ?10 (NULL if none, or if
+// it was made from an older English text: `src` must equal the current one, compared here in SQL).
 export const CANDIDATE_SQL = `
 SELECT id, summary, headline, description, emojis, best_url, best_source, importance, final_score, topic_score,
-       topics, main_topic, updated_at, dup_group
+       topics, main_topic, updated_at, dup_group, tr_headline, tr_description
 FROM (
   SELECT s.*, coalesce(s.final_score, s.importance - ?6) AS g,
          s.final_score + min(max(coalesce(s.topic_score, s.final_score) - s.final_score, 0),
                              coalesce(json_extract(?8, '$.' || s.main_topic), 10)) AS t,
-         s.main_topic IN (SELECT u.value FROM json_each(?2) u) AS followed
+         s.main_topic IN (SELECT u.value FROM json_each(?2) u) AS followed,
+         tr.headline AS tr_headline, tr.description AS tr_description
   FROM stories s
+  LEFT JOIN story_translations tr ON tr.story_id = s.id AND tr.lang = ?10 AND tr.ok = 1
+       AND tr.src = coalesce(s.headline, s.summary) || char(10) || coalesce(s.description, '')
   WHERE max(s.updated_at, coalesce(s.scored_at, 0)) >= ?3
     AND s.merged_into IS NULL
     AND EXISTS (SELECT 1 FROM json_each(s.topics) x WHERE x.value IN (SELECT u.value FROM json_each(?2) u))
@@ -61,12 +67,12 @@ export function parseList(value, fallback = []) {
   }
 }
 
-export function candidateStatement(user, now, cfg = CONFIG) {
+export function candidateStatement(user, now, cfg = CONFIG, lang = effectiveLang(user)) {
   return {
     sql: CANDIDATE_SQL,
     params: [user.id, JSON.stringify(parseList(user.topics)), digestSince(user.last_digest_at, now, cfg),
              cfg.candidate_limit, cfg.editorial_bar, cfg.unedited_offset, cfg.topic_bar,
-             JSON.stringify(cfg.topic_boost_max ?? {}), cfg.topic_needs_boost ? 1 : 0],
+             JSON.stringify(cfg.topic_boost_max ?? {}), cfg.topic_needs_boost ? 1 : 0, lang],
   };
 }
 
@@ -151,8 +157,10 @@ const byRank = (a, b) => b.rank - a.rank || b.score - a.score || (b.updated_at ?
 
 // ------------------------------------------------------------------ message
 
-export const FORBIDDEN = /[—–]/;   // owner rule: never the em dash (nor the en dash)
-const MAX_HEADLINE = 250, MAX_DESCRIPTION = 450;
+export { FORBIDDEN };   // owner rule: never the em dash (nor the en dash), in any language (src/i18n.js)
+// Room for translations (Russian runs about 20% longer); English headlines and descriptions are
+// already capped lower by the editor (job/editor.py: 200 and 420).
+const MAX_HEADLINE = 300, MAX_DESCRIPTION = 600;
 
 export function escapeHtml(s) {
   return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -169,8 +177,8 @@ function cut(text, max) {
 export function cleanText(text) {
   return String(text ?? "")
     .replace(/[\u0000-\u001f\u007f]/g, " ")
-    .replace(/\s+[—–]\s+/g, ", ")
-    .replace(/[—–]/g, "-")
+    .replace(/\s+[‒–—―]\s+/g, ", ")
+    .replace(/[‒–—―]/g, "-")
     .replace(/\s+/g, " ")
     .replace(/\s+([,.;:])/g, "$1")
     .trim();
@@ -187,35 +195,36 @@ export function visibleLength(html) {
     .replace(/&quot;/g, '"').replace(/&amp;/g, "&").length;
 }
 
-export function greeting(hour) {
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
+export function greeting(hour, lang = "en") {
+  return t(lang, hour < 12 ? "digest.greeting_morning" : hour < 18 ? "digest.greeting_afternoon" : "digest.greeting_evening");
 }
 
 // "2 PM", "2:30 PM", "12 PM" (noon), "12 AM" (midnight).
 export function clock12(p) {
-  const h = p.hour % 12 || 12;
-  const ap = p.hour < 12 ? "AM" : "PM";
-  return p.minute ? `${h}:${String(p.minute).padStart(2, "0")} ${ap}` : `${h} ${ap}`;
+  return timeText("en", p);
 }
 
 // "Good evening, Sam. Since 2 PM, 6 stories for you:" (no name if Telegram gave none). The first
-// digest, or one after more than 24 h, says "In the last 24 hours".
+// digest, or one after more than 24 h, says "In the last 24 hours". In the digest's language
+// (Step 9: "Добрый вечер, Sam. С 14:00 для вас 6 историй:"); the first name is never changed.
 // The parts that need Intl (costly on a cold Worker) are computed once per digest.
 function greetingParts(opts, cfg) {
   if (opts.greeting) return opts.greeting;
   const { now, tz, lastDigestAt, name } = opts;
+  const lang = opts.lang ?? "en";
   const first = String(name ?? "").trim().slice(0, 32);
-  const hello = `${greeting(localParts(now, tz).hour)}${first ? `, ${escapeHtml(first)}` : ""}`;
+  const g = greeting(localParts(now, tz).hour, lang);
+  const hello = first ? t(lang, "digest.hello_name", { greeting: g, name: escapeHtml(first) }) : g;
   const recent = lastDigestAt && now - lastDigestAt <= cfg.max_lookback_hours * 3600;
-  const since = recent ? `since ${clock12(localParts(lastDigestAt, tz))}` : "in the last 24 hours";
-  return { hello, since };
+  const time = recent ? timeText(lang, localParts(lastDigestAt, tz)) : null;
+  const since = recent ? t(lang, "digest.since_mid", { time }) : t(lang, "digest.last24_mid");
+  const sinceStart = recent ? t(lang, "digest.since_start", { time }) : t(lang, "digest.last24_start");
+  return { hello, since, sinceStart, lang };
 }
 
-function headerText(count, { hello, since }) {
-  if (!count) return `${hello}. Quiet period: nothing important on your topics ${since}.`;
-  return `${hello}. ${since[0].toUpperCase()}${since.slice(1)}, ${count} ${count === 1 ? "story" : "stories"} for you:`;
+function headerText(count, { hello, since, sinceStart, lang }) {
+  if (!count) return t(lang, "digest.quiet", { hello, since });
+  return t(lang, "digest.header", { hello, since: sinceStart, count, stories: plural(lang, count, "digest.stories") });
 }
 
 // ------------------------------------------------------------------ fallback line emoji
@@ -290,10 +299,12 @@ function storyBlock(n, s) {
 
 const headingOf = (t) => `${t.emoji ? `${t.emoji} ` : ""}<b><u>${escapeHtml(t.label)}</u></b>`;
 
-// topics: rows of the D1 `topics` table. Returns {tag: {label, emoji}}.
-export function topicInfoFrom(topics) {
+// topics: rows of the D1 `topics` table. Returns {tag: {label, emoji}}, labels in `lang` (Step 9).
+export function topicInfoFrom(topics, lang = "en") {
   const out = {};
-  for (const t of topics ?? []) out[t.tag] = { label: t.label_en ?? t.label ?? t.tag, emoji: t.emoji ?? "" };
+  for (const x of topics ?? []) {
+    out[x.tag] = { label: topicLabel(lang, x.tag, x.label_en ?? x.label ?? x.tag), emoji: x.emoji ?? "" };
+  }
   return out;
 }
 
@@ -321,7 +332,9 @@ function prepare(stories, topicInfo) {
     return {
       ...s, headline, prepared: true,
       description: s.description ? cut(cleanText(s.description), MAX_DESCRIPTION) : "",
-      fallbackEmoji: s.emojis ? "" : lineEmoji(headline, topicInfo[s.primary]?.emoji),
+      // from the English headline, so a translated digest shows the same emojis (Step 9)
+      fallbackEmoji: s.emojis ? "" : lineEmoji(s.en_headline ? cleanHeadline(s.en_headline) : headline,
+                                                topicInfo[s.primary]?.emoji),
     };
   });
 }
@@ -396,13 +409,31 @@ export function buildMessage(stories, opts, cfg = CONFIG) {
   return { text, storyIds, stories: list };
 }
 
-// One user's whole digest from candidate rows: pick (two-score rule), cut to one unfolded
-// message, format. No I/O. Returns {text, storyIds, stories, cut, nextAt}.
+// Step 9, never a mixed-language digest: in a reader language only if EVERY picked story has a
+// translation (tr_headline from CANDIDATE_SQL, made from the current English text); otherwise the
+// whole digest (greeting, headings, stories) is English and `fallback` says why. A quiet note has
+// no stories, so it is always in the reader's language. Returns {stories, lang, fallback}.
+export function chooseDigestLanguage(picked, want) {
+  if (want === "en") return { stories: picked, lang: "en", fallback: null };
+  const missing = picked.filter((s) => !s.tr_headline).length;
+  if (missing) return { stories: picked, lang: "en", fallback: { lang: want, missing, of: picked.length } };
+  return {
+    stories: picked.map((s) => ({ ...s, en_headline: s.headline || s.summary, headline: s.tr_headline,
+                                  summary: s.tr_headline, description: s.tr_description ?? "" })),
+    lang: want, fallback: null,
+  };
+}
+
+// One user's whole digest from candidate rows: pick (two-score rule), choose the language, cut to
+// one unfolded message (measured on the text actually sent), format. No I/O.
+// Returns {text, storyIds, stories, cut, nextAt, lang, fallback}.
 export function planDigest(user, candidates, topics, now, cfg = CONFIG, opts = {}) {
-  const picked = pickStories(candidates, parseList(user.topics), cfg);
+  const chosen = chooseDigestLanguage(pickStories(candidates, parseList(user.topics), cfg),
+                                      opts.lang ?? effectiveLang(user));
+  const picked = chosen.stories;
   const tz = user.timezone || cfg.default_timezone;
-  const mopts = { now, tz, lastDigestAt: user.last_digest_at, name: user.first_name, topicInfo: topicInfoFrom(topics),
-                  label: opts.label };
+  const mopts = { now, tz, lastDigestAt: user.last_digest_at, name: user.first_name, lang: chosen.lang,
+                  topicInfo: topicInfoFrom(topics, chosen.lang), label: opts.label };
   mopts.greeting = greetingParts(mopts, cfg);
   let { kept, cut } = fitToLength(picked, mopts, cfg);
   let msg = buildMessage(kept, mopts, cfg);
@@ -412,7 +443,7 @@ export function planDigest(user, candidates, topics, now, cfg = CONFIG, opts = {
     msg = buildMessage(kept, mopts, cfg);
   }
   const times = parseList(user.digest_times, cfg.default_times);
-  return { ...msg, cut: cut.length, nextAt: nextSlot(now, tz, times) };
+  return { ...msg, cut: cut.length, nextAt: nextSlot(now, tz, times), lang: chosen.lang, fallback: chosen.fallback };
 }
 
 
@@ -487,11 +518,11 @@ export function nextSlot(now, tz, times) {
   return now + DAY;
 }
 
-// "today at 20:00" / "tomorrow at 09:00" for bot replies.
-export function describeSlot(ts, now, tz) {
+// "today at 20:00" / "tomorrow at 09:00" for bot replies, in the reader's language.
+export function describeSlot(ts, now, tz, lang = "en") {
   const a = localParts(now, tz), b = localParts(ts, tz);
   const same = a.year === b.year && a.month === b.month && a.day === b.day;
-  return `${same ? "today" : "tomorrow"} at ${hhmm(b)}`;
+  return t(lang, same ? "bot.today_at" : "bot.tomorrow_at", { time: hhmm(b) });
 }
 
 export function zoneLabel(tz) {

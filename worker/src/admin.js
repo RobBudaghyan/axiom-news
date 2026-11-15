@@ -1,6 +1,7 @@
 // Admin tab data: one D1 batch, shaped in JS. Aggregates run inside D1 (SQL), so the Worker's
 // CPU only shapes a few dozen rows. Only reached after the API checked the owner id.
 import { CONFIG, parseList } from "./digest.js";
+import { LANGS } from "./i18n.js";
 
 const H = 3600, DAY = 86400;
 export const D1_FREE = { rows_read: 5_000_000, rows_written: 100_000 };   // per day, reset 00:00 UTC
@@ -35,7 +36,7 @@ export function adminStatements(now) {
     { sql: RUN_STATS_SQL, params: [now - 7 * DAY] },
     { sql: MODELS_SQL, params: [now - DAY, now - 7 * DAY] },
     { sql: "SELECT key, value FROM meta WHERE key IN ('feed_health', 'last_alert_at', 'last_alert_text', 'd1_worker')", params: [] },
-    { sql: "SELECT id, first_name, timezone, digest_times, paused, blocked, last_digest_at, next_digest_at, created_at " +
+    { sql: "SELECT id, first_name, timezone, digest_times, paused, blocked, last_digest_at, next_digest_at, created_at, lang " +
            "FROM users ORDER BY created_at, id LIMIT 200", params: [] },
     { sql: "SELECT at, component, message FROM errors ORDER BY at DESC, id DESC LIMIT 50", params: [] },
     { sql: "SELECT sum(d1_rows_read) AS r, sum(d1_rows_written) AS w, count(*) AS runs FROM job_runs WHERE started_at >= ?1",
@@ -46,7 +47,37 @@ export function adminStatements(now) {
     { sql: "SELECT x.user_id, count(*) AS stories, count(DISTINCT x.sent_at) AS digests FROM sent x " +
            "JOIN stories s ON s.id = x.story_id WHERE x.sent_at >= ?1 AND s.merged_into IS NULL GROUP BY x.user_id",
       params: [now - DAY] },
+    // Step 9, per reader language over the last 24 h: readers, stories translated (and rejected by
+    // the checks), the translation calls and tokens, and digests that went out in English instead.
+    { sql: "SELECT lang, count(*) AS users, sum(paused = 0 AND blocked = 0) AS active FROM users GROUP BY lang", params: [] },
+    { sql: "SELECT lang, sum(ok = 1) AS ok, sum(ok = 0) AS rejected FROM story_translations WHERE created_at >= ?1 " +
+           "GROUP BY lang", params: [now - DAY] },
+    { sql: "SELECT substr(kind, 11) AS lang, count(*) AS calls, sum(ok) AS ok, sum(input_tokens) AS input_tokens, " +
+           "sum(output_tokens) AS output_tokens FROM ai_calls WHERE at >= ?1 AND kind LIKE 'translate\\_%' ESCAPE '\\' " +
+           "GROUP BY kind", params: [now - DAY] },
+    { sql: "SELECT message FROM errors WHERE component = 'digest' AND at >= ?1 AND message LIKE 'language fallback%'",
+      params: [now - DAY] },
   ];
+}
+
+// Step 9: one row per language that is enabled or has any reader or activity in the last 24 h.
+export function languageReport(readers = [], translated = [], calls = [], fallbacks = []) {
+  const by = (rows) => new Map(rows.map((r) => [r.lang, r]));
+  const R = by(readers), T = by(translated), C = by(calls);
+  const fb = new Map();
+  for (const { message } of fallbacks) {
+    const m = /^language fallback \(([a-z]+)\)/.exec(message ?? "");
+    if (m) fb.set(m[1], (fb.get(m[1]) ?? 0) + 1);
+  }
+  const codes = [...new Set([...LANGS.enabled, ...R.keys(), ...T.keys(), ...C.keys(), ...fb.keys()])];
+  return codes.filter((c) => c).map((code) => ({
+    code, name: LANGS.english_names?.[code] ?? code, enabled: LANGS.enabled.includes(code),
+    users: num(R.get(code)?.users), active: num(R.get(code)?.active),
+    translated_24h: num(T.get(code)?.ok), rejected_24h: num(T.get(code)?.rejected),
+    calls_24h: num(C.get(code)?.calls), failed_calls_24h: num(C.get(code)?.calls) - num(C.get(code)?.ok),
+    input_tokens_24h: num(C.get(code)?.input_tokens), output_tokens_24h: num(C.get(code)?.output_tokens),
+    fallbacks_24h: fb.get(code) ?? 0,
+  }));
 }
 
 const num = (v) => Number(v ?? 0);
@@ -78,7 +109,8 @@ export function feedReport(health, now, cfg = CONFIG) {
 }
 
 export function shapeAdmin(rows, now, cfg = CONFIG) {
-  const [[last], [lastOk], [s24], [s7], models, metaRows, users, errors, [jobD1], sizes = []] = rows;
+  const [[last], [lastOk], [s24], [s7], models, metaRows, users, errors, [jobD1], sizes = [],
+         readers = [], translated = [], trCalls = [], fallbacks = []] = rows;
   const sizeOf = new Map(sizes.map((r) => [r.user_id, r]));
   const meta = Object.fromEntries(metaRows.map((r) => [r.key, r.value]));
 
@@ -102,7 +134,7 @@ export function shapeAdmin(rows, now, cfg = CONFIG) {
 
   const list = users.map((u) => ({
     id: u.id, name: u.first_name || "(no name)", timezone: u.timezone, times: parseList(u.digest_times),
-    paused: !!u.paused, blocked: !!u.blocked, last_digest_at: u.last_digest_at ?? null,
+    paused: !!u.paused, blocked: !!u.blocked, last_digest_at: u.last_digest_at ?? null, lang: u.lang ?? "en",
     next_digest_at: u.next_digest_at ?? null,
     ...(() => {   // Step 8: average digest size in the last 24 h (digests with stories)
       const z = sizeOf.get(u.id);
@@ -140,6 +172,7 @@ export function shapeAdmin(rows, now, cfg = CONFIG) {
       blocked: list.filter((u) => u.blocked).length,
       list,
     },
+    languages: languageReport(readers, translated, trCalls, fallbacks),
     errors: errors.map((e) => ({ at: e.at, component: e.component, message: String(e.message).slice(0, 400) })),
     d1: {
       day_start: today * DAY, job, worker,

@@ -382,7 +382,7 @@ describe("bot: Open settings button", () => {
       assert.deepEqual(c.body.reply_markup, { inline_keyboard: [[{ text: "Open settings", web_app: { url: "https://w.test/app/" } }]] });
     }
     assert.match(fetchMock.calls[0].body.text, /Tap Open settings/);
-    assert.match(fetchMock.calls[1].body.text, /^Choose your topics and when your digests arrive/);
+    assert.match(fetchMock.calls[1].body.text, /^Choose your topics, language and when your digests arrive/);
     assert.doesNotMatch(fetchMock.calls.map((c) => c.body.text).join(), /[—–]/);
   });
 

@@ -1,0 +1,3616 @@
+{
+"_comment": "Writes tests/fixtures/eligible_cases.json: 300 generated stories and whether each could reach a\ndigest (the two-score rule for a reader who follows every topic), with the digest settings used.\nBoth test suites check it: tests/test_translate.py (job/translate.py: the Python rule and its\nSQL) and worker/test/i18n.test.mjs (worker/src/digest.js qualifies()), so the job never\ntranslates a different set of stories than the Worker can pick. Re-run only to change the cases.",
+"cfg": {
+"editorial_bar": 7,
+"topic_bar": 6,
+"topic_needs_boost": true,
+"topic_boost_max": {
+"politics": 0,
+"wars_conflicts": 0,
+"iran_war": 1,
+"ukraine_war": 1,
+"armenia": 2,
+"russia": 2
+},
+"unedited_offset": 2
+},
+"tags": [
+"politics",
+"wars_conflicts",
+"armenia",
+"russia",
+"iran_war",
+"ukraine_war"
+],
+"cases": [
+{
+"id": 1,
+"topics": [
+"armenia",
+"wars_conflicts"
+],
+"importance": 10,
+"final_score": 2,
+"topic_score": 2,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 2,
+"topics": [
+"armenia"
+],
+"importance": 9,
+"final_score": 8,
+"topic_score": 7,
+"main_topic": "armenia",
+"eligible": true
+},
+{
+"id": 3,
+"topics": [
+"ukraine_war",
+"russia"
+],
+"importance": 4,
+"final_score": 2,
+"topic_score": null,
+"main_topic": "ukraine_war",
+"eligible": false
+},
+{
+"id": 4,
+"topics": [
+"politics",
+"russia",
+"ukraine_war"
+],
+"importance": 4,
+"final_score": 4,
+"topic_score": 4,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 5,
+"topics": [
+"russia"
+],
+"importance": 3,
+"final_score": 4,
+"topic_score": 4,
+"main_topic": "russia",
+"eligible": false
+},
+{
+"id": 6,
+"topics": [
+"russia"
+],
+"importance": 9,
+"final_score": 7,
+"topic_score": null,
+"main_topic": "russia",
+"eligible": true
+},
+{
+"id": 7,
+"topics": [
+"iran_war"
+],
+"importance": 4,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 8,
+"topics": [
+"wars_conflicts"
+],
+"importance": 5,
+"final_score": 5,
+"topic_score": null,
+"main_topic": "wars_conflicts",
+"eligible": false
+},
+{
+"id": 9,
+"topics": [
+"iran_war"
+],
+"importance": 10,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 10,
+"topics": [
+"russia"
+],
+"importance": 9,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 11,
+"topics": [
+"ukraine_war"
+],
+"importance": 3,
+"final_score": 9,
+"topic_score": null,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 12,
+"topics": [
+"ukraine_war",
+"iran_war",
+"wars_conflicts"
+],
+"importance": 4,
+"final_score": 4,
+"topic_score": 7,
+"main_topic": "ukraine_war",
+"eligible": false
+},
+{
+"id": 13,
+"topics": [
+"wars_conflicts",
+"ukraine_war"
+],
+"importance": 4,
+"final_score": 9,
+"topic_score": 8,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 14,
+"topics": [
+"iran_war"
+],
+"importance": 3,
+"final_score": 5,
+"topic_score": 7,
+"main_topic": "iran_war",
+"eligible": true
+},
+{
+"id": 15,
+"topics": [
+"armenia",
+"politics",
+"russia"
+],
+"importance": 6,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 16,
+"topics": [
+"armenia",
+"politics"
+],
+"importance": 3,
+"final_score": 4,
+"topic_score": 4,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 17,
+"topics": [
+"russia",
+"ukraine_war",
+"armenia"
+],
+"importance": 6,
+"final_score": 3,
+"topic_score": 3,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 18,
+"topics": [
+"iran_war",
+"armenia"
+],
+"importance": 5,
+"final_score": 8,
+"topic_score": 7,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 19,
+"topics": [
+"politics",
+"ukraine_war"
+],
+"importance": 5,
+"final_score": 2,
+"topic_score": 2,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 20,
+"topics": [
+"sports"
+],
+"importance": 10,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 21,
+"topics": [
+"armenia",
+"iran_war"
+],
+"importance": 8,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 22,
+"topics": [
+"iran_war",
+"armenia"
+],
+"importance": 4,
+"final_score": 2,
+"topic_score": 1,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 23,
+"topics": [
+"wars_conflicts",
+"iran_war"
+],
+"importance": 10,
+"final_score": 6,
+"topic_score": 6,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 24,
+"topics": [
+"armenia"
+],
+"importance": 4,
+"final_score": 8,
+"topic_score": null,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 25,
+"topics": [
+"politics"
+],
+"importance": 9,
+"final_score": 3,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 26,
+"topics": [
+"russia",
+"iran_war",
+"armenia"
+],
+"importance": 9,
+"final_score": 8,
+"topic_score": null,
+"main_topic": "russia",
+"eligible": true
+},
+{
+"id": 27,
+"topics": [
+"iran_war",
+"ukraine_war",
+"politics"
+],
+"importance": 6,
+"final_score": 9,
+"topic_score": 10,
+"main_topic": "iran_war",
+"eligible": true
+},
+{
+"id": 28,
+"topics": [
+"politics"
+],
+"importance": 3,
+"final_score": 7,
+"topic_score": 9,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 29,
+"topics": [
+"armenia"
+],
+"importance": 10,
+"final_score": 3,
+"topic_score": 3,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 30,
+"topics": [
+"iran_war"
+],
+"importance": 9,
+"final_score": 9,
+"topic_score": null,
+"main_topic": "iran_war",
+"eligible": true
+},
+{
+"id": 31,
+"topics": [
+"politics"
+],
+"importance": 4,
+"final_score": 3,
+"topic_score": null,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 32,
+"topics": [
+"iran_war",
+"russia"
+],
+"importance": 8,
+"final_score": 8,
+"topic_score": 8,
+"main_topic": "iran_war",
+"eligible": true
+},
+{
+"id": 33,
+"topics": [
+"politics",
+"russia"
+],
+"importance": 5,
+"final_score": 7,
+"topic_score": 9,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 34,
+"topics": [
+"ukraine_war",
+"wars_conflicts"
+],
+"importance": 4,
+"final_score": 7,
+"topic_score": 7,
+"main_topic": "wars_conflicts",
+"eligible": true
+},
+{
+"id": 35,
+"topics": [
+"politics"
+],
+"importance": 8,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 36,
+"topics": [
+"russia"
+],
+"importance": 6,
+"final_score": 8,
+"topic_score": 7,
+"main_topic": "russia",
+"eligible": true
+},
+{
+"id": 37,
+"topics": [
+"sports"
+],
+"importance": 7,
+"final_score": 8,
+"topic_score": 8,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 38,
+"topics": [
+"politics"
+],
+"importance": 10,
+"final_score": 8,
+"topic_score": 8,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 39,
+"topics": [
+"wars_conflicts",
+"politics",
+"armenia"
+],
+"importance": 9,
+"final_score": 2,
+"topic_score": 2,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 40,
+"topics": [
+"politics",
+"ukraine_war"
+],
+"importance": 10,
+"final_score": 5,
+"topic_score": 7,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 41,
+"topics": [
+"russia",
+"wars_conflicts"
+],
+"importance": 7,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 42,
+"topics": [
+"iran_war",
+"ukraine_war"
+],
+"importance": 9,
+"final_score": 7,
+"topic_score": 7,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 43,
+"topics": [
+"wars_conflicts"
+],
+"importance": 8,
+"final_score": 5,
+"topic_score": 5,
+"main_topic": "wars_conflicts",
+"eligible": false
+},
+{
+"id": 44,
+"topics": [
+"ukraine_war"
+],
+"importance": 8,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 45,
+"topics": [
+"iran_war",
+"russia",
+"wars_conflicts"
+],
+"importance": 9,
+"final_score": 8,
+"topic_score": 8,
+"main_topic": "iran_war",
+"eligible": true
+},
+{
+"id": 46,
+"topics": [
+"armenia",
+"iran_war",
+"politics"
+],
+"importance": 6,
+"final_score": 7,
+"topic_score": 8,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 47,
+"topics": [
+"armenia"
+],
+"importance": 4,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 48,
+"topics": [
+"ukraine_war"
+],
+"importance": 9,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 49,
+"topics": [
+"russia",
+"iran_war"
+],
+"importance": 8,
+"final_score": 8,
+"topic_score": 10,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 50,
+"topics": [
+"armenia"
+],
+"importance": 5,
+"final_score": 6,
+"topic_score": 9,
+"main_topic": "armenia",
+"eligible": true
+},
+{
+"id": 51,
+"topics": [
+"sports"
+],
+"importance": 7,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 52,
+"topics": [
+"russia",
+"politics",
+"armenia"
+],
+"importance": 10,
+"final_score": 4,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 53,
+"topics": [
+"wars_conflicts"
+],
+"importance": 8,
+"final_score": 5,
+"topic_score": null,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 54,
+"topics": [
+"iran_war"
+],
+"importance": 5,
+"final_score": 4,
+"topic_score": 4,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 55,
+"topics": [
+"politics",
+"russia",
+"wars_conflicts"
+],
+"importance": 9,
+"final_score": 5,
+"topic_score": 8,
+"main_topic": "russia",
+"eligible": true
+},
+{
+"id": 56,
+"topics": [
+"ukraine_war"
+],
+"importance": 8,
+"final_score": 9,
+"topic_score": 10,
+"main_topic": "ukraine_war",
+"eligible": true
+},
+{
+"id": 57,
+"topics": [
+"armenia"
+],
+"importance": 6,
+"final_score": 6,
+"topic_score": 8,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 58,
+"topics": [
+"iran_war"
+],
+"importance": 8,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 59,
+"topics": [
+"russia"
+],
+"importance": 3,
+"final_score": 8,
+"topic_score": null,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 60,
+"topics": [
+"armenia",
+"wars_conflicts",
+"iran_war"
+],
+"importance": 3,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 61,
+"topics": [
+"iran_war",
+"wars_conflicts",
+"armenia"
+],
+"importance": 9,
+"final_score": 4,
+"topic_score": 5,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 62,
+"topics": [
+"wars_conflicts",
+"russia"
+],
+"importance": 5,
+"final_score": 7,
+"topic_score": 7,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 63,
+"topics": [
+"ukraine_war",
+"wars_conflicts",
+"russia"
+],
+"importance": 3,
+"final_score": 8,
+"topic_score": null,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 64,
+"topics": [
+"wars_conflicts",
+"armenia"
+],
+"importance": 10,
+"final_score": 6,
+"topic_score": 6,
+"main_topic": "wars_conflicts",
+"eligible": false
+},
+{
+"id": 65,
+"topics": [
+"armenia",
+"iran_war"
+],
+"importance": 10,
+"final_score": 5,
+"topic_score": 5,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 66,
+"topics": [
+"wars_conflicts"
+],
+"importance": 6,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 67,
+"topics": [
+"armenia"
+],
+"importance": 9,
+"final_score": 4,
+"topic_score": 4,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 68,
+"topics": [
+"ukraine_war",
+"armenia"
+],
+"importance": 5,
+"final_score": 5,
+"topic_score": 5,
+"main_topic": "ukraine_war",
+"eligible": false
+},
+{
+"id": 69,
+"topics": [
+"politics"
+],
+"importance": 6,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 70,
+"topics": [
+"sports"
+],
+"importance": 4,
+"final_score": 7,
+"topic_score": 10,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 71,
+"topics": [
+"ukraine_war",
+"russia"
+],
+"importance": 9,
+"final_score": 2,
+"topic_score": null,
+"main_topic": "russia",
+"eligible": false
+},
+{
+"id": 72,
+"topics": [
+"wars_conflicts",
+"armenia",
+"russia"
+],
+"importance": 5,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 73,
+"topics": [
+"armenia",
+"russia"
+],
+"importance": 4,
+"final_score": 4,
+"topic_score": 7,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 74,
+"topics": [
+"ukraine_war",
+"wars_conflicts"
+],
+"importance": 4,
+"final_score": 6,
+"topic_score": 8,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 75,
+"topics": [
+"iran_war",
+"wars_conflicts"
+],
+"importance": 4,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 76,
+"topics": [
+"armenia",
+"russia",
+"iran_war"
+],
+"importance": 7,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 77,
+"topics": [
+"armenia",
+"wars_conflicts"
+],
+"importance": 3,
+"final_score": 9,
+"topic_score": 10,
+"main_topic": "wars_conflicts",
+"eligible": true
+},
+{
+"id": 78,
+"topics": [
+"politics",
+"iran_war",
+"ukraine_war"
+],
+"importance": 4,
+"final_score": 9,
+"topic_score": 9,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 79,
+"topics": [
+"ukraine_war",
+"wars_conflicts"
+],
+"importance": 7,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 80,
+"topics": [
+"russia",
+"wars_conflicts",
+"iran_war"
+],
+"importance": 8,
+"final_score": 4,
+"topic_score": 3,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 81,
+"topics": [
+"russia",
+"politics",
+"ukraine_war"
+],
+"importance": 4,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 82,
+"topics": [
+"armenia",
+"politics",
+"russia"
+],
+"importance": 5,
+"final_score": 2,
+"topic_score": 5,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 83,
+"topics": [
+"ukraine_war",
+"russia"
+],
+"importance": 7,
+"final_score": 8,
+"topic_score": 8,
+"main_topic": "ukraine_war",
+"eligible": true
+},
+{
+"id": 84,
+"topics": [
+"politics",
+"iran_war",
+"armenia"
+],
+"importance": 8,
+"final_score": 8,
+"topic_score": null,
+"main_topic": "politics",
+"eligible": true
+},
+{
+"id": 85,
+"topics": [
+"iran_war",
+"armenia"
+],
+"importance": 8,
+"final_score": 5,
+"topic_score": 5,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 86,
+"topics": [
+"armenia"
+],
+"importance": 7,
+"final_score": 4,
+"topic_score": 7,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 87,
+"topics": [
+"russia",
+"ukraine_war",
+"politics"
+],
+"importance": 9,
+"final_score": 4,
+"topic_score": 6,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 88,
+"topics": [
+"wars_conflicts"
+],
+"importance": 4,
+"final_score": 2,
+"topic_score": 2,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 89,
+"topics": [
+"armenia",
+"politics",
+"russia"
+],
+"importance": 5,
+"final_score": 4,
+"topic_score": 6,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 90,
+"topics": [
+"politics",
+"ukraine_war"
+],
+"importance": 6,
+"final_score": 2,
+"topic_score": 3,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 91,
+"topics": [
+"ukraine_war",
+"wars_conflicts",
+"russia"
+],
+"importance": 10,
+"final_score": 9,
+"topic_score": 10,
+"main_topic": "russia",
+"eligible": true
+},
+{
+"id": 92,
+"topics": [
+"politics",
+"armenia",
+"iran_war"
+],
+"importance": 9,
+"final_score": 2,
+"topic_score": 2,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 93,
+"topics": [
+"politics",
+"iran_war"
+],
+"importance": 9,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 94,
+"topics": [
+"wars_conflicts",
+"ukraine_war"
+],
+"importance": 4,
+"final_score": 5,
+"topic_score": 5,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 95,
+"topics": [
+"armenia"
+],
+"importance": 6,
+"final_score": 9,
+"topic_score": 10,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 96,
+"topics": [
+"ukraine_war",
+"politics",
+"russia"
+],
+"importance": 8,
+"final_score": 4,
+"topic_score": 5,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 97,
+"topics": [
+"armenia"
+],
+"importance": 3,
+"final_score": 9,
+"topic_score": null,
+"main_topic": "armenia",
+"eligible": true
+},
+{
+"id": 98,
+"topics": [
+"politics"
+],
+"importance": 5,
+"final_score": 2,
+"topic_score": 1,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 99,
+"topics": [
+"ukraine_war",
+"armenia",
+"russia"
+],
+"importance": 9,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 100,
+"topics": [
+"ukraine_war"
+],
+"importance": 7,
+"final_score": 8,
+"topic_score": null,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 101,
+"topics": [
+"sports"
+],
+"importance": 7,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 102,
+"topics": [
+"wars_conflicts"
+],
+"importance": 8,
+"final_score": 7,
+"topic_score": 6,
+"main_topic": "wars_conflicts",
+"eligible": true
+},
+{
+"id": 103,
+"topics": [
+"wars_conflicts",
+"ukraine_war"
+],
+"importance": 4,
+"final_score": 5,
+"topic_score": 4,
+"main_topic": "ukraine_war",
+"eligible": false
+},
+{
+"id": 104,
+"topics": [
+"ukraine_war",
+"politics"
+],
+"importance": 6,
+"final_score": 7,
+"topic_score": null,
+"main_topic": "ukraine_war",
+"eligible": true
+},
+{
+"id": 105,
+"topics": [
+"armenia",
+"iran_war",
+"politics"
+],
+"importance": 6,
+"final_score": 6,
+"topic_score": 6,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 106,
+"topics": [
+"wars_conflicts"
+],
+"importance": 5,
+"final_score": 5,
+"topic_score": null,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 107,
+"topics": [
+"armenia",
+"iran_war",
+"ukraine_war"
+],
+"importance": 7,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 108,
+"topics": [
+"wars_conflicts",
+"politics"
+],
+"importance": 8,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 109,
+"topics": [
+"armenia"
+],
+"importance": 7,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 110,
+"topics": [
+"wars_conflicts",
+"ukraine_war",
+"politics"
+],
+"importance": 8,
+"final_score": 9,
+"topic_score": null,
+"main_topic": "wars_conflicts",
+"eligible": true
+},
+{
+"id": 111,
+"topics": [
+"wars_conflicts"
+],
+"importance": 10,
+"final_score": 2,
+"topic_score": 5,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 112,
+"topics": [
+"ukraine_war",
+"iran_war"
+],
+"importance": 10,
+"final_score": 7,
+"topic_score": 7,
+"main_topic": "iran_war",
+"eligible": true
+},
+{
+"id": 113,
+"topics": [
+"politics",
+"russia"
+],
+"importance": 10,
+"final_score": 9,
+"topic_score": 10,
+"main_topic": "russia",
+"eligible": true
+},
+{
+"id": 114,
+"topics": [
+"ukraine_war",
+"wars_conflicts"
+],
+"importance": 5,
+"final_score": 5,
+"topic_score": 5,
+"main_topic": "ukraine_war",
+"eligible": false
+},
+{
+"id": 115,
+"topics": [
+"politics",
+"armenia"
+],
+"importance": 10,
+"final_score": 8,
+"topic_score": 8,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 116,
+"topics": [
+"wars_conflicts",
+"armenia"
+],
+"importance": 8,
+"final_score": 6,
+"topic_score": 9,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 117,
+"topics": [
+"politics"
+],
+"importance": 8,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 118,
+"topics": [
+"politics",
+"russia",
+"iran_war"
+],
+"importance": 8,
+"final_score": 5,
+"topic_score": 8,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 119,
+"topics": [
+"russia",
+"armenia",
+"politics"
+],
+"importance": 7,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 120,
+"topics": [
+"armenia"
+],
+"importance": 4,
+"final_score": 6,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 121,
+"topics": [
+"russia",
+"politics",
+"ukraine_war"
+],
+"importance": 7,
+"final_score": 9,
+"topic_score": null,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 122,
+"topics": [
+"ukraine_war"
+],
+"importance": 3,
+"final_score": 7,
+"topic_score": 9,
+"main_topic": "ukraine_war",
+"eligible": true
+},
+{
+"id": 123,
+"topics": [
+"russia",
+"armenia"
+],
+"importance": 9,
+"final_score": 4,
+"topic_score": 3,
+"main_topic": "russia",
+"eligible": false
+},
+{
+"id": 124,
+"topics": [
+"politics",
+"armenia"
+],
+"importance": 9,
+"final_score": 3,
+"topic_score": 5,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 125,
+"topics": [
+"armenia"
+],
+"importance": 8,
+"final_score": 6,
+"topic_score": 5,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 126,
+"topics": [
+"iran_war"
+],
+"importance": 4,
+"final_score": 5,
+"topic_score": 5,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 127,
+"topics": [
+"armenia",
+"russia"
+],
+"importance": 8,
+"final_score": 9,
+"topic_score": 10,
+"main_topic": "russia",
+"eligible": true
+},
+{
+"id": 128,
+"topics": [
+"iran_war",
+"armenia"
+],
+"importance": 10,
+"final_score": 2,
+"topic_score": 2,
+"main_topic": "iran_war",
+"eligible": false
+},
+{
+"id": 129,
+"topics": [
+"politics"
+],
+"importance": 6,
+"final_score": 9,
+"topic_score": 9,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 130,
+"topics": [
+"armenia",
+"politics",
+"wars_conflicts"
+],
+"importance": 3,
+"final_score": 4,
+"topic_score": null,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 131,
+"topics": [
+"sports"
+],
+"importance": 9,
+"final_score": 3,
+"topic_score": 2,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 132,
+"topics": [
+"armenia"
+],
+"importance": 9,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 133,
+"topics": [
+"wars_conflicts",
+"iran_war"
+],
+"importance": 7,
+"final_score": 7,
+"topic_score": 8,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 134,
+"topics": [
+"politics"
+],
+"importance": 3,
+"final_score": 5,
+"topic_score": 4,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 135,
+"topics": [
+"wars_conflicts"
+],
+"importance": 3,
+"final_score": 4,
+"topic_score": 7,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 136,
+"topics": [
+"ukraine_war",
+"armenia"
+],
+"importance": 6,
+"final_score": 7,
+"topic_score": 7,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 137,
+"topics": [
+"armenia",
+"politics",
+"iran_war"
+],
+"importance": 3,
+"final_score": 9,
+"topic_score": null,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 138,
+"topics": [
+"ukraine_war"
+],
+"importance": 4,
+"final_score": 5,
+"topic_score": null,
+"main_topic": "ukraine_war",
+"eligible": false
+},
+{
+"id": 139,
+"topics": [
+"wars_conflicts",
+"iran_war",
+"politics"
+],
+"importance": 7,
+"final_score": 6,
+"topic_score": 6,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 140,
+"topics": [
+"iran_war",
+"politics",
+"wars_conflicts"
+],
+"importance": 5,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 141,
+"topics": [
+"politics",
+"iran_war"
+],
+"importance": 6,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 142,
+"topics": [
+"armenia",
+"russia"
+],
+"importance": 3,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 143,
+"topics": [
+"politics"
+],
+"importance": 7,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 144,
+"topics": [
+"russia",
+"wars_conflicts",
+"ukraine_war"
+],
+"importance": 3,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 145,
+"topics": [
+"russia"
+],
+"importance": 5,
+"final_score": 2,
+"topic_score": null,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 146,
+"topics": [
+"iran_war"
+],
+"importance": 4,
+"final_score": 3,
+"topic_score": 3,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 147,
+"topics": [
+"politics",
+"wars_conflicts",
+"armenia"
+],
+"importance": 8,
+"final_score": 4,
+"topic_score": 6,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 148,
+"topics": [
+"armenia"
+],
+"importance": 8,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 149,
+"topics": [
+"armenia"
+],
+"importance": 10,
+"final_score": 9,
+"topic_score": null,
+"main_topic": "armenia",
+"eligible": true
+},
+{
+"id": 150,
+"topics": [
+"iran_war",
+"wars_conflicts"
+],
+"importance": 10,
+"final_score": 2,
+"topic_score": 2,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 151,
+"topics": [
+"sports"
+],
+"importance": 3,
+"final_score": 8,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 152,
+"topics": [
+"wars_conflicts",
+"ukraine_war",
+"politics"
+],
+"importance": 6,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 153,
+"topics": [
+"politics"
+],
+"importance": 5,
+"final_score": 9,
+"topic_score": 10,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 154,
+"topics": [
+"politics",
+"ukraine_war",
+"russia"
+],
+"importance": 10,
+"final_score": 7,
+"topic_score": 10,
+"main_topic": "russia",
+"eligible": true
+},
+{
+"id": 155,
+"topics": [
+"ukraine_war",
+"armenia"
+],
+"importance": 10,
+"final_score": 8,
+"topic_score": 8,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 156,
+"topics": [
+"ukraine_war"
+],
+"importance": 4,
+"final_score": 8,
+"topic_score": 10,
+"main_topic": "ukraine_war",
+"eligible": true
+},
+{
+"id": 157,
+"topics": [
+"wars_conflicts",
+"ukraine_war",
+"politics"
+],
+"importance": 7,
+"final_score": 7,
+"topic_score": 7,
+"main_topic": "ukraine_war",
+"eligible": true
+},
+{
+"id": 158,
+"topics": [
+"politics",
+"iran_war",
+"russia"
+],
+"importance": 9,
+"final_score": 2,
+"topic_score": 4,
+"main_topic": "iran_war",
+"eligible": false
+},
+{
+"id": 159,
+"topics": [
+"iran_war",
+"wars_conflicts",
+"politics"
+],
+"importance": 4,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 160,
+"topics": [
+"russia",
+"politics",
+"iran_war"
+],
+"importance": 7,
+"final_score": 3,
+"topic_score": 6,
+"main_topic": "russia",
+"eligible": false
+},
+{
+"id": 161,
+"topics": [
+"armenia",
+"politics"
+],
+"importance": 8,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 162,
+"topics": [
+"ukraine_war"
+],
+"importance": 6,
+"final_score": 6,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 163,
+"topics": [
+"politics",
+"russia",
+"iran_war"
+],
+"importance": 8,
+"final_score": 5,
+"topic_score": 6,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 164,
+"topics": [
+"iran_war",
+"ukraine_war"
+],
+"importance": 7,
+"final_score": 3,
+"topic_score": 2,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 165,
+"topics": [
+"iran_war",
+"wars_conflicts"
+],
+"importance": 5,
+"final_score": 7,
+"topic_score": 7,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 166,
+"topics": [
+"armenia",
+"politics"
+],
+"importance": 3,
+"final_score": 4,
+"topic_score": 4,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 167,
+"topics": [
+"russia"
+],
+"importance": 10,
+"final_score": 3,
+"topic_score": 6,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 168,
+"topics": [
+"ukraine_war"
+],
+"importance": 10,
+"final_score": 3,
+"topic_score": 6,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 169,
+"topics": [
+"ukraine_war",
+"wars_conflicts"
+],
+"importance": 5,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 170,
+"topics": [
+"armenia",
+"russia",
+"iran_war"
+],
+"importance": 9,
+"final_score": 7,
+"topic_score": 10,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 171,
+"topics": [
+"ukraine_war",
+"iran_war",
+"politics"
+],
+"importance": 10,
+"final_score": 8,
+"topic_score": 7,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 172,
+"topics": [
+"russia"
+],
+"importance": 8,
+"final_score": 2,
+"topic_score": 4,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 173,
+"topics": [
+"sports"
+],
+"importance": 6,
+"final_score": 5,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 174,
+"topics": [
+"politics",
+"armenia",
+"ukraine_war"
+],
+"importance": 10,
+"final_score": 3,
+"topic_score": 3,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 175,
+"topics": [
+"iran_war",
+"wars_conflicts"
+],
+"importance": 10,
+"final_score": 5,
+"topic_score": 4,
+"main_topic": "iran_war",
+"eligible": false
+},
+{
+"id": 176,
+"topics": [
+"russia",
+"wars_conflicts"
+],
+"importance": 4,
+"final_score": 5,
+"topic_score": 5,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 177,
+"topics": [
+"iran_war",
+"ukraine_war",
+"wars_conflicts"
+],
+"importance": 8,
+"final_score": 4,
+"topic_score": 3,
+"main_topic": "iran_war",
+"eligible": false
+},
+{
+"id": 178,
+"topics": [
+"iran_war",
+"armenia"
+],
+"importance": 5,
+"final_score": 5,
+"topic_score": 5,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 179,
+"topics": [
+"iran_war",
+"ukraine_war"
+],
+"importance": 8,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 180,
+"topics": [
+"politics",
+"wars_conflicts"
+],
+"importance": 9,
+"final_score": 3,
+"topic_score": 2,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 181,
+"topics": [
+"russia",
+"armenia",
+"politics"
+],
+"importance": 6,
+"final_score": 3,
+"topic_score": 2,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 182,
+"topics": [
+"iran_war",
+"armenia",
+"russia"
+],
+"importance": 4,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 183,
+"topics": [
+"russia",
+"iran_war"
+],
+"importance": 5,
+"final_score": 6,
+"topic_score": 9,
+"main_topic": "russia",
+"eligible": true
+},
+{
+"id": 184,
+"topics": [
+"politics"
+],
+"importance": 10,
+"final_score": 4,
+"topic_score": 3,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 185,
+"topics": [
+"iran_war"
+],
+"importance": 5,
+"final_score": 9,
+"topic_score": null,
+"main_topic": "iran_war",
+"eligible": true
+},
+{
+"id": 186,
+"topics": [
+"iran_war",
+"politics",
+"ukraine_war"
+],
+"importance": 10,
+"final_score": 6,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 187,
+"topics": [
+"politics",
+"ukraine_war",
+"armenia"
+],
+"importance": 5,
+"final_score": 4,
+"topic_score": 7,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 188,
+"topics": [
+"politics",
+"armenia",
+"ukraine_war"
+],
+"importance": 5,
+"final_score": 6,
+"topic_score": 6,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 189,
+"topics": [
+"politics",
+"armenia"
+],
+"importance": 4,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 190,
+"topics": [
+"wars_conflicts",
+"armenia",
+"ukraine_war"
+],
+"importance": 10,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 191,
+"topics": [
+"ukraine_war"
+],
+"importance": 8,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 192,
+"topics": [
+"iran_war",
+"ukraine_war"
+],
+"importance": 5,
+"final_score": 6,
+"topic_score": null,
+"main_topic": "iran_war",
+"eligible": false
+},
+{
+"id": 193,
+"topics": [
+"ukraine_war",
+"armenia"
+],
+"importance": 10,
+"final_score": 3,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 194,
+"topics": [
+"wars_conflicts"
+],
+"importance": 4,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 195,
+"topics": [
+"russia",
+"armenia",
+"wars_conflicts"
+],
+"importance": 5,
+"final_score": 9,
+"topic_score": 9,
+"main_topic": "armenia",
+"eligible": true
+},
+{
+"id": 196,
+"topics": [
+"politics",
+"iran_war",
+"armenia"
+],
+"importance": 9,
+"final_score": 7,
+"topic_score": 9,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 197,
+"topics": [
+"russia"
+],
+"importance": 6,
+"final_score": 3,
+"topic_score": 2,
+"main_topic": "russia",
+"eligible": false
+},
+{
+"id": 198,
+"topics": [
+"armenia",
+"politics"
+],
+"importance": 6,
+"final_score": 3,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 199,
+"topics": [
+"iran_war",
+"russia"
+],
+"importance": 5,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 200,
+"topics": [
+"russia"
+],
+"importance": 7,
+"final_score": 5,
+"topic_score": 5,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 201,
+"topics": [
+"politics",
+"russia",
+"iran_war"
+],
+"importance": 3,
+"final_score": 7,
+"topic_score": 8,
+"main_topic": "russia",
+"eligible": true
+},
+{
+"id": 202,
+"topics": [
+"russia",
+"armenia"
+],
+"importance": 7,
+"final_score": 7,
+"topic_score": 7,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 203,
+"topics": [
+"ukraine_war",
+"armenia",
+"politics"
+],
+"importance": 3,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 204,
+"topics": [
+"wars_conflicts"
+],
+"importance": 6,
+"final_score": 2,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 205,
+"topics": [
+"politics",
+"wars_conflicts",
+"ukraine_war"
+],
+"importance": 8,
+"final_score": 6,
+"topic_score": 5,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 206,
+"topics": [
+"iran_war",
+"wars_conflicts"
+],
+"importance": 6,
+"final_score": 8,
+"topic_score": null,
+"main_topic": "wars_conflicts",
+"eligible": true
+},
+{
+"id": 207,
+"topics": [
+"armenia",
+"iran_war",
+"politics"
+],
+"importance": 5,
+"final_score": 4,
+"topic_score": 7,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 208,
+"topics": [
+"ukraine_war",
+"armenia",
+"russia"
+],
+"importance": 5,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 209,
+"topics": [
+"armenia",
+"iran_war"
+],
+"importance": 6,
+"final_score": 9,
+"topic_score": 10,
+"main_topic": "iran_war",
+"eligible": true
+},
+{
+"id": 210,
+"topics": [
+"politics",
+"iran_war"
+],
+"importance": 5,
+"final_score": 8,
+"topic_score": 10,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 211,
+"topics": [
+"wars_conflicts"
+],
+"importance": 8,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 212,
+"topics": [
+"iran_war"
+],
+"importance": 4,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 213,
+"topics": [
+"iran_war"
+],
+"importance": 3,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 214,
+"topics": [
+"armenia",
+"politics"
+],
+"importance": 7,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 215,
+"topics": [
+"russia",
+"armenia"
+],
+"importance": 4,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 216,
+"topics": [
+"armenia",
+"ukraine_war",
+"iran_war"
+],
+"importance": 4,
+"final_score": 7,
+"topic_score": 7,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 217,
+"topics": [
+"politics",
+"armenia"
+],
+"importance": 8,
+"final_score": 6,
+"topic_score": 6,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 218,
+"topics": [
+"russia",
+"wars_conflicts",
+"iran_war"
+],
+"importance": 10,
+"final_score": 7,
+"topic_score": 8,
+"main_topic": "russia",
+"eligible": true
+},
+{
+"id": 219,
+"topics": [
+"wars_conflicts",
+"armenia",
+"iran_war"
+],
+"importance": 8,
+"final_score": 4,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 220,
+"topics": [
+"sports"
+],
+"importance": 4,
+"final_score": 7,
+"topic_score": 6,
+"main_topic": "sports",
+"eligible": false
+},
+{
+"id": 221,
+"topics": [
+"politics"
+],
+"importance": 4,
+"final_score": 2,
+"topic_score": 5,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 222,
+"topics": [
+"ukraine_war",
+"iran_war",
+"armenia"
+],
+"importance": 5,
+"final_score": 8,
+"topic_score": 10,
+"main_topic": "iran_war",
+"eligible": true
+},
+{
+"id": 223,
+"topics": [
+"russia"
+],
+"importance": 6,
+"final_score": 7,
+"topic_score": 7,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 224,
+"topics": [
+"politics",
+"wars_conflicts",
+"iran_war"
+],
+"importance": 8,
+"final_score": 7,
+"topic_score": 9,
+"main_topic": "iran_war",
+"eligible": true
+},
+{
+"id": 225,
+"topics": [
+"armenia"
+],
+"importance": 4,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 226,
+"topics": [
+"russia",
+"armenia",
+"wars_conflicts"
+],
+"importance": 3,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 227,
+"topics": [
+"armenia",
+"russia",
+"ukraine_war"
+],
+"importance": 10,
+"final_score": 2,
+"topic_score": 5,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 228,
+"topics": [
+"armenia",
+"ukraine_war"
+],
+"importance": 3,
+"final_score": 5,
+"topic_score": 4,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 229,
+"topics": [
+"armenia",
+"ukraine_war"
+],
+"importance": 7,
+"final_score": 3,
+"topic_score": 4,
+"main_topic": "ukraine_war",
+"eligible": false
+},
+{
+"id": 230,
+"topics": [
+"sports"
+],
+"importance": 10,
+"final_score": 7,
+"topic_score": 7,
+"main_topic": "sports",
+"eligible": false
+},
+{
+"id": 231,
+"topics": [
+"russia",
+"politics"
+],
+"importance": 6,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 232,
+"topics": [
+"iran_war",
+"politics"
+],
+"importance": 3,
+"final_score": 5,
+"topic_score": 6,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 233,
+"topics": [
+"russia"
+],
+"importance": 10,
+"final_score": 7,
+"topic_score": 9,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 234,
+"topics": [
+"ukraine_war",
+"iran_war"
+],
+"importance": 4,
+"final_score": 7,
+"topic_score": 8,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 235,
+"topics": [
+"ukraine_war",
+"wars_conflicts",
+"russia"
+],
+"importance": 3,
+"final_score": 7,
+"topic_score": 10,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 236,
+"topics": [
+"wars_conflicts"
+],
+"importance": 7,
+"final_score": 3,
+"topic_score": 4,
+"main_topic": "wars_conflicts",
+"eligible": false
+},
+{
+"id": 237,
+"topics": [
+"russia"
+],
+"importance": 5,
+"final_score": 6,
+"topic_score": 9,
+"main_topic": "russia",
+"eligible": true
+},
+{
+"id": 238,
+"topics": [
+"wars_conflicts",
+"ukraine_war"
+],
+"importance": 6,
+"final_score": 6,
+"topic_score": 6,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 239,
+"topics": [
+"russia"
+],
+"importance": 10,
+"final_score": 8,
+"topic_score": null,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 240,
+"topics": [
+"iran_war"
+],
+"importance": 10,
+"final_score": 5,
+"topic_score": 6,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 241,
+"topics": [
+"sports"
+],
+"importance": 7,
+"final_score": 5,
+"topic_score": 6,
+"main_topic": "sports",
+"eligible": false
+},
+{
+"id": 242,
+"topics": [
+"armenia"
+],
+"importance": 9,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 243,
+"topics": [
+"iran_war",
+"wars_conflicts",
+"ukraine_war"
+],
+"importance": 8,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 244,
+"topics": [
+"iran_war",
+"armenia",
+"politics"
+],
+"importance": 9,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 245,
+"topics": [
+"ukraine_war",
+"armenia"
+],
+"importance": 3,
+"final_score": 7,
+"topic_score": 6,
+"main_topic": "armenia",
+"eligible": true
+},
+{
+"id": 246,
+"topics": [
+"wars_conflicts",
+"iran_war",
+"ukraine_war"
+],
+"importance": 6,
+"final_score": 5,
+"topic_score": 5,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 247,
+"topics": [
+"iran_war",
+"russia"
+],
+"importance": 8,
+"final_score": 8,
+"topic_score": 7,
+"main_topic": "russia",
+"eligible": true
+},
+{
+"id": 248,
+"topics": [
+"iran_war",
+"politics"
+],
+"importance": 3,
+"final_score": 3,
+"topic_score": 2,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 249,
+"topics": [
+"armenia",
+"politics",
+"iran_war"
+],
+"importance": 5,
+"final_score": 3,
+"topic_score": null,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 250,
+"topics": [
+"ukraine_war",
+"politics",
+"russia"
+],
+"importance": 3,
+"final_score": 5,
+"topic_score": 4,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 251,
+"topics": [
+"politics",
+"iran_war"
+],
+"importance": 8,
+"final_score": 8,
+"topic_score": null,
+"main_topic": "iran_war",
+"eligible": true
+},
+{
+"id": 252,
+"topics": [
+"ukraine_war",
+"russia",
+"armenia"
+],
+"importance": 9,
+"final_score": 9,
+"topic_score": 10,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 253,
+"topics": [
+"politics",
+"wars_conflicts",
+"ukraine_war"
+],
+"importance": 7,
+"final_score": 3,
+"topic_score": 3,
+"main_topic": "wars_conflicts",
+"eligible": false
+},
+{
+"id": 254,
+"topics": [
+"politics"
+],
+"importance": 8,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 255,
+"topics": [
+"ukraine_war",
+"iran_war"
+],
+"importance": 8,
+"final_score": 6,
+"topic_score": 6,
+"main_topic": "iran_war",
+"eligible": false
+},
+{
+"id": 256,
+"topics": [
+"armenia",
+"wars_conflicts"
+],
+"importance": 10,
+"final_score": 2,
+"topic_score": 2,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 257,
+"topics": [
+"politics"
+],
+"importance": 8,
+"final_score": 9,
+"topic_score": 9,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 258,
+"topics": [
+"ukraine_war",
+"russia",
+"iran_war"
+],
+"importance": 7,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 259,
+"topics": [
+"iran_war",
+"armenia"
+],
+"importance": 10,
+"final_score": 4,
+"topic_score": 6,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 260,
+"topics": [
+"iran_war",
+"wars_conflicts"
+],
+"importance": 6,
+"final_score": 7,
+"topic_score": 6,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 261,
+"topics": [
+"politics",
+"iran_war",
+"ukraine_war"
+],
+"importance": 10,
+"final_score": 2,
+"topic_score": 3,
+"main_topic": "ukraine_war",
+"eligible": false
+},
+{
+"id": 262,
+"topics": [
+"iran_war",
+"armenia"
+],
+"importance": 9,
+"final_score": 7,
+"topic_score": 7,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 263,
+"topics": [
+"iran_war",
+"ukraine_war",
+"russia"
+],
+"importance": 4,
+"final_score": 6,
+"topic_score": null,
+"main_topic": "ukraine_war",
+"eligible": false
+},
+{
+"id": 264,
+"topics": [
+"armenia",
+"ukraine_war"
+],
+"importance": 3,
+"final_score": 9,
+"topic_score": 9,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 265,
+"topics": [
+"armenia",
+"politics"
+],
+"importance": 5,
+"final_score": 3,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 266,
+"topics": [
+"sports"
+],
+"importance": 3,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 267,
+"topics": [
+"armenia"
+],
+"importance": 4,
+"final_score": 9,
+"topic_score": null,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 268,
+"topics": [
+"armenia",
+"wars_conflicts",
+"ukraine_war"
+],
+"importance": 6,
+"final_score": 2,
+"topic_score": 5,
+"main_topic": "wars_conflicts",
+"eligible": false
+},
+{
+"id": 269,
+"topics": [
+"russia",
+"politics",
+"iran_war"
+],
+"importance": 4,
+"final_score": 9,
+"topic_score": null,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 270,
+"topics": [
+"ukraine_war",
+"russia"
+],
+"importance": 7,
+"final_score": 7,
+"topic_score": 7,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 271,
+"topics": [
+"politics",
+"armenia"
+],
+"importance": 10,
+"final_score": 8,
+"topic_score": 8,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 272,
+"topics": [
+"ukraine_war"
+],
+"importance": 7,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 273,
+"topics": [
+"politics",
+"ukraine_war",
+"russia"
+],
+"importance": 8,
+"final_score": 9,
+"topic_score": null,
+"main_topic": "russia",
+"eligible": true
+},
+{
+"id": 274,
+"topics": [
+"politics",
+"ukraine_war"
+],
+"importance": 10,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 275,
+"topics": [
+"iran_war",
+"russia"
+],
+"importance": 10,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 276,
+"topics": [
+"wars_conflicts",
+"ukraine_war",
+"russia"
+],
+"importance": 6,
+"final_score": 4,
+"topic_score": 7,
+"main_topic": "ukraine_war",
+"eligible": false
+},
+{
+"id": 277,
+"topics": [
+"politics",
+"russia",
+"ukraine_war"
+],
+"importance": 10,
+"final_score": 4,
+"topic_score": 3,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 278,
+"topics": [
+"armenia",
+"russia",
+"ukraine_war"
+],
+"importance": 9,
+"final_score": 8,
+"topic_score": 8,
+"main_topic": "ukraine_war",
+"eligible": true
+},
+{
+"id": 279,
+"topics": [
+"politics"
+],
+"importance": 9,
+"final_score": 9,
+"topic_score": 9,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 280,
+"topics": [
+"iran_war",
+"russia"
+],
+"importance": 10,
+"final_score": 7,
+"topic_score": 6,
+"main_topic": "iran_war",
+"eligible": true
+},
+{
+"id": 281,
+"topics": [
+"russia",
+"politics",
+"iran_war"
+],
+"importance": 3,
+"final_score": 6,
+"topic_score": 6,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 282,
+"topics": [
+"politics",
+"russia"
+],
+"importance": 7,
+"final_score": 6,
+"topic_score": 9,
+"main_topic": "russia",
+"eligible": true
+},
+{
+"id": 283,
+"topics": [
+"iran_war",
+"wars_conflicts"
+],
+"importance": 3,
+"final_score": 7,
+"topic_score": 7,
+"main_topic": "iran_war",
+"eligible": true
+},
+{
+"id": 284,
+"topics": [
+"ukraine_war",
+"armenia",
+"iran_war"
+],
+"importance": 3,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 285,
+"topics": [
+"russia",
+"wars_conflicts",
+"iran_war"
+],
+"importance": 7,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 286,
+"topics": [
+"ukraine_war",
+"wars_conflicts"
+],
+"importance": 7,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 287,
+"topics": [
+"ukraine_war",
+"wars_conflicts"
+],
+"importance": 8,
+"final_score": 2,
+"topic_score": 4,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 288,
+"topics": [
+"iran_war",
+"ukraine_war",
+"armenia"
+],
+"importance": 7,
+"final_score": 8,
+"topic_score": 10,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 289,
+"topics": [
+"wars_conflicts",
+"politics"
+],
+"importance": 8,
+"final_score": 5,
+"topic_score": 5,
+"main_topic": "wars_conflicts",
+"eligible": false
+},
+{
+"id": 290,
+"topics": [
+"wars_conflicts",
+"russia",
+"iran_war"
+],
+"importance": 9,
+"final_score": 6,
+"topic_score": 9,
+"main_topic": "wars_conflicts",
+"eligible": false
+},
+{
+"id": 291,
+"topics": [
+"ukraine_war"
+],
+"importance": 4,
+"final_score": 3,
+"topic_score": 6,
+"main_topic": "ukraine_war",
+"eligible": false
+},
+{
+"id": 292,
+"topics": [
+"russia"
+],
+"importance": 7,
+"final_score": 6,
+"topic_score": 6,
+"main_topic": "unknown_tag",
+"eligible": false
+},
+{
+"id": 293,
+"topics": [
+"politics",
+"ukraine_war"
+],
+"importance": 5,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 294,
+"topics": [
+"ukraine_war",
+"iran_war"
+],
+"importance": 4,
+"final_score": 3,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 295,
+"topics": [
+"russia",
+"iran_war"
+],
+"importance": 9,
+"final_score": 9,
+"topic_score": 10,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 296,
+"topics": [
+"russia"
+],
+"importance": 5,
+"final_score": 9,
+"topic_score": 9,
+"main_topic": "unknown_tag",
+"eligible": true
+},
+{
+"id": 297,
+"topics": [
+"armenia",
+"wars_conflicts"
+],
+"importance": 8,
+"final_score": 4,
+"topic_score": 5,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 298,
+"topics": [
+"russia",
+"iran_war",
+"wars_conflicts"
+],
+"importance": 4,
+"final_score": 8,
+"topic_score": 8,
+"main_topic": "russia",
+"eligible": true
+},
+{
+"id": 299,
+"topics": [
+"sports"
+],
+"importance": 9,
+"final_score": 4,
+"topic_score": 4,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 300,
+"topics": [
+"iran_war"
+],
+"importance": 8,
+"final_score": 9,
+"topic_score": 10,
+"main_topic": "unknown_tag",
+"eligible": true
+}
+]
+}

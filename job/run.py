@@ -20,7 +20,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 from typing import Callable
 
-from job import ai, dupes, editor
+from job import ai, dupes, editor, translate
 from job.config import Prompt, Settings, load_env, load_prompt, load_sources, load_topics
 from job.d1 import D1, in_list_statements, insert_statements
 from job.fetch import (Entry, FeedResult, candidates, feed_caps, feed_health, fetch_all, select_new,
@@ -67,6 +67,7 @@ class RunStats:
     items_left_pending: int = 0
     providers: list[str] = field(default_factory=list)
     editor: "editor.EditorResult | None" = None
+    translate: "translate.TranslateResult | None" = None
     ai_calls: int = 0
     input_tokens: int = 0
     output_tokens: int = 0
@@ -119,7 +120,7 @@ class Job:
                  prompt: Prompt | None = None,
                  fetcher: Callable[[list[dict], int], list[FeedResult]] | None = None,
                  clock: Callable[[], float] = time.time, log: Callable[[str], None] = print,
-                 debug_dir: str | None = None, editor_enabled: bool = True):
+                 debug_dir: str | None = None, editor_enabled: bool = True, translate_enabled: bool = True):
         self.db = db
         self.plans = plans
         self.s = settings or Settings()
@@ -135,6 +136,7 @@ class Job:
         self.cap_cut: dict[str, int] = {}
         self.debug_dir = Path(debug_dir) if debug_dir else None   # saves raw prompts/answers
         self.editor_enabled = editor_enabled   # tests of the first pass alone switch it off
+        self.translate_enabled = translate_enabled
 
     # ------------------------------------------------------------ steps
 
@@ -427,6 +429,26 @@ class Job:
         self.log(res.line())
         return res
 
+    # ------------------------------------------------------------ translation pass
+
+    def run_translate(self, now: int, stats: RunStats) -> "translate.TranslateResult":
+        """Step 9 (job/translate.py): reader-language headlines and descriptions. Never fails the
+        run: stories without a translation are retried next hour, and their digests go out in
+        English meanwhile."""
+        tr = translate.Translator(
+            self.db, self.plans, settings=self.s, topic_tags=self.topic_order, log=self.log,
+            on_call=lambda p, ok, n, res, err, kind: self._log_call(p, ok, n, res, err, kind=kind),
+            debug_dir=self.debug_dir)
+        try:
+            res = tr.run(now)
+        except Exception as exc:
+            res = translate.TranslateResult(status="failed", errors=[f"translate: {type(exc).__name__}: {exc}"])
+        stats.input_tokens += res.input_tokens
+        stats.output_tokens += res.output_tokens
+        stats.ai_errors += res.errors
+        self.log(res.line())
+        return res
+
     # ------------------------------------------------------------ housekeeping
 
     def prune_daily(self, now: int) -> int | None:
@@ -437,6 +459,8 @@ class Job:
         cut = int(now - self.s.retention_days * 86400)
         log_cut = int(now - self.s.log_retention_days * 86400)
         results = self.db.batch([
+            ("DELETE FROM story_translations WHERE story_id IN (SELECT id FROM stories WHERE updated_at < ?) "
+             "RETURNING story_id", [cut]),
             ("DELETE FROM sent WHERE story_id IN (SELECT id FROM stories WHERE updated_at < ?) "
              "RETURNING story_id", [cut]),
             ("DELETE FROM stories WHERE updated_at < ? RETURNING id", [cut]),
@@ -483,6 +507,7 @@ class Job:
             except Exception as exc:
                 stats.ai_errors.append(f"dupes: {type(exc).__name__}: {exc}")
             stats.editor = self.run_editor(now, stats) if self.editor_enabled else None
+            stats.translate = self.run_translate(now, stats) if self.translate_enabled else None
             stats.ai_calls = len(self.calls_log)
             stats.pruned = self.prune_daily(now)
             processed = stats.items_pending_in - stats.items_left_pending
@@ -546,6 +571,7 @@ class Job:
             f"AI: provider {s.provider}, calls {s.ai_calls}, tokens in {s.input_tokens} out {s.output_tokens}"
             f" | pruned {s.pruned}",
             s.editor.line() if s.editor else "editor: not run",
+            s.translate.line() if s.translate else "translate: not run",
         ]
         if s.failed_feeds:
             lines.append("failed feeds: " + ", ".join(s.failed_feeds))

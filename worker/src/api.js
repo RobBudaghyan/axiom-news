@@ -13,8 +13,10 @@ import { CONFIG, afterSendStatements, candidateStatement, hhmm, localParts, next
 import { SettingsError, TZ_AUTO, TZ_DEFAULT, nextDigestAfterChange, publicUser, validZone, validatePatch } from "./settings.js";
 import { adminStatements, shapeAdmin } from "./admin.js";
 import { dispatchJob } from "./github.js";
-import { sendDigest } from "./cron.js";
+import { fallbackStatement, sendDigest } from "./cron.js";
 import { errorStatement } from "./db.js";
+import { LANGS, chooseLang, effectiveLang, t, topicLabel } from "./i18n.js";
+import { setChatLanguage } from "./bot.js";
 
 const TOPICS_SQL = "SELECT tag, label_en, emoji, sort, is_default FROM topics ORDER BY sort";
 const USER_SQL = "SELECT * FROM users WHERE id = ?1";
@@ -25,13 +27,17 @@ export function json(status, body) {
     headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
   });
 }
-const fail = (status, message) => json(status, { error: message });
+// Errors carry a `code` (config/i18n errors.<code>) that the Mini App shows in the user's
+// language; `error` is the English text (Step 9).
+const fail = (status, code, vars = {}) => json(status, { error: t("en", `errors.${code}`, vars), code, vars });
 
 function state(user, topics, isOwner, cfg) {
   const L = cfg.settings_limits;
+  const lang = effectiveLang(user);
   return {
     user: publicUser(user, cfg),
-    topics: topics.map((t) => ({ tag: t.tag, label: t.label_en, emoji: t.emoji ?? "" })),
+    topics: topics.map((x) => ({ tag: x.tag, label: topicLabel(lang, x.tag, x.label_en), emoji: x.emoji ?? "" })),
+    languages: LANGS.enabled.map((code) => ({ code, name: LANGS.names[code] ?? code })),   // the picker (Step 9)
     limits: { ...L },
     is_owner: isOwner,
   };
@@ -40,9 +46,9 @@ function state(user, topics, isOwner, cfg) {
 async function readBody(request) {
   if (request.method !== "POST") return {};
   const text = await request.text();
-  if (text.length > 4096) throw new SettingsError("Request too large.");
+  if (text.length > 4096) throw new SettingsError("too_large");
   if (!text) return {};
-  try { return JSON.parse(text); } catch { throw new SettingsError("Bad request."); }
+  try { return JSON.parse(text); } catch { throw new SettingsError("bad_request"); }
 }
 
 // ------------------------------------------------------------------ settings
@@ -55,23 +61,23 @@ async function open(db, tg, body, now, cfg, isOwner) {
   let user = rows[0];
   if (!user) {   // opened the app before sending /start: same defaults as /start
     user = {
-      id: tg.id, first_name: firstName, language, timezone: deviceTz ?? cfg.default_timezone,
+      id: tg.id, first_name: firstName, language, lang: chooseLang(language), timezone: deviceTz ?? cfg.default_timezone,
       tz_detected: deviceTz ? TZ_AUTO : TZ_DEFAULT, digest_times: JSON.stringify(cfg.default_times),
       topics: JSON.stringify(topics.filter((t) => t.is_default).map((t) => t.tag)),
       paused: 0, blocked: 0, created_at: now,
     };
     user.next_digest_at = nextSlot(now, user.timezone, cfg.default_times);
     await db.batch([{
-      sql: "INSERT INTO users (id, first_name, language, timezone, tz_detected, digest_times, topics, " +
-           "created_at, next_digest_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9) ON CONFLICT(id) DO NOTHING",
-      params: [user.id, firstName, language, user.timezone, user.tz_detected, user.digest_times,
+      sql: "INSERT INTO users (id, first_name, language, lang, timezone, tz_detected, digest_times, topics, " +
+           "created_at, next_digest_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10) ON CONFLICT(id) DO NOTHING",
+      params: [user.id, firstName, language, user.lang, user.timezone, user.tz_detected, user.digest_times,
                user.topics, now, user.next_digest_at],
     }]);
     return state(user, topics, isOwner, cfg);
   }
   const after = { ...user };
   if (firstName && firstName !== user.first_name) after.first_name = firstName;   // lesson 14
-  if (language !== user.language) after.language = language;
+  if (language !== user.language) after.language = language;   // Telegram's code only; never users.lang
   // The zone always follows the phone (Step 5: there is no hand-picked zone any more), so it
   // follows the user when they travel.
   if (deviceTz && (deviceTz !== user.timezone || user.tz_detected !== TZ_AUTO)) {
@@ -89,10 +95,10 @@ async function open(db, tg, body, now, cfg, isOwner) {
   return state(after, topics, isOwner, cfg);
 }
 
-async function saveSettings(db, tg, body, now, cfg, isOwner) {
+async function saveSettings(db, tg, body, now, cfg, isOwner, io) {
   const [rows, topics] = await db.batch([{ sql: USER_SQL, params: [tg.id] }, { sql: TOPICS_SQL, params: [] }]);
   const user = rows[0];
-  if (!user) return fail(404, "Please close and reopen the settings.");
+  if (!user) return fail(404, "reopen_simple");
   const clean = validatePatch(body, topics.map((t) => t.tag), cfg);
   const cols = {};
   for (const [k, v] of Object.entries(clean)) cols[k] = Array.isArray(v) ? JSON.stringify(v) : v;
@@ -104,6 +110,11 @@ async function saveSettings(db, tg, body, now, cfg, isOwner) {
     sql: `UPDATE users SET ${keys.map((k, i) => `${k} = ?${i + 1}`).join(", ")} WHERE id = ?${keys.length + 1}`,
     params: [...keys.map((k) => cols[k]), user.id],
   }]);
+  // Step 9: the chat's menu button and command list follow the new language.
+  if (clean.lang && clean.lang !== user.lang) {
+    const problems = await setChatLanguage(io?.tg, user.id, clean.lang, io?.appUrl);
+    if (problems.length) await db.batch(problems.map((p) => errorStatement(p, now)));
+  }
   return json(200, state(after, topics, isOwner, cfg));
 }
 
@@ -112,11 +123,12 @@ async function saveSettings(db, tg, body, now, cfg, isOwner) {
 async function digestNow(db, ownerId, now, cfg, io) {
   const [rows, topics] = await db.batch([{ sql: USER_SQL, params: [ownerId] }, { sql: TOPICS_SQL, params: [] }]);
   const user = rows[0];
-  if (!user) return fail(404, "Send /start to the bot first.");
+  if (!user) return fail(404, "no_user");
   const [cands] = await db.batch([candidateStatement(user, now, cfg)]);
   const plan = planDigest(user, cands, topics, now, cfg);
   const ids = await sendDigest(io, user.id, plan);
-  await db.batch(afterSendStatements(user, ids, now, plan.nextAt));
+  await db.batch([...afterSendStatements(user, ids, now, plan.nextAt),
+                  ...(plan.fallback ? [fallbackStatement(user.id, plan.fallback, now)] : [])]);
   const n = ids.length;
   return json(200, {
     ok: true, stories: n,
@@ -147,13 +159,13 @@ async function runJobNow(db, env, now, cfg, io) {
 
 // ------------------------------------------------------------------ router
 
-// io (tests replace it): {send(chatId, html), dispatch(env)}
+// io (tests replace it): {send(chatId, html), dispatch(env), tg(method, body)?, appUrl?}
 export async function handleApi(request, env, db, now, io, cfg = CONFIG) {
   const path = new URL(request.url).pathname;
   const auth = request.headers.get("authorization") ?? "";
   const initData = auth.startsWith("tma ") ? auth.slice(4) : "";
   const v = await verifyInitData(initData, env.TELEGRAM_BOT_TOKEN, now);
-  if (!v.ok) return fail(401, "Please close and reopen the settings from the bot.");
+  if (!v.ok) return fail(401, "reopen");
   const tg = v.user;
   const isOwner = String(tg.id) === String(env.OWNER_TELEGRAM_ID ?? "");
 
@@ -162,19 +174,19 @@ export async function handleApi(request, env, db, now, io, cfg = CONFIG) {
     const body = await readBody(request);
     switch (route) {
       case "POST /api/open": return json(200, await open(db, tg, body, now, cfg, isOwner));
-      case "POST /api/settings": return await saveSettings(db, tg, body, now, cfg, isOwner);
+      case "POST /api/settings": return await saveSettings(db, tg, body, now, cfg, isOwner, io);
       case "GET /api/admin":
       case "POST /api/admin/digest":
       case "POST /api/admin/run-job": {
-        if (!isOwner) return fail(403, "This is only for the bot's owner.");
+        if (!isOwner) return fail(403, "owner_only");
         if (route === "GET /api/admin") return json(200, shapeAdmin(await db.batch(adminStatements(now)), now, cfg));
         if (route === "POST /api/admin/digest") return await digestNow(db, tg.id, now, cfg, io);
         return await runJobNow(db, env, now, cfg, io);
       }
-      default: return fail(404, "Not found.");
+      default: return fail(404, "not_found");
     }
   } catch (e) {
-    if (e instanceof SettingsError) return fail(400, e.message);
+    if (e instanceof SettingsError) return fail(400, e.code, e.vars);
     throw e;
   }
 }
