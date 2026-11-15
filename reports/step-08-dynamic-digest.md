@@ -46,7 +46,7 @@ story placed in the window where it first appeared, never twice.
 | 40% topic cap | **removed** | see below |
 | Candidates per editor call | **90** (was 45) | one call covered 89 of 90; the second call is the safety net |
 
-### One change to your rule (please confirm)
+### One change to your rule (confirmed by you, 2026-11-15)
 You asked: "in if global score >= editorial bar OR (main topic followed AND topic score >= topic
 bar)". With a topic bar of 6, that also lets in **every** story with a global score of 6 for
 anyone who follows its topic (about 56 a day). Someone who follows all topics, like dad, then
@@ -250,7 +250,6 @@ about 12-20k in / 5-9k out |
 1. **Read the preview digest** I sent ("Preview of the new dynamic digest": the last 24 hours as
    if nothing had been sent, 14 stories, 3,853 characters, 35 more cut for length) and the short
    message with the numbers after it. Does the amount of Armenia news feel right? Is anything noise?
-2. **Confirm the one change to your rule** (the topic path needs a real boost), or tell me to
-   switch it off.
+2. ~~Confirm the one change to your rule~~: done, you chose to keep it.
 3. If anyone with an **iPhone** can look at the 5 fold test messages, tell me whether any shows
    "Show more".
