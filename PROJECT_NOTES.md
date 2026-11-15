@@ -32,8 +32,10 @@ bot @axiom_news_bot at the end.
   Mini App (Admin stays English). A new user starts in Telegram's language if supported, else
   English; then only the Mini App picker changes it. The hourly job translates, after the
   editor, the stories that could reach a digest into the languages active users read (one call
-  per language per run, checks on numbers, names, alphabet). A digest with any untranslated
-  story goes out wholly in English (never mixed). In Russian, "digest" is always сводка.
+  per language per run, checks on numbers, names, alphabet). Never mixed (Step 10, owner): a
+  story with no translation yet is held back, not marked sent, and goes out in a later digest
+  once translated (inside its 24 h); only a digest left with no story at all goes out wholly in
+  English. In Russian, "digest" is always сводка.
 - **Telegram Mini App settings:** topics, digest times (hourly grid), pause; the time zone is
   shown read-only (Step 5 removed stories per digest, the format choice and the zone picker). An Admin tab, visible
   only to the owner, shows stats, errors and AI usage, plus a "Send me a digest now" button.
@@ -42,7 +44,10 @@ bot @axiom_news_bot at the end.
   reader language other than English while someone reads it (Step 9).
 - **Hosting:** GitHub Actions hourly job, plus Cloudflare Worker + D1 (webhook, Mini App API,
   static Mini App, digest cron).
-- **Not in v1:** payments, ads, user-added sources, instant alerts, channels.
+- **Tips (Step 10):** "Support Axiom ⭐" (Mini App) and /support: voluntary Telegram Stars tips of
+  50, 100, 250 or 500 (plus a hidden 1-Star test amount for the owner). Nothing is locked and a tip
+  changes nothing else. /paysupport and /terms as Telegram requires; the owner refunds from Admin.
+- **Not in v1:** paid features, ads, user-added sources, instant alerts, channels.
 - **Digest format (owner, Step 5): format B for everyone.** "Good evening, Sam. Since 2 PM, 6
   stories for you:" (12-hour time, first name from Telegram; "In the last 24 hours" the first
   time). Topic headings: emoji + bold underlined name. Each story: `N. <emojis> <b>headline</b>`,
@@ -117,6 +122,13 @@ bot @axiom_news_bot at the end.
 | 2026-11-15 | In Russian, "digest" is always сводка (owner, hard rule) | tests fail on дайджест in any Russian text; the job rejects it in translations |
 | 2026-11-15 | One dictionary per language (`config/i18n/<lang>.json`); the Mini App's `i18n.js` is generated from them at deploy; the Admin tab and owner alerts stay English | no hard-coded user text; a test lists missing keys |
 | 2026-11-15 | Plurals and times by hand, no Intl in the Worker; English keeps "2 PM", other languages "14:00" | Intl is the costly part of a cold Worker |
+| 2026-11-15 | ~~One untranslated story makes the digest English~~ replaced in Step 10 (owner): untranslated stories are **held** (left out, not marked sent), the rest goes out in the reader's language; only zero stories left means a wholly English digest | readers of Russian got English digests whenever one story lagged |
+| 2026-11-15 | A held story is kept a candidate by a `digest_holds` row (user, story, language, time), not by its timestamps; still only inside the 24 h window | a held story's `updated_at` is older than the next digest's window, so without the row it would be lost; the row also feeds Admin's "held for translation" count |
+| 2026-11-15 | The length cut runs after the drop | the room a held story leaves goes to the next translated story |
+| 2026-11-15 | Tips: Telegram Stars only (XTR, no card, no provider), amounts 50/100/250/500, 1 for the owner's tests; Mini App via createInvoiceLink + openInvoice, chat via /support buttons + sendInvoice (owner, Step 10) | $0 and no card; Stars are Telegram's required currency for digital goods |
+| 2026-11-15 | pre_checkout_query is answered from the invoice payload alone (no database read) | Telegram cancels the payment after 10 s; measured a few microseconds |
+| 2026-11-15 | Table `tips`: user, amount, Telegram charge id (UNIQUE), time, refunded time; nothing else | the owner's rule; the charge id is needed for refunds, and UNIQUE makes a repeated update count once |
+| 2026-11-15 | /paysupport forwards the user's note to the owner; /terms states the tip terms; the owner refunds from Admin after a confirm (refundStarPayment) | Telegram's rules for bots that take Stars |
 
 ## Current status
 - **Step 1 done:** repo, docs, topics, prompt, lessons, 116 verified feeds.
@@ -168,21 +180,27 @@ bot @axiom_news_bot at the end.
   real stories in three languages, four labelled previews sent; the owner checked the Russian Mini
   App on his phone and chose сводка for "digest". The owner reads English. Details in
   `reports/step-09-languages.md`.
+- **Step 10 done (2026-11-15): translation hold and tips.** Untranslated stories wait for their
+  translation instead of turning a digest English; "Support Axiom ⭐" voluntary Stars tips with
+  /support, /paysupport, /terms and refunds from Admin. Details in
+  `reports/step-10-translation-hold-and-stars.md`.
 - The owner is the only user.
 
 ## Next step
 Switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, which also sets
 the Russian command list, then invite the first users). Watch the first real Russian reader's
 digests: the first hourly run after they choose Russian translates about 70 stories in one call;
-Admin's "Languages" section shows calls, tokens and English fallbacks. Before that: a few days of real digests with the Step 8 rules, and a look at the
+Admin's "Languages" section shows calls, tokens, stories held for translation and full English
+fallbacks. Admin's "Tips" section shows Stars received. Before that: a few days of real digests with the Step 8 rules, and a look at the
 fold on an iPhone if any user has one. Later: custom topics (e.g. "Colombia") can reuse the paused
 Google News code (`job/gnews.py`, `job/shadow.py`).
 
 ## Known issues / open questions
 - **Translations (Step 9):** the code checks catch numbers, names, alphabets and accents, not a
   wrong word or an odd sentence (French and Armenian samples had 2 and 3 such errors in 15;
-  Russian almost none). A story that keeps failing a check keeps Russian readers on English
-  digests until it passes. Russian digests run about 7% longer, so on busy days a story or two
+  Russian almost none). A story that keeps failing a check is held from Russian readers until it
+  passes or its 24 h end (Step 10); if it is the only story of a digest, that digest is English.
+  Russian digests run about 7% longer, so on busy days a story or two
   fewer fits. No real Russian reader yet: the first live Russian run is still to be seen.
 - **Gemini 503 overloads** were frequent on 2026-11-13; fallback runs are slow (Groq ~1
   chunk/min).
@@ -216,5 +234,8 @@ Google News code (`job/gnews.py`, `job/shadow.py`).
   Admin's "D1 today", and Google News feeds are for "personal, non-commercial use" per their own
   notice (owner to decide before adoption). Its old rows stay in `shadow_items` (its prune only runs
   when it is on).
+- **Tips (Step 10):** the per-chat command list of a reader who picked Russian before Step 10 keeps
+  the old two commands until they change language again (none exist yet). Telegram may ask the bot
+  to handle disputes; Stars received can be withdrawn only through Telegram's own rules (not set up).
 - **Admin "D1 today" for the Worker is a slight undercount** (counts of short-lived Worker instances
   that end between ticks are lost). The job's numbers are exact and are most of the total.
