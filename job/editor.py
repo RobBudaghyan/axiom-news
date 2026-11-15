@@ -6,7 +6,9 @@ grouping (job/dupes.py) misses about 30% of duplicates. The editor sees the stro
 the last 24 hours side by side, with the titles and snippets of their articles, and:
 - merges stories about the same concrete event (the oldest story is kept, the others get
   `merged_into`; users who got one of them never get the kept one either);
-- gives a strict `final_score` 1-10, which digests measure against the bars in config/digest.json;
+- gives a strict `final_score` 1-10 (global importance) and, Step 8, a `topic_score` 1-10 (importance
+  for readers who follow the story's main topic, never below the final score); digests measure
+  them against the two bars in config/digest.json;
 - writes the `headline`, a 1-3 sentence `description` (only facts from the given articles, checked
   by a fact guard here) and 2-4 `emojis`.
 
@@ -40,7 +42,8 @@ MAX_EMOJIS = 4
 MAX_EVENT_STORIES = 6       # more stories in one event is a roundup, not one event
 
 POOL_SQL = ("SELECT id, summary, topics, importance, best_url, best_source, best_tier, best_published_at, "
-            "source_count, created_at, updated_at, headline, description, emojis, final_score, edited_at, main_topic "
+            "source_count, created_at, updated_at, headline, description, emojis, final_score, edited_at, main_topic, "
+            "topic_score, scored_at "
             "FROM stories WHERE updated_at >= ? AND merged_into IS NULL AND importance >= ? "
             "ORDER BY importance DESC, updated_at DESC, id DESC")
 ITEMS_SQL = ("SELECT story_id, source_name, tier, title, snippet, published_at FROM items "
@@ -115,7 +118,9 @@ def candidate_block(s: dict, items: list[dict], edited: bool) -> str:
     # (measured in the backfill on 2026-11-14), which is the inflated number we want to replace.
     head = f"S{s['id']} | {','.join(tags(s))}"
     if edited:
-        head += f" | EDITED: score {s.get('final_score')}, headline: {s.get('headline') or s['summary']}"
+        ts = f", topic score {s['topic_score']}" if s.get("topic_score") is not None else ""
+        main = f", topic {s['main_topic']}" if s.get("main_topic") else ""
+        head += f" | EDITED: score {s.get('final_score')}{ts}{main}, headline: {s.get('headline') or s['summary']}"
     lines = [head, f"  first-pass summary: {s['summary']}"]
     for it in items:
         snippet = f" :: {it['snippet']}" if it.get("snippet") else ""
@@ -351,6 +356,8 @@ class Event:
     description: str | None
     emojis: str | None
     topic: str | None = None      # the one topic it is mainly about (its digest section)
+    topic_score: int | None = None   # Step 8: for followers of that topic; always >= score
+    topic_raw: int | None = None     # the answer's own topic score (clamped to 1-10 only)
     dropped: list[str] = field(default_factory=list)   # fact-guard notes
 
 
@@ -408,11 +415,17 @@ def validate_events(data: dict, by_id: dict[int, dict], items: dict[int, list[di
             score = min(10, max(1, int(round(float(raw.get("score"))))))
         except (TypeError, ValueError):
             continue
+        topic_raw = None
+        try:
+            topic_raw = min(10, max(1, int(round(float(raw.get("topic_score"))))))
+        except (TypeError, ValueError):
+            pass          # missing: the story keeps its old topic score, or digests use the final score
         group = [by_id[i] for i in ids]
         leader = min(group, key=lambda s: (s["created_at"], s["id"]))
         raw_head = str(raw.get("headline") or "").strip()
         rewrite = bool(raw_head) or leader.get("edited_at") is None
-        ev = Event(ids, score, rewrite, None, None, None)
+        ev = Event(ids, score, rewrite, None, None, None,
+                   topic_score=None if topic_raw is None else max(score, topic_raw), topic_raw=topic_raw)
         topic = str(raw.get("topic") or "").strip()
         ev.topic = topic if topic_order and topic in topic_order else None
         if rewrite:
@@ -456,14 +469,18 @@ def write_statements(events: list[Event], by_id: dict[int, dict], topic_order: l
         head = ev.headline or leader.get("headline")
         desc = ev.description or leader.get("description")
         emo = ev.emojis or leader.get("emojis")
+        ts = ev.topic_score if ev.topic_score is not None else leader.get("topic_score")
+        ts = None if ts is None else max(int(ts), ev.score)
+        # scored_at: the first time the editor scored this story (kept on later re-edits). Digests
+        # look at it, so a story scored after a digest went out still reaches the next one.
         stmts.append((
             "UPDATE stories SET final_score=?, headline=?, description=?, emojis=?, edited_at=?, topics=?, "
             "best_url=?, best_source=?, best_tier=?, best_published_at=?, updated_at=?, source_count=?, "
-            "main_topic=? WHERE id=?",
+            "main_topic=?, topic_score=?, scored_at=coalesce(scored_at, ?) WHERE id=?",
             [ev.score, head, desc, emo, now, json.dumps([t for t in topic_order if t in tagset]),
              best["best_url"], best["best_source"], best["best_tier"], best["best_published_at"],
              max(s["updated_at"] for s in group), sum(s["source_count"] or 1 for s in group), main,
-             leader["id"]]))
+             ts, now, leader["id"]]))
         for k in kids:
             merged += 1
             stmts += [
@@ -483,29 +500,31 @@ class EditorResult:
     candidates: int = 0
     edited: int = 0
     merged: int = 0
-    left_out: int = 0             # candidates the answer did not mention (stay unedited)
+    left_out: int = 0             # candidates the last answer did not mention (stay unedited)
     guard_dropped: list[str] = field(default_factory=list)
     provider: str | None = None
     calls: int = 0
+    rounds: int = 0               # Step 8: successful editor answers in this run (1, or 2 on a backlog)
     input_tokens: int = 0
     output_tokens: int = 0
     errors: list[str] = field(default_factory=list)
 
     def line(self) -> str:
-        return (f"editor: {self.status}, provider {self.provider}, {self.candidates} candidates, "
-                f"{self.edited} events written, {self.merged} merged away, {self.left_out} left out, "
+        return (f"editor: {self.status}, provider {self.provider}, {self.rounds} round(s), {self.candidates} "
+                f"candidates, {self.edited} events written, {self.merged} merged away, {self.left_out} left out, "
                 f"{len(self.guard_dropped)} texts dropped by the fact guard, calls {self.calls}, "
                 f"tokens in {self.input_tokens} out {self.output_tokens}")
 
 
 class Editor:
     """plans: the job's ProviderPlan list (same chain as the first pass).
-    on_call(provider, ok, n_candidates, CallResult|None, error|None) records each AI call."""
+    on_call(provider, ok, n_candidates, CallResult|None, error|None) records each AI call.
+    dry_run: call the AI and validate, but write nothing (sandbox measurements)."""
 
     def __init__(self, db, plans, *, topics: list[dict], facts: list[str], facts_checked: str,
                  settings: Settings | None = None, prompt: EditorPrompt | None = None,
                  on_call: Callable | None = None, log: Callable[[str], None] = print,
-                 debug_dir: str | Path | None = None):
+                 debug_dir: str | Path | None = None, dry_run: bool = False):
         self.db = db
         self.plans = plans
         self.topics = topics
@@ -517,14 +536,59 @@ class Editor:
         self.on_call = on_call or (lambda *a: None)
         self.log = log
         self.debug_dir = Path(debug_dir) if debug_dir else None
+        self.dry_run = dry_run
 
     def pool(self, now: int, min_importance: int | None = None, hours: float = 24) -> list[dict]:
-        floor = self.s.editor_min_importance if min_importance is None else min_importance
-        return self.db.query(POOL_SQL, [int(now - hours * 3600), floor])
+        """Stories of the last `hours` the editor may see. The floor is editor_min_importance,
+        lower for the topics in editor_topic_floor (Armenia: 3). An explicit floor overrides both."""
+        if min_importance is not None:
+            return self.db.query(POOL_SQL, [int(now - hours * 3600), min_importance])
+        base = self.s.editor_min_importance
+        floors = self.s.editor_topic_floor or {}
+        low = min([base, *floors.values()])
+        rows = self.db.query(POOL_SQL, [int(now - hours * 3600), low])
+        return [r for r in rows if r["importance"] >= base
+                or any(r["importance"] >= floors[t] for t in tags(r) if t in floors)]
 
-    def run(self, now: int, min_importance: int | None = None, hours: float = 24) -> EditorResult:
-        out = EditorResult()
-        pool = self.pool(now, min_importance, hours)
+    def _today(self, now: int) -> str:
+        return datetime.fromtimestamp(now, timezone.utc).strftime("%Y-%m-%d")
+
+    def _ask(self, plan, prompt: str, by_id: dict[int, dict], items: dict[int, list[dict]],
+             out: EditorResult) -> tuple[list[Event], list[int]] | None:
+        """One provider, with one retry on an invalid or empty answer. None = this provider failed."""
+        p = plan.provider
+        n = len(by_id)
+        for attempt in range(2):
+            if plan.reply_tokens and hasattr(p, "wait_for_tokens"):
+                p.wait_for_tokens(ai.estimate_tokens(prompt) + plan.reply_tokens)
+            res = None
+            out.calls += 1
+            try:
+                res = p.generate(prompt, self.prompt.schema)
+                out.input_tokens += res.input_tokens or 0
+                out.output_tokens += res.output_tokens or 0
+                self._dump(p.name, out.calls, prompt, res.text)
+                try:
+                    data = parse_answer(res.text)
+                except ValueError as exc:
+                    raise ai.AIError(p.name, f"editor: invalid JSON: {exc}", kind="invalid") from None
+                events, left_out = validate_events(data, by_id, items, self.topic_order)
+                covered = n - len(left_out)
+                if covered < n * MIN_COVERED_SHARE:
+                    raise ai.AIError(p.name, f"editor: answer covers only {covered} of {n} candidates",
+                                     kind="invalid")
+            except ai.AIError as exc:
+                self.on_call(p, False, n, res, str(exc))
+                out.errors.append(str(exc) if str(exc).startswith(f"{p.name}: editor") else f"editor {exc}")
+                if exc.kind in ("invalid", "empty") and attempt == 0:
+                    continue                # one retry on the same model
+                return None                 # next provider
+            self.on_call(p, True, n, res, None)
+            return events, left_out
+        return None
+
+    def _round(self, now: int, pool: list[dict], out: EditorResult) -> tuple[str, bool]:
+        """One editor answer over the best unscored stories. Returns (status, used_small_model)."""
         for plan in self.plans:
             p = plan.provider
             small = p.name == "groq"
@@ -534,56 +598,95 @@ class Editor:
                 self.s.editor_groq_per_topic if small else self.s.editor_per_topic,
                 self.s.editor_groq_compare if small else self.s.editor_compare)
             if not new:
-                return out                      # skipped: everything is edited already
+                return "skipped", small     # everything is edited already
             cands = new + compare
             by_id = {s["id"]: s for s in cands}
             items = load_items(self.db, list(by_id),
                                self.s.editor_groq_items if small else self.s.editor_items_per_story)
             prompt = render_prompt(
-                self.prompt.template, today=datetime.fromtimestamp(now, timezone.utc).strftime("%Y-%m-%d"),
-                topics=self.topics, facts=self.facts, facts_checked=self.facts_checked,
-                new=new, compare=compare, items=items)
-            out.candidates = len(cands)
-            for attempt in range(2):
-                if plan.reply_tokens and hasattr(p, "wait_for_tokens"):
-                    p.wait_for_tokens(ai.estimate_tokens(prompt) + plan.reply_tokens)
-                res = None
-                out.calls += 1
-                try:
-                    res = p.generate(prompt, self.prompt.schema)
-                    out.input_tokens += res.input_tokens or 0
-                    out.output_tokens += res.output_tokens or 0
-                    self._dump(p.name, out.calls, prompt, res.text)
-                    try:
-                        data = parse_answer(res.text)
-                    except ValueError as exc:
-                        raise ai.AIError(p.name, f"editor: invalid JSON: {exc}", kind="invalid") from None
-                    events, left_out = validate_events(data, by_id, items, self.topic_order)
-                    covered = len(cands) - len(left_out)
-                    if covered < len(cands) * MIN_COVERED_SHARE:
-                        raise ai.AIError(p.name, f"editor: answer covers only {covered} of {len(cands)} "
-                                         f"candidates", kind="invalid")
-                except ai.AIError as exc:
-                    self.on_call(p, False, len(cands), res, str(exc))
-                    out.errors.append(str(exc) if str(exc).startswith(f"{p.name}: editor") else
-                                      f"editor {exc}")
-                    if exc.kind in ("invalid", "empty") and attempt == 0:
-                        continue                # one retry on the same model
-                    break                       # next provider
-                self.on_call(p, True, len(cands), res, None)
-                stmts, merged = write_statements(events, by_id, self.topic_order, now)
+                self.prompt.template, today=self._today(now), topics=self.topics, facts=self.facts,
+                facts_checked=self.facts_checked, new=new, compare=compare, items=items)
+            got = self._ask(plan, prompt, by_id, items, out)
+            if got is None:
+                continue
+            events, left_out = got
+            stmts, merged = write_statements(events, by_id, self.topic_order, now)
+            if not self.dry_run:
                 self.db.batch(stmts)
-                out.status = "ok"
-                out.provider = plan.label
-                out.edited = len(events)
-                out.merged = merged
-                out.left_out = len(left_out)
-                out.guard_dropped = [d for e in events for d in e.dropped]
-                if left_out:
-                    out.errors.append(f"editor: answer left out {len(left_out)} of {len(cands)} candidates")
-                return out
-        out.status = "failed"
+            out.candidates += len(cands)
+            out.provider = plan.label if out.provider in (None, plan.label) else f"{out.provider}+{plan.label}"
+            out.edited += len(events)
+            out.merged += merged
+            out.left_out = len(left_out)
+            out.guard_dropped += [d for e in events for d in e.dropped]
+            out.rounds += 1
+            if left_out:
+                out.errors.append(f"editor: answer left out {len(left_out)} of {len(cands)} candidates")
+            return "ok", small
+        return "failed", False
+
+    def run(self, now: int, min_importance: int | None = None, hours: float = 24) -> EditorResult:
+        """Up to editor_max_calls answers per run: the next one only while unscored candidates
+        remain (a busy hour, or ids the last answer left out) and only on Gemini (Groq's
+        per-minute limit makes a second Groq call slow; the backlog waits for the next hour)."""
+        out = EditorResult()
+        rounds = 1 if self.dry_run else max(1, self.s.editor_max_calls)
+        for _ in range(rounds):
+            status, small = self._round(now, self.pool(now, min_importance, hours), out)
+            if status == "skipped":
+                break
+            if status == "failed":
+                if out.status != "ok":
+                    out.status = "failed"
+                break
+            out.status = "ok"
+            if small:
+                break
         return out
+
+    # ------------------------------------------------------------ Step 8: topic scores only
+
+    def rescore_topics(self, now: int, hours: float = 24) -> tuple[EditorResult, int]:
+        """One call over edited stories that have no topic score yet, shown as EDITED (with their
+        score and main topic). Writes ONLY topic_score: final scores, text, topics and merges stay
+        as they are, so live digests do not move. Returns (result, answers whose topic differs
+        from the stored main topic)."""
+        out = EditorResult()
+        todo = [s for s in self.pool(now, hours=hours)
+                if s.get("edited_at") is not None and s.get("topic_score") is None]
+        todo.sort(key=lambda s: (-(s.get("final_score") or 0), -s["updated_at"], -s["id"]))
+        if not todo:
+            return out, 0
+        for plan in self.plans:
+            small = plan.provider.name == "groq"
+            batch = todo[:self.s.editor_groq_new if small else self.s.editor_new]
+            by_id = {s["id"]: s for s in batch}
+            items = load_items(self.db, list(by_id),
+                               self.s.editor_groq_items if small else self.s.editor_items_per_story)
+            prompt = render_prompt(
+                self.prompt.template, today=self._today(now), topics=self.topics, facts=self.facts,
+                facts_checked=self.facts_checked, new=[], compare=batch, items=items)
+            got = self._ask(plan, prompt, by_id, items, out)
+            if got is None:
+                continue
+            events, left_out = got
+            stmts, mismatch = [], 0
+            for ev in events:
+                if ev.topic_raw is None:
+                    continue
+                for i in ev.ids:
+                    st = by_id[i]
+                    if ev.topic and st.get("main_topic") and ev.topic != st["main_topic"]:
+                        mismatch += 1
+                    stmts.append(("UPDATE stories SET topic_score=? WHERE id=?",
+                                  [max(ev.topic_raw, st.get("final_score") or 0), i]))
+            if not self.dry_run:
+                self.db.batch(stmts)
+            out.status, out.provider, out.rounds = "ok", plan.label, 1
+            out.candidates, out.edited, out.left_out = len(batch), len(stmts), len(left_out)
+            return out, mismatch
+        out.status = "failed"
+        return out, 0
 
     def _dump(self, provider: str, n: int, prompt: str, text: str) -> None:
         if not self.debug_dir:
@@ -605,30 +708,49 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--min-importance", type=int, default=None, help="first-pass score floor")
     parser.add_argument("--hours", type=float, default=24, help="pool window (default 24 h, like the job)")
     parser.add_argument("--debug-dir", default=None, help="save prompts and answers here")
+    parser.add_argument("--topic-only", action="store_true",
+                        help="Step 8: give edited stories a topic score; writes only topic_score")
+    parser.add_argument("--dry-run", action="store_true", help="call the AI, write nothing (sandbox)")
+    parser.add_argument("--new", type=int, default=None, help="candidates per call (default editor_new)")
+    parser.add_argument("--fresh-sim", action="store_true",
+                        help="with --dry-run: treat edited stories as unscored (to measure a big call)")
     args = parser.parse_args(argv)
     from job.config import load_env, load_prompt, load_topics
     from job.d1 import insert_statements
     from job.run import build_from_env
     settings = Settings()
+    if args.new:
+        settings.editor_new = args.new
     db, plans = build_from_env(load_env(), settings)
     calls: list[tuple] = []
 
     def on_call(p, ok, n, res, error):
         calls.append((int(time.time()), p.name, p.model, 1 if ok else 0, n, res.input_tokens if res else None,
                       res.output_tokens if res else None, res.ms if res else None, (error or "")[:500] or None,
-                      "editor"))
+                      kind))
 
+    # Measurements and the one-off rescore are logged apart from the hourly editor calls.
+    kind = "editor_sandbox" if args.dry_run else "editor_rescore" if args.topic_only else "editor"
     batch_prompt = load_prompt()
     ed = Editor(db, plans, topics=load_topics(), facts=batch_prompt.facts,
                 facts_checked=batch_prompt.facts_checked, settings=settings, on_call=on_call,
-                debug_dir=args.debug_dir)
+                debug_dir=args.debug_dir, dry_run=args.dry_run)
+    if args.fresh_sim:
+        if not args.dry_run:
+            parser.error("--fresh-sim needs --dry-run")
+        real_pool = ed.pool
+        ed.pool = lambda now, mi=None, h=24: [{**s, "edited_at": None} for s in real_pool(now, mi, h)]
     rounds = args.rounds if args.backfill else 1
     for n in range(rounds):
-        res = ed.run(int(time.time()), args.min_importance, args.hours)
-        print(f"round {n + 1}: {res.line()}")
+        if args.topic_only:
+            res, mismatch = ed.rescore_topics(int(time.time()), args.hours)
+            print(f"round {n + 1}: {res.line()}, topic differs from the stored one: {mismatch}")
+        else:
+            res = ed.run(int(time.time()), args.min_importance, args.hours)
+            print(f"round {n + 1}: {res.line()}")
         for e in res.errors + res.guard_dropped:
             print(f"  note: {e[:300]}")
-        if res.status != "ok":
+        if res.status != "ok" or args.dry_run:
             break
     db.batch(insert_statements("ai_calls", ("at", "provider", "model", "ok", "items", "input_tokens",
                                             "output_tokens", "ms", "error", "kind"), calls))

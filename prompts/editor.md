@@ -3,7 +3,8 @@
 The second AI call of every hourly run (`job/editor.py`). It sees the strongest stories of the
 last 24 hours side by side, with the titles and snippets of their articles, after the first pass
 (`prompts/story_batch.md`) has grouped and roughly scored them. It merges duplicates, gives a
-strict final score that the digest bar is measured against (`config/digest.json`), and writes
+strict final score and (Step 8) a topic score for followers of the main topic, which the two
+digest bars are measured against (`config/digest.json`), and writes
 what users read: a one-sentence headline, a short description and 2-3 emojis.
 
 The job fills the `{placeholders}`. The current-facts list is shared with `story_batch.md`.
@@ -75,6 +76,42 @@ stories side by side and judge each one yourself.
 3. TOPIC. Give each event the ONE topic tag from the list above that it is mainly about: the
    section a reader would look for it in. A summit of the US, Russian and Chinese leaders is
    politics, not iran_war, even if Iran will be discussed.
+   TOPIC SCORE. Also give each event a topic_score from 1 to 10: how important it is for a
+   reader who follows that main topic closely, like the editor of a specialist newsletter on
+   that topic. It is never lower than the score. For the broad topics (politics,
+   wars_conflicts) it is usually the same as the score, at most 1 point higher. For the narrow
+   topics (armenia, russia, iran_war, ukraine_war) real news on the topic is often 1 to 2
+   points higher: a medium Armenian court case may be 4 for the world but 6 for Armenia
+   followers. Routine items stay low for followers too: statements with no decision, analysis
+   and commentary, ceremonies, visits with no outcome, daily military claims. Examples:
+   - armenia: 8 "CSTO strips Armenia of voting rights"; "Armenia and Turkey are close to
+     establishing diplomatic relations"; a border shooting that kills soldiers. 6 "Supreme
+     Judicial Council suspends the powers of two judges"; "Prosecutor General seeks to strip
+     two judges of immunity"; "Armenia launches a 24-hour biometric passport service"; an
+     opposition leader arrested; a local election result in a big town. 4 "Pashinyan meets
+     India's foreign minister during a stopover"; "International conference of Russian
+     compatriots starts in Yerevan"; an analyst or opposition figure repeating a known view.
+   - russia: 8 "Moscow car bomb severely injures a former aide to an ex-prime minister"; a new
+     mobilisation; a minister arrested. 6 "Telegram channel administrator sentenced to 21 years";
+     "Russia prepares measures against seizures of its foreign assets". 4 "Business ombudsperson
+     forecasts staff cuts in 2027"; "Domodedovo airport briefly suspends flights".
+   - iran_war: 8 "Two oil tankers hit naval mines south of the Strait of Hormuz"; "Bahrain
+     intercepts two Iranian drone barrages after months of calm". 6 "Iran says it shot down a US
+     MQ-1 drone over Qeshm Island"; "Trump tells advisers he may hold off on Iran attacks".
+     4 "US intelligence estimates Iran retains up to 2,500 missiles"; "IDF holds multi-front
+     war drills".
+   - ukraine_war: 8 "Russia demands Finland leave NATO and full control of Donbas"; a strike that
+     cuts power to a whole region for days. 6 "US envoys prepare a large prisoner swap"; "Russian
+     strike on Pavlohrad injures a seven-year-old boy and others". 4 "Fifty-four combat
+     engagements along the front line over the past day"; "Scheduled power outages in Ukrainian
+     regions".
+   - wars_conflicts (broad): 8 a new war or a ceasefire in one; "Myanmar airstrike kills 12 at a
+     displacement camp" is 7 and 7. 6 "Floods and cold hit Gaza as the aid block persists".
+     4 "Teenager arrested for setting fire to a communications cabinet".
+   - politics (broad): 8 "Trump to meet Xi and Putin in China"; 6 "Italy fines Meta 887 million
+     dollars over photo privacy"; 4 "France reaffirms support for Morocco's position on Western
+     Sahara". Same as the score.
+   For an EDITED story, give a topic_score as well, even when you keep its text.
 
 4. WRITE for each event. For an EDITED story whose facts did not change, you may leave
    headline, description and emojis empty to keep them.
@@ -101,7 +138,8 @@ CURRENT FACTS (checked {facts_checked_date}; the job maintainer keeps these curr
 {calibration_facts}
 
 CANDIDATES. Each starts with "S<id> | topics", then its articles
-("source, tier | title :: snippet"); EDITED ones also show their current score and headline.
+("source, tier | title :: snippet"); EDITED ones also show their current score, topic score
+and main topic when known, and headline.
 {candidates}
 
 Every candidate id must appear exactly once in your answer, in the ids of one event.
@@ -122,11 +160,12 @@ Return JSON only, matching the schema.
           "ids":         {"type": "array", "items": {"type": "string"}},
           "score":       {"type": "integer"},
           "topic":       {"type": "string"},
+          "topic_score": {"type": "integer"},
           "headline":    {"type": "string"},
           "description": {"type": "string"},
           "emojis":      {"type": "string"}
         },
-        "required": ["ids", "score", "topic", "headline", "description", "emojis"]
+        "required": ["ids", "score", "topic", "topic_score", "headline", "description", "emojis"]
       }
     }
   },
@@ -138,6 +177,8 @@ Return JSON only, matching the schema.
 
 - Validate everything (`validate_events`): unknown and repeated ids are dropped (the first wins),
   the score is clamped to 1-10, an event without a usable score leaves its stories unedited.
+- `topic_score` is clamped to 1-10 and raised to the score if lower; a missing one keeps the
+  story's old topic score (digests then use the final score).
 - Fact guard: every number in the headline or description must appear in the articles or the
   first-pass summary, and (when all articles are in Latin script) so must every capitalised
   name; otherwise the description is dropped and a failing headline falls back to the summary.

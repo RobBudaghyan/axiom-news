@@ -284,6 +284,127 @@ class Writes(unittest.TestCase):
         self.assertEqual(calls[-1][2], Settings().editor_groq_new)
 
 
+def score_all(score=5, topic_score=None):
+    """An editor answer that scores every candidate in the prompt on its own."""
+    def respond(prompt):
+        ids = [l.split(" |")[0] for l in prompt.splitlines() if CAND.match(l)]
+        return {"events": [{"ids": [i], "score": score, "topic_score": topic_score, "topic": "", "headline": "",
+                            "description": "", "emojis": ""} for i in ids]}
+    return respond
+
+
+class Step8(unittest.TestCase):
+    """Topic score, coverage (second call, Armenia floor), scored_at, the topic-only rescore."""
+
+    def setUp(self):
+        self.db = new_db()
+
+    def test_topic_score_is_clamped_never_below_the_score_and_kept_when_missing(self):
+        a = add_story(self.db, "Armenian judges suspended", ["armenia"], 5)
+        b = add_story(self.db, "Big summit", ["politics"], 7)
+        c = add_story(self.db, "Odd answer", ["russia"], 5)
+        gem = FakeProvider("gemini", [{"events": [
+            {"ids": [f"S{a}"], "score": 4, "topic_score": 6, "topic": "armenia", "headline": "", "description": "",
+             "emojis": ""},
+            {"ids": [f"S{b}"], "score": 8, "topic_score": 5, "topic": "politics", "headline": "", "description": "",
+             "emojis": ""},
+            {"ids": [f"S{c}"], "score": 5, "topic_score": 40, "topic": "russia", "headline": "", "description": "",
+             "emojis": ""}]}])
+        ed, _ = make_editor(self.db, [gem])
+        ed.run(T0)
+        self.assertEqual((story(self.db, a)["final_score"], story(self.db, a)["topic_score"]), (4, 6))
+        self.assertEqual(story(self.db, b)["topic_score"], 8)       # never below the global score
+        self.assertEqual(story(self.db, c)["topic_score"], 10)      # clamped
+        # a later answer without a topic score keeps the old one (raised to a higher new score)
+        self.db.query("UPDATE stories SET edited_at = NULL WHERE id = ?", [a])
+        ed, _ = make_editor(self.db, [FakeProvider("gemini", [score_all(5)])])
+        ed.run(T0 + H)
+        self.assertEqual((story(self.db, a)["final_score"], story(self.db, a)["topic_score"]), (5, 6))
+
+    def test_scored_at_is_the_first_score_time_and_survives_re_edits(self):
+        a = add_story(self.db, "Armenia story", ["armenia"], 5)
+        ed, _ = make_editor(self.db, [FakeProvider("gemini", [score_all(5, 6)])])
+        ed.run(T0)
+        self.assertEqual(story(self.db, a)["scored_at"], T0)
+        b = add_story(self.db, "New one", ["russia"], 5, now=T0 + H)
+        ed, _ = make_editor(self.db, [FakeProvider("gemini", [score_all(5, 5)])])
+        ed.run(T0 + H)                                              # `a` comes back only to compare
+        self.assertEqual(story(self.db, a)["edited_at"], T0 + H)
+        self.assertEqual(story(self.db, a)["scored_at"], T0)        # unchanged
+        self.assertEqual(story(self.db, b)["scored_at"], T0 + H)
+
+    def test_a_second_call_only_while_unscored_candidates_remain(self):
+        for i in range(7):
+            add_story(self.db, f"Politics story {i}", ["politics"], 6)
+        s = Settings(editor_new=5, editor_compare=2)
+        gem = FakeProvider("gemini", [score_all(5), score_all(5)])
+        ed, calls = make_editor(self.db, [gem], s)
+        res = ed.run(T0)
+        self.assertEqual((res.status, res.rounds, res.calls), ("ok", 2, 2))
+        self.assertEqual(self.db.query("SELECT count(*) n FROM stories WHERE final_score IS NULL")[0]["n"], 0)
+        self.assertEqual([c[2] for c in calls], [5, 4])             # 5 new; then 2 new + 2 to compare
+        # no backlog: one call
+        add_story(self.db, "One more", ["russia"], 6)
+        gem = FakeProvider("gemini", [score_all(5)])
+        res = make_editor(self.db, [gem], s)[0].run(T0)
+        self.assertEqual((res.rounds, len(gem.prompts)), (1, 1))
+        # never more than editor_max_calls
+        for i in range(20):
+            add_story(self.db, f"Wave {i}", ["politics"], 6)
+        gem = FakeProvider("gemini", [score_all(5), score_all(5)])
+        res = make_editor(self.db, [gem], s)[0].run(T0)
+        self.assertEqual(res.rounds, 2)
+        self.assertGreater(self.db.query("SELECT count(*) n FROM stories WHERE final_score IS NULL")[0]["n"], 0)
+
+    def test_no_second_call_after_falling_back_to_groq(self):
+        for i in range(15):
+            add_story(self.db, f"Politics story {i}", ["politics"], 6)
+        groq = FakeProvider("groq", [score_all(5)])
+        ed, _ = make_editor(self.db, [FakeProvider("gemini", [OVERLOAD]), groq])
+        res = ed.run(T0)
+        self.assertEqual((res.status, res.rounds, len(groq.prompts)), ("ok", 1, 1))
+
+    def test_armenia_stories_at_first_pass_3_are_candidates_other_topics_are_not(self):
+        arm = add_story(self.db, "Party switch in Amasia race", ["politics", "armenia"], 3)
+        add_story(self.db, "Football friendly", ["politics"], 3)
+        add_story(self.db, "Armenian poem", ["armenia"], 2)
+        pool = make_editor(self.db, [])[0].pool(T0)
+        self.assertEqual([s["id"] for s in pool], [arm])
+        self.assertEqual(len(make_editor(self.db, [])[0].pool(T0, min_importance=4)), 0)   # explicit floor wins
+
+    def test_topic_only_rescore_writes_only_topic_scores(self):
+        a = add_story(self.db, "Judges suspended", ["armenia"], 5, edited={"score": 4, "headline": "Judges suspended"})
+        self.db.query("UPDATE stories SET main_topic = 'armenia' WHERE id = ?", [a])
+        b = add_story(self.db, "Summit", ["politics"], 7, edited={"score": 7, "headline": "Summit"})
+        new = add_story(self.db, "Not edited yet", ["russia"], 6)
+        before = {i: story(self.db, i) for i in (a, b, new)}
+        gem = FakeProvider("gemini", [{"events": [
+            {"ids": [f"S{a}", f"S{b}"], "score": 9, "topic_score": 6, "topic": "politics", "headline": "Changed",
+             "description": "Changed.", "emojis": "💥"}]}])
+        ed, _ = make_editor(self.db, [gem])
+        res, mismatch = ed.rescore_topics(T0)
+        self.assertEqual((res.status, res.edited, mismatch), ("ok", 2, 1))
+        self.assertIn(f"S{a} | armenia | EDITED: score 4, topic armenia, headline: Judges suspended", gem.prompts[0])
+        self.assertNotIn(f"S{new} |", gem.prompts[0])                # only edited stories
+        self.assertEqual(story(self.db, a)["topic_score"], 6)
+        self.assertEqual(story(self.db, b)["topic_score"], 7)        # never below its own final score
+        for i in (a, b, new):
+            row = story(self.db, i)
+            for k in ("final_score", "headline", "description", "emojis", "topics", "merged_into", "edited_at",
+                      "main_topic"):
+                self.assertEqual(row[k], before[i][k], k)
+        self.assertEqual(ed.rescore_topics(T0)[0].status, "skipped")  # nothing left to rescore
+
+    def test_dry_run_calls_the_ai_but_writes_nothing(self):
+        a = add_story(self.db, "Story", ["politics"], 6)
+        gem = FakeProvider("gemini", [score_all(6, 7)])
+        ed, calls = make_editor(self.db, [gem])
+        ed.dry_run = True
+        res = ed.run(T0)
+        self.assertEqual((res.status, res.edited, len(calls)), ("ok", 1, 1))
+        self.assertIsNone(story(self.db, a)["final_score"])
+
+
 class InTheJob(unittest.TestCase):
     def test_a_run_edits_new_stories_and_logs_editor_calls(self):
         db, clock, feeds = new_db(), Clock(), Feeds()

@@ -72,11 +72,11 @@ const POOL_COLUMNS = "id, summary, headline, description, emojis, main_topic, be
 // The owner's digests of the last 24 h, replayed on the stories as they are now: each story is
 // placed in the window where it first appeared (created_at), and none is shown twice. For tuning
 // the bars:  --windows [--bars 7,6] [--show]
-async function windows(db, user, topics, now, cfg) {
+async function windows(db, user, topics, now, cfg, hours = 24) {
   const tz = user.timezone || cfg.default_timezone;
   const times = parseList(user.digest_times, cfg.default_times);
-  const slots = [];   // every digest time of the user in the last 24 h (zones have 15-minute offsets at most)
-  for (let t = Math.ceil((now - 86400) / 900) * 900; t <= now; t += 900) {
+  const slots = [];   // every digest time of the user in the last `hours` (zones have 15-minute offsets at most)
+  for (let t = Math.ceil((now - hours * 3600) / 900) * 900; t <= now; t += 900) {
     const p = localParts(t, tz);
     if (p.minute === 0 && times.includes(hhmm(p))) slots.push(t);
   }
@@ -99,7 +99,9 @@ async function windows(db, user, topics, now, cfg) {
     for (const s of plan.stories) byTopic[s.primary] = (byTopic[s.primary] ?? 0) + 1;
     const label = partial && i === slots.length - 1 ? `now ${hhmm(localParts(end, tz))} (window still open)` : hhmm(localParts(end, tz));
     summary.push({ at: label, candidates: cands.length, stories: plan.stories.length, byTopic,
-      parts: plan.parts.length, chars: plan.parts.map(visibleLength) });
+      parts: plan.parts.length, chars: plan.parts.map(visibleLength),
+      armenia: plan.stories.filter((s) => parseList(s.topics).includes("armenia"))
+        .map((s) => `[${storyScore(s, cfg)}${s.topic_score != null ? `/t${s.topic_score}` : ""}] ${s.headline || s.summary}`) });
     console.log(`\n=== digest at ${label} (${tz}), window from ${hhmm(localParts(from, tz))}: ` +
       `${plan.stories.length} stories from ${cands.length} candidates >= topic bar, ${plan.parts.length} message(s)`);
     for (const s of plan.stories) {
@@ -132,13 +134,43 @@ async function main() {
     id: owner, topics: JSON.stringify(topics.map((t) => t.tag)), first_name: "",
     timezone: CONFIG.default_timezone, digest_times: JSON.stringify(CONFIG.default_times), last_digest_at: null,
   };
-  const bars = arg("--bars");
-  const cfg = bars ? { ...CONFIG, editorial_bar: Number(bars.split(",")[0]), topic_bar: Number(bars.split(",")[1]) } : CONFIG;
+  // --bars 7,6 or several: --bars "7,5;7,6;7,7" (editorial,topic)
+  const barSets = (arg("--bars") ?? `${CONFIG.editorial_bar},${CONFIG.topic_bar}`).split(";")
+    .map((b) => ({ ...CONFIG, editorial_bar: Number(b.split(",")[0]), topic_bar: Number(b.split(",")[1]) }));
+  const cfg = barSets[0];
 
   if (process.argv.includes("--windows")) {
-    const s = await windows(db, user, topics, now, cfg);
-    console.log(`\nbars ${cfg.editorial_bar}/${cfg.topic_bar}: ` + s.map((w) => `${w.at} ${w.stories} (${Object.entries(w.byTopic)
-      .map(([k, v]) => `${k} ${v}`).join(", ")})`).join(" | "));
+    // --profile owner|dad|armenia3h|all6h|all (default owner); --hours 48 (default 24)
+    const allTags = JSON.stringify(topics.map((t) => t.tag));
+    const yerevan = "Asia/Yerevan";
+    const PROFILES = {
+      owner: user,
+      dad: { ...user, id: 0, first_name: "Dad", topics: allTags, timezone: yerevan,
+             digest_times: JSON.stringify(["09:00", "14:00", "20:00"]) },
+      armenia3h: { ...user, id: 0, first_name: "Ani", topics: JSON.stringify(["armenia"]), timezone: yerevan,
+                   digest_times: JSON.stringify(["09:00", "12:00", "15:00", "18:00", "21:00"]) },
+      all6h: { ...user, id: 0, first_name: "Sam", topics: allTags, timezone: yerevan,
+               digest_times: JSON.stringify(["06:00", "12:00", "18:00"]) },
+    };
+    const want = arg("--profile", "owner");
+    const names = want === "all" ? Object.keys(PROFILES) : [want];
+    const hours = Number(arg("--hours", "24"));
+    const lines = [];
+    for (const name of names) {
+      for (const c of barSets) {
+        const s = await windows(db, PROFILES[name], topics, now, c, hours);
+        const sizes = s.map((w) => w.stories);
+        const arm = s.reduce((n, w) => n + w.armenia.length, 0);
+        lines.push(`\n## ${name}, bars ${c.editorial_bar}/${c.topic_bar}, last ${hours} h: ${s.length} digests, sizes ` +
+          `${sizes.join(" ")} (avg ${(sizes.reduce((a, b) => a + b, 0) / (sizes.length || 1)).toFixed(1)}, max ${Math.max(0, ...sizes)}), ` +
+          `Armenia stories ${arm}, messages ${s.map((w) => w.parts).join(" ")}, chars ${s.map((w) => w.chars.join("+")).join(" ")}`);
+        for (const w of s) {
+          lines.push(`  ${w.at}: ${w.stories} (${Object.entries(w.byTopic).map(([k, v]) => `${k} ${v}`).join(", ")})`);
+          for (const a of w.armenia) lines.push(`      AM ${a}`);
+        }
+      }
+    }
+    console.log(`\n# SUMMARY\n${lines.join("\n")}`);
     return;
   }
 

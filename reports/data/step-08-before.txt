@@ -1,0 +1,238 @@
+
+=== digest at 17:00 (Asia/Dubai), window from 12:00: 0 stories from 0 candidates >= topic bar, 1 message(s)
+
+=== digest at 20:00 (Asia/Dubai), window from 17:00: 4 stories from 20 candidates >= topic bar, 1 message(s)
+  [7, topic's best] wars_conflicts: 🇷🇺🇫🇮🇺🇦 Russia demands Finland leave NATO and full control of Donbas
+  [7] wars_conflicts: 🇺🇦🇷🇺🛢️ Ukrainian strikes target Russian oil facilities and military airfield
+  [7, topic's best] armenia: 🇦🇲🇷🇺🏛️ CSTO strips Armenia of voting rights
+  [6, topic's best] iran_war: 🇮🇱🇺🇸🗣️ Mossad chief visits Washington to discuss Iran regional tensions
+
+=== digest at 06:00 (Asia/Dubai), window from 20:00: 3 stories from 17 candidates >= topic bar, 1 message(s)
+  [8, topic's best] iran_war: 🇺🇸🇷🇺🇨🇳🤝 Trump to meet with Xi and Putin in China on November 19
+  [7] iran_war: 🇮🇷🚢💥 Two oil tankers hit naval mines south of Strait of Hormuz
+  [7, topic's best] wars_conflicts: 🇹🇷🇶🇦🤝 Turkey and Qatar sign mutual defence agreement
+
+=== digest at 09:00 (Asia/Dubai), window from 06:00: 1 stories from 1 candidates >= topic bar, 1 message(s)
+  [6, topic's best] armenia: 🇪🇺🇦🇲🗣️ European leaders reaffirm support for Armenia sovereignty in Dublin
+
+=== digest at 12:00 (Asia/Dubai), window from 09:00: 2 stories from 2 candidates >= topic bar, 1 message(s)
+  [7, topic's best] armenia: 🇦🇲🇹🇷🤝 Armenia and Turkey are close to establishing diplomatic relations, Pashinyan says
+  [6, topic's best] wars_conflicts: 🇺🇦💥 Russian strikes hit railway locomotives and electrical substation in Ukraine
+
+=== digest at 17:00 (Asia/Dubai), window from 12:00: 3 stories from 18 candidates >= topic bar, 1 message(s)
+  [6, topic's best] iran_war: 🇺🇸🇮🇷🗣️ Trump tells advisers he may hold off on Iran attacks barring new provocations
+  [6, topic's best] wars_conflicts: 🇺🇸🇺🇦🇷🇺🤝 US envoys begin preparing large prisoner swap between Ukraine and Russia
+  [6, topic's best] armenia: 🇦🇲⚖️ Supreme Judicial Council suspends powers of judges Masis Melkonyan and Gevorg Poghosyan
+
+=== digest at 20:00 (Asia/Dubai), window from 17:00: 3 stories from 11 candidates >= topic bar, 1 message(s)
+  [6, topic's best] wars_conflicts: 🇷🇴🚢💥 Drone attacks cargo ship in Romanian territorial waters
+  [6, topic's best] iran_war: 🇮🇷🇺🇸✈️ Iran says it shot down US MQ-1 drone over Qeshm Island
+  [6, topic's best] armenia: 🇦🇲⚖️ Armenia's Prosecutor General seeks to strip two judges of immunity
+
+=== digest at 06:00 (Asia/Dubai), window from 20:00: 3 stories from 14 candidates >= topic bar, 1 message(s)
+  [7, topic's best] wars_conflicts: 🇷🇺🇺🇦🚢 Russian military strikes Chornomorsk port infrastructure and cargo ship
+  [7] wars_conflicts: 🇲🇲💥 Myanmar military airstrike kills 12 at displacement camp in Rakhine state
+  [7, topic's best] iran_war: 🇸🇦🇵🇸🏥 Eighteen Arab and Islamic countries condemn Israeli strike on Gaza hospital
+
+=== digest at 09:00 (Asia/Dubai), window from 06:00: 2 stories from 3 candidates >= topic bar, 1 message(s)
+  [6, topic's best] wars_conflicts: 🇷🇺🇺🇦🛢️ Ukrainian drone strikes hit industrial facilities in Tatarstan and Bryansk
+  [6, topic's best] iran_war: 🇸🇦🇾🇪🚀 Saudi-led coalition intercepts Houthi ballistic missiles
+
+=== digest at 12:00 (Asia/Dubai), window from 09:00: 2 stories from 5 candidates >= topic bar, 1 message(s)
+  [7, topic's best] wars_conflicts: 🇺🇦🇷🇺💥 Russian glide bombs destroy fortified underground school in Zaporizhzhia
+  [6, topic's best] iran_war: 🇮🇷🇧🇭💥 Iran says it targeted US radar site in Bahrain with six drones
+
+=== digest at now 16:15 (window still open) (Asia/Dubai), window from 12:00: 2 stories from 8 candidates >= topic bar, 1 message(s)
+  [7, topic's best] iran_war: 🇧🇭🇮🇷💥 Bahrain intercepts two Iranian drone barrages after months of calm
+  [6, topic's best] wars_conflicts: 🇯🇴⚖️ Jordanian court sentences three men to death for church shooting
+
+=== digest at 20:00 (Asia/Yerevan), window from 14:00: 8 stories from 25 candidates >= topic bar, 1 message(s)
+  [7, topic's best] ukraine_war: 🇷🇺🇫🇮🇺🇦 Russia demands Finland leave NATO and full control of Donbas
+  [7] ukraine_war: 🇺🇦🇷🇺🛢️ Ukrainian strikes target Russian oil facilities and military airfield
+  [7] ukraine_war: 🇺🇦🇷🇺💥 Russian strikes across Ukraine injure dozens, including children in Zaporizhzhia
+  [7, topic's best] wars_conflicts: 🇵🇸🏥💥 Israeli strike on Gaza hospital kills six
+  [7, topic's best] armenia: 🇦🇲🇷🇺🏛️ CSTO strips Armenia of voting rights
+  [7, topic's best] russia: 🇷🇺🚗💥 Moscow car bomb severely injures former aide to ex-prime minister
+  [6, topic's best] politics: 🇪🇺🇷🇺🗣️ Europe struggles over representation in talks as Russia demands security discussions
+  [6, topic's best] iran_war: 🇮🇱🇺🇸🗣️ Mossad chief visits Washington to discuss Iran regional tensions
+
+=== digest at 09:00 (Asia/Yerevan), window from 20:00: 7 stories from 25 candidates >= topic bar, 1 message(s)
+  [8, topic's best] politics: 🇺🇸🇷🇺🇨🇳🤝 Trump to meet with Xi and Putin in China on November 19
+  [7, topic's best] iran_war: 🇮🇷🚢💥 Two oil tankers hit naval mines south of Strait of Hormuz
+  [7, topic's best] wars_conflicts: 🇹🇷🇶🇦🤝 Turkey and Qatar sign mutual defence agreement
+  [7] politics: 🇺🇸⚖️ US Supreme Court to hear appeal on southern border asylum ban
+  [6, topic's best] armenia: 🇪🇺🇦🇲🗣️ European leaders reaffirm support for Armenia sovereignty in Dublin
+  [6, topic's best] ukraine_war: 🇷🇺🇺🇦💥 Ukrainian drone strike in Belgorod region kills three
+  [6, topic's best] russia: 🇪🇺🇷🇺💰 EU to soon present 22nd sanctions package against Russia
+
+=== digest at 14:00 (Asia/Yerevan), window from 09:00: 5 stories from 19 candidates >= topic bar, 1 message(s)
+  [7, topic's best] armenia: 🇦🇲🇹🇷🤝 Armenia and Turkey are close to establishing diplomatic relations, Pashinyan says
+  [6, topic's best] politics: 🇺🇸🗳️🏛️ Democrat Jonathan Kreiss-Tomkins wins Alaska governor race
+  [6, topic's best] ukraine_war: 🇺🇸🇺🇦🇷🇺🤝 US envoys begin preparing large prisoner swap between Ukraine and Russia
+  [6, topic's best] wars_conflicts: 🇺🇰🇷🇺⚡ Russian strike leaves nearly 50,000 without power in Odessa Oblast
+  [6, topic's best] russia: 🇷🇺⚖️🏛️ Russian court sentences defense lawyer Maria Bonzler to 12 years
+
+=== digest at 20:00 (Asia/Yerevan), window from 14:00: 6 stories from 25 candidates >= topic bar, 1 message(s)
+  [6, topic's best] iran_war: 🇺🇸🇮🇷🗣️ Trump tells advisers he may hold off on Iran attacks barring new provocations
+  [6, topic's best] wars_conflicts: 🇷🇴🚢💥 Drone attacks cargo ship in Romanian territorial waters
+  [6, topic's best] politics: 🇭🇺💰 Hungarian authorities seize millions in hidden cash from former official
+  [6, topic's best] armenia: 🇦🇲⚖️ Supreme Judicial Council suspends powers of judges Masis Melkonyan and Gevorg Poghosyan
+  [6, topic's best] ukraine_war: 🇺🇦🇷🇺🛢️ Russian drone strikes hit Naftogaz facility in Poltava region
+  [6, topic's best] russia: 🇺🇦🇷🇺💥 Ukrainian drone and shelling attacks in Belgorod and Bryansk regions cause casualties
+
+=== digest at 09:00 (Asia/Yerevan), window from 20:00: 5 stories from 24 candidates >= topic bar, 1 message(s)
+  [7, topic's best] ukraine_war: 🇷🇺🇺🇦🚢 Russian military strikes Chornomorsk port infrastructure and cargo ship
+  [7, topic's best] wars_conflicts: 🇲🇲💥 Myanmar military airstrike kills 12 at displacement camp in Rakhine state
+  [7, topic's best] iran_war: 🇸🇦🇵🇸🏥 Eighteen Arab and Islamic countries condemn Israeli strike on Gaza hospital
+  [6, topic's best] politics: 🇺🇸🚀 SpaceX successfully catches Starship rocket upper stage with launch tower arms
+  [6, topic's best] russia: 🇷🇺🇺🇦🛢️ Ukrainian drone strikes hit industrial facilities in Tatarstan and Bryansk
+
+=== digest at 14:00 (Asia/Yerevan), window from 09:00: 5 stories from 11 candidates >= topic bar, 1 message(s)
+  [7, topic's best] ukraine_war: 🇺🇦🇷🇺💥 Russian glide bombs destroy fortified underground school in Zaporizhzhia
+  [6, topic's best] russia: 🇷🇺💥🚂 Drone attack kills substation engineer and halts trains in Russia's Rostov region
+  [6, topic's best] wars_conflicts: 🇯🇴⚖️ Jordanian court sentences three men to death for church shooting
+  [6, topic's best] iran_war: 🇾🇪🚢 Yemeni government forces withdraw from Bab el-Mandeb Strait area
+  [6, topic's best] politics: 🇮🇷🇧🇭💥 Iran says it targeted US radar site in Bahrain with six drones
+
+=== digest at now 16:15 (window still open) (Asia/Yerevan), window from 14:00: 4 stories from 4 candidates >= topic bar, 1 message(s)
+  [7, topic's best] iran_war: 🇧🇭🇮🇷💥 Bahrain intercepts two Iranian drone barrages after months of calm
+  [6, topic's best] ukraine_war: 🇷🇺🇪🇺🇺🇦 Russia says Ukraine peace talks will be structured to meet military goals
+  [6, topic's best] politics: 🇨🇿🏛️ Hundreds of thousands protest in Prague over media license fee plans
+  [6, topic's best] russia: 🇷🇺🇺🇦🚨 Russian report claims lifting of unspoken ban on targeting Zelenskyy
+
+=== digest at 18:00 (Asia/Yerevan), window from 15:00: 0 stories from 0 candidates >= topic bar, 1 message(s)
+
+=== digest at 21:00 (Asia/Yerevan), window from 18:00: 1 stories from 2 candidates >= topic bar, 1 message(s)
+  [7, topic's best] armenia: 🇦🇲🇷🇺🏛️ CSTO strips Armenia of voting rights
+
+=== digest at 09:00 (Asia/Yerevan), window from 21:00: 1 stories from 1 candidates >= topic bar, 1 message(s)
+  [6, topic's best] armenia: 🇪🇺🇦🇲🗣️ European leaders reaffirm support for Armenia sovereignty in Dublin
+
+=== digest at 12:00 (Asia/Yerevan), window from 09:00: 1 stories from 1 candidates >= topic bar, 1 message(s)
+  [7, topic's best] armenia: 🇦🇲🇹🇷🤝 Armenia and Turkey are close to establishing diplomatic relations, Pashinyan says
+
+=== digest at 15:00 (Asia/Yerevan), window from 12:00: 0 stories from 0 candidates >= topic bar, 1 message(s)
+
+=== digest at 18:00 (Asia/Yerevan), window from 15:00: 1 stories from 3 candidates >= topic bar, 1 message(s)
+  [6, topic's best] armenia: 🇦🇲⚖️ Supreme Judicial Council suspends powers of judges Masis Melkonyan and Gevorg Poghosyan
+
+=== digest at 21:00 (Asia/Yerevan), window from 18:00: 0 stories from 0 candidates >= topic bar, 1 message(s)
+
+=== digest at 09:00 (Asia/Yerevan), window from 21:00: 0 stories from 0 candidates >= topic bar, 1 message(s)
+
+=== digest at 12:00 (Asia/Yerevan), window from 09:00: 0 stories from 0 candidates >= topic bar, 1 message(s)
+
+=== digest at 15:00 (Asia/Yerevan), window from 12:00: 0 stories from 0 candidates >= topic bar, 1 message(s)
+
+=== digest at now 16:15 (window still open) (Asia/Yerevan), window from 15:00: 0 stories from 0 candidates >= topic bar, 1 message(s)
+
+=== digest at 18:00 (Asia/Yerevan), window from 12:00: 0 stories from 0 candidates >= topic bar, 1 message(s)
+
+=== digest at 06:00 (Asia/Yerevan), window from 18:00: 10 stories from 49 candidates >= topic bar, 1 message(s)
+  [8, topic's best] politics: 🇺🇸🇷🇺🇨🇳🤝 Trump to meet with Xi and Putin in China on November 19
+  [7, topic's best] ukraine_war: 🇷🇺🇫🇮🇺🇦 Russia demands Finland leave NATO and full control of Donbas
+  [7] ukraine_war: 🇺🇦🇷🇺🛢️ Ukrainian strikes target Russian oil facilities and military airfield
+  [7, topic's best] iran_war: 🇮🇷🚢💥 Two oil tankers hit naval mines south of Strait of Hormuz
+  [7, topic's best] wars_conflicts: 🇹🇷🇶🇦🤝 Turkey and Qatar sign mutual defence agreement
+  [7] ukraine_war: 🇺🇦🇷🇺💥 Russian strikes across Ukraine injure dozens, including children in Zaporizhzhia
+  [7] politics: 🇺🇸⚖️ US Supreme Court to hear appeal on southern border asylum ban
+  [7] wars_conflicts: 🇵🇸🏥💥 Israeli strike on Gaza hospital kills six
+  [7, topic's best] armenia: 🇦🇲🇷🇺🏛️ CSTO strips Armenia of voting rights
+  [7, topic's best] russia: 🇷🇺🚗💥 Moscow car bomb severely injures former aide to ex-prime minister
+
+=== digest at 12:00 (Asia/Yerevan), window from 06:00: 4 stories from 6 candidates >= topic bar, 1 message(s)
+  [7, topic's best] armenia: 🇦🇲🇹🇷🤝 Armenia and Turkey are close to establishing diplomatic relations, Pashinyan says
+  [6, topic's best] politics: 🇺🇸🗳️🏛️ Democrat Jonathan Kreiss-Tomkins wins Alaska governor race
+  [6, topic's best] russia: 🇷🇺⚖️🏛️ Russian court sentences defense lawyer Maria Bonzler to 12 years
+  [6, topic's best] ukraine_war: 🇺🇦💥 Russian strikes hit railway locomotives and electrical substation in Ukraine
+
+=== digest at 18:00 (Asia/Yerevan), window from 12:00: 6 stories from 34 candidates >= topic bar, 1 message(s)
+  [6, topic's best] iran_war: 🇺🇸🇮🇷🗣️ Trump tells advisers he may hold off on Iran attacks barring new provocations
+  [6, topic's best] wars_conflicts: 🇷🇴🚢💥 Drone attacks cargo ship in Romanian territorial waters
+  [6, topic's best] ukraine_war: 🇺🇸🇺🇦🇷🇺🤝 US envoys begin preparing large prisoner swap between Ukraine and Russia
+  [6, topic's best] politics: 🇭🇺💰 Hungarian authorities seize millions in hidden cash from former official
+  [6, topic's best] armenia: 🇦🇲⚖️ Supreme Judicial Council suspends powers of judges Masis Melkonyan and Gevorg Poghosyan
+  [6, topic's best] russia: 🇺🇦🇷🇺💥 Ukrainian drone and shelling attacks in Belgorod and Bryansk regions cause casualties
+
+=== digest at 06:00 (Asia/Yerevan), window from 18:00: 5 stories from 26 candidates >= topic bar, 1 message(s)
+  [7, topic's best] ukraine_war: 🇷🇺🇺🇦🚢 Russian military strikes Chornomorsk port infrastructure and cargo ship
+  [7, topic's best] wars_conflicts: 🇲🇲💥 Myanmar military airstrike kills 12 at displacement camp in Rakhine state
+  [7, topic's best] iran_war: 🇸🇦🇵🇸🏥 Eighteen Arab and Islamic countries condemn Israeli strike on Gaza hospital
+  [6, topic's best] politics: 🇺🇸🚀 SpaceX successfully catches Starship rocket upper stage with launch tower arms
+  [6, topic's best] russia: 🇺🇸🇷🇺🇪🇺🗣️ US envoy Kushner calls for direct Russia-Europe talks on Ukraine
+
+=== digest at 12:00 (Asia/Yerevan), window from 06:00: 5 stories from 9 candidates >= topic bar, 1 message(s)
+  [7, topic's best] ukraine_war: 🇺🇦🇷🇺💥 Russian glide bombs destroy fortified underground school in Zaporizhzhia
+  [6, topic's best] russia: 🇷🇺🇺🇦🛢️ Ukrainian drone strikes hit industrial facilities in Tatarstan and Bryansk
+  [6, topic's best] wars_conflicts: 🇷🇺💥🚂 Drone attack kills substation engineer and halts trains in Russia's Rostov region
+  [6, topic's best] iran_war: 🇮🇷🇧🇭💥 Iran says it targeted US radar site in Bahrain with six drones
+  [6, topic's best] politics: 🇦🇺🇵🇭🤝 Australia and Philippines sign defense cooperation arrangement in Manila
+
+=== digest at now 16:15 (window still open) (Asia/Yerevan), window from 12:00: 5 stories from 9 candidates >= topic bar, 1 message(s)
+  [7, topic's best] iran_war: 🇧🇭🇮🇷💥 Bahrain intercepts two Iranian drone barrages after months of calm
+  [6, topic's best] wars_conflicts: 🇯🇴⚖️ Jordanian court sentences three men to death for church shooting
+  [6, topic's best] ukraine_war: 🇷🇺🇪🇺🇺🇦 Russia says Ukraine peace talks will be structured to meet military goals
+  [6, topic's best] politics: 🇨🇿🏛️ Hundreds of thousands protest in Prague over media license fee plans
+  [6, topic's best] russia: 🇺🇦🇷🇺💥 Russian strikes across Ukraine damage energy and port infrastructure
+
+# SUMMARY
+
+## owner, bars 7/6, last 48 h: 11 digests, sizes 0 4 3 1 2 3 3 3 2 2 2 (avg 2.3, max 4), Armenia stories 5, messages 1 1 1 1 1 1 1 1 1 1 1, chars 80 991 777 308 615 934 897 768 538 591 619
+  17:00: 0 ()
+  20:00: 4 (wars_conflicts 2, armenia 1, iran_war 1)
+      AM [7] CSTO strips Armenia of voting rights
+  06:00: 3 (iran_war 2, wars_conflicts 1)
+  09:00: 1 (armenia 1)
+      AM [6] European leaders reaffirm support for Armenia sovereignty in Dublin
+  12:00: 2 (armenia 1, wars_conflicts 1)
+      AM [7] Armenia and Turkey are close to establishing diplomatic relations, Pashinyan says
+  17:00: 3 (iran_war 1, wars_conflicts 1, armenia 1)
+      AM [6] Supreme Judicial Council suspends powers of judges Masis Melkonyan and Gevorg Poghosyan
+  20:00: 3 (wars_conflicts 1, iran_war 1, armenia 1)
+      AM [6] Armenia's Prosecutor General seeks to strip two judges of immunity
+  06:00: 3 (wars_conflicts 2, iran_war 1)
+  09:00: 2 (wars_conflicts 1, iran_war 1)
+  12:00: 2 (wars_conflicts 1, iran_war 1)
+  now 16:15 (window still open): 2 (iran_war 1, wars_conflicts 1)
+
+## dad, bars 7/6, last 48 h: 7 digests, sizes 8 7 5 6 5 5 4 (avg 5.7, max 8), Armenia stories 4, messages 1 1 1 1 1 1 1, chars 2087 1768 1307 1744 1272 1353 1160
+  20:00: 8 (ukraine_war 3, wars_conflicts 1, armenia 1, russia 1, politics 1, iran_war 1)
+      AM [7] CSTO strips Armenia of voting rights
+  09:00: 7 (politics 2, iran_war 1, wars_conflicts 1, armenia 1, ukraine_war 1, russia 1)
+      AM [6] European leaders reaffirm support for Armenia sovereignty in Dublin
+  14:00: 5 (armenia 1, politics 1, ukraine_war 1, wars_conflicts 1, russia 1)
+      AM [7] Armenia and Turkey are close to establishing diplomatic relations, Pashinyan says
+  20:00: 6 (iran_war 1, wars_conflicts 1, politics 1, armenia 1, ukraine_war 1, russia 1)
+      AM [6] Supreme Judicial Council suspends powers of judges Masis Melkonyan and Gevorg Poghosyan
+  09:00: 5 (ukraine_war 1, wars_conflicts 1, iran_war 1, politics 1, russia 1)
+  14:00: 5 (ukraine_war 1, russia 1, wars_conflicts 1, iran_war 1, politics 1)
+  now 16:15 (window still open): 4 (iran_war 1, ukraine_war 1, politics 1, russia 1)
+
+## armenia3h, bars 7/6, last 48 h: 11 digests, sizes 0 1 1 1 0 1 0 0 0 0 0 (avg 0.4, max 1), Armenia stories 4, messages 1 1 1 1 1 1 1 1 1 1 1, chars 77 255 308 307 80 303 77 77 79 80 79
+  18:00: 0 ()
+  21:00: 1 (armenia 1)
+      AM [7] CSTO strips Armenia of voting rights
+  09:00: 1 (armenia 1)
+      AM [6] European leaders reaffirm support for Armenia sovereignty in Dublin
+  12:00: 1 (armenia 1)
+      AM [7] Armenia and Turkey are close to establishing diplomatic relations, Pashinyan says
+  15:00: 0 ()
+  18:00: 1 (armenia 1)
+      AM [6] Supreme Judicial Council suspends powers of judges Masis Melkonyan and Gevorg Poghosyan
+  21:00: 0 ()
+  09:00: 0 ()
+  12:00: 0 ()
+  15:00: 0 ()
+  now 16:15 (window still open): 0 ()
+
+## all6h, bars 7/6, last 48 h: 7 digests, sizes 0 10 4 6 5 5 5 (avg 5.0, max 10), Armenia stories 3, messages 1 1 1 1 1 1 1, chars 78 2510 1118 1694 1258 1418 1464
+  18:00: 0 ()
+  06:00: 10 (politics 2, ukraine_war 3, iran_war 1, wars_conflicts 2, armenia 1, russia 1)
+      AM [7] CSTO strips Armenia of voting rights
+  12:00: 4 (armenia 1, politics 1, russia 1, ukraine_war 1)
+      AM [7] Armenia and Turkey are close to establishing diplomatic relations, Pashinyan says
+  18:00: 6 (iran_war 1, wars_conflicts 1, ukraine_war 1, politics 1, armenia 1, russia 1)
+      AM [6] Supreme Judicial Council suspends powers of judges Masis Melkonyan and Gevorg Poghosyan
+  06:00: 5 (ukraine_war 1, wars_conflicts 1, iran_war 1, politics 1, russia 1)
+  12:00: 5 (ukraine_war 1, russia 1, wars_conflicts 1, iran_war 1, politics 1)
+  now 16:15 (window still open): 5 (iran_war 1, wars_conflicts 1, ukraine_war 1, politics 1, russia 1)

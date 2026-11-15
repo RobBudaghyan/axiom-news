@@ -31,6 +31,9 @@ MIGRATIONS = [
     "ALTER TABLE job_runs ADD COLUMN editor_merged INTEGER",
     "ALTER TABLE ai_calls ADD COLUMN kind TEXT",
     "ALTER TABLE stories ADD COLUMN main_topic TEXT",
+    # Step 8: the dynamic digest
+    "ALTER TABLE stories ADD COLUMN topic_score INTEGER",
+    "ALTER TABLE stories ADD COLUMN scored_at INTEGER",
 ]
 
 
