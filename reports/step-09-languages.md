@@ -139,7 +139,8 @@ it right; your only change was сводка for "digest", now done.
   (`i18n.js`, 17 KB, cached), not from the Worker.
 - On Cloudflare (`wrangler tail` on the new version): the first tick after the deploy, with no
   digest due, took **5 ms** (it includes the start-up: loading the code and the dictionaries;
-  Step 8's idle ticks took 2 ms, its first digest tick after a deploy 9 ms). **A tick that sends
+  Step 8's idle ticks took 2 ms, its first digest tick after a deploy 9 ms). The hourly trigger
+  tick took 3 ms, and 16 Mini App requests (15:09 to 15:10 UTC) took 0 to 6 ms each. **A tick that sends
   a Russian digest was not measured on Cloudflare:** nobody reads Russian now, and your next
   digest (20:00 your time) is in English. Estimate from the numbers above: start-up plus about
   0.1 ms more per Russian digest than an English one, so the same margin as Step 8. If
