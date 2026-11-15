@@ -3,11 +3,14 @@
 A Telegram news digest bot for a small private group (~20 people). Every hour it collects
 ~115 RSS news feeds, groups duplicate stories with one AI pass, then an "editor" AI pass compares
 the strongest stories side by side, merges duplicates, scores them strictly and writes the
-headlines. Each user gets a short digest of what clears the bar at their chosen times in their own
+headlines, and gives each story a global score and a topic score. Each user gets one message with
+what clears the bars for the topics they follow at their chosen times in their own
 time zone. It runs on free tiers only
 (GitHub Actions + Cloudflare Workers/D1 + Gemini, with Groq as fallback).
 
-**Status:** Step 5 done (the editor pass, new digest rules and format, Mini App in brand red).
+**Status:** Step 8 done (the dynamic digest: two scores, one message, no fixed size; see
+`reports/step-08-dynamic-digest.md`). Step 5 added the editor pass, the digest format and the
+red Mini App.
 Step 6 (a Google News coverage experiment) is paused. Step 7 added eight Armenian and
 Russian-language Armenian feeds and per-feed caps; see `reports/step-07-armenia-sources.md`. Everything runs in the cloud with the owner's PC off, still on the TEST
 bot: the Cloudflare Worker answers the bot, sends digests every 5 minutes, starts the hourly
@@ -22,7 +25,7 @@ for the design.
 |---|---|
 | `config/topics.yaml` | the 6 topics users can pick |
 | `config/sources.yaml` | the RSS feeds, with region/language/paywall/state-owned/tier labels; `enabled: false` switches one off |
-| `config/digest.json` | digest settings (editorial and topic bars, max 12 stories, 40% topic cap, dedupe threshold, users per tick, allowed times) |
+| `config/digest.json` | digest settings (editorial and topic bars, topic boost caps, the one-message length limit, dedupe threshold, users per tick, allowed times) |
 | `config/gnews_queries.yaml` | Step 6 experiment: Google News search terms per topic (paused: `enabled: false`) |
 | `config/candidates/armenia.yaml` | Step 7: Armenian feeds that were tested (the good ones are in `sources.yaml`) |
 | `config/line_emoji.json` | fallback line emojis when the editor gave none (names, capitals, groups, subjects) |
@@ -67,7 +70,12 @@ venv/Scripts/python -m job.dupes                              # show near-duplic
 cd worker && node scripts/digest-cli.mjs                      # print the owner's next digest (writes nothing)
 cd worker && node scripts/digest-cli.mjs --preview --dry      # print a preview of the last 24 h
 cd worker && node scripts/digest-cli.mjs --windows            # replay the owner's digests of the last 24 h (--bars 7,6)
+cd worker && node scripts/digest-cli.mjs --windows --profile all --hours 48 --bars "7,5;7,6;7,7"   # Step 8: four test readers
+cd worker && node scripts/digest-cli.mjs --cpu 800            # CPU time for 800 digests from full pools
+cd worker && node scripts/fold-test.mjs --dry                 # Step 8: the 5 fold test messages (drop --dry: send, TEST bot only)
 venv/Scripts/python -m job.editor --backfill                  # run the editor over the current pool (a few AI calls)
+venv/Scripts/python -m job.editor --backfill --topic-only --hours 48   # Step 8: topic scores only (writes nothing else)
+venv/Scripts/python -m job.editor --dry-run --fresh-sim --new 90       # Step 8: sandbox editor call, writes nothing
 cd worker && npm run deploy                                   # stamp the Mini App files, deploy the Worker
 cd worker && node scripts/dev-server.mjs                      # Mini App preview with demo data: localhost:8790/app/
 cd worker && node scripts/ui-check.mjs                        # click through the preview (start it first)

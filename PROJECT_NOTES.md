@@ -15,10 +15,15 @@ bot @axiom_news_bot at the end.
   last 24 h side by side (the best few of every topic always included), merges duplicates, gives
   a strict final score 1-10, the main topic, a one-sentence headline, a 1-3 sentence description
   (only facts from the articles) and 2-3 emojis. If it fails, digests use the first-pass data.
+  Step 8: it also gives a **topic score** (for followers of the main topic: the score plus a
+  boost, capped in code at 0 for Politics and Wars & Conflicts, 1 for the two wars, 2 for Armenia
+  and Russia), sees up to 90 new stories per call, and makes a second call on a backlog.
 - **Digests per user** at chosen local times (on the hour, 06:00-23:00, 1 to 5; defaults
-  09:00/14:00/20:00), time zone from the phone. No fixed count: stories with a final score of 7+,
-  plus each followed topic's best remaining story if it scores 6+; at most 12; 40% topic cap
-  (at least 2). Building a digest is a database filter with no AI. The same story is never sent
+  09:00/14:00/20:00), time zone from the phone. **No fixed count (Step 8):** a story is in if its
+  final score is 7+, or its main topic is followed and its topic score is 6+ and above its final
+  score. No maximum, no topic cap: the digest is ONE message of at most 3,900 characters (never
+  folded behind "Show more"); if longer, the lowest-ranked stories are cut, keeping each followed
+  topic's best story. Building a digest is a database filter with no AI. The same story is never sent
   to a user twice; if nothing qualifies, a short "quiet period" note.
 - **Topics:** Politics, Wars & Conflicts, Armenia, Russia, Iran war, Ukraine war. English only,
   designed so Russian can be added later.
@@ -34,7 +39,7 @@ bot @axiom_news_bot at the end.
   stories for you:" (12-hour time, first name from Telegram; "In the last 24 hours" the first
   time). Topic headings: emoji + bold underlined name. Each story: `N. <emojis> <b>headline</b>`,
   blank line, the description, then the outlet name alone as a link. Numbering runs on across
-  topics. A digest over Telegram's 4,096 characters is split into two messages at a topic heading.
+  topics. Always one message (Step 8; the split into two is gone).
   HTML, link previews off, never an em dash. The editor's emojis; the word-rule emojis of
   `config/line_emoji.json` are only a fallback.
 
@@ -86,6 +91,15 @@ bot @axiom_news_bot at the end.
 | 2026-11-14 | Per-feed cap `max_items` in `sources.yaml` (default 8): News.am Russian and 168.am 20, A1+ 12, Factor.am and Aravot 10; what a cap cuts is logged and kept in `feed_health.cut` | busiest Armenian feeds publish up to ~14 items in an hour; the 8 cap is still right for the rest |
 | 2026-11-14 | Prefer English links (owner): in a merge, the story's current link is scored like a new article, so an English article that matches the summary takes over from a Russian/Armenian one | new stories already ranked a matching English title first; merges assumed the old link was perfect |
 | 2026-11-14 | `ai.estimate_tokens` counts Armenian at 1.6 characters per token | it counted 2.5, 44% too low, so chunks of Armenian items would have been larger than planned |
+| 2026-11-15 | Editor coverage: up to 90 new stories per call (was 45), a 2nd call in the same run only while unscored ones remain (not after Groq), Armenia candidates from first-pass 3 (Step 8) | measured: 97% of 4+ stories were scored, but 13 of 24 runs were full and 58 stories waited 3+ h; a 90-candidate sandbox call covered 89 (19.2k in / 8.4k out), one call instead of two |
+| 2026-11-15 | `stories.scored_at`; a digest counts a story as new if it was updated OR first scored since the last digest | a story scored after a digest went out was lost for good (its `updated_at` was older than the next window) |
+| 2026-11-15 | Topic score = score + boost; the boost is capped in code per topic (0 Politics, 0 Wars & Conflicts, 1 Iran war, 1 Ukraine war, 2 Armenia, 2 Russia) | the first calibration put 148 stories a day at topic 6+ (43 Ukraine, 26 Iran); the model still lifts statements and routine war news |
+| 2026-11-15 | The topic path needs a real boost (`topic_needs_boost`: topic score above the global score) | without it every global-6 story reaches its topic's followers; a reader of all topics got a full digest every time (13.7 avg, 97 cut in 48 h) |
+| 2026-11-15 | Bars 7 (editorial) and 6 (topic) (Step 8) | 48 h replay: Armenia-only reader 3.0 stories per digest (0.4 before), owner 5.0 (2.3), all topics 3x a day 12.1 (5.7); 7/7 gave the Armenia-only reader 0.9 |
+| 2026-11-15 | One message, at most 3,900 characters; the two-message split and `max_stories` removed | the owner's Android phone folded none of 5 test messages up to 3,993 characters; Telegram's blog: only bot rich messages fold (about 8,000); plain messages are capped at 4,096 |
+| 2026-11-15 | The 40% topic cap removed; the length cut keeps each followed topic's best story and breaks ties from the most crowded section | with no fixed size the cap held a one-topic reader to 2 stories; length is the real limit now |
+| 2026-11-15 | Unedited stories qualify only through the editorial bar | an editor outage must not flood digests with first-pass scores |
+| 2026-11-15 | Admin: average digest size per user over 24 h, from `sent` (rows of one digest share `sent_at`; merged-away stories skipped) | no new table; quiet notes are not counted |
 
 ## Current status
 - **Step 1 done:** repo, docs, topics, prompt, lessons, 116 verified feeds.
@@ -125,23 +139,20 @@ bot @axiom_news_bot at the end.
   and then 4 after; first-pass input tokens 31.9k -> 33.8k per run (+6%). None of the new Armenia
   stories would reach a digest under today's rules (they score 4-5). English links preferred in
   merges (owner). Details in `reports/step-07-armenia-sources.md`.
+- **Step 8 done (2026-11-15): the dynamic digest.** Two scores per story (global and topic),
+  bars 7/6, one message of at most 3,900 characters with a length cut, no maximum and no topic
+  cap; the editor sees up to 90 new stories per call and makes a second call on a backlog;
+  late-scored stories reach the next digest. 48 h replay: owner 5.0 stories per digest (2.3
+  before), Armenia-only reader 3.0 (0.4), reader of all topics 3x a day 12.1 (5.7). One-off: 26
+  rescore calls (439k in / 213k out) and 4 sandbox calls. Admin shows the average digest size.
+  Details in `reports/step-08-dynamic-digest.md`.
 - The owner is the only user.
 
 ## Next step
-**Step 8: the dynamic digest.** Owner decisions (2026-11-14):
-- No fixed story count.
-- The editor gives each story a **global score** and a **topic score**.
-- A story is included if its global score is high, OR it belongs to a topic the user follows and
-  its topic score passes a fixed bar.
-- No per-user depth setting.
-- A digest must never be long enough for Telegram to fold it behind "Show more"; the
-  lowest-scored stories are cut to fit.
-Input from Step 7: about 4-17 new Armenia stories an hour, mostly editor score 4-5; the editor sees
-at most 60 stories per run, so many are never scored (12 of 21 after 2 runs).
-
-After that: switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, then
-invite the first users). Later: custom topics (e.g. "Colombia") can reuse the paused Google News
-code (`job/gnews.py`, `job/shadow.py`).
+Switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, then invite the
+first users). Before that: a few days of real digests with the Step 8 rules, and a look at the
+fold on an iPhone if any user has one. Later: custom topics (e.g. "Colombia") can reuse the paused
+Google News code (`job/gnews.py`, `job/shadow.py`).
 
 ## Known issues / open questions
 - **Gemini 503 overloads** were frequent on 2026-11-13; fallback runs are slow (Groq ~1
@@ -151,10 +162,16 @@ code (`job/gnews.py`, `job/shadow.py`).
 - **Worker CPU is the tightest free limit** (10 ms). Watch Cloudflare's Metrics > Errors for
   `exceededCpu` once there are ~20 users.
 - **Duplicates:** the word-based check misses some; the editor now merges most of the rest
-  (14 merges in its first 45 candidates), but it sees at most 60 stories per run.
+  (14 merges in its first 45 candidates). The Step 8 replay still showed one pair in two windows
+  ("Pashinyan plans three visits to Russia").
 - **The editor decides what users see.** Its scores are whole numbers clustered at 5-6, so one
   point changes a digest a lot; it sometimes rates big off-topic stories high (the US flight
-  ground stop got a 7). Watch the first week and nudge the bars or prompt examples if needed.
+  ground stop got a 7). Step 8 topic scores: it still lifts some Armenia/Russia statements and
+  ceremonies by 1-2 points (capped at 2 in code). Readers of all six topics get long digests
+  (about 12 stories) on busy days. Watch the first week; the bars, caps and examples are config
+  and prompt changes.
+- **Fold limit checked on Android only.** iPhone and Telegram Desktop were not tested; the limit
+  (3,900) is under the hard 4,096 anyway.
 - **Line emojis** from word rules (`config/line_emoji.json`) are now only a fallback for stories
   the editor did not write emojis for.
 - **No usable feeds** from Reuters, AP (both blocked), Armenpress, 1lurer, Panorama, Shamshyan

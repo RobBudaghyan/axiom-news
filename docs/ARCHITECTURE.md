@@ -62,8 +62,8 @@ of logic lives in exactly one language:
   exactly the same way.
 - **Near-duplicate grouping:** `job/dupes.py` only. It runs in the job because the job has no CPU
   limit (see §8); the Worker reads the result (`stories.dup_group`).
-- **Shared settings:** `config/digest.json` is read by both (editorial and topic bars, max 12
-  stories, 40% cap, dedupe threshold, users per tick, allowed digest times).
+- **Shared settings:** `config/digest.json` is read by both (editorial and topic bars, the topic
+  boost caps, the one-message length limit, dedupe threshold, users per tick, allowed digest times).
 
 Tools: Node.js 26 LTS and `wrangler` (pinned in `worker/package.json`) deploy the Worker;
 `gh` manages the GitHub repo and its secrets.
@@ -123,14 +123,19 @@ Tools: Node.js 26 LTS and `wrangler` (pinned in `worker/package.json`) deploy th
    per run, after the near-duplicate grouping. Why: the first pass scores generously (in 24 h,
    364 of 424 politics stories scored 4 or more) and word-based grouping misses about 30% of
    duplicates, so ranking by its score buried small topics such as Armenia.
-   - **Candidates:** stories updated in the last 24 h, first-pass score >= 4, not merged away.
-     First the best 3 not-yet-edited stories of every topic (so Armenia is always seen), then the
-     strongest not-yet-edited ones, up to 45; then up to 15 already-edited stories with their
-     current score and headline, for comparison and merging. Each candidate shows its first-pass
+   - **Candidates:** stories updated in the last 24 h, first-pass score >= 4 (>= 3 for Armenia,
+     `editor_topic_floor`, Step 8), not merged away. First the best 3 not-yet-edited stories of
+     every topic (so Armenia is always seen), then the strongest not-yet-edited ones, up to **90**
+     (45 before Step 8; a sandbox call with 90 covered 89); then up to 15 already-edited stories
+     with their current score, topic score, main topic and headline, for comparison and merging.
+     **A second call in the same run** (`editor_max_calls` 2) only while unscored candidates remain
+     (a busy hour, or ids the answer left out), and not after a fall back to Groq. Each candidate shows its first-pass
      summary and its best 3 articles (`source, tier | title :: snippet`). **The first-pass score is
      not shown:** with it, the editor copied it for almost every story (lesson 27).
    - **Output** (JSON schema): events, each with the candidate ids it covers (several ids = a
-     merge), a strict `score` 1-10, the main `topic`, a `headline` (present tense, at most 14
+     merge), a strict `score` 1-10, the main `topic`, a `topic_score` (Step 8: for followers of
+     that topic, the score plus a boost: +0 for most events and for the broad topics, at most +1
+     for the two wars, +1/+2 for real Armenia and Russia news; never below the score), a `headline` (present tense, at most 14
      words), a 1-3 sentence `description` (only facts from the given articles) and 2-4 `emojis`
      (flags of the main actors, then a subject emoji). The prompt anchors every score level with
      real examples and says that about 15-25 stories a day worldwide reach 7.
@@ -156,36 +161,46 @@ Tools: Node.js 26 LTS and `wrangler` (pinned in `worker/package.json`) deploy th
      first-pass data (below).
    - **Measured** (2026-11-14, Gemini `gemini-3.5-flash-lite`): 45-60 candidates, 6.5-12.5k input
      and 2.5-6.2k output tokens per call, 10-30 s. On GitHub: 60 candidates, 10.1k in, 4.9k out.
+     Step 8 sandbox (2026-11-15, with the topic score): 45 candidates 11.0k in / 4.4k out, 90
+     candidates 19.2k in / 8.4k out. `stories.scored_at` keeps the time of the first score.
 7. **Digests.** The Worker cron runs every 5 minutes and takes up to 8 users whose
    `next_digest_at <= now` (earliest first; the rest go at the next tick). For each user:
-   1. **Candidates (SQL):** on one of their topics, not merged away, a score of at least the
-      **topic bar**, created or updated since the last digest (at most 24 h back), **not in
-      `sent`**, best score first, then most recent; at most 40. The score is the editor's
-      `final_score`; a story the editor has not scored uses its first-pass importance minus
-      `unedited_offset` (2), so digests keep working, more thinly, when the editor is down.
-   2. **Pick (JS, `pickStories`), no fixed count** (`config/digest.json`):
-      - every story that clears the **editorial bar** (7);
-      - every topic the user follows gets its own section: if no story above is shown under it,
-        its best *remaining* story is added if it clears the **topic bar** (6). "Remaining"
-        matters: a Trump-Putin-Xi summit is tagged politics, Russia, Iran war and wars, but it is
-        shown under one topic only;
-      - at most **12** stories, the guaranteed ones first;
-      - no topic may have more than `max(2, ceil(0.4 x N))` stories, N being the size actually
-        picked (recomputed until it holds, so 6 strong Ukraine stories and 2 politics ones give a
-        digest of 2 + 2);
-      - near-duplicates (`dup_group`) only once; nothing qualifies: the quiet note.
-      A story is shown under (and counted against) the editor's **main topic** if the user
-      follows it, otherwise its most specific topic among the user's (order in
-      `config/digest.json`: ukraine_war, iran_war, armenia, russia, wars_conflicts, politics).
-   3. Send the message(s), then write `sent` rows, `last_digest_at` (the slot time) and the next
+   1. **Candidates (SQL, the two-score rule, Step 8):** on one of their topics, not merged away,
+      **not in `sent`**, new since the last digest (at most 24 h back; "new" also counts
+      `scored_at`, so a story the editor scored after a digest went out reaches the next one), and
+      - its global score g >= the **editorial bar** (7), or
+      - its main topic is one the user follows, and its topic score t >= the **topic bar** (6) and
+        t > g (`topic_needs_boost`: the story matters more to followers than to everyone).
+
+      g is the editor's `final_score`; a story the editor has not scored uses its first-pass
+      importance minus `unedited_offset` (2) and has no topic path, so an editor outage cannot
+      flood digests. t is g plus the editor's boost, **capped per main topic in code**
+      (`topic_boost_max`: politics 0, wars_conflicts 0, iran_war 1, ukraine_war 1, armenia 2,
+      russia 2), because the model still lifted statements and routine war news. Best relevance
+      first (t if the main topic is followed, else g); at most 60. The same rule is in
+      `topicScore`/`qualifies` in JS, and a test checks both agree on random pools.
+   2. **Pick and cut (JS, `pickStories`, `fitToLength`), no fixed count, no topic cap:** every
+      qualifying story, near-duplicates (`dup_group`) once. Then the **length cut**: the digest is
+      ONE message of at most `message_char_limit` (3,900) visible characters. Each followed topic's
+      best story is kept while any other can go; otherwise the lowest relevance goes first (ties:
+      from the section with the most stories, then the lower g, then the older). Pieces are measured
+      once, numbers as two digits, so the estimate is never short. Cut stories are not marked sent
+      and do not come back (their window has passed). Nothing qualifies: the quiet note.
+      A story is shown under the editor's **main topic** if the user follows it, otherwise its
+      most specific topic among the user's (order in `config/digest.json`: ukraine_war, iran_war,
+      armenia, russia, wars_conflicts, politics).
+   3. Send the one message, then write `sent` rows, `last_digest_at` (the slot time) and the next
       `next_digest_at`.
 
-   **Tuning (2026-11-14, real pool, `node scripts/digest-cli.mjs --windows`).** The pool only
-   reached back 19 h (to 19:17 Yerevan the day before). With bars 7/6 the owner's digests (all six
-   topics) would have had 9 stories at 20:00 (a window holding the first run's 3-hour backlog), 9 at
-   09:00 and 5 by 12:39 for 14:00, with Armenia in each. 6/6 gave 12 (the maximum) every time; 8/6
-   gave 3. The editor's scores are whole numbers and cluster at 5-6, so 7/6 is the only setting
-   near the 4-8 target. Building a digest makes no AI call.
+   **Tuning (2026-11-15, 48 h replay, `node scripts/digest-cli.mjs --windows --profile all
+   --hours 48 --bars "7,5;7,6;7,7"`, `reports/data/step-08-after.txt`).** Bars 7/6 with the boost
+   rule: the owner's digests average 5.0 stories (2.3 under the Step 5 rules), a reader of all
+   topics at 09/14/20 12.1, an Armenia-only reader every 3 h 3.0 (0.4 before), and Armenia stories
+   in 48 h rose from 4 to 29-33. Without the boost rule, every global-6 story reached the followers
+   of its topic and readers of all topics got full digests every time. 7/7 lets almost no medium
+   Armenia news through (0.9 per digest for the Armenia-only reader). The **40% topic cap was
+   removed:** with no fixed size it held a one-topic reader to 2 stories, and the length is now the
+   real limit; its purpose survives as the tie rule of the cut. Building a digest makes no AI call.
 
 ### Digest message format (Step 5, the same for everyone)
 
@@ -211,13 +226,13 @@ Pashinyan said the two countries are close to full normalisation.
   without editor text uses its first-pass summary and the dictionary emoji (`lineEmoji`,
   `config/line_emoji.json`: the flag of the first actor named, else a subject icon, else the topic
   emoji). HTML parse mode, link previews off.
-- **Length:** Telegram's 4,096 limit counts the text after HTML parsing, in UTF-16 units; the
-  budget is 4,000. A longer digest is **split into two (or more) messages at a topic heading**, or
-  between two stories if one topic alone is too long; no story is dropped. If a later message fails
-  to send, the stories already sent are recorded, the slot moves on, and the unsent stories stay
-  eligible for the next digest. The 12 longest real stories (2026-11-14) came to 3,837 visible
-  characters: still one message, but close to the budget, so a full 12-story digest will sometimes
-  arrive as two messages.
+- **Length (Step 8):** always ONE message, never long enough for Telegram to fold it behind
+  "Show more". Telegram counts the text after HTML parsing, in UTF-16 units. Per Telegram's June
+  2026 update only the new bot *rich messages* fold ("Show More" after about 8,000 characters);
+  plain `sendMessage` text stays capped at 4,096. The owner's phone test (2026-11-15, Android, 5
+  labelled messages of 1,400 to 3,993 characters, `scripts/fold-test.mjs`): none folded. The limit
+  is **3,900**, under the 4,096 cap; iPhone and desktop were not checked. Too long: stories are cut
+  (see Digests above), the two-message split is gone.
 - **The quiet note:** "Good afternoon, Sam. Quiet period: nothing important on your topics since
   9 AM."
 - **No em dash anywhere.** The job cleans what the AI writes, the digest code cleans again, and it
@@ -598,8 +613,14 @@ scripts/gnews_probe.py, shadow_ai_sample.py   Step 6: feasibility probe; sandbox
 
   The prompt and code now guard against both, but grouping stays the weakest part of the
   quality. Watch the first days of real digests.
-- **Topic balance.** Many feeds are Russian and Ukrainian. Since Step 3 no topic may take more
-  than 40% of a digest (3 of 7), counted against each story's most specific topic.
+- **Topic balance.** Many feeds are Russian and Ukrainian. Steps 3-7 capped a topic at 40% of a
+  digest; Step 8 removed the cap (digests have no fixed size). What is left: the topic boost caps
+  (the wars get at most +1), each followed topic's best story survives the length cut, and ties
+  in the cut go from the most crowded section first. A heavy war day can still fill much of a
+  digest.
+- **Topic scores (Step 8)** are the model's judgement, capped in code. It still lifts some
+  statements and ceremonies on Armenia and Russia by 1-2 points (a gala concert, "X says..."),
+  and its main topic differs from the stored one for about 1 in 8 stories.
 - **The editor pass (Step 5)** decides what users see, so its mistakes matter more:
   - it can merge two different events, or miss a duplicate (the roundup guard and the
     "keep apart when unsure" rule help; the 30% word-based miss rate was the reason to add it);
