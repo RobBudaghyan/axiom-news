@@ -8,8 +8,9 @@ what clears the bars for the topics they follow at their chosen times in their o
 time zone. It runs on free tiers only
 (GitHub Actions + Cloudflare Workers/D1 + Gemini, with Groq as fallback).
 
-**Status:** Step 8 done (the dynamic digest: two scores, one message, no fixed size; see
-`reports/step-08-dynamic-digest.md`). Step 5 added the editor pass, the digest format and the
+**Status:** Step 9 done (reader languages: English and Russian, Armenian and French built but
+hidden; see `reports/step-09-languages.md`). Step 8 made the digest dynamic (two scores, one
+message, no fixed size; `reports/step-08-dynamic-digest.md`). Step 5 added the editor pass, the digest format and the
 red Mini App.
 Step 6 (a Google News coverage experiment) is paused. Step 7 added eight Armenian and
 Russian-language Armenian feeds and per-feed caps; see `reports/step-07-armenia-sources.md`. Everything runs in the cloud with the owner's PC off, still on the TEST
@@ -29,10 +30,14 @@ for the design.
 | `config/gnews_queries.yaml` | Step 6 experiment: Google News search terms per topic (paused: `enabled: false`) |
 | `config/candidates/armenia.yaml` | Step 7: Armenian feeds that were tested (the good ones are in `sources.yaml`) |
 | `config/line_emoji.json` | fallback line emojis when the editor gave none (names, capitals, groups, subjects) |
+| `config/languages.json` | Step 9: reader languages (`enabled` = in the picker and translated; the others hidden) |
+| `config/i18n/<lang>.json` | Step 9: every text a reader sees, one file per language (English is the fallback) |
+| `config/glossary.yaml` | Step 9: how common names are written in each language (checked on every translation) |
 | `prompts/story_batch.md` | the first hourly AI prompt (group, tag, score, summarize) and its output schema |
 | `prompts/editor.md` | the editor prompt (merge, strict score, main topic, headline, description, emojis) |
+| `prompts/translate.md` | Step 9: the translation prompt, with per-language notes |
 | `db/schema.sql` | D1 tables |
-| `job/` | the hourly job (`python -m job.run`), with near-duplicate grouping (`job/dupes.py`) and the editor pass (`job/editor.py`); Step 6 shadow collection `job/shadow.py` + `job/gnews.py` |
+| `job/` | the hourly job (`python -m job.run`), with near-duplicate grouping (`job/dupes.py`), the editor pass (`job/editor.py`) and the translation pass (`job/translate.py`, Step 9); Step 6 shadow collection `job/shadow.py` + `job/gnews.py` |
 | `tests/` | Python unit tests for the job |
 | `worker/` | the Cloudflare Worker (`src/`), the Mini App (`public/app/`), tests (`test/`) and tools (`scripts/`) |
 | `docs/screenshots/` | the Mini App at phone width, light and dark, with invented demo data |
@@ -71,17 +76,20 @@ cd worker && node scripts/digest-cli.mjs                      # print the owner'
 cd worker && node scripts/digest-cli.mjs --preview --dry      # print a preview of the last 24 h
 cd worker && node scripts/digest-cli.mjs --windows            # replay the owner's digests of the last 24 h (--bars 7,6)
 cd worker && node scripts/digest-cli.mjs --windows --profile all --hours 48 --bars "7,5;7,6;7,7"   # Step 8: four test readers
-cd worker && node scripts/digest-cli.mjs --cpu 800            # CPU time for 800 digests from full pools
+cd worker && node scripts/digest-cli.mjs --cpu 800            # CPU time for 800 digests from full pools (--lang ru: in Russian)
+venv/Scripts/python -m job.translate --samples 15 --langs ru,hy,fr   # Step 9: translate real stories, write nothing (3 AI calls)
+cd worker && node scripts/step9-previews.mjs --dry            # Step 9: labelled digests in ru/hy/fr from the samples (drop --dry: send, TEST bot)
+venv/Scripts/python scripts/make_eligible_cases.py            # Step 9: regenerate the shared job/Worker eligibility test file
 cd worker && node scripts/fold-test.mjs --dry                 # Step 8: the 5 fold test messages (drop --dry: send, TEST bot only)
 venv/Scripts/python -m job.editor --backfill                  # run the editor over the current pool (a few AI calls)
 venv/Scripts/python -m job.editor --backfill --topic-only --hours 48   # Step 8: topic scores only (writes nothing else)
 venv/Scripts/python -m job.editor --dry-run --fresh-sim --new 90       # Step 8: sandbox editor call, writes nothing
-cd worker && npm run deploy                                   # stamp the Mini App files, deploy the Worker
+cd worker && npm run deploy                                   # write the Mini App's i18n.js and file stamps, deploy the Worker
 cd worker && node scripts/dev-server.mjs                      # Mini App preview with demo data: localhost:8790/app/
 cd worker && node scripts/ui-check.mjs                        # click through the preview (start it first)
 cd worker && node scripts/screenshots.mjs                     # screenshots of the preview -> docs/screenshots
 cd worker && node scripts/api-check.mjs                       # check the live Mini App API (TEST bot)
-cd worker && node scripts/setup-bot.mjs                       # set the bot's menu button and commands
+cd worker && node scripts/setup-bot.mjs                       # set the bot's menu button and commands (each enabled language)
 cd worker && node scripts/migrate-times.mjs --dry             # Step 5: half-hour digest times -> nearest hour
 venv/Scripts/python -m job.shadow --dry-run --show 20         # Step 6: fetch Google News, compare, write nothing
 venv/Scripts/python scripts/gnews_probe.py                    # Step 6: Google News feasibility probe (no keys)

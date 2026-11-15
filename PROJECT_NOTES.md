@@ -25,16 +25,24 @@ bot @axiom_news_bot at the end.
   folded behind "Show more"); if longer, the lowest-ranked stories are cut, keeping each followed
   topic's best story. Building a digest is a database filter with no AI. The same story is never sent
   to a user twice; if nothing qualifies, a short "quiet period" note.
-- **Topics:** Politics, Wars & Conflicts, Armenia, Russia, Iran war, Ukraine war. English only,
-  designed so Russian can be added later.
+- **Topics:** Politics, Wars & Conflicts, Armenia, Russia, Iran war, Ukraine war.
+- **Reader languages (Step 9):** English (default) and Russian; Armenian and French are built and
+  approved on quality but hidden (`config/languages.json`). Everything a reader sees is in their
+  language: digest text, greeting, headings, quiet note, bot replies, menu button, commands, the
+  Mini App (Admin stays English). A new user starts in Telegram's language if supported, else
+  English; then only the Mini App picker changes it. The hourly job translates, after the
+  editor, the stories that could reach a digest into the languages active users read (one call
+  per language per run, checks on numbers, names, alphabet). A digest with any untranslated
+  story goes out wholly in English (never mixed). In Russian, "digest" is always сводка.
 - **Telegram Mini App settings:** topics, digest times (hourly grid), pause; the time zone is
   shown read-only (Step 5 removed stories per digest, the format choice and the zone picker). An Admin tab, visible
   only to the owner, shows stats, errors and AI usage, plus a "Send me a digest now" button.
-- **AI:** Gemini free tier, falling back to Groq; if both fail, items wait an hour. About 48
-  calls/day (24 first pass + 24 editor), independent of user count.
+- **AI:** Gemini free tier, falling back to Groq; if both fail, items wait an hour. About 82
+  calls/day (about 57 first pass + 25 editor), independent of user count; plus about 20 a day per
+  reader language other than English while someone reads it (Step 9).
 - **Hosting:** GitHub Actions hourly job, plus Cloudflare Worker + D1 (webhook, Mini App API,
   static Mini App, digest cron).
-- **Not in v1:** payments, ads, multiple languages, user-added sources, instant alerts, channels.
+- **Not in v1:** payments, ads, user-added sources, instant alerts, channels.
 - **Digest format (owner, Step 5): format B for everyone.** "Good evening, Sam. Since 2 PM, 6
   stories for you:" (12-hour time, first name from Telegram; "In the last 24 hours" the first
   time). Topic headings: emoji + bold underlined name. Each story: `N. <emojis> <b>headline</b>`,
@@ -100,6 +108,15 @@ bot @axiom_news_bot at the end.
 | 2026-11-15 | The 40% topic cap removed; the length cut keeps each followed topic's best story and breaks ties from the most crowded section | with no fixed size the cap held a one-topic reader to 2 stories; length is the real limit now |
 | 2026-11-15 | Unedited stories qualify only through the editorial bar | an editor outage must not flood digests with first-pass scores |
 | 2026-11-15 | Admin: average digest size per user over 24 h, from `sent` (rows of one digest share `sent_at`; merged-away stories skipped) | no new table; quiet notes are not counted |
+| 2026-11-15 | Russian on; Armenian and French approved on quality but hidden (owner) | each used language adds about 20 Gemini calls a day; Gemini's daily request cap is the tight limit. One line in `config/languages.json` switches one on |
+| 2026-11-15 | Translation in the hourly job after the editor, one call per language per run, only stories that could reach a digest, only languages an active user reads | measured: 70 stories in one call (5.5k in, 6.7k out); 18 of 24 hours have new stories; no reader, no call |
+| 2026-11-15 | `users.lang` (the reader's choice) apart from `users.language` (Telegram's code, refreshed on every /start) | the language is set once from Telegram, then only by the picker |
+| 2026-11-15 | A translation counts only while its `src` equals the story's current English text, compared in the digest SQL | an editor rewrite makes it stale at once, with no Worker CPU and no hashing |
+| 2026-11-15 | Never mixed: one untranslated story makes the whole digest English; logged in `errors` (component `digest`), counted per language in Admin | spec; a quiet note has no stories and is always in the reader's language |
+| 2026-11-15 | Checks on every translation: the same numbers both ways (an English number word may become digits), glossary names (`config/glossary.yaml`, a stem for declined forms), the alphabet, French accents and apostrophes, no дайджест; a rejected story is redone next hour with the reason; an answer mostly rejected is asked again at once | samples: French once had no accents in 14 of 15, Armenian had Greek letters and a misspelled name |
+| 2026-11-15 | In Russian, "digest" is always сводка (owner, hard rule) | tests fail on дайджест in any Russian text; the job rejects it in translations |
+| 2026-11-15 | One dictionary per language (`config/i18n/<lang>.json`); the Mini App's `i18n.js` is generated from them at deploy; the Admin tab and owner alerts stay English | no hard-coded user text; a test lists missing keys |
+| 2026-11-15 | Plurals and times by hand, no Intl in the Worker; English keeps "2 PM", other languages "14:00" | Intl is the costly part of a cold Worker |
 
 ## Current status
 - **Step 1 done:** repo, docs, topics, prompt, lessons, 116 verified feeds.
@@ -146,15 +163,27 @@ bot @axiom_news_bot at the end.
   before), Armenia-only reader 3.0 (0.4), reader of all topics 3x a day 12.1 (5.7). One-off: 26
   rescore calls (439k in / 213k out) and 4 sandbox calls. Admin shows the average digest size.
   Details in `reports/step-08-dynamic-digest.md`.
+- **Step 9 done (2026-11-15): reader languages.** Russian on (Mini App picker, bot, digests);
+  Armenian and French built and approved on quality, hidden to save Gemini calls. Samples of 15
+  real stories in three languages, four labelled previews sent; the owner checked the Russian Mini
+  App on his phone and chose сводка for "digest". The owner reads English. Details in
+  `reports/step-09-languages.md`.
 - The owner is the only user.
 
 ## Next step
-Switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, then invite the
-first users). Before that: a few days of real digests with the Step 8 rules, and a look at the
+Switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, which also sets
+the Russian command list, then invite the first users). Watch the first real Russian reader's
+digests: the first hourly run after they choose Russian translates about 70 stories in one call;
+Admin's "Languages" section shows calls, tokens and English fallbacks. Before that: a few days of real digests with the Step 8 rules, and a look at the
 fold on an iPhone if any user has one. Later: custom topics (e.g. "Colombia") can reuse the paused
 Google News code (`job/gnews.py`, `job/shadow.py`).
 
 ## Known issues / open questions
+- **Translations (Step 9):** the code checks catch numbers, names, alphabets and accents, not a
+  wrong word or an odd sentence (French and Armenian samples had 2 and 3 such errors in 15;
+  Russian almost none). A story that keeps failing a check keeps Russian readers on English
+  digests until it passes. Russian digests run about 7% longer, so on busy days a story or two
+  fewer fits. No real Russian reader yet: the first live Russian run is still to be seen.
 - **Gemini 503 overloads** were frequent on 2026-11-13; fallback runs are slow (Groq ~1
   chunk/min).
 - **AI grouping is the weakest part:** some over-merged stories and near-duplicates. Guarded by
