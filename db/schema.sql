@@ -111,6 +111,18 @@ CREATE TABLE IF NOT EXISTS sent (
   PRIMARY KEY (user_id, story_id)
 ) WITHOUT ROWID;
 
+-- Step 10: a story left out of a reader's digest because it had no translation into the reader's
+-- language yet. It is NOT in `sent`, so it can still go out once translated: the digest query
+-- also takes held stories that are older than the last digest (still inside the 24 h window).
+-- One row per (user, story); `at` = the last digest that held it. Admin counts the last 24 h.
+CREATE TABLE IF NOT EXISTS digest_holds (
+  user_id  INTEGER NOT NULL,
+  story_id INTEGER NOT NULL,
+  lang     TEXT NOT NULL,
+  at       INTEGER NOT NULL,
+  PRIMARY KEY (user_id, story_id)
+) WITHOUT ROWID;
+
 -- One row per hourly job run (Admin tab stats).
 CREATE TABLE IF NOT EXISTS job_runs (
   id                 INTEGER PRIMARY KEY,

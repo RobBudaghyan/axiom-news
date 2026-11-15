@@ -468,6 +468,7 @@ class Job:
             ("DELETE FROM job_runs WHERE started_at < ? RETURNING id", [log_cut]),
             ("DELETE FROM ai_calls WHERE at < ? RETURNING id", [log_cut]),
             ("DELETE FROM errors WHERE at < ? RETURNING id", [log_cut]),
+            ("DELETE FROM digest_holds WHERE at < ? RETURNING story_id", [log_cut]),   # Step 10
         ])
         return sum(len(r) for r in results)
 

@@ -213,11 +213,21 @@ describe("never a mixed-language digest", () => {
     assert.doesNotMatch(plan.text, /Armenia and Turkey|Good evening|stories for you/);
   });
 
-  test("one story without a translation: the WHOLE digest is English, and the fallback is reported", () => {
+  test("one story without a translation is held (Step 10): the digest stays wholly Russian", () => {
     const [a, b] = two();
     const plan = planDigest(user("ru"), [a, { ...b, tr_headline: null, tr_description: null }], TOPICS, yerevan(20, 5), CONFIG);
+    assert.equal(plan.lang, "ru");
+    assert.equal(plan.fallback, null);
+    assert.deepEqual(plan.heldIds, [b.id]);
+    assert.match(plan.text, /^Добрый вечер, Rob\. С 14:00 для вас 1 история:/);
+    assert.doesNotMatch(plan.text, /Ukraine and Russia|Good evening|stories for you/);
+  });
+
+  test("no story translated: the WHOLE digest is English, and the fallback is reported", () => {
+    const [a, b] = two().map((s) => ({ ...s, tr_headline: null, tr_description: null }));
+    const plan = planDigest(user("ru"), [a, b], TOPICS, yerevan(20, 5), CONFIG);
     assert.equal(plan.lang, "en");
-    assert.deepEqual(plan.fallback, { lang: "ru", missing: 1, of: 2 });
+    assert.deepEqual(plan.fallback, { lang: "ru", missing: 2, of: 2 });
     assert.match(plan.text, /^Good evening, Rob\. Since 2 PM, 2 stories for you:/);
     assert.match(plan.text, /<b><u>Armenia<\/u><\/b>/);
     assert.doesNotMatch(plan.text, /[А-Яа-яЁё]/);   // not one Russian letter
@@ -248,20 +258,20 @@ describe("never a mixed-language digest", () => {
     assert.equal(candidateStatement(u, now).params[9], "ru");
   });
 
-  test("the cron sends the English digest, logs the fallback, and Admin counts it per language", async () => {
+  test("no story translated: the cron sends the English digest, logs the fallback, and Admin counts it per language", async () => {
     const { db, sqlite } = fakeD1();
     const now = yerevan(14, 2);
     addUser(sqlite, { lang: "ru", next_digest_at: yerevan(14), last_digest_at: yerevan(9) });
     const a = addStory(sqlite, "A", ["armenia"], 6, now - 600, { final_score: 8, headline: "Armenia story" });
     addStory(sqlite, "B", ["politics"], 6, now - 600, { final_score: 8, headline: "Politics story" });
-    addTranslation(sqlite, a, "ru", "История об Армении");
+    assert.ok(a);
     const outbox = [];
     const io = { send: async (chat, text) => outbox.push(text), alert: async () => {} };
     const out = await runTick(db, io, now);
     assert.equal(out.lang_fallback, 1);
     assert.match(outbox[0], /^Good afternoon, Owner\. Since 9 AM, 2 stories for you:/);
     const err = sqlite.prepare("SELECT component, message FROM errors WHERE component = 'digest'").get();
-    assert.match(err.message, /^language fallback \(ru\): user 42 got English, 1 of 2 stories have no ru translation/);
+    assert.match(err.message, /^language fallback \(ru\): user 42 got English, none of 2 stories has a ru translation/);
     const admin = shapeAdmin(await db.batch(adminStatements(now)), now);
     const ru = admin.languages.find((l) => l.code === "ru");
     assert.equal(ru.fallbacks_24h, 1);

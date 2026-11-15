@@ -384,6 +384,16 @@ class InTheJob(unittest.TestCase):
         job.prune_daily(T0)
         self.assertEqual(rows(db), {})
 
+    def test_prune_removes_old_digest_holds(self):
+        # Step 10: holds older than the log retention go; a recent one stays.
+        from tests.helpers import Clock, Feeds, make_job
+        db = new_db()
+        db.query("INSERT INTO digest_holds (user_id, story_id, lang, at) VALUES (1, 1, 'ru', ?), (1, 2, 'ru', ?)",
+                 [T0 - 40 * 86400, T0 - 3600])
+        job = make_job(db, FakeProvider("gemini", []), FakeProvider("groq", []), Feeds(), Clock())
+        job.prune_daily(T0)
+        self.assertEqual([r["story_id"] for r in db.query("SELECT story_id FROM digest_holds")], [2])
+
 
 class SharedRule(unittest.TestCase):
     """tests/fixtures/eligible_cases.json is also checked by worker/test/i18n.test.mjs."""

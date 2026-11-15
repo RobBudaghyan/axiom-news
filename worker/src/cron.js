@@ -2,7 +2,7 @@
 // Subrequests per tick: 1 read batch + 1 candidate batch + 1 Telegram call per due user
 // + 1 write batch (+ 1 alert): about 12 with the 8 users per tick that the 10 ms CPU limit allows
 // (measured on Cloudflare, see reports/step-03-automation.md).
-import { CONFIG, afterSendStatements, candidateStatement, nextSlot, parseList, planDigest } from "./digest.js";
+import { CONFIG, afterSendStatements, candidateStatement, holdStatements, nextSlot, parseList, planDigest } from "./digest.js";
 import { HEALTH_STATEMENTS, assessHealth } from "./health.js";
 import { errorStatement, takeUsage, usageStatement } from "./db.js";
 
@@ -12,12 +12,23 @@ ORDER BY next_digest_at LIMIT ?2`;
 const TOPICS_SQL = "SELECT tag, label_en, emoji, sort, is_default FROM topics ORDER BY sort";
 const GIVE_UP_S = 3600;   // a slot that keeps failing for an hour is skipped
 
-// Step 9: a digest that went out in English because some of its stories had no translation into
-// the reader's language yet. Logged in `errors` (component "digest"); Admin counts them per language.
+// A digest that went out wholly in English because NONE of its stories had a translation into the
+// reader's language yet (Step 10; in Step 9 one missing story was enough). Logged in `errors`
+// (component "digest"); Admin counts them per language.
 export const FALLBACK_PREFIX = "language fallback";
 export function fallbackStatement(userId, fb, now) {
-  return errorStatement(`${FALLBACK_PREFIX} (${fb.lang}): user ${userId} got English, ${fb.missing} of ${fb.of} ` +
-    `stories have no ${fb.lang} translation yet`, now, "digest");
+  return errorStatement(`${FALLBACK_PREFIX} (${fb.lang}): user ${userId} got English, none of ${fb.of} ` +
+    `stories has a ${fb.lang} translation yet`, now, "digest");
+}
+
+// Every D1 write after a digest was sent: never-twice rows for the stories in it, the digest time,
+// the held stories (Step 10) and the English fallback note. Used by the cron and the Admin button.
+export function digestWrites(user, plan, sentIds, now) {
+  return [
+    ...afterSendStatements(user, sentIds, now, plan.nextAt),
+    ...holdStatements(user, plan.heldIds ?? [], plan.lang, now),
+    ...(plan.fallback ? [fallbackStatement(user.id, plan.fallback, now)] : []),
+  ];
 }
 
 // Sends a digest: always ONE message since Step 8 (planDigest cuts it to fit). A failure is
@@ -63,13 +74,11 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
       }
       out.sent++;
       if (!plan.stories.length) out.quiet++;
-      if (plan.fallback) {                  // Step 9: never mixed; the whole digest went out in English
-        out.lang_fallback = (out.lang_fallback ?? 0) + 1;
-        writes.push(fallbackStatement(user.id, plan.fallback, now));
-      }
+      if (plan.fallback) out.lang_fallback = (out.lang_fallback ?? 0) + 1;   // never mixed: wholly English
+      if (plan.heldIds?.length) out.held = (out.held ?? 0) + plan.heldIds.length;   // Step 10
       out.stories += sentIds.length;
       out.cut += plan.cut ?? 0;            // stories that qualified but did not fit (Step 8)
-      writes.push(...afterSendStatements(user, sentIds, now, plan.nextAt));
+      writes.push(...digestWrites(user, plan, sentIds, now));
     }
   }
 

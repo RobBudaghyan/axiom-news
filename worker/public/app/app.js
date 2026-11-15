@@ -486,8 +486,11 @@
       sub: esc(l.code === "en" ? `${plural(l.active, "active reader", "active readers")} · no translation needed`
         : `${plural(l.active, "active reader", "active readers")} · ${plural(l.translated_24h, "story", "stories")} translated` +
           `${l.rejected_24h ? ` (${l.rejected_24h} rejected by checks)` : ""} · ${plural(l.calls_24h, "call", "calls")}, ` +
-          `${compact(l.input_tokens_24h)} in, ${compact(l.output_tokens_24h)} out`),
-      right: l.code === "en" ? "" : l.fallbacks_24h ? badge(`${l.fallbacks_24h} in English`, "warn") : badge("No fallback") })).join("");
+          `${compact(l.input_tokens_24h)} in, ${compact(l.output_tokens_24h)} out` +
+          ` · ${plural(l.held_24h, "story", "stories")} held for translation` +
+          `${l.held_holds_24h ? ` (${l.held_released_24h} of ${l.held_holds_24h} sent later)` : ""}`),
+      right: l.code === "en" ? "" : l.fallbacks_24h ? badge(`${plural(l.fallbacks_24h, "digest", "digests")} fully in English`, "warn")
+        : badge("No English fallback") })).join("");
 
     const D = A.d1;
     const meter = (label, used, limit) => {
@@ -510,7 +513,7 @@
       ${section("AI by model", models)}
       ${feeds}
       ${section("Users", tiles + userRows)}
-      ${section("Languages, last 24 h", langRowsA || row({ title: "No data" }), "A digest goes out in English when any of its stories has no translation yet; the badge counts those.")}
+      ${section("Languages, last 24 h", langRowsA || row({ title: "No data" }), "A story with no translation yet is held: left out of the digest and sent in a later one once translated. A digest goes out fully in English only when none of its stories is translated; the badge counts those.")}
       ${section("Database today", d1, "Free limits per day, reset at 00:00 UTC. The news job's counts are exact; the bot server's are counted every 5 minutes and can be slightly low.")}
       ${section("Recent errors", errRows || row({ title: "No errors" }), A.errors.length ? "Newest first. Notes from the news job about skipped items are normal." : "")}`;
   }

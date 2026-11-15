@@ -9,11 +9,11 @@
 //   POST /api/admin/digest              send the owner a real digest now (owner only)
 //   POST /api/admin/run-job             start the hourly GitHub job, min-gap guard (owner only)
 import { verifyInitData } from "./auth.js";
-import { CONFIG, afterSendStatements, candidateStatement, hhmm, localParts, nextSlot, planDigest } from "./digest.js";
+import { CONFIG, candidateStatement, hhmm, localParts, nextSlot, planDigest } from "./digest.js";
 import { SettingsError, TZ_AUTO, TZ_DEFAULT, nextDigestAfterChange, publicUser, validZone, validatePatch } from "./settings.js";
 import { adminStatements, shapeAdmin } from "./admin.js";
 import { dispatchJob } from "./github.js";
-import { fallbackStatement, sendDigest } from "./cron.js";
+import { digestWrites, sendDigest } from "./cron.js";
 import { errorStatement } from "./db.js";
 import { LANGS, chooseLang, effectiveLang, t, topicLabel } from "./i18n.js";
 import { setChatLanguage } from "./bot.js";
@@ -127,8 +127,7 @@ async function digestNow(db, ownerId, now, cfg, io) {
   const [cands] = await db.batch([candidateStatement(user, now, cfg)]);
   const plan = planDigest(user, cands, topics, now, cfg);
   const ids = await sendDigest(io, user.id, plan);
-  await db.batch([...afterSendStatements(user, ids, now, plan.nextAt),
-                  ...(plan.fallback ? [fallbackStatement(user.id, plan.fallback, now)] : [])]);
+  await db.batch(digestWrites(user, plan, ids, now));
   const n = ids.length;
   return json(200, {
     ok: true, stories: n,

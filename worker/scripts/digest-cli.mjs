@@ -16,10 +16,11 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import {
-  CONFIG, afterSendStatements, candidateStatement, hhmm, localParts, parseList, planDigest, storyScore, topicScore,
+  CONFIG, candidateStatement, hhmm, localParts, parseList, planDigest, storyScore, topicScore,
   visibleLength,
 } from "../src/digest.js";
 import { sendHtml } from "../src/telegram.js";
+import { digestWrites } from "../src/cron.js";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 
@@ -198,7 +199,12 @@ async function main() {
     const lang = arg("--lang", "en");
     if (lang !== "en") {   // Step 9: stand-in translations, about 20% longer, Cyrillic, same numbers
       const fake = (s) => (s ? `${s} ${"перевод ".repeat(Math.ceil(s.length / 40))}`.replace(/[A-Za-z]/g, "ж") : s);
-      for (const p of pools) for (const s of p) { s.tr_headline = fake(s.headline || s.summary); s.tr_description = fake(s.description); }
+      // Step 10: --held 0.3 leaves 30% of the stories untranslated (held), so the drop and the second length cut run
+      const heldShare = Number(arg("--held", "0"));
+      for (const p of pools) p.forEach((s, k) => {
+        if (heldShare && (k % 10) < heldShare * 10) return;
+        s.tr_headline = fake(s.headline || s.summary); s.tr_description = fake(s.description);
+      });
     }
     const opts = { lang };
     for (let i = 0; i < list.length; i++) planDigest(list[i], pools[i], topics, now, cfg, opts);   // warm-up (JIT), not counted
@@ -225,8 +231,8 @@ async function main() {
     const result = await sendHtml(env.TELEGRAM_BOT_TOKEN, owner, plan.text);
     console.log(`[sent: Telegram message_id ${result.message_id}]`);
     if (!previewing) {
-      await db.batch(afterSendStatements(user, plan.storyIds, now, plan.nextAt));
-      console.log("[recorded: sent rows, last_digest_at, next_digest_at]");
+      await db.batch(digestWrites(user, plan, plan.storyIds, now));
+      console.log("[recorded: sent rows, held stories, last_digest_at, next_digest_at]");
     } else console.log("[preview: nothing written]");
   } else console.log("[dry run: nothing sent, nothing written]");
 }

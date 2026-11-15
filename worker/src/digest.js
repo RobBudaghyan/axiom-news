@@ -31,6 +31,8 @@ const DAY = 86400;
 // in topicScore/qualifies below (the tests check both agree).
 // Step 9: each row also carries its translation into the reader's language ?10 (NULL if none, or if
 // it was made from an older English text: `src` must equal the current one, compared here in SQL).
+// Step 10: a story held back from an earlier digest for want of a translation (digest_holds) stays
+// a candidate after its window passed, while it is inside the 24 h floor ?11.
 export const CANDIDATE_SQL = `
 SELECT id, summary, headline, description, emojis, best_url, best_source, importance, final_score, topic_score,
        topics, main_topic, updated_at, dup_group, tr_headline, tr_description
@@ -43,7 +45,9 @@ FROM (
   FROM stories s
   LEFT JOIN story_translations tr ON tr.story_id = s.id AND tr.lang = ?10 AND tr.ok = 1
        AND tr.src = coalesce(s.headline, s.summary) || char(10) || coalesce(s.description, '')
-  WHERE max(s.updated_at, coalesce(s.scored_at, 0)) >= ?3
+  WHERE (max(s.updated_at, coalesce(s.scored_at, 0)) >= ?3
+         OR (max(s.updated_at, coalesce(s.scored_at, 0)) >= ?11
+             AND EXISTS (SELECT 1 FROM digest_holds h WHERE h.user_id = ?1 AND h.story_id = s.id)))
     AND s.merged_into IS NULL
     AND EXISTS (SELECT 1 FROM json_each(s.topics) x WHERE x.value IN (SELECT u.value FROM json_each(?2) u))
     AND NOT EXISTS (SELECT 1 FROM sent x WHERE x.user_id = ?1 AND x.story_id = s.id)
@@ -72,7 +76,8 @@ export function candidateStatement(user, now, cfg = CONFIG, lang = effectiveLang
     sql: CANDIDATE_SQL,
     params: [user.id, JSON.stringify(parseList(user.topics)), digestSince(user.last_digest_at, now, cfg),
              cfg.candidate_limit, cfg.editorial_bar, cfg.unedited_offset, cfg.topic_bar,
-             JSON.stringify(cfg.topic_boost_max ?? {}), cfg.topic_needs_boost ? 1 : 0, lang],
+             JSON.stringify(cfg.topic_boost_max ?? {}), cfg.topic_needs_boost ? 1 : 0, lang,
+             now - cfg.max_lookback_hours * 3600],
   };
 }
 
@@ -409,24 +414,31 @@ export function buildMessage(stories, opts, cfg = CONFIG) {
   return { text, storyIds, stories: list };
 }
 
-// Step 9, never a mixed-language digest: in a reader language only if EVERY picked story has a
-// translation (tr_headline from CANDIDATE_SQL, made from the current English text); otherwise the
-// whole digest (greeting, headings, stories) is English and `fallback` says why. A quiet note has
-// no stories, so it is always in the reader's language. Returns {stories, lang, fallback}.
+// Never a mixed-language digest. Step 10 (owner): a picked story with no translation into the
+// reader's language (tr_headline from CANDIDATE_SQL, made from the current English text) is HELD:
+// left out of this digest, not marked sent, and offered again by the next digests while it is
+// inside the 24 h window (digest_holds). The rest goes out in the reader's language. Only if every
+// picked story is held does the digest go out wholly in English (e.g. right after a language
+// switch), and `fallback` says why. A quiet note has no stories, so it is always in the reader's
+// language. Returns {stories, lang, fallback, held}.
 export function chooseDigestLanguage(picked, want) {
-  if (want === "en") return { stories: picked, lang: "en", fallback: null };
-  const missing = picked.filter((s) => !s.tr_headline).length;
-  if (missing) return { stories: picked, lang: "en", fallback: { lang: want, missing, of: picked.length } };
+  if (want === "en") return { stories: picked, lang: "en", fallback: null, held: [] };
+  const held = picked.filter((s) => !s.tr_headline);
+  if (picked.length && held.length === picked.length) {
+    return { stories: picked, lang: "en", fallback: { lang: want, missing: held.length, of: picked.length }, held: [] };
+  }
   return {
-    stories: picked.map((s) => ({ ...s, en_headline: s.headline || s.summary, headline: s.tr_headline,
-                                  summary: s.tr_headline, description: s.tr_description ?? "" })),
-    lang: want, fallback: null,
+    stories: picked.filter((s) => s.tr_headline)
+      .map((s) => ({ ...s, en_headline: s.headline || s.summary, headline: s.tr_headline,
+                     summary: s.tr_headline, description: s.tr_description ?? "" })),
+    lang: want, fallback: null, held,
   };
 }
 
-// One user's whole digest from candidate rows: pick (two-score rule), choose the language, cut to
-// one unfolded message (measured on the text actually sent), format. No I/O.
-// Returns {text, storyIds, stories, cut, nextAt, lang, fallback}.
+// One user's whole digest from candidate rows: pick (two-score rule), choose the language (holding
+// untranslated stories), then cut to one unfolded message (measured on the text actually sent, so
+// the room a held story leaves goes to the next translated story), format. No I/O.
+// Returns {text, storyIds, stories, cut, nextAt, lang, fallback, heldIds}.
 export function planDigest(user, candidates, topics, now, cfg = CONFIG, opts = {}) {
   const chosen = chooseDigestLanguage(pickStories(candidates, parseList(user.topics), cfg),
                                       opts.lang ?? effectiveLang(user));
@@ -443,9 +455,18 @@ export function planDigest(user, candidates, topics, now, cfg = CONFIG, opts = {
     msg = buildMessage(kept, mopts, cfg);
   }
   const times = parseList(user.digest_times, cfg.default_times);
-  return { ...msg, cut: cut.length, nextAt: nextSlot(now, tz, times), lang: chosen.lang, fallback: chosen.fallback };
+  return { ...msg, cut: cut.length, nextAt: nextSlot(now, tz, times), lang: chosen.lang, fallback: chosen.fallback,
+           heldIds: chosen.held.map((s) => s.id) };
 }
 
+// Step 10: one digest_holds row per held story (the last digest that held it wins).
+export function holdStatements(user, heldIds, lang, now) {
+  return heldIds.map((sid) => ({
+    sql: "INSERT INTO digest_holds (user_id, story_id, lang, at) VALUES (?1, ?2, ?3, ?4) " +
+         "ON CONFLICT(user_id, story_id) DO UPDATE SET lang = excluded.lang, at = excluded.at",
+    params: [user.id, sid, lang, now],
+  }));
+}
 
 // D1 writes after a successful send: never-twice rows, the digest time, the next slot.
 // last_digest_at is the slot time (so the next header reads "Since 2 PM", not "2:03 PM").

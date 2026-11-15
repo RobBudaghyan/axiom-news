@@ -57,26 +57,33 @@ export function adminStatements(now) {
            "GROUP BY kind", params: [now - DAY] },
     { sql: "SELECT message FROM errors WHERE component = 'digest' AND at >= ?1 AND message LIKE 'language fallback%'",
       params: [now - DAY] },
+    // Step 10: stories held back for want of a translation (one row per reader and story; `at` =
+    // the last digest that held it), and how many of those holds were sent later.
+    { sql: "SELECT h.lang, count(DISTINCT h.story_id) AS stories, count(*) AS holds, " +
+           "sum(EXISTS (SELECT 1 FROM sent x WHERE x.user_id = h.user_id AND x.story_id = h.story_id)) AS released " +
+           "FROM digest_holds h WHERE h.at >= ?1 GROUP BY h.lang", params: [now - DAY] },
   ];
 }
 
 // Step 9: one row per language that is enabled or has any reader or activity in the last 24 h.
-export function languageReport(readers = [], translated = [], calls = [], fallbacks = []) {
+export function languageReport(readers = [], translated = [], calls = [], fallbacks = [], holds = []) {
   const by = (rows) => new Map(rows.map((r) => [r.lang, r]));
-  const R = by(readers), T = by(translated), C = by(calls);
+  const R = by(readers), T = by(translated), C = by(calls), HD = by(holds);
   const fb = new Map();
   for (const { message } of fallbacks) {
     const m = /^language fallback \(([a-z]+)\)/.exec(message ?? "");
     if (m) fb.set(m[1], (fb.get(m[1]) ?? 0) + 1);
   }
-  const codes = [...new Set([...LANGS.enabled, ...R.keys(), ...T.keys(), ...C.keys(), ...fb.keys()])];
+  const codes = [...new Set([...LANGS.enabled, ...R.keys(), ...T.keys(), ...C.keys(), ...fb.keys(), ...HD.keys()])];
   return codes.filter((c) => c).map((code) => ({
     code, name: LANGS.english_names?.[code] ?? code, enabled: LANGS.enabled.includes(code),
     users: num(R.get(code)?.users), active: num(R.get(code)?.active),
     translated_24h: num(T.get(code)?.ok), rejected_24h: num(T.get(code)?.rejected),
     calls_24h: num(C.get(code)?.calls), failed_calls_24h: num(C.get(code)?.calls) - num(C.get(code)?.ok),
     input_tokens_24h: num(C.get(code)?.input_tokens), output_tokens_24h: num(C.get(code)?.output_tokens),
-    fallbacks_24h: fb.get(code) ?? 0,
+    fallbacks_24h: fb.get(code) ?? 0,   // digests sent wholly in English (none of their stories translated)
+    held_24h: num(HD.get(code)?.stories), held_holds_24h: num(HD.get(code)?.holds),
+    held_released_24h: num(HD.get(code)?.released),
   }));
 }
 
@@ -110,7 +117,7 @@ export function feedReport(health, now, cfg = CONFIG) {
 
 export function shapeAdmin(rows, now, cfg = CONFIG) {
   const [[last], [lastOk], [s24], [s7], models, metaRows, users, errors, [jobD1], sizes = [],
-         readers = [], translated = [], trCalls = [], fallbacks = []] = rows;
+         readers = [], translated = [], trCalls = [], fallbacks = [], holds = []] = rows;
   const sizeOf = new Map(sizes.map((r) => [r.user_id, r]));
   const meta = Object.fromEntries(metaRows.map((r) => [r.key, r.value]));
 
@@ -172,7 +179,7 @@ export function shapeAdmin(rows, now, cfg = CONFIG) {
       blocked: list.filter((u) => u.blocked).length,
       list,
     },
-    languages: languageReport(readers, translated, trCalls, fallbacks),
+    languages: languageReport(readers, translated, trCalls, fallbacks, holds),
     errors: errors.map((e) => ({ at: e.at, component: e.component, message: String(e.message).slice(0, 400) })),
     d1: {
       day_start: today * DAY, job, worker,
