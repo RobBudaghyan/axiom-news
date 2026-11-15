@@ -213,7 +213,49 @@ class Guards(unittest.TestCase):
         en = {"headline": "Talks resume", "summary": "", "description": "Both sides met."}
         self.assertIn("headline is not in ru script", self.check("Talks resume", "Стороны встретились.", en=en)[2])
         self.assertIn("empty description", self.check("Переговоры возобновились", "", en=en)[2])
-        self.assertIn("text in a foreign script", self.check("Reprise des pourparlers", "Стороны", "fr", en)[2])
+        self.assertIn("letters of another alphabet: Снорты", self.check("Reprise des pourparlers", "Стороны", "fr", en)[2])
+
+    def test_letters_of_another_alphabet_inside_a_word_are_rejected(self):
+        en = {"headline": "Strike in Rakhine state kills 12", "summary": "", "description": ""}
+        self.assertEqual(self.check("Հարված Ռախին նահանգում, զոհվել է 12 մարդ", "", "hy", en)[2], [])
+        self.assertEqual(self.check("Հարված Ռαխին նահանգում, զոհվել է 12 մարդ", "", "hy", en)[2],
+                         ["letters of another alphabet: α"])
+
+    def test_french_without_accents_or_apostrophes_is_rejected(self):
+        en = {"headline": "Silence on Karabakh undermines the UN system", "summary": "",
+              "description": "He said international inaction damages global legal structures."}
+        good = ("Le silence sur le Karabakh sape le système de l'ONU",
+                "Il a déclaré que l'inaction internationale nuit aux structures juridiques mondiales.")
+        self.assertEqual(self.check(*good, "fr", en)[2], [])
+        self.assertIn("French written without accents",
+                      self.check("Le silence sur le Karabakh sape le systeme de l'ONU",
+                                 "Il a declare que l'inaction internationale nuit aux structures juridiques mondiales.",
+                                 "fr", en)[2])
+        self.assertIn("missing apostrophe: 'l ...'",
+                      self.check("Le silence sur le Karabakh sape le système de l ONU", good[1], "fr", en)[2])
+
+    def test_an_english_number_word_may_become_digits_but_not_the_other_way(self):
+        en = {"headline": "Iran launches six drones at 2 bases", "summary": "", "description": ""}
+        self.assertEqual(self.check("Իրանը 6 անօդաչու է արձակել 2 բազայի ուղղությամբ", "", "hy", en)[2], [])
+        self.assertEqual(self.check("Իրանը 7 անօդաչու է արձակել 2 բազայի ուղղությամբ", "", "hy", en)[2],
+                         ["number(s) not in the English: 7"])
+        self.assertEqual(self.check("Иран запустил шесть беспилотников по двум базам", "", "ru", en)[2],
+                         ["missing number(s) 2"])
+        en6 = {"headline": "Iran launches 6 drones at bases", "summary": "", "description": ""}
+        self.assertEqual(self.check("L'Iran lance six drones contre des bases", "", "fr", en6)[2],
+                         ["missing number(s) 6"])      # French "six" looks like the English word
+
+    def test_armenian_classical_spelling_becomes_reformed(self):
+        self.assertEqual(translate.armenian_reformed("Երեւանը եւ Եւրոպան, Գեւորգ. Եւ նա"),
+                         "Երևանը և Եվրոպան, Գևորգ. Եվ նա")
+        en = {"headline": "Yerevan and Europe", "summary": "", "description": ""}
+        self.assertEqual(self.check("Երեւանը եւ Եւրոպան", "", "hy", en)[0], "Երևանը և Եվրոպան")
+
+    def test_an_armenian_sentence_ending_in_a_colon_gets_the_armenian_full_stop(self):
+        en = {"headline": "Talks resume", "summary": "", "description": "Both sides met. They agreed."}
+        _, desc, problems = self.check("Բանակցությունները վերսկսվել են", "Կողմերը հանդիպել են: Նրանք համաձայնել են:",
+                                       "hy", en)
+        self.assertEqual((desc, problems), ("Կողմերը հանդիպել են։ Նրանք համաձայնել են։", []))
 
     def test_dashes_are_removed_and_the_final_period_dropped(self):
         en = {"headline": "Moscow is the capital", "summary": "", "description": "It is big."}
@@ -238,6 +280,35 @@ class Guards(unittest.TestCase):
         tr.run(T0 + H)
         self.assertIn("missing number(s) 12", stories_in(g.prompts[1])[0]["retry_note"])
         self.assertEqual(rows(db)[a]["ok"], 1)
+
+
+class WholeAnswerRetry(unittest.TestCase):
+    def test_an_answer_with_most_stories_rejected_is_asked_again_at_once_with_the_notes(self):
+        db = new_db()
+        add_user(db, 1, "fr")
+        for i in range(3):
+            add_story(db, f"Talks on the {i} border crossings resumed today in the capital",
+                      description="Both delegations met for a long session and agreed on the next steps.")
+        plain = responder(lang_fn=lambda t: f"Les negociations ont repris {t}")         # no accents
+        good = responder(lang_fn=lambda t: f"Les négociations ont repris {t}")
+        g = FakeProvider("gemini", [plain, good])
+        tr, calls = make(db, [g], languages={**LANGS, "enabled": ["en", "fr"]})
+        res = tr.run(T0)
+        self.assertEqual(len(calls), 2)
+        self.assertEqual((res.langs["fr"].ok, res.langs["fr"].rejected), (3, 0))
+        self.assertIn("French written without accents", stories_in(g.prompts[1])[0]["retry_note"])
+        self.assertTrue(all(r["ok"] for r in rows(db, "fr").values()))
+
+    def test_a_worse_second_answer_does_not_replace_the_first(self):
+        db = new_db()
+        add_user(db, 1, "ru")
+        for i in range(3):
+            add_story(db, f"Story {i}", description="")
+        two_bad = responder(fix=lambda it: it if it["id"] == "S1" else {**it, "headline": "Story in English"})
+        all_bad = responder(fix=lambda it: {**it, "headline": "Story in English"})
+        tr, calls = make(db, [FakeProvider("gemini", [two_bad, all_bad])])
+        res = tr.run(T0)
+        self.assertEqual((len(calls), res.langs["ru"].ok, res.langs["ru"].rejected), (2, 1, 2))
 
 
 class Providers(unittest.TestCase):

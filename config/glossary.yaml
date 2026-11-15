@@ -35,4 +35,9 @@ names:
   - {en: [Karapetyan], ru: Карапетян, hy: Կարապետյան, fr: Karapetian}
   - {en: [Ter-Petrosyan], ru: Тер-Петросян, hy: Տեր-Պետրոսյան, fr: Ter-Petrossian}
   - {en: [Simonyan], ru: Симонян, hy: Սիմոնյան, fr: Simonian}
+  - {en: [Sharmazanov], ru: Шармазанов, hy: Շարմազանով, fr: Charmazanov}
+  - {en: [Papikyan], ru: Папикян, hy: Պապիկյան, fr: Papikian}
+  - {en: [Khachaturyan], ru: Хачатурян, hy: Խաչատուրյան, fr: Khatchatourian}
+  - {en: [Zaporizhzhia], ru: Запорожье, ru_check: Запорож, hy: Զապորոժիե, hy_check: Զապորոժ, fr: Zaporijjia}
+  - {en: [Kyiv], ru: Киев, hy: Կիև, fr: Kyiv}
   - {en: [CSTO], ru: ОДКБ, hy: ՀԱՊԿ, fr: OTSC}

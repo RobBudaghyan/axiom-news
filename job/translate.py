@@ -71,7 +71,17 @@ UPSERT_SQL = ("INSERT INTO story_translations (story_id, lang, ok, headline, des
 
 SCRIPT = {"ru": re.compile(r"[А-Яа-яЁё]"), "hy": re.compile(r"[Ա-և]"),
           "fr": re.compile(r"[A-Za-zÀ-ÿ]")}
-FOREIGN_SCRIPT = {"fr": re.compile(r"[Ѐ-ӿԱ-և]")}
+# Letters of another alphabet inside the text (seen in the Step 9 samples: a Greek α inside an
+# Armenian place name). Greek is never right; Russian and Armenian take no letter of each other.
+FOREIGN_SCRIPT = {"fr": re.compile(r"[Ͱ-ϿЀ-ӿԱ-և]"),
+                  "ru": re.compile(r"[Ͱ-ϿԱ-և]"),
+                  "hy": re.compile(r"[Ͱ-ϿЀ-ӿ]")}
+# French written without its accents or apostrophes (seen in the Step 9 samples: "le systeme de
+# l ONU"): a longer text with no accented letter at all, or an elided article standing alone.
+FRENCH_ACCENT = re.compile(r"[àâäçéèêëîïôöùûüÿœæ]", re.I)
+FRENCH_NO_APOSTROPHE = re.compile(r"(?<![\w'’])(?:[ldjmnstc]|qu|jusqu|lorsqu|puisqu) (?=[aeiouyhàâéèêîôûAEIOUYHÀÂÉÈÊÎÔÛ])")
+# An Armenian sentence that ends with a colon instead of the Armenian full stop ։.
+ARMENIAN_COLON_END = re.compile(r":(?=\s+[Ա-Ֆ]|\s*$)")
 # A number with its group or decimal separators: 3,500 / 3 500 / 3.5 / 3,5 all compare as digits.
 NUMBER = re.compile(r"\d+(?:[   .,'’]\d+)*")
 
@@ -145,6 +155,31 @@ def number_set(text: str) -> set[str]:
     return {re.sub(r"\D", "", m) for m in NUMBER.findall(text or "")}
 
 
+# English number words. A translation may write them as digits ("six drones" -> "6 drones": the
+# Armenian samples did, as Armenian news sites do); that adds no new fact. The other way (a digit
+# in the English written as a word) is still a missing number.
+NUMBER_WORDS = {w: str(n) for n, w in enumerate(
+    "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen "
+    "seventeen eighteen nineteen twenty".split())}
+NUMBER_WORDS.update({"thirty": "30", "forty": "40", "fifty": "50", "sixty": "60", "seventy": "70", "eighty": "80",
+                     "ninety": "90", "hundred": "100", "thousand": "1000", "dozen": "12", "first": "1", "second": "2",
+                     "third": "3"})
+
+
+def number_words(text: str) -> set[str]:
+    return {NUMBER_WORDS[w] for w in re.findall(r"[a-z]+", (text or "").lower()) if w in NUMBER_WORDS}
+
+
+def armenian_reformed(text: str) -> str:
+    """Classical "եւ" in the reformed (Soviet-era) spelling used in Armenia: the conjunction and
+    any "եւ" inside a word become "և" (Երեւան -> Երևան), and at the start of a longer word "եվ"
+    (Եւրոպա -> Եվրոպա). The samples mixed both spellings although the prompt asks for reformed."""
+    text = re.sub(r"(?<!\w)Եւ(?!\w)", "Եվ", text)
+    text = re.sub(r"(?<!\w)եւ(?!\w)", "և", text)
+    text = re.sub(r"(?<!\w)([Եե])ւ(?=\w)", lambda m: f"{m.group(1)}վ", text)
+    return re.sub(r"(?<=\w)եւ", "և", text)
+
+
 def glossary_hits(english: str, glossary: list[dict]) -> list[dict]:
     out = []
     for g in glossary:
@@ -164,6 +199,8 @@ def check_translation(lang: str, english: dict, raw_head: str, raw_desc: str,
     en_head, en_desc = english_headline(english), english.get("description") or ""
     head = clean_translated_headline(raw_head or "")
     desc = clean_text(raw_desc or "", MAX_DESCRIPTION) if en_desc else ""
+    if lang == "hy":
+        head, desc = armenian_reformed(head), armenian_reformed(ARMENIAN_COLON_END.sub("։", desc))
     problems = []
     if not head:
         problems.append("empty headline")
@@ -174,15 +211,21 @@ def check_translation(lang: str, english: dict, raw_head: str, raw_desc: str,
     if head and script and not script.search(head):
         problems.append(f"headline is not in {lang} script")
     if FOREIGN_SCRIPT.get(lang) and FOREIGN_SCRIPT[lang].search(both):
-        problems.append("text in a foreign script")
+        problems.append(f"letters of another alphabet: {''.join(sorted(set(FOREIGN_SCRIPT[lang].findall(both))))}")
+    if lang == "fr":
+        if len(both) > 80 and not FRENCH_ACCENT.search(both):
+            problems.append("French written without accents")
+        if FRENCH_NO_APOSTROPHE.search(both):
+            problems.append(f"missing apostrophe: '{FRENCH_NO_APOSTROPHE.search(both).group(0)}...'")
     en_len = len(en_head) + len(en_desc)
     if head and en_len and not 0.5 <= len(head + desc) / en_len <= 3:
         problems.append(f"length {len(head + desc)} vs English {en_len}")
     en_nums, tr_nums = number_set(f"{en_head}\n{en_desc}"), number_set(both)
     if en_nums - tr_nums:
         problems.append(f"missing number(s) {', '.join(sorted(en_nums - tr_nums))}")
-    if tr_nums - en_nums:
-        problems.append(f"number(s) not in the English: {', '.join(sorted(tr_nums - en_nums))}")
+    added = tr_nums - en_nums - number_words(f"{en_head}\n{en_desc}")
+    if added:
+        problems.append(f"number(s) not in the English: {', '.join(sorted(added))}")
     low = both.casefold()
     for g in glossary_hits(f"{en_head}\n{en_desc}", glossary):
         form = g.get(lang)
@@ -341,26 +384,47 @@ class Translator:
                 answer = self._call(plan, lang, chunk, res, kind)
                 if answer is None:
                     break             # this provider is down or keeps failing: next provider
-                by_id = {s["id"]: s for s in chunk}
-                for sid, s in by_id.items():
-                    raw = answer.get(sid)
-                    if raw is None:
-                        continue      # not answered: the next provider, or next hour
-                    done.add(sid)
-                    head, desc, problems = check_translation(
-                        lang, s, str(raw.get("headline") or ""), str(raw.get("description") or ""), self.glossary)
-                    if problems:
-                        res.rejected += 1
-                        note = "; ".join(problems)[:300]
-                        res.notes.append(f"S{sid}: {note}")
-                        rows.append((sid, lang, 0, None, None, src_text(s), note, plan.label, now))
-                    else:
+                checked = self._check(lang, chunk, answer, plan.label, now)
+                bad = sum(1 for r in checked if not r[2])
+                if len(chunk) >= 2 and bad * 2 > len(chunk):
+                    # A whole answer gone wrong the same way (seen: French with no accents in 14 of
+                    # 15 stories, the next answer was fine): ask once more now, with the notes,
+                    # rather than leave the batch for an hour.
+                    res.notes.append(f"{p.name}: {bad} of {len(chunk)} rejected by the checks, asked again")
+                    notes = {r[0]: r[6] for r in checked if not r[2]}
+                    again = self._call(plan, lang, [{**s, "retry_note": notes.get(s["id"], s.get("retry_note"))}
+                                                    for s in chunk], res, kind)
+                    if again is not None:
+                        second = self._check(lang, chunk, again, plan.label, now)
+                        if sum(1 for r in second if r[2]) >= len(chunk) - bad:
+                            checked = second
+                for r in checked:
+                    done.add(r[0])
+                    rows.append(r)
+                    if r[2]:
                         res.ok += 1
-                        rows.append((sid, lang, 1, head, desc, src_text(s), None, plan.label, now))
+                    else:
+                        res.rejected += 1
+                        res.notes.append(f"S{r[0]}: {r[6]}")
                 res.provider = plan.label if res.provider in (None, plan.label) else f"{res.provider}+{plan.label}"
             queue = [s for s in queue if s["id"] not in done]
         res.unanswered += len(queue)
         return rows
+
+    def _check(self, lang: str, chunk: list[dict], answer: dict[int, dict], label: str, now: int) -> list[tuple]:
+        """Rows for the stories the answer covers (stories it left out get none)."""
+        out = []
+        for s in chunk:
+            raw = answer.get(s["id"])
+            if raw is None:
+                continue          # not answered: the next provider, or next hour
+            head, desc, problems = check_translation(
+                lang, s, str(raw.get("headline") or ""), str(raw.get("description") or ""), self.glossary)
+            if problems:
+                out.append((s["id"], lang, 0, None, None, src_text(s), "; ".join(problems)[:300], label, now))
+            else:
+                out.append((s["id"], lang, 1, head, desc, src_text(s), None, label, now))
+        return out
 
     def _call(self, plan, lang: str, chunk: list[dict], res: LangResult, kind: str) -> dict[int, dict] | None:
         p = plan.provider
@@ -463,15 +527,25 @@ def main(argv: list[str] | None = None) -> int:
     for lang in [x.strip() for x in args.langs.split(",") if x.strip()]:
         res = LangResult()
         rows = tr.translate(lang, [{**s, "retry_note": None} for s in stories], int(time.time()), res)
-        out["langs"][lang] = {
-            "result": res.__dict__,
-            "rows": {str(r[0]): {"ok": r[2], "headline": r[3], "description": r[4], "note": r[6], "provider": r[7]}
-                     for r in rows},
-        }
+        first = {str(r[0]): {"ok": r[2], "headline": r[3], "description": r[4], "note": r[6], "provider": r[7]}
+                 for r in rows}
         print(f"{lang}: {res.ok} ok, {res.rejected} rejected, {res.unanswered} unanswered, {res.calls} calls, "
               f"tokens in {res.input_tokens} out {res.output_tokens}, via {res.provider}")
         for n in res.notes:
             print(f"  note: {n}")
+        # What the next hour does: the rejected stories again, each with its rejection note.
+        again = [{**s, "retry_note": first[str(s["id"])]["note"]} for s in stories
+                 if str(s["id"]) in first and not first[str(s["id"])]["ok"]]
+        retry = LangResult()
+        if again:
+            for r in tr.translate(lang, again, int(time.time()), retry):
+                first[str(r[0])] = {**first[str(r[0])], "retry_ok": r[2], "retry_headline": r[3],
+                                    "retry_description": r[4], "retry_note": r[6]}
+            print(f"  next hour's retry: {retry.ok} ok, {retry.rejected} rejected, {retry.calls} calls, "
+                  f"tokens in {retry.input_tokens} out {retry.output_tokens}")
+            for n in retry.notes:
+                print(f"    note: {n}")
+        out["langs"][lang] = {"result": res.__dict__, "retry": retry.__dict__, "rows": first}
     Path(args.out).write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"written: {args.out}")
     return 0

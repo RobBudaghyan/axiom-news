@@ -28,11 +28,16 @@ Rules:
 3. Names: use exactly the forms in NAMES below (decline them as the grammar needs). For other
    people, places and organisations use the spelling that quality media in {language} use.
    Common abbreviations take their usual form in {language} (NATO, EU, UN and so on).
-4. Never use a dash between words: no em dash and no en dash. Use a colon, a comma or a new
-   sentence instead. A hyphen inside a word or a compound name is fine.
-5. The headline is one sentence with no full stop at the end. The description keeps the same
-   sentences as the English.
-6. A story with "retry_note" was translated before and rejected by a check: read the note and
+4. Spelling: write correct, natural {language} with its full alphabet: every accent, every
+   apostrophe, every letter the language needs. Keep the hyphen in every word that has one
+   (compound words, names, 24-hour and the like).
+5. Long dashes only: never use an em dash or an en dash between words. Use a colon, a comma or
+   a new sentence instead. (This rule is about long dashes only; hyphens inside words stay.)
+6. Grammar: check case, gender and number agreement, especially after numbers and in
+   declined names.
+7. The headline is one sentence with no full stop at the end, written the way headlines are
+   written in {language}. The description keeps the same sentences as the English.
+8. A story with "retry_note" was translated before and rejected by a check: read the note and
    fix exactly that.
 {style}
 
@@ -51,9 +56,9 @@ If a story has an empty description, give an empty description.
 
 ```json
 {
-  "ru": "Russian: standard press style (like RBC or Kommersant). Write ё where it is usual. In Russian typography a dash between subject and predicate is common: never use it, rephrase or use a colon. Quotation marks: «». Ukrainian place names in their usual Russian press form (Киев, Харьков, Запорожье). Armenia's Prime Minister is премьер-министр.",
-  "hy": "Eastern Armenian, reformed (Soviet-era) orthography, standard press style (like Armenpress or Azatutyun). End sentences with the Armenian full stop ։ and use the Armenian comma. Write foreign names in Armenian letters. Quotation marks: «».",
-  "fr": "French: standard press style (like Le Monde or AFP). Use a no-break space before : ; ! ? and inside « ». Write Armenian names as French media do (Erevan, Pachinian)."
+  "ru": "Russian: standard press style (like RBC or Kommersant). Headlines in the past tense for events that happened (Бахрейн перехватил, not перехватывает), as Russian news sites write them. In Russian typography a dash between subject and predicate is common: never use it, rephrase or use a colon. Quotation marks: «». Ukrainian place names in their usual Russian press form (Киев, Харьков, Запорожье). Armenia's Prime Minister is премьер-министр.",
+  "hy": "Eastern Armenian, reformed (Soviet-era) orthography as used in Armenia today, standard press style (like Armenpress or Azatutyun): write և (never եւ), lower-case month names and adjectives (սեպտեմբեր, հայկական), only Armenian letters (no Latin, Greek or Cyrillic letter inside a word). Headlines in the past tense for events that happened, as Armenian news sites write them. End every sentence with the Armenian full stop ։ (never a colon). Write foreign names in Armenian letters as Armenian media do (Շարմազանով, not a new spelling). Quotation marks: «».",
+  "fr": "French: standard press style (like Le Monde or AFP), with all accents (é, è, ê, à, ç, ô, î, ï) and apostrophes (l'ONU, d'Iran, qu'il). Use a no-break space before : ; ! ? and inside « ». Write Armenian names as French media do (Erevan, Pachinian)."
 }
 ```
 

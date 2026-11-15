@@ -1,0 +1,643 @@
+{
+ "made_at": 1794752347,
+ "stories": [
+  {
+   "id": 1601,
+   "summary": "Eduard Sharmazanov stated that international silence on aggression and ethnic cleansing in Nagorno-Karabakh undermines the UN system.",
+   "headline": "Sharmazanov says silence on Karabakh undermines UN system",
+   "description": "Eduard Sharmazanov stated that international inaction regarding ethnic cleansing in Nagorno-Karabakh damages global legal structures.",
+   "emojis": "🇦🇲🏛️",
+   "best_source": "Aravot",
+   "best_url": "https://www.aravot.am/2026/11/15/1593691/",
+   "topics": "[\"politics\", \"armenia\"]",
+   "main_topic": "armenia",
+   "final_score": 5,
+   "sent_at": 1794747646
+  },
+  {
+   "id": 1565,
+   "summary": "Bahrain intercepted two Iranian drone barrages following months of relative calm amid escalating regional hostilities.",
+   "headline": "Bahrain intercepts two Iranian drone barrages after months of calm",
+   "description": "Bahrain intercepted two Iranian drone barrages in a first attack since September, following months of relative calm. Iran's Islamic Revolutionary Guard Corps claimed it targeted a US military base.",
+   "emojis": "🇧🇭🇮🇷💥",
+   "best_source": "Financial Times",
+   "best_url": "https://www.ft.com/content/fc7ccc23-c051-49e6-85e5-8d8ba0a83ef9?syn-25a6b1a6=1",
+   "topics": "[\"wars_conflicts\", \"iran_war\"]",
+   "main_topic": "iran_war",
+   "final_score": 7,
+   "sent_at": 1794747646
+  },
+  {
+   "id": 1545,
+   "summary": "Criminal proceedings and travel bans were initiated against judges Masis Melkonyan and Gevorg Pogosyan.",
+   "headline": "Armenian General Prosecution initiates criminal proceedings against two judges",
+   "description": "The Armenian Prosecutor General initiated criminal proceedings and imposed travel bans against judges Masis Melkonyan and Gevorg Pogosyan.",
+   "emojis": "🇦🇲⚖️🚨",
+   "best_source": "News.am",
+   "best_url": "https://news.am/ru/news/1074935",
+   "topics": "[\"politics\", \"armenia\"]",
+   "main_topic": "armenia",
+   "final_score": 6,
+   "sent_at": 1794747646
+  },
+  {
+   "id": 1510,
+   "summary": "The Days of Armenian Culture in Russia concluded with a gala concert in Moscow.",
+   "headline": "Days of Armenian Culture in Russia conclude with Moscow gala concert",
+   "description": "The Days of Armenian Culture in Russia concluded with a gala concert in Moscow, highlighting bilateral cultural ties.",
+   "emojis": "🇦🇲🇷🇺🎵",
+   "best_source": "Aravot",
+   "best_url": "https://www.aravot.am/2026/11/15/1593713/",
+   "topics": "[\"politics\", \"armenia\", \"russia\"]",
+   "main_topic": "armenia",
+   "final_score": 5,
+   "sent_at": 1794747646
+  },
+  {
+   "id": 1497,
+   "summary": "Armenian Prime Minister Nikol Pashinyan stated during a meeting that he envisions Armenia as a member of the European Union in 20 years.",
+   "headline": "Pashinyan says he envisions Armenia as a member of the EU in 20 years",
+   "description": "Armenian Prime Minister Nikol Pashinyan stated his long-term vision for the country during a public meeting.",
+   "emojis": "🇦🇲🇪🇺🏛️",
+   "best_source": "Novaya Gazeta Europe",
+   "best_url": "https://novayagazeta.eu/articles/2026/11/15/pashinian-zaiavil-chto-cherez-20-let-vidit-armeniiu-v-sostave-evrosoiuza-news",
+   "topics": "[\"politics\", \"armenia\"]",
+   "main_topic": "armenia",
+   "final_score": 5,
+   "sent_at": 1794747646
+  },
+  {
+   "id": 1463,
+   "summary": "Armenia launched an expedited 24-hour service for issuing biometric passports and ID cards for a fee of approximately 88,650 drams.",
+   "headline": "Armenia launches expedited 24-hour biometric passport service",
+   "description": "The Ministry of Interior introduced an accelerated issuance service for ID cards and biometric passports for a set fee.",
+   "emojis": "🇦🇲🪪",
+   "best_source": "News.am",
+   "best_url": "https://news.am/ru/news/1074909",
+   "topics": "[\"armenia\"]",
+   "main_topic": "armenia",
+   "final_score": 5,
+   "sent_at": 1794747646
+  },
+  {
+   "id": 1433,
+   "summary": "Russian glide bombs destroyed a fortified underground school in Komyshuvakha, Zaporizhzhia, killing at least 55 people.",
+   "headline": "Russian glide bombs destroy fortified underground school in Zaporizhzhia",
+   "description": "Russian glide bombs destroyed a fortified underground school in Komyshuvakha, Zaporizhzhia, while residents were collecting humanitarian aid.",
+   "emojis": "🇷🇺🇺🇦💥",
+   "best_source": "Kyiv Post",
+   "best_url": "https://www.kyivpost.com/opinion/90147",
+   "topics": "[\"wars_conflicts\", \"ukraine_war\"]",
+   "main_topic": "ukraine_war",
+   "final_score": 7,
+   "sent_at": 1794729646
+  },
+  {
+   "id": 1396,
+   "summary": "Iran's IRGC claimed its drones struck a US radar installation in Bahrain, an action Tehran described as defensive.",
+   "headline": "Iran says it targeted US radar site in Bahrain with six drones",
+   "description": "Iran's Revolutionary Guards launched six drones targeting a US air defence radar at a base in Bahrain. The action was described by Tehran as defensive.",
+   "emojis": "🇮🇷🇧🇭💥",
+   "best_source": "Bloomberg",
+   "best_url": "https://www.bloomberg.com/news/articles/2026-11-15/iran-strikes-bahrain-base-repeats-path-to-us-deal-remains-open",
+   "topics": "[\"politics\", \"wars_conflicts\", \"iran_war\"]",
+   "main_topic": "iran_war",
+   "final_score": 6,
+   "sent_at": 1794729646
+  },
+  {
+   "id": 1000,
+   "summary": "Russian forces struck a dry cargo ship carrying military supplies for the Ukrainian army in Chornomorsk port.",
+   "headline": "Russian military strikes Chornomorsk port infrastructure and cargo ship",
+   "description": "Russian forces launched drone strikes against port infrastructure in Chornomorsk and hit a dry cargo ship carrying military supplies for the Ukrainian army.",
+   "emojis": "🇷🇺🇺🇦🚢",
+   "best_source": "TASS",
+   "best_url": "https://tass.com/defense/2218275",
+   "topics": "[\"wars_conflicts\", \"ukraine_war\"]",
+   "main_topic": "ukraine_war",
+   "final_score": 7,
+   "sent_at": 1794729646
+  },
+  {
+   "id": 1249,
+   "summary": "Hamas confirmed the death of senior commander Samir Abu Yunes in an Israeli airstrike in Gaza.",
+   "headline": "Israel kills Hamas commander Samir Abu Younis in Gaza strike",
+   "description": "Both Hamas and the Israel Defense Forces confirmed the death of Samir Abu Younis, commander of the Rafah Brigade, in an Israeli airstrike in Gaza.",
+   "emojis": "🇮🇱🇵🇸💥",
+   "best_source": "BBC News",
+   "best_url": "https://www.bbc.co.uk/news/articles/cqrkg4r6mg7xo?at_medium=RSS&at_campaign=rss",
+   "topics": "[\"wars_conflicts\", \"iran_war\"]",
+   "main_topic": "iran_war",
+   "final_score": 7,
+   "sent_at": 1794718846
+  },
+  {
+   "id": 1280,
+   "summary": "Three commercial ships were struck by drones near Romania's Black Sea coast over two days.",
+   "headline": "Three commercial ships struck by drones near Romanian coast",
+   "description": "Romanian authorities confirmed that three commercial vessels were struck by drones near the Black Sea coast, sparking fires aboard.",
+   "emojis": "🇷🇴🚢💥",
+   "best_source": "The Kyiv Independent",
+   "best_url": "https://kyivindependent.com/three-commercial-ships-struck-by-drones-near-romanias-black-sea-coast-over-two-days/",
+   "topics": "[\"wars_conflicts\", \"iran_war\"]",
+   "main_topic": "iran_war",
+   "final_score": 6,
+   "sent_at": 1794708046
+  },
+  {
+   "id": 1253,
+   "summary": "Security measures were increased in the US following intelligence regarding an alleged Iranian assassination plot against Donald Trump.",
+   "headline": "Mossad warns CIA of Iranian assassination plot against Trump",
+   "description": "Israel's Mossad has officially notified the CIA that Iran is planning to assassinate US President Donald Trump and key members of his administration.",
+   "emojis": "🇮🇱🇺🇸🇮🇷",
+   "best_source": "TASS",
+   "best_url": "https://tass.com/world/2218283",
+   "topics": "[\"politics\", \"wars_conflicts\", \"iran_war\"]",
+   "main_topic": "politics",
+   "final_score": 7,
+   "sent_at": 1794708046
+  },
+  {
+   "id": 892,
+   "summary": "The Prosecutor General's Office has requested the Supreme Judicial Council to strip two judges of their immunity for criminal prosecution",
+   "headline": "Armenia's Prosecutor General seeks to strip two judges of immunity",
+   "description": "The Prosecutor General's Office asked the Supreme Judicial Council to strip judges Masis Melkonyan and Gevorg Poghosyan of their immunity for criminal prosecution.",
+   "emojis": "🇦🇲⚖️",
+   "best_source": "CivilNet",
+   "best_url": "https://civilnet.am/hy/news/1015401",
+   "topics": "[\"politics\", \"armenia\"]",
+   "main_topic": "politics",
+   "final_score": 6,
+   "sent_at": 1794708046
+  },
+  {
+   "id": 1036,
+   "summary": "Eighteen Arab and Islamic countries condemned an Israeli airstrike on the Nasser Medical Complex in Khan Younis that killed at least six people.",
+   "headline": "Eighteen Arab and Islamic countries condemn Israeli strike on Gaza hospital",
+   "description": "Eighteen Arab and Islamic countries jointly condemned an Israeli airstrike on the Nasser Medical Complex in Khan Younis that resulted in multiple deaths.",
+   "emojis": "🇵🇸🇮🇱🏥",
+   "best_source": "Asharq Al-Awsat",
+   "best_url": "https://english.aawsat.com/node/5341218",
+   "topics": "[\"wars_conflicts\", \"iran_war\"]",
+   "main_topic": "iran_war",
+   "final_score": 7,
+   "sent_at": 1794679246
+  },
+  {
+   "id": 1035,
+   "summary": "A Myanmar military airstrike on a displacement camp in Rakhine state killed 12 people.",
+   "headline": "Myanmar military airstrike kills 12 at displacement camp in Rakhine state",
+   "description": "A Myanmar military airstrike on a displacement camp in Rakhine state killed 12 people.",
+   "emojis": "🇲🇲💥",
+   "best_source": "Al Jazeera",
+   "best_url": "https://www.aljazeera.com/video/newsfeed/2026/11/14/myanmar-airstrike-displacement-camp-rakhine?traffic_source=rss",
+   "topics": "[\"wars_conflicts\"]",
+   "main_topic": "wars_conflicts",
+   "final_score": 7,
+   "sent_at": 1794679246
+  }
+ ],
+ "langs": {
+  "ru": {
+   "result": {
+    "todo": 0,
+    "ok": 14,
+    "rejected": 1,
+    "unanswered": 0,
+    "calls": 1,
+    "input_tokens": 1649,
+    "output_tokens": 1417,
+    "provider": "gemini",
+    "notes": [
+     "S1463: missing number(s) 24"
+    ]
+   },
+   "retry": {
+    "todo": 0,
+    "ok": 1,
+    "rejected": 0,
+    "unanswered": 0,
+    "calls": 1,
+    "input_tokens": 676,
+    "output_tokens": 79,
+    "provider": "gemini",
+    "notes": []
+   },
+   "rows": {
+    "1601": {
+     "ok": 1,
+     "headline": "Шармазанов заявил, что молчание о Карабахе подрывает систему ООН",
+     "description": "Эдуард Шармазанов заявил, что международное бездействие в отношении этнических чисток в Нагорном Карабахе наносит ущерб глобальным правовым структурам.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1565": {
+     "ok": 1,
+     "headline": "Бахрейн перехватил два залпа иранских беспилотников после месяцев затишья",
+     "description": "Бахрейн перехватил два залпа иранских беспилотников в ходе первой атаки с сентября, последовавшей за месяцами относительного затишья. Корпус стражей исламской революции Ирана заявил, что целью была военная база США.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1545": {
+     "ok": 1,
+     "headline": "Генеральная прокуратура Армении возбудила уголовные дела против двух судей",
+     "description": "Генеральный прокурор Армении возбудил уголовные дела и ввел запреты на выезд в отношении судей Масиса Мелконяна и Геворга Погосяна.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1510": {
+     "ok": 1,
+     "headline": "Дни армянской культуры в России завершились гала-концертом в Москве",
+     "description": "Дни армянской культуры в России завершились гала-концертом в Москве, подчеркнувшим двусторонние культурные связи.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1497": {
+     "ok": 1,
+     "headline": "Пашинян заявил, что видит Армению членом ЕС через 20 лет",
+     "description": "Премьер-министр Армении Никол Пашинян изложил свое долгосрочное видение будущего страны во время публичной встречи.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1463": {
+     "ok": 0,
+     "headline": null,
+     "description": null,
+     "note": "missing number(s) 24",
+     "provider": "gemini",
+     "retry_ok": 1,
+     "retry_headline": "Армения запустила ускоренную 24-часовую услугу выдачи биометрических паспортов",
+     "retry_description": "Министерство внутренних дел ввело услугу ускоренной выдачи удостоверений личности и биометрических паспортов за фиксированную плату.",
+     "retry_note": null
+    },
+    "1433": {
+     "ok": 1,
+     "headline": "Российские планирующие бомбы уничтожили укрепленную подземную школу в Запорожье",
+     "description": "Российские планирующие бомбы уничтожили укрепленную подземную школу в Камышевахе в Запорожье в то время, когда жители получали гуманитарную помощь.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1396": {
+     "ok": 1,
+     "headline": "Иран заявил об ударе шестью беспилотниками по радиолокационной станции США в Бахрейне",
+     "description": "Стражи исламской революции Ирана запустили шесть беспилотников по радарной станции противовоздушной обороны США на базе в Бахрейне. Тегеран охарактеризовал эти действия как оборонительные.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1000": {
+     "ok": 1,
+     "headline": "Вооруженные силы России нанесли удары по портовой инфраструктуре и сухогрузу в Черноморске",
+     "description": "Российские войска нанесли удары беспилотниками по портовой инфраструктуре в Черноморске и поразили сухогруз, перевозивший военные грузы для украинской армии.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1249": {
+     "ok": 1,
+     "headline": "Израиль ликвидировал командира ХАМАС Самира Абу Юниса в результате удара по Газе",
+     "description": "И ХАМАС, и Армия обороны Израиля подтвердили гибель Самира Абу Юниса, командира бригады Рафах, в результате израильского авиаудара в Газе.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1280": {
+     "ok": 1,
+     "headline": "Три торговых судна поражены беспилотниками у румынского побережья",
+     "description": "Румынские власти подтвердили, что три торговых судна были поражены беспилотниками у побережья Черного моря, что привело к пожарам на борту.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1253": {
+     "ok": 1,
+     "headline": "Моссад предупредил ЦРУ о готовящемся Ираном покушении на Трампа",
+     "description": "Израильский Моссад официально уведомил ЦРУ о том, что Иран планирует покушение на президента США Дональда Трампа и ключевых членов его администрации.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "892": {
+     "ok": 1,
+     "headline": "Генеральная прокуратура Армении добивается лишения иммунитета двух судей",
+     "description": "Прокуратура обратилась в Высший судебный совет с ходатайством о лишении судей Масиса Мелконяна и Геворга Погосяна иммунитета для уголовного преследования.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1036": {
+     "ok": 1,
+     "headline": "Восемнадцать арабских и исламских стран осудили удар Израиля по больнице в Газе",
+     "description": "Восемнадцать арабских и исламских стран совместно осудили израильский авиаудар по медицинскому комплексу «Насер» в Хан-Юнисе, который привел к многочисленным жертвам.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1035": {
+     "ok": 1,
+     "headline": "Авиаудар военных Мьянмы унес жизни 12 человек в лагере для перемещенных лиц в штате Рахайн",
+     "description": "Авиаудар военных Мьянмы по лагерю для перемещенных лиц в штате Рахайн унес жизни 12 человек.",
+     "note": null,
+     "provider": "gemini"
+    }
+   }
+  },
+  "hy": {
+   "result": {
+    "todo": 0,
+    "ok": 15,
+    "rejected": 0,
+    "unanswered": 0,
+    "calls": 1,
+    "input_tokens": 1690,
+    "output_tokens": 2340,
+    "provider": "gemini",
+    "notes": []
+   },
+   "retry": {
+    "todo": 0,
+    "ok": 0,
+    "rejected": 0,
+    "unanswered": 0,
+    "calls": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "provider": null,
+    "notes": []
+   },
+   "rows": {
+    "1601": {
+     "ok": 1,
+     "headline": "Շարմազանովը հայտարարել է, որ Ղարաբաղի հարցում լռությունը խաթարում է ՄԱԿ-ի համակարգը",
+     "description": "Էդուարդ Շարմազանովը հայտարարել է, որ Լեռնային Ղարաբաղում էթնիկ զտումների նկատմամբ միջազգային անգործությունը վնասում է գլոբալ իրավական կառույցներին։",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1565": {
+     "ok": 1,
+     "headline": "Բահրեյնը որսացել է իրանական անօդաչուների երկու տարափը մի քանի ամիս տևած անդորրից հետո",
+     "description": "Բահրեյնը որսացել է իրանական անօդաչուների երկու տարափը սեպտեմբերից ի վեր առաջին հարձակման ժամանակ՝ հարաբերական անդորրի ամիսներից հետո։ Իրանի իսլամական հեղափոխության պահապանների կորպուսը հայտարարել է, որ թիրախավորել է ամերիկյան ռազմական բազա։",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1545": {
+     "ok": 1,
+     "headline": "Հայաստանի գլխավոր դատախազությունը քրեական վարույթ է սկսել երկու դատավորի նկատմամբ",
+     "description": "Հայաստանի գլխավոր դատախազը քրեական վարույթ է սկսել և արգելքներ սահմանել երկրից դուրս գալու համար դատավորներ Մասիս Մելքոնյանի և Գևորգ Պողոսյանի նկատմամբ։",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1510": {
+     "ok": 1,
+     "headline": "Ռուսաստանում հայկական մշակույթի օրերն ավարտվել են մոսկովյան գալա համերգով",
+     "description": "Ռուսաստանում հայկական մշակույթի օրերն ավարտվել են Մոսկվայում կայացած գալա համերգով՝ ընդգծելով երկկողմ մշակութային կապերը։",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1497": {
+     "ok": 1,
+     "headline": "Փաշինյանը հայտարարել է, որ Հայաստանը տեսնում է ԵՄ անդամ 20 տարի հետո",
+     "description": "Հայաստանի վարչապետ Նիկոլ Փաշինյանը հանրային հանդիպման ժամանակ հայտարարել է երկրի զարգացման իր երկարաժամկետ տեսլականի մասին։",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1463": {
+     "ok": 1,
+     "headline": "Հայաստանում գործարկվել է արագացված 24-ժամյա կենսաչափական անձնագրերի ծառայություն",
+     "description": "ՆԳ նախարարությունը ներդրել է նույնականացման քարտերի և կենսաչափական անձնագրերի արագացված տրամադրման ծառայություն՝ սահմանված վճարի դիմաց։",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1433": {
+     "ok": 1,
+     "headline": "Ռուսական պլանավորող ռումբերը ոչնչացրել են Զապորոժիեի ամրացված ստորգետնյա դպրոցը",
+     "description": "Ռուսական պլանավորող ռումբերը ոչնչացրել են Զապորոժիեի Կոմիշուվախա գյուղում գտնվող ամրացված ստորգետնյա դպրոցը, մինչ բնակիչները հավաքում էին հումանիտար օգնություն։",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1396": {
+     "ok": 1,
+     "headline": "Իրանը հայտարարել է, որ Բահրեյնում վեց անօդաչուով հարվածել է ամերիկյան ռադարային կայանին",
+     "description": "Իրանի հեղափոխության պահապանները վեց անօդաչու են արձակել՝ թիրախավորելով ԱՄՆ-ի հակաօդային պաշտպանության ռադարը Բահրեյնի բազայում։ Թեհրանն այդ գործողությունը որակել է որպես պաշտպանական։",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1000": {
+     "ok": 1,
+     "headline": "Ռուսական զինված ուժերը հարվածել են Չեռնոմորսկի նավահանգստային ենթակառուցվածքին և բեռնանավին",
+     "description": "Ռուսական ուժերն անօդաչուներով հարվածներ են հասցրել Չեռնոմորսկի նավահանգստային ենթակառուցվածքին և խոցել ուկրաինական բանակի համար ռազմական պարագաներ տեղափոխող չորաբեռնանավ։",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1249": {
+     "ok": 1,
+     "headline": "Իսրայելը Գազայում հարվածի հետևանքով սպանել է ՀԱՄԱՍ-ի հրամանատար Սամիր Աբու Յունիսին",
+     "description": "Եվ ՀԱՄԱՍ-ը, և Իսրայելի պաշտպանության բանակը հաստատել են Ռաֆահի բրիգադի հրամանատար Սամիր Աբու Յունիսի մահը Գազայում իսրայելական ավիահարվածի հետևանքով։",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1280": {
+     "ok": 1,
+     "headline": "Ռումինական ափերի մոտ անօդաչուները հարվածել են երեք առևտրային նավի",
+     "description": "Ռումինիայի իշխանությունները հաստատել են, որ Սևծովյան ափերի մոտ երեք առևտրային նավ խոցվել է անօդաչուների կողմից, ինչի հետևանքով դրանցում հրդեհներ են բռնկվել։",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1253": {
+     "ok": 1,
+     "headline": "«Մոսադը» ԿՀՎ-ին զգուշացրել է Թրամփի դեմ իրանական մահափորձի ծրագրի մասին",
+     "description": "Իսրայելի «Մոսադը» պաշտոնապես տեղեկացրել է ԿՀՎ-ին, որ Իրանը պլանավորում է սպանել ԱՄՆ նախագահ Դոնալդ Թրամփին և նրա վարչակազմի առանցքային անդամներին։",
+     "note": null,
+     "provider": "gemini"
+    },
+    "892": {
+     "ok": 1,
+     "headline": "Հայաստանի գլխավոր դատախազըձգտում է զրկել երկու դատավորի անձեռնմխելիությունից",
+     "description": "Գլխավոր դատախազությունը դիմել է Բարձրագույն դատական խորհրդին՝ քրեական հետապնդման նպատակով դատավորներ Մասիս Մելքոնյանին և Գևորգ Պողոսյանին անձեռնմխելիությունից զրկելու համար։",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1036": {
+     "ok": 1,
+     "headline": "Տասնութ արաբական և իսլամական երկիր դատապարտել է Գազայի հիվանդանոցի վրա իսրայելական հարվածը",
+     "description": "Տասնութ արաբական և իսլամական երկիր համատեղ դատապարտել են Խան Յունիսի «Նասեր» բժշկական համալիրի վրա իսրայելական ավիահարվածը, որը հանգեցրել է բազմաթիվ զոհերի։",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1035": {
+     "ok": 1,
+     "headline": "Մյանմայի զինված ուժերի ավիահարվածից 12 մարդ է զոհվել Ռաքհայն նահանգի փախստականների ճամբարում",
+     "description": "Մյանմայի զինված ուժերի ավիահարվածը Ռաքհայն նահանգի փախստականների ճամբարին խլել է 12 մարդու կյանք։",
+     "note": null,
+     "provider": "gemini"
+    }
+   }
+  },
+  "fr": {
+   "result": {
+    "todo": 0,
+    "ok": 15,
+    "rejected": 0,
+    "unanswered": 0,
+    "calls": 1,
+    "input_tokens": 1614,
+    "output_tokens": 1374,
+    "provider": "gemini",
+    "notes": []
+   },
+   "retry": {
+    "todo": 0,
+    "ok": 0,
+    "rejected": 0,
+    "unanswered": 0,
+    "calls": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "provider": null,
+    "notes": []
+   },
+   "rows": {
+    "1601": {
+     "ok": 1,
+     "headline": "Charmazanov affirme que le silence sur le Karabakh nuit au système de l'ONU",
+     "description": "Édouard Charmazanov a déclaré que l'inaction internationale concernant le nettoyage ethnique dans le Haut-Karabakh nuit aux structures juridiques mondiales.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1565": {
+     "ok": 1,
+     "headline": "Bahreïn isterne deux barrages de drones iraniens après des mois de calme",
+     "description": "Bahreïn a intercepté deux barrages de drones iraniens lors d'une première attaque depuis septembre, à la suite de mois de calme relatif. Le Corps des gardiens de la révolution islamique d'Iran a affirmé avoir visé une base militaire américaine.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1545": {
+     "ok": 1,
+     "headline": "Le Parquet général arménien engage des poursuites pénales contre deux juges",
+     "description": "Le procureur général arménien a engagé des poursuites pénales et imposé des interdictions de sortie du territoire contre les juges Masis Melkonyan et Gevorg Pogosyan.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1510": {
+     "ok": 1,
+     "headline": "Les Journées de la culture arménienne en Russie s'achèvent par un concert de gala à Moscou",
+     "description": "Les Journées de la culture arménienne en Russie se sont achevées par un concert de gala à Moscou, mettant en valeur les liens culturels bilatéraux.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1497": {
+     "ok": 1,
+     "headline": "Pachinian déclare qu'il envisage l'Arménie comme membre de l'UE dans 20 ans",
+     "description": "Le Premier ministre arménien Nikol Pachinian a exprimé sa vision à long terme pour le pays lors d'une réunion publique.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1463": {
+     "ok": 1,
+     "headline": "L'Arménie lance un service accéléré de passeport biométrique en 24 heures",
+     "description": "Le ministère de l'Intérieur a introduit un service de délivrance accélérée pour les cartes d'identité et les passeports biométriques moyennant des frais fixes.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1433": {
+     "ok": 1,
+     "headline": "Des bombes planantes russes détruisent une école souterraine fortifiée à Zaporijjia",
+     "description": "Des bombes planantes russes ont détruit une école souterraine fortifiée à Komychouvakha, à Zaporijjia, alors que des habitants collectaient de l'aide humanitaire.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1396": {
+     "ok": 1,
+     "headline": "L'Iran affirme avoir ciblé un site radar américain à Bahreïn avec six drones",
+     "description": "Les Gardiens de la révolution iranienne ont lancé six drones visant un radar de défense aérienne américain sur une base à Bahreïn. L'action a été qualifiée de défensive par Téhéran.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1000": {
+     "ok": 1,
+     "headline": "L'armée russe frappe l'infrastructure portuaire de Tchernomorsk et un cargo",
+     "description": "Les forces russes ont lancé des attaques de drones contre l'infrastructure portuaire à Tchernomorsk et ont touché un navire sec transportant des fournitures militaires pour l'armée ukrainienne.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1249": {
+     "ok": 1,
+     "headline": "Israël tue le commandant du Hamas Samir Abou Younis lors d'une frappe à Gaza",
+     "description": "Le Hamas et les Forces de défense israéliennes ont tous deux confirmé la mort de Samir Abou Younis, commandant de la brigade de Rafah, lors d'une frappe aérienne israélienne à Gaza.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1280": {
+     "ok": 1,
+     "headline": "Trois navires commerciaux touchés par des drones près de la côte roumaine",
+     "description": "Les autorités roumaines ont confirmé que trois navires commerciaux avaient été touchés par des drones près de la côte de la mer Noire, provoquant des incendies à bord.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1253": {
+     "ok": 1,
+     "headline": "Le Mossad avertit la CIA d'un complot d'assassinat iranien contre Trump",
+     "description": "Le Mossad israélien a officiellement informé la CIA que l'Iran prévoyait d'assassiner le président américain Donald Trump et des membres clés de son administration.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "892": {
+     "ok": 1,
+     "headline": "Le procureur général d'Arménie cherche à lever l'immunité de deux juges",
+     "description": "Le Parquet général a demandé au Conseil supérieur de la magistrature de lever l'immunité des juges Masis Melkonyan et Gevorg Poghosyan en vue de poursuites pénales.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1036": {
+     "ok": 1,
+     "headline": "Dix-huit pays arabes et islamiques condamnent la frappe israélienne sur un hôpital de Gaza",
+     "description": "Dix-huit pays arabes et islamiques ont conjointement condamné une frappe aérienne israélienne sur le complexe médical Nasser à Khan Younès, qui a fait de multiples morts.",
+     "note": null,
+     "provider": "gemini"
+    },
+    "1035": {
+     "ok": 1,
+     "headline": "Une frappe aérienne de l'armée birmane fait 12 morts dans un camp de déplacés dans l'État Rakhine",
+     "description": "Une frappe aérienne de l'armée birmane sur un camp de déplacés dans l'État Rakhine a tué 12 personnes.",
+     "note": null,
+     "provider": "gemini"
+    }
+   }
+  }
+ },
+ "calls": [
+  {
+   "kind": "translate_ru",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "items": 15,
+   "input_tokens": 1649,
+   "output_tokens": 1417,
+   "error": null
+  },
+  {
+   "kind": "translate_ru",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "items": 1,
+   "input_tokens": 676,
+   "output_tokens": 79,
+   "error": null
+  },
+  {
+   "kind": "translate_hy",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "items": 15,
+   "input_tokens": 1690,
+   "output_tokens": 2340,
+   "error": null
+  },
+  {
+   "kind": "translate_fr",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "items": 15,
+   "input_tokens": 1614,
+   "output_tokens": 1374,
+   "error": null
+  }
+ ]
+}
