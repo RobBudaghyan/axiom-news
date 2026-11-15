@@ -40,6 +40,12 @@ export function adminStatements(now) {
     { sql: "SELECT at, component, message FROM errors ORDER BY at DESC, id DESC LIMIT 50", params: [] },
     { sql: "SELECT sum(d1_rows_read) AS r, sum(d1_rows_written) AS w, count(*) AS runs FROM job_runs WHERE started_at >= ?1",
       params: [dayStart] },
+    // Step 8: digest sizes over the last 24 h from `sent` (no new table). All rows of one digest
+    // share its sent_at. A merge copies a sent row to the kept story with the same sent_at, and
+    // the merged-away story is skipped here, so each story counts once. Quiet notes write no rows.
+    { sql: "SELECT x.user_id, count(*) AS stories, count(DISTINCT x.sent_at) AS digests FROM sent x " +
+           "JOIN stories s ON s.id = x.story_id WHERE x.sent_at >= ?1 AND s.merged_into IS NULL GROUP BY x.user_id",
+      params: [now - DAY] },
   ];
 }
 
@@ -72,7 +78,8 @@ export function feedReport(health, now, cfg = CONFIG) {
 }
 
 export function shapeAdmin(rows, now, cfg = CONFIG) {
-  const [[last], [lastOk], [s24], [s7], models, metaRows, users, errors, [jobD1]] = rows;
+  const [[last], [lastOk], [s24], [s7], models, metaRows, users, errors, [jobD1], sizes = []] = rows;
+  const sizeOf = new Map(sizes.map((r) => [r.user_id, r]));
   const meta = Object.fromEntries(metaRows.map((r) => [r.key, r.value]));
 
   const alertAt = Number(meta.last_alert_at ?? 0);
@@ -97,6 +104,11 @@ export function shapeAdmin(rows, now, cfg = CONFIG) {
     id: u.id, name: u.first_name || "(no name)", timezone: u.timezone, times: parseList(u.digest_times),
     paused: !!u.paused, blocked: !!u.blocked, last_digest_at: u.last_digest_at ?? null,
     next_digest_at: u.next_digest_at ?? null,
+    ...(() => {   // Step 8: average digest size in the last 24 h (digests with stories)
+      const z = sizeOf.get(u.id);
+      const digests = num(z?.digests);
+      return { digests_24h: digests, avg_stories_24h: digests ? Math.round((num(z.stories) / digests) * 10) / 10 : null };
+    })(),
   }));
 
   return {

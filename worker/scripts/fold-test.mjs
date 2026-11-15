@@ -25,7 +25,7 @@ const [stories, topics, users] = await db.batch([
 const user = users[0] ?? {};
 const topicInfo = topicInfoFrom(topics);
 const pool = stories.map((s) => ({ ...s, primary: s.main_topic ?? JSON.parse(s.topics)[0] }));
-const cfg = { ...CONFIG, message_char_budget: 4096 };
+const cfg = CONFIG;
 
 function build(list, n, target) {
   const label = `<i>Fold test ${n} of ${TARGETS.length}, about ${target.toLocaleString("en-US")} characters. ` +
@@ -38,15 +38,14 @@ const messages = TARGETS.map((target, i) => {
   let list = [];
   for (const s of pool) {
     const next = build([...list, s], i + 1, target);
-    if (next.parts.length > 1 || visibleLength(next.parts[0]) > target + 60) continue;
+    if (visibleLength(next.text) > target + 60) continue;
     list = [...list, s];
-    if (visibleLength(next.parts[0]) >= target - 60) break;
+    if (visibleLength(next.text) >= target - 60) break;
   }
   const msg = build(list, i + 1, target);
-  if (msg.parts.length !== 1) throw new Error("a test message would be split");
   // The label names the real length (same number of digits as the target, so the length holds).
-  const real = visibleLength(msg.parts[0]).toLocaleString("en-US");
-  const text = msg.parts[0].replace(`about ${target.toLocaleString("en-US")} characters`, `${real} characters`);
+  const real = (visibleLength(msg.text) - 6).toLocaleString("en-US");   // "about " goes
+  const text = msg.text.replace(`about ${target.toLocaleString("en-US")} characters`, `${real} characters`);
   return { target, text, chars: visibleLength(text), lines: text.split("\n").length, stories: list.length };
 });
 

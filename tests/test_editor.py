@@ -315,6 +315,14 @@ class Step8(unittest.TestCase):
         self.assertEqual((story(self.db, a)["final_score"], story(self.db, a)["topic_score"]), (4, 6))
         self.assertEqual(story(self.db, b)["topic_score"], 8)       # never below the global score
         self.assertEqual(story(self.db, c)["topic_score"], 10)      # clamped
+        # the answer check itself raises a low topic score (the write clamps it a second time)
+        by_id = {s["id"]: s for s in editor.Editor(self.db, [], topics=TOPICS, facts=[], facts_checked="x").pool(T0 + H)}
+        if b in by_id:
+            evs, _ = editor.validate_events({"events": [{"ids": [f"S{b}"], "score": 8, "topic_score": 5}]}, by_id, {})
+            self.assertEqual((evs[0].topic_score, evs[0].topic_raw), (8, 5))
+        evs, _ = editor.validate_events({"events": [{"ids": [f"S{a}"], "score": 7, "topic_score": 3}]},
+                                        {a: story(self.db, a)}, {})
+        self.assertEqual((evs[0].topic_score, evs[0].topic_raw), (7, 3))
         # a later answer without a topic score keeps the old one (raised to a higher new score)
         self.db.query("UPDATE stories SET edited_at = NULL WHERE id = ?", [a])
         ed, _ = make_editor(self.db, [FakeProvider("gemini", [score_all(5)])])

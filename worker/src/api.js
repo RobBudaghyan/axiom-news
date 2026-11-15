@@ -13,7 +13,7 @@ import { CONFIG, afterSendStatements, candidateStatement, hhmm, localParts, next
 import { SettingsError, TZ_AUTO, TZ_DEFAULT, nextDigestAfterChange, publicUser, validZone, validatePatch } from "./settings.js";
 import { adminStatements, shapeAdmin } from "./admin.js";
 import { dispatchJob } from "./github.js";
-import { sendParts } from "./cron.js";
+import { sendDigest } from "./cron.js";
 import { errorStatement } from "./db.js";
 
 const TOPICS_SQL = "SELECT tag, label_en, emoji, sort, is_default FROM topics ORDER BY sort";
@@ -115,9 +115,8 @@ async function digestNow(db, ownerId, now, cfg, io) {
   if (!user) return fail(404, "Send /start to the bot first.");
   const [cands] = await db.batch([candidateStatement(user, now, cfg)]);
   const plan = planDigest(user, cands, topics, now, cfg);
-  const errors = [];
-  const ids = await sendParts(io, user.id, plan, (msg) => errors.push(errorStatement(msg, now)));
-  await db.batch([...afterSendStatements(user, ids, now, plan.nextAt), ...errors]);
+  const ids = await sendDigest(io, user.id, plan);
+  await db.batch(afterSendStatements(user, ids, now, plan.nextAt));
   const n = ids.length;
   return json(200, {
     ok: true, stories: n,

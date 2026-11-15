@@ -262,6 +262,14 @@ describe("admin data and actions", () => {
     const now = nowS();
     addUser(sqlite, { last_digest_at: now - 3600 });
     addUser(sqlite, { id: FRIEND, first_name: "Ani", paused: 1 });
+    // two digests in the last day (3 + 1 stories, one of them merged away later and copied to its
+    // kept story: still 4), one older digest that does not count
+    const st = [1, 2, 3, 4, 5, 6].map((i) => addStory(sqlite, `S${i}`, ["politics"], 7, now - 7200));
+    sqlite.prepare("UPDATE stories SET merged_into = ? WHERE id = ?").run(st[5], st[2]);
+    const sent = sqlite.prepare("INSERT INTO sent (user_id, story_id, sent_at) VALUES (?, ?, ?)");
+    for (const s of [st[0], st[1], st[2], st[5]]) sent.run(OWNER, s, now - 5000);   // st[5]: the copy of st[2]
+    sent.run(OWNER, st[3], now - 1000);
+    sent.run(OWNER, st[4], now - 2 * 86400);
     addUser(sqlite, { id: 8, first_name: "Gone", blocked: 1 });
     const run = sqlite.prepare("INSERT INTO job_runs (started_at, finished_at, status, provider, items_fetched, items_new, " +
       "stories_created, stories_merged, items_dropped, ai_calls, input_tokens, output_tokens, d1_rows_read, d1_rows_written) " +
@@ -288,6 +296,9 @@ describe("admin data and actions", () => {
     assert.deepEqual(a.stats.models[0]["24h"], { calls: 1, ok: 1, input_tokens: 10, output_tokens: 5 });
     assert.equal(a.stats.models[0]["7d"].calls, 2);
     assert.deepEqual([a.users.count, a.users.active, a.users.paused, a.users.blocked], [3, 1, 1, 1]);
+    const me = a.users.list.find((u) => u.id === OWNER);
+    assert.deepEqual([me.digests_24h, me.avg_stories_24h], [2, 2]);            // (3 + 1) / 2
+    assert.deepEqual([a.users.list.find((u) => u.id === FRIEND).digests_24h, a.users.list.find((u) => u.id === FRIEND).avg_stories_24h], [0, null]);
     assert.deepEqual(a.feeds.failing.map((f) => [f.name, f.error, f.fails]), [["Beta", "HTTP 403", 2]]);
     assert.deepEqual(a.feeds.silent.map((f) => f.name), ["Gamma"]);
     assert.equal(a.errors[0].message, "boom");
@@ -314,7 +325,7 @@ describe("admin data and actions", () => {
     const { binding, sqlite } = fakeD1();
     const now = nowS();
     addUser(sqlite, { next_digest_at: now + 4 * 3600 });
-    const a = addStory(sqlite, "IRAN: strike reported", ["iran_war"], 8, now - 600);
+    const a = addStory(sqlite, "IRAN: strike reported", ["iran_war"], 9, now - 600);   // unedited: 9 - 2 = 7
     fetchMock = mockFetch(() => undefined);
     const r = await call(binding, "/api/admin/digest", { init: await initFor(OWNER), body: {} });
     assert.equal(r.status, 200);

@@ -1,11 +1,12 @@
-// Digest building: the ONE place for selection, topic cap, near-duplicate removal, message
-// format and time-slot math. Used by the Worker cron (src/cron.js), the Admin "digest now" button
+// Digest building: the ONE place for selection (the two-score rule), near-duplicate removal, the
+// length cut, message format and time-slot math. Used by the Worker cron (src/cron.js), the Admin "digest now" button
 // (src/api.js) and the local tool (scripts/digest-cli.mjs), so all behave identically. Pure
 // functions only: no I/O. Settings live in config/digest.json.
 //
-// Scores (Step 5): the editor pass (job/editor.py) gives each story a strict `final_score`. A
-// story it has not scored (its call failed, or the story is weak) uses its first-pass importance
-// minus `unedited_offset`, so digests still work, just less well, when the editor is down.
+// Scores: the editor pass (job/editor.py) gives each story a strict `final_score` (Step 5) and a
+// `topic_score` for readers who follow its main topic (Step 8). A story it has not scored (its
+// call failed, or the story is weak) uses its first-pass importance minus `unedited_offset`, so
+// digests still work, just less well, when the editor is down.
 import CONFIG from "../../config/digest.json" with { type: "json" };
 import LINE_EMOJI from "../../config/line_emoji.json" with { type: "json" };
 
@@ -15,21 +16,34 @@ const DAY = 86400;
 
 // ------------------------------------------------------------------ selection (SQL)
 
-// Candidates for one user: on one of the user's topics, scoring at least the topic bar (the lower
-// of the two bars), created or updated since the last digest (at most 24 h back), not merged into
-// another story by the editor, never sent to this user. Best score first, then most recent.
-// Near-duplicates (dup_group), the bars, the topic guarantee and the cap follow in pickStories.
+// Step 8, the two-score rule. A story qualifies for a user if it is on one of the user's topics,
+// not merged away, never sent to this user, new since the last digest (at most 24 h back) and
+//   its global score g >= editorial_bar, OR
+//   its main topic (named by the editor) is one the user follows AND its topic score t >= topic_bar
+//   (and, with topic_needs_boost, t > g: the story matters more to followers than to everyone).
+// g = final_score, or first-pass importance minus unedited_offset when the editor has not scored
+// it yet; such a story has no topic score, so it qualifies only through the editorial bar (an
+// editor outage must not flood digests with first-pass scores). t = g plus the editor's boost,
+// capped per main topic (topic_boost_max, ?8). "New since the last digest" also counts the
+// editor's first score time (scored_at): a story scored after a digest went out still reaches the
+// next one. Best relevance first: t if the main topic is followed, otherwise g. The same rule is
+// in topicScore/qualifies below (the tests check both agree).
 export const CANDIDATE_SQL = `
-SELECT s.id, s.summary, s.headline, s.description, s.emojis, s.best_url, s.best_source, s.importance,
-       s.final_score, s.topics, s.main_topic, s.updated_at, s.dup_group
-FROM stories s
-WHERE s.updated_at >= ?3
-  AND s.merged_into IS NULL
-  AND coalesce(s.final_score, s.importance - ?6) >= ?5
-  AND EXISTS (SELECT 1 FROM json_each(s.topics) t
-              WHERE t.value IN (SELECT u.value FROM json_each(?2) u))
-  AND NOT EXISTS (SELECT 1 FROM sent x WHERE x.user_id = ?1 AND x.story_id = s.id)
-ORDER BY coalesce(s.final_score, s.importance - ?6) DESC, s.updated_at DESC, s.id DESC
+SELECT id, summary, headline, description, emojis, best_url, best_source, importance, final_score, topic_score,
+       topics, main_topic, updated_at, dup_group
+FROM (
+  SELECT s.*, coalesce(s.final_score, s.importance - ?6) AS g,
+         s.final_score + min(max(coalesce(s.topic_score, s.final_score) - s.final_score, 0),
+                             coalesce(json_extract(?8, '$.' || s.main_topic), 10)) AS t,
+         s.main_topic IN (SELECT u.value FROM json_each(?2) u) AS followed
+  FROM stories s
+  WHERE max(s.updated_at, coalesce(s.scored_at, 0)) >= ?3
+    AND s.merged_into IS NULL
+    AND EXISTS (SELECT 1 FROM json_each(s.topics) x WHERE x.value IN (SELECT u.value FROM json_each(?2) u))
+    AND NOT EXISTS (SELECT 1 FROM sent x WHERE x.user_id = ?1 AND x.story_id = s.id)
+)
+WHERE g >= ?5 OR (followed AND t >= ?7 AND (?9 = 0 OR t > final_score))
+ORDER BY max(g, CASE WHEN followed THEN coalesce(t, 0) ELSE 0 END) DESC, g DESC, updated_at DESC, id DESC
 LIMIT ?4`;
 
 export function digestSince(lastDigestAt, now, cfg = CONFIG) {
@@ -51,19 +65,25 @@ export function candidateStatement(user, now, cfg = CONFIG) {
   return {
     sql: CANDIDATE_SQL,
     params: [user.id, JSON.stringify(parseList(user.topics)), digestSince(user.last_digest_at, now, cfg),
-             cfg.candidate_limit, cfg.topic_bar, cfg.unedited_offset],
+             cfg.candidate_limit, cfg.editorial_bar, cfg.unedited_offset, cfg.topic_bar,
+             JSON.stringify(cfg.topic_boost_max ?? {}), cfg.topic_needs_boost ? 1 : 0],
   };
 }
 
+// The global score g.
 export function storyScore(s, cfg = CONFIG) {
   return s.final_score ?? (s.importance ?? 0) - cfg.unedited_offset;
 }
 
-// ------------------------------------------------------------------ topic cap
-
-// At most this many stories from one topic in a digest of n stories (40%, at least 2).
-export function topicCap(n, cfg = CONFIG) {
-  return Math.max(cfg.min_topic_cap ?? 2, Math.ceil(cfg.max_topic_share * n - 1e-9));   // 0.4 * 15 = 6.000000000000001
+// The topic score: for readers who follow the story's main topic. Never below the global score;
+// a story the editor has not scored has none. The editor's boost (topic score minus score) is
+// capped per main topic in code (cfg.topic_boost_max: 0 for the broad topics, 1 for the two wars,
+// 2 for Armenia and Russia), because the model still lifts statements and routine war news.
+export function topicScore(s, cfg = CONFIG) {
+  if (s.final_score == null) return null;
+  const boost = Math.max(0, (s.topic_score ?? s.final_score) - s.final_score);
+  const cap = cfg.topic_boost_max?.[s.main_topic] ?? boost;
+  return s.final_score + Math.min(boost, cap);
 }
 
 const rankOf = (specificity) => (t) => {
@@ -71,8 +91,8 @@ const rankOf = (specificity) => (t) => {
   return i < 0 ? specificity.length : i;
 };
 
-// The topic a story is shown under and counted against: the one the editor says it is mainly
-// about, if the user follows it; otherwise its most specific topic among the user's topics.
+// The topic a story is shown under: the one the editor says it is mainly about, if the user
+// follows it; otherwise its most specific topic among the user's topics.
 export function primaryTopic(storyTopics, userTopics, specificity = CONFIG.topic_specificity, main = null) {
   if (main && userTopics.includes(main) && storyTopics.includes(main)) return main;
   const mine = storyTopics.filter((t) => userTopics.includes(t));
@@ -97,68 +117,37 @@ export function dedupe(candidates) {
   return { kept, dropped };
 }
 
-// candidates: rows from CANDIDATE_SQL. Returns the digest's stories, best first, each with
-// `primary` (the topic it is shown under and counted against) and `score`. No fixed count:
-//  1. every story that clears the editorial bar, best first;
-//  2. every topic the user follows gets its own section: if no story above is shown under it,
-//     its best remaining story is added if it clears the (lower) topic bar. "Remaining" matters:
-//     one strong story is often tagged with four topics (a Trump-Putin-Xi summit: politics,
-//     Russia, Iran war, wars) but is shown under only one of them;
-//  3. at most max_stories, the guaranteed ones first; no topic may have more than topicCap(N)
-//     stories, N being the size actually picked;
-//  4. nothing qualifies: an empty list (the quiet note).
+// Does a story qualify for a user who follows userTopics (the two-score rule)? With
+// cfg.topic_needs_boost the topic path is only for stories that matter MORE to followers than to
+// everyone (topic score above the global score); otherwise every global-6 story would reach the
+// followers of its topic, and a reader of all topics would get them all.
+export function qualifies(s, userTopics, cfg = CONFIG) {
+  const tags = parseList(s.topics);
+  if (!tags.some((t) => userTopics.includes(t))) return false;
+  if (storyScore(s, cfg) >= cfg.editorial_bar) return true;
+  const t = topicScore(s, cfg);
+  return t != null && !!s.main_topic && userTopics.includes(s.main_topic) && t >= cfg.topic_bar &&
+    (!cfg.topic_needs_boost || t > s.final_score);
+}
+
+// candidates: rows from CANDIDATE_SQL. Returns every story that qualifies (no fixed count, no
+// topic cap since Step 8: the message length is the limit, see fitToLength), best first, each
+// with `primary` (its section), `score` (g), `topicScore` and `rank` (relevance).
 export function pickStories(candidates, userTopics, cfg = CONFIG) {
-  const rank = rankOf(cfg.topic_specificity);
-  const pool = dedupe(candidates).kept
+  return dedupe(candidates).kept
+    .filter((c) => qualifies(c, userTopics, cfg))
     .map((c, i) => {
       const tags = parseList(c.topics);
-      return { ...c, i, tags, score: storyScore(c, cfg),
+      const score = storyScore(c, cfg);
+      const ts = topicScore(c, cfg);
+      const followedMain = !!c.main_topic && userTopics.includes(c.main_topic);
+      return { ...c, i, score, topicScore: ts, rank: followedMain && ts != null ? Math.max(score, ts) : score,
                primary: primaryTopic(tags, userTopics, cfg.topic_specificity, c.main_topic) };
     })
-    .filter((s) => s.score >= cfg.topic_bar)
-    .sort((a, b) => b.score - a.score || a.i - b.i);
-
-  const strong = pool.filter((s) => s.score >= cfg.editorial_bar);
-  const used = new Set(strong.map((s) => s.id));
-  const covered = new Set(strong.map((s) => s.primary));
-  const guaranteed = [];
-  for (const t of [...userTopics].sort((a, b) => rank(a) - rank(b))) {
-    if (covered.has(t)) continue;
-    const best = pool.find((s) => s.tags.includes(t) && !used.has(s.id));
-    if (!best) continue;
-    used.add(best.id);
-    covered.add(t);
-    guaranteed.push({ ...best, primary: t, guaranteed: true });
-  }
-  // A strong story whose own topic is covered anyway stays in the normal fill; the strong stories
-  // that alone give a topic its section are guaranteed too.
-  const firstOfTopic = new Map();
-  for (const s of strong) if (!firstOfTopic.has(s.primary)) firstOfTopic.set(s.primary, s.id);
-  const topStrong = strong.filter((s) => firstOfTopic.get(s.primary) === s.id && userTopics.includes(s.primary))
-    .map((s) => ({ ...s, guaranteed: true }));
-  const rest = strong.filter((s) => !topStrong.some((x) => x.id === s.id));
-  guaranteed.unshift(...topStrong);
-
-  // 2-3. fill up to max_stories under the cap. A smaller digest has a smaller cap, so the target
-  //      shrinks until the cap for the size actually picked holds.
-  let n = Math.min(cfg.max_stories, guaranteed.length + rest.length);
-  let chosen;
-  for (;;) {
-    const cap = topicCap(n, cfg);
-    const counts = new Map();
-    chosen = [];
-    for (const s of [...guaranteed, ...rest]) {
-      if (chosen.length >= n) break;
-      const k = counts.get(s.primary) ?? 0;
-      if (k >= cap) continue;
-      chosen.push(s);
-      counts.set(s.primary, k + 1);
-    }
-    if (chosen.length >= n) break;
-    n = chosen.length;
-  }
-  return chosen.sort((a, b) => b.score - a.score || a.i - b.i);
+    .sort(byRank);
 }
+
+const byRank = (a, b) => b.rank - a.rank || b.score - a.score || (b.updated_at ?? 0) - (a.updated_at ?? 0) || a.i - b.i;
 
 // ------------------------------------------------------------------ message
 
@@ -213,11 +202,18 @@ export function clock12(p) {
 
 // "Good evening, Sam. Since 2 PM, 6 stories for you:" (no name if Telegram gave none). The first
 // digest, or one after more than 24 h, says "In the last 24 hours".
-function header(count, { now, tz, lastDigestAt, name }, cfg) {
+// The parts that need Intl (costly on a cold Worker) are computed once per digest.
+function greetingParts(opts, cfg) {
+  if (opts.greeting) return opts.greeting;
+  const { now, tz, lastDigestAt, name } = opts;
   const first = String(name ?? "").trim().slice(0, 32);
   const hello = `${greeting(localParts(now, tz).hour)}${first ? `, ${escapeHtml(first)}` : ""}`;
   const recent = lastDigestAt && now - lastDigestAt <= cfg.max_lookback_hours * 3600;
   const since = recent ? `since ${clock12(localParts(lastDigestAt, tz))}` : "in the last 24 hours";
+  return { hello, since };
+}
+
+function headerText(count, { hello, since }) {
   if (!count) return `${hello}. Quiet period: nothing important on your topics ${since}.`;
   return `${hello}. ${since[0].toUpperCase()}${since.slice(1)}, ${count} ${count === 1 ? "story" : "stories"} for you:`;
 }
@@ -315,63 +311,110 @@ function groupsOf(stories, topicInfo) {
   }));
 }
 
-// Builds the digest as one or more Telegram messages. One over the budget (Telegram allows 4,096
-// characters as it counts them) is split at a topic heading, or between two stories when one
-// topic alone is too long; no story is dropped for length.
-// Returns {parts: [html], partStories: [[story id]], stories}.
-export function buildMessage(stories, opts, cfg = CONFIG) {
-  const topicInfo = opts.topicInfo ?? {};
-  const budget = cfg.message_char_budget;
-  const list = stories.map((s) => {
+// Headline, description and fallback emoji cleaned once per story (fitToLength and buildMessage
+// both need them; the fallback dictionary costs CPU, so it runs only for stories without editor
+// emojis, and only once).
+function prepare(stories, topicInfo) {
+  return stories.map((s) => {
+    if (s.prepared) return s;
     const headline = cleanHeadline(s.headline || s.summary);
     return {
-      ...s, headline,
+      ...s, headline, prepared: true,
       description: s.description ? cut(cleanText(s.description), MAX_DESCRIPTION) : "",
-      // The word-rule dictionary only when the editor gave no emojis: building it costs CPU.
       fallbackEmoji: s.emojis ? "" : lineEmoji(headline, topicInfo[s.primary]?.emoji),
     };
   });
-  const parts = [], partStories = [];
-  let text = (opts.label ? `${opts.label}\n\n` : "") + header(list.length, opts, cfg);
-  let size = visibleLength(text);   // kept up to date, so each piece is measured once
-  let ids = [];
-  const add = (piece) => { size += (text ? 2 : 0) + visibleLength(piece); text = text ? `${text}\n\n${piece}` : piece; };
-  const fits = (piece) => size + (text ? 2 : 0) + visibleLength(piece) <= budget;
-  const flush = () => { parts.push(text); partStories.push(ids); text = ""; size = 0; ids = []; };
-  for (const g of groupsOf(list, topicInfo)) {
-    const whole = [g.heading, ...g.blocks.map((b) => b.text)].join("\n\n");
-    if (!fits(whole) && ids.length) flush();        // start a new message at this topic
-    if (fits(whole)) {
-      add(whole);
-      ids.push(...g.blocks.map((b) => b.id));
-      continue;
-    }
-    add(g.heading);                                 // this topic alone is too long
-    for (const b of g.blocks) {
-      if (!fits(b.text) && ids.length) flush();
-      add(b.text);
-      ids.push(b.id);
-    }
-  }
-  flush();
-  for (const p of parts) {
-    if (FORBIDDEN.test(p)) throw new Error("em/en dash in user-facing text");
-    if (visibleLength(p) > 4096) throw new Error(`message too long (${visibleLength(p)})`);
-  }
-  return { parts, partStories, stories: list };
 }
 
-// One user's whole digest from candidate rows: pick, then format. No I/O.
+// Step 8: a digest is ONE message, never so long that Telegram folds it ("Show more"). The
+// stories (best first, from pickStories) are cut until the message fits in
+// cfg.message_char_limit visible characters:
+//  - the best story of each section (each followed topic in the digest) is kept while any other
+//    story can go;
+//  - otherwise the lowest relevance goes first; on a tie, from the section with the most stories
+//    (what the old 40% topic cap was for), then the lower global score, then the older story.
+// Each piece is measured once; story numbers are counted as two digits and the story count in the
+// greeting as "99", so the estimate is never shorter than the real message.
+// Returns {kept, cut}, both in the input order.
+export function fitToLength(stories, opts, cfg = CONFIG) {
+  const topicInfo = opts.topicInfo ?? {};
+  const list = prepare(stories, topicInfo);
+  const limit = cfg.message_char_limit;
+  const fixed = (opts.label ? visibleLength(opts.label) + 2 : 0) + visibleLength(headerText(99, greetingParts(opts, cfg)));
+  const blockLen = new Map(list.map((s) => [s.id, visibleLength(storyBlock(0, s)) + 1]));
+  const headLen = new Map();
+  for (const s of list) {
+    if (!headLen.has(s.primary)) headLen.set(s.primary, visibleLength(headingOf(topicInfo[s.primary] ?? { label: s.primary, emoji: "" })));
+  }
+  const size = (keep) => {
+    let n = fixed;
+    const seen = new Set();
+    for (const s of keep) {
+      if (!seen.has(s.primary)) { seen.add(s.primary); n += 2 + headLen.get(s.primary); }
+      n += 2 + blockLen.get(s.id);
+    }
+    return n;
+  };
+  const best = new Set();
+  const firstOf = new Set();
+  for (const s of list) if (!firstOf.has(s.primary)) { firstOf.add(s.primary); best.add(s.id); }
+
+  let keep = [...list];
+  while (keep.length > 1 && size(keep) > limit) {
+    const count = new Map();
+    for (const s of keep) count.set(s.primary, (count.get(s.primary) ?? 0) + 1);
+    const open = keep.filter((s) => !best.has(s.id));
+    const pool = open.length ? open : keep;
+    let victim = pool[0];
+    for (const s of pool) {
+      const d = s.rank - victim.rank || count.get(victim.primary) - count.get(s.primary) ||
+        s.score - victim.score || (s.updated_at ?? 0) - (victim.updated_at ?? 0) || (victim.i ?? 0) - (s.i ?? 0);
+      if (d < 0) victim = s;
+    }
+    keep = keep.filter((s) => s !== victim);
+  }
+  const kept = new Set(keep.map((s) => s.id));
+  return { kept: keep, cut: list.filter((s) => !kept.has(s.id)) };
+}
+
+// Builds the digest message (HTML) from stories in display order: greeting, then topic sections
+// in the order of their best story, numbering running on across sections. Returns
+// {text, storyIds, stories}. Refuses an em/en dash and anything over Telegram's 4,096 characters;
+// planDigest keeps it under the (lower) fold limit.
+export function buildMessage(stories, opts, cfg = CONFIG) {
+  const topicInfo = opts.topicInfo ?? {};
+  const list = prepare(stories, topicInfo);
+  const pieces = [...(opts.label ? [opts.label] : []), headerText(list.length, greetingParts(opts, cfg))];
+  const storyIds = [];
+  for (const g of groupsOf(list, topicInfo)) {
+    pieces.push(g.heading, ...g.blocks.map((b) => b.text));
+    storyIds.push(...g.blocks.map((b) => b.id));
+  }
+  const text = pieces.join("\n\n");
+  if (FORBIDDEN.test(text)) throw new Error("em/en dash in user-facing text");
+  if (visibleLength(text) > 4096) throw new Error(`message too long (${visibleLength(text)})`);
+  return { text, storyIds, stories: list };
+}
+
+// One user's whole digest from candidate rows: pick (two-score rule), cut to one unfolded
+// message, format. No I/O. Returns {text, storyIds, stories, cut, nextAt}.
 export function planDigest(user, candidates, topics, now, cfg = CONFIG, opts = {}) {
   const picked = pickStories(candidates, parseList(user.topics), cfg);
   const tz = user.timezone || cfg.default_timezone;
-  const msg = buildMessage(picked, {
-    now, tz, lastDigestAt: user.last_digest_at, name: user.first_name, topicInfo: topicInfoFrom(topics),
-    label: opts.label,
-  }, cfg);
+  const mopts = { now, tz, lastDigestAt: user.last_digest_at, name: user.first_name, topicInfo: topicInfoFrom(topics),
+                  label: opts.label };
+  mopts.greeting = greetingParts(mopts, cfg);
+  let { kept, cut } = fitToLength(picked, mopts, cfg);
+  let msg = buildMessage(kept, mopts, cfg);
+  while (visibleLength(msg.text) > cfg.message_char_limit && kept.length > 1) {   // cannot happen (the estimate is high); a guard
+    cut = [...cut, kept[kept.length - 1]];
+    kept = kept.slice(0, -1);
+    msg = buildMessage(kept, mopts, cfg);
+  }
   const times = parseList(user.digest_times, cfg.default_times);
-  return { ...msg, nextAt: nextSlot(now, tz, times) };
+  return { ...msg, cut: cut.length, nextAt: nextSlot(now, tz, times) };
 }
+
 
 // D1 writes after a successful send: never-twice rows, the digest time, the next slot.
 // last_digest_at is the slot time (so the next header reads "Since 2 PM", not "2:03 PM").

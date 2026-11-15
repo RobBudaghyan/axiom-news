@@ -124,24 +124,17 @@ describe("digest cron", () => {
     assert.equal(outbox[1].text, "Good afternoon, Owner. Quiet period: nothing important on your topics since 2 PM.");
   });
 
-  test("a long digest goes out as two messages; a failed second part keeps its stories for later", async () => {
+  test("a digest is ONE message: too long, the weaker story is cut and stays unsent (Step 8)", async () => {
     const { db, sqlite, now, outbox, io } = setup();
     addUser(sqlite, { next_digest_at: yerevan(14) });
-    const cfg = { ...(await import("../src/digest.js")).CONFIG, message_char_budget: 200 };
-    await runTick(db, io, now, {}, cfg);
-    assert.equal(outbox.length, 2);
-    assert.match(outbox[0].text, /^Good afternoon, Owner\. In the last 24 hours, 2 stories for you:\n\n🇦🇲 <b><u>Armenia/);
-    assert.match(outbox[1].text, /^🇮🇷 <b><u>Iran War<\/u><\/b>\n\n2\. /);   // split at the topic; numbering runs on
-    assert.equal(sqlite.prepare("SELECT COUNT(*) AS n FROM sent").get().n, 2);
-
-    const t = setup();
-    addUser(t.sqlite, { next_digest_at: yerevan(14) });
-    let n = 0;
-    t.io.send = async () => { if (++n === 2) throw new Error("Telegram sendMessage HTTP 502: bad gateway"); return {}; };
-    await runTick(t.db, t.io, t.now, {}, cfg);
-    assert.deepEqual(t.sqlite.prepare("SELECT story_id FROM sent").all().map((r) => r.story_id), [1]);
-    assert.match(t.sqlite.prepare("SELECT message FROM errors").get().message, /part 2 of 2 not sent/);
-    assert.equal(t.sqlite.prepare("SELECT next_digest_at FROM users").get().next_digest_at, yerevan(20));   // slot moves on
+    const cfg = { ...(await import("../src/digest.js")).CONFIG, message_char_limit: 260 };
+    const out = await runTick(db, io, now, {}, cfg);
+    assert.equal(outbox.length, 1);
+    assert.ok(outbox[0].text.replace(/<[^>]+>/g, "").length <= 260);
+    assert.match(outbox[0].text, /^Good afternoon, Owner\. In the last 24 hours, 1 story for you:\n\n🇦🇲 <b><u>Armenia/);
+    assert.equal(out.stories, 1);
+    assert.equal(out.cut, 1);
+    assert.deepEqual(sqlite.prepare("SELECT story_id FROM sent").all().map((r) => r.story_id), [1]);   // the cut one is not
   });
 
   test("at most max_users_per_tick users per tick, the earliest due first; the rest go next tick", async () => {

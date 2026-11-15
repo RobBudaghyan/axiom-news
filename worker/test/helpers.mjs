@@ -60,6 +60,10 @@ export function addStory(sqlite, summary, topics, importance, updatedAt, extra =
     extra.source ?? "Alpha Times", updatedAt, updatedAt, extra.final_score ?? null, extra.headline ?? null,
     extra.description ?? null, extra.emojis ?? null, extra.merged_into ?? null, extra.dup_group ?? null,
     extra.final_score != null ? updatedAt : null);
+  if (extra.topic_score != null || extra.main_topic != null || extra.scored_at != null) {   // Step 8
+    sqlite.prepare("UPDATE stories SET topic_score = ?, main_topic = ?, scored_at = ? WHERE id = ?")
+      .run(extra.topic_score ?? null, extra.main_topic ?? null, extra.scored_at ?? null, r.id);
+  }
   return r.id;
 }
 
