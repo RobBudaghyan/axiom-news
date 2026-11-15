@@ -77,40 +77,47 @@ stories side by side and judge each one yourself.
    section a reader would look for it in. A summit of the US, Russian and Chinese leaders is
    politics, not iran_war, even if Iran will be discussed.
    TOPIC SCORE. Also give each event a topic_score from 1 to 10: how important it is for a
-   reader who follows that main topic closely, like the editor of a specialist newsletter on
-   that topic. It is never lower than the score. For the broad topics (politics,
-   wars_conflicts) it is usually the same as the score, at most 1 point higher. For the narrow
-   topics (armenia, russia, iran_war, ukraine_war) real news on the topic is often 1 to 2
-   points higher: a medium Armenian court case may be 4 for the world but 6 for Armenia
-   followers. Routine items stay low for followers too: statements with no decision, analysis
-   and commentary, ceremonies, visits with no outcome, daily military claims. Examples:
-   - armenia: 8 "CSTO strips Armenia of voting rights"; "Armenia and Turkey are close to
-     establishing diplomatic relations"; a border shooting that kills soldiers. 6 "Supreme
-     Judicial Council suspends the powers of two judges"; "Prosecutor General seeks to strip
-     two judges of immunity"; "Armenia launches a 24-hour biometric passport service"; an
-     opposition leader arrested; a local election result in a big town. 4 "Pashinyan meets
-     India's foreign minister during a stopover"; "International conference of Russian
-     compatriots starts in Yerevan"; an analyst or opposition figure repeating a known view.
-   - russia: 8 "Moscow car bomb severely injures a former aide to an ex-prime minister"; a new
-     mobilisation; a minister arrested. 6 "Telegram channel administrator sentenced to 21 years";
-     "Russia prepares measures against seizures of its foreign assets". 4 "Business ombudsperson
-     forecasts staff cuts in 2027"; "Domodedovo airport briefly suspends flights".
-   - iran_war: 8 "Two oil tankers hit naval mines south of the Strait of Hormuz"; "Bahrain
-     intercepts two Iranian drone barrages after months of calm". 6 "Iran says it shot down a US
-     MQ-1 drone over Qeshm Island"; "Trump tells advisers he may hold off on Iran attacks".
-     4 "US intelligence estimates Iran retains up to 2,500 missiles"; "IDF holds multi-front
-     war drills".
-   - ukraine_war: 8 "Russia demands Finland leave NATO and full control of Donbas"; a strike that
-     cuts power to a whole region for days. 6 "US envoys prepare a large prisoner swap"; "Russian
-     strike on Pavlohrad injures a seven-year-old boy and others". 4 "Fifty-four combat
-     engagements along the front line over the past day"; "Scheduled power outages in Ukrainian
-     regions".
-   - wars_conflicts (broad): 8 a new war or a ceasefire in one; "Myanmar airstrike kills 12 at a
-     displacement camp" is 7 and 7. 6 "Floods and cold hit Gaza as the aid block persists".
-     4 "Teenager arrested for setting fire to a communications cabinet".
-   - politics (broad): 8 "Trump to meet Xi and Putin in China"; 6 "Italy fines Meta 887 million
-     dollars over photo privacy"; 4 "France reaffirms support for Morocco's position on Western
-     Sahara". Same as the score.
+   reader who follows that main topic closely. Start from the score and add a boost:
+   - +0 for most events, on every topic. Always +0 for politics and wars_conflicts (broad
+     topics: their readers already get the world scale). Always +0 for statements, warnings
+     and criticism with no decision; analysis, commentary, interviews; forums, conferences,
+     ceremonies; visits and meetings with no outcome; daily military reports (drones shot down,
+     shelling, strikes with few casualties); follow-ups.
+   - iran_war, ukraine_war: these wars are covered every day, so +1 at most, only for a notable
+     development (a new kind of target or weapon, a concrete step in talks, a large casualty
+     count, a real change at the front). Routine war news is +0.
+   - armenia, russia: news the world scale underrates. +1 for a real domestic development (a
+     court ruling, arrest or sentence of a known figure, a government decision or new law, a
+     concrete step with a neighbour). +2 for a significant one (a political arrest or trial of a
+     leading figure, a security incident with casualties, a big change in relations with Turkey,
+     Azerbaijan, Russia, the EU or the US, a constitutional or election step).
+   On a normal day only about 3 to 6 events per topic reach a topic score of 7 or more.
+   Examples (score, then topic score):
+   - armenia: "CSTO strips Armenia of voting rights" 7, 9; "Armenia and Turkey are close to
+     establishing diplomatic relations" 7, 9; "Supreme Judicial Council suspends the powers of
+     two judges" 4, 6; "Prosecutor General seeks to strip two judges of immunity" 4, 6;
+     "Armenia launches a 24-hour biometric passport service" 5, 6; "Pashinyan visits Dublin to
+     discuss peace" 5, 5; "EU gives Armenia a second demining machine" 5, 5; "Pashinyan meets
+     India's foreign minister during a stopover" 4, 4; "Opposition politician repeats calls to
+     leave the CSTO" 4, 4.
+   - russia: "Moscow car bomb severely injures a former aide to an ex-prime minister" 7, 8;
+     "Telegram channel administrator sentenced to 21 years" 5, 6; "Russia prepares measures
+     against seizures of its foreign assets" 5, 6; "Business ombudsperson forecasts staff cuts in
+     2027" 4, 4; "Domodedovo airport briefly suspends flights" 3, 3.
+   - iran_war: "Two oil tankers hit naval mines south of the Strait of Hormuz" 7, 8; "Iran says
+     it shot down a US MQ-1 drone over Qeshm Island" 6, 6; "Trump tells advisers he may hold off
+     on Iran attacks" 6, 6; "US intelligence estimates Iran retains up to 2,500 missiles" 4, 4;
+     "IDF holds multi-front war drills" 4, 4.
+   - ukraine_war: "Russia demands Finland leave NATO and full control of Donbas" 7, 8; "US
+     envoys prepare a large prisoner swap" 6, 7; "Russian strike on Pavlohrad injures a
+     seven-year-old boy and others" 6, 6; "Fifty-four combat engagements along the front line
+     over the past day" 4, 4; "Scheduled power outages in Ukrainian regions" 4, 4.
+   - wars_conflicts: "Myanmar airstrike kills 12 at a displacement camp" 7, 7; "Floods and cold
+     hit Gaza as the aid block persists" 6, 6; "Teenager arrested for setting fire to a
+     communications cabinet" 4, 4.
+   - politics: "Trump to meet Xi and Putin in China" 8, 8; "Italy fines Meta 887 million dollars
+     over photo privacy" 6, 6; "France reaffirms support for Morocco's position on Western
+     Sahara" 4, 4.
    For an EDITED story, give a topic_score as well, even when you keep its text.
 
 4. WRITE for each event. For an EDITED story whose facts did not change, you may leave

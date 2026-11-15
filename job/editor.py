@@ -646,15 +646,19 @@ class Editor:
 
     # ------------------------------------------------------------ Step 8: topic scores only
 
-    def rescore_topics(self, now: int, hours: float = 24) -> tuple[EditorResult, int]:
+    def rescore_topics(self, now: int, hours: float = 24, redo: bool = False) -> tuple[EditorResult, int]:
         """One call over edited stories that have no topic score yet, shown as EDITED (with their
         score and main topic). Writes ONLY topic_score: final scores, text, topics and merges stay
         as they are, so live digests do not move. Returns (result, answers whose topic differs
-        from the stored main topic)."""
+        from the stored main topic). redo: also stories that have a topic score, in a spread
+        (pseudo-random, repeatable) order: for sandbox checks of a new calibration."""
         out = EditorResult()
         todo = [s for s in self.pool(now, hours=hours)
-                if s.get("edited_at") is not None and s.get("topic_score") is None]
-        todo.sort(key=lambda s: (-(s.get("final_score") or 0), -s["updated_at"], -s["id"]))
+                if s.get("edited_at") is not None and (redo or s.get("topic_score") is None)]
+        if redo:
+            todo.sort(key=lambda s: (s["id"] * 2654435761) % 2 ** 32)
+        else:
+            todo.sort(key=lambda s: (-(s.get("final_score") or 0), -s["updated_at"], -s["id"]))
         if not todo:
             return out, 0
         for plan in self.plans:
@@ -663,9 +667,11 @@ class Editor:
             by_id = {s["id"]: s for s in batch}
             items = load_items(self.db, list(by_id),
                                self.s.editor_groq_items if small else self.s.editor_items_per_story)
+            # The old topic score is NOT shown: the editor would copy it (as with first-pass scores).
             prompt = render_prompt(
                 self.prompt.template, today=self._today(now), topics=self.topics, facts=self.facts,
-                facts_checked=self.facts_checked, new=[], compare=batch, items=items)
+                facts_checked=self.facts_checked, new=[], compare=[{**s, "topic_score": None} for s in batch],
+                items=items)
             got = self._ask(plan, prompt, by_id, items, out)
             if got is None:
                 continue
@@ -712,6 +718,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="Step 8: give edited stories a topic score; writes only topic_score")
     parser.add_argument("--dry-run", action="store_true", help="call the AI, write nothing (sandbox)")
     parser.add_argument("--new", type=int, default=None, help="candidates per call (default editor_new)")
+    parser.add_argument("--redo", action="store_true",
+                        help="with --topic-only --dry-run: a spread sample of stories that already have one")
     parser.add_argument("--fresh-sim", action="store_true",
                         help="with --dry-run: treat edited stories as unscored (to measure a big call)")
     args = parser.parse_args(argv)
@@ -743,7 +751,9 @@ def main(argv: list[str] | None = None) -> int:
     rounds = args.rounds if args.backfill else 1
     for n in range(rounds):
         if args.topic_only:
-            res, mismatch = ed.rescore_topics(int(time.time()), args.hours)
+            if args.redo and not args.dry_run:
+                parser.error("--redo needs --dry-run (to redo for real, clear topic_score first)")
+            res, mismatch = ed.rescore_topics(int(time.time()), args.hours, redo=args.redo)
             print(f"round {n + 1}: {res.line()}, topic differs from the stored one: {mismatch}")
         else:
             res = ed.run(int(time.time()), args.min_importance, args.hours)
