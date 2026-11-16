@@ -35,7 +35,8 @@ bot @axiom_news_bot at the end.
   per language per run, checks on numbers, names, alphabet). Never mixed (Step 10, owner): a
   story with no translation yet is held back, not marked sent, and goes out in a later digest
   once translated (inside its 24 h); only a digest left with no story at all goes out wholly in
-  English. In Russian, "digest" is always сводка.
+  English. In Russian, "digest" is always сводка, and Ukraine always takes на (Step 11, owner):
+  the topic is "Война на Украине", translations say "на Украине" (the job rejects "в Украине").
 - **Telegram Mini App settings:** topics, digest times (hourly grid), pause; the time zone is
   shown read-only (Step 5 removed stories per digest, the format choice and the zone picker). An Admin tab, visible
   only to the owner, shows stats, errors and AI usage, plus a "Send me a digest now" button.
@@ -44,17 +45,21 @@ bot @axiom_news_bot at the end.
   reader language other than English while someone reads it (Step 9).
 - **Hosting:** GitHub Actions hourly job, plus Cloudflare Worker + D1 (webhook, Mini App API,
   static Mini App, digest cron).
-- **Tips (Step 10):** "Support Axiom ⭐" (Mini App) and /support: voluntary Telegram Stars tips of
-  50, 100, 250 or 500 (plus a hidden 1-Star test amount for the owner). Nothing is locked and a tip
+- **Tips (Step 10, amounts Step 11):** "Support Axiom" (always open at the bottom of the Mini App
+  settings: a short text, then 100, 500 and 1000 Stars) and /support (the same three buttons):
+  voluntary Telegram Stars tips, the same for everyone (no test amount). Nothing is locked and a tip
   changes nothing else. /paysupport and /terms as Telegram requires; the owner refunds from Admin.
 - **Not in v1:** paid features, ads, user-added sources, instant alerts, channels.
-- **Digest format (owner, Step 5): format B for everyone.** "Good evening, Sam. Since 2 PM, 6
-  stories for you:" (12-hour time, first name from Telegram; "In the last 24 hours" the first
-  time). Topic headings: emoji + bold underlined name. Each story: `N. <emojis> <b>headline</b>`,
-  blank line, the description, then the outlet name alone as a link. Numbering runs on across
-  topics. Always one message (Step 8; the split into two is gone).
-  HTML, link previews off, never an em dash. The editor's emojis; the word-rule emojis of
-  `config/line_emoji.json` are only a fallback.
+- **Digest format (owner, Step 11: design "E5f").** A Telegram **rich message**
+  (`sendRichMessage`). One line: "**Good evening, Sam** · 6 stories since 2 PM" (12-hour time in
+  English, 24-hour in other languages; "in the last 24 hours" the first time). Each topic in a
+  centred, bordered box with its emoji; a divider line between topics. Each story: the editor's
+  2-3 emojis, the headline in bold, then " · Outlet" in italics as the link, then the description
+  in a quote box. No numbers. The quiet note is the same greeting line. A "⚙️ Settings" button under
+  every digest and quiet note opens the Mini App. Always one message of at most 3,900 characters
+  (Telegram folds rich messages only after about 8,000), never an em dash. The word-rule emojis of
+  `config/line_emoji.json` are only a fallback. The Step 5 format stays in code as `CLASSIC`
+  (fold test only).
 
 ## Decisions (with reasons)
 | Date | Decision | Why |
@@ -125,7 +130,13 @@ bot @axiom_news_bot at the end.
 | 2026-11-15 | ~~One untranslated story makes the digest English~~ replaced in Step 10 (owner): untranslated stories are **held** (left out, not marked sent), the rest goes out in the reader's language; only zero stories left means a wholly English digest | readers of Russian got English digests whenever one story lagged |
 | 2026-11-15 | A held story is kept a candidate by a `digest_holds` row (user, story, language, time), not by its timestamps; still only inside the 24 h window | a held story's `updated_at` is older than the next digest's window, so without the row it would be lost; the row also feeds Admin's "held for translation" count |
 | 2026-11-15 | The length cut runs after the drop | the room a held story leaves goes to the next translated story |
-| 2026-11-15 | Tips: Telegram Stars only (XTR, no card, no provider), amounts 50/100/250/500, 1 for the owner's tests; Mini App via createInvoiceLink + openInvoice, chat via /support buttons + sendInvoice (owner, Step 10) | $0 and no card; Stars are Telegram's required currency for digital goods |
+| 2026-11-15 | Tips: Telegram Stars only (XTR, no card, no provider), amounts ~~50/100/250/500, 1 for the owner's tests~~ (100/500/1000 since Step 11); Mini App via createInvoiceLink + openInvoice, chat via /support buttons + sendInvoice (owner, Step 10) | $0 and no card; Stars are Telegram's required currency for digital goods |
+| 2026-11-16 | Russian: Ukraine always takes на ("Война на Украине", "на Украине"); the translation check rejects "в/во Украине", "в Украину" (owner, Step 11) | owner's rule; a rejected story is redone next hour with the reason |
+| 2026-11-16 | Tips: 100, 500, 1000 Stars for everyone; the owner's 1-Star test amount removed; the Mini App section is always open (owner, Step 11) | simpler; the test amount was only for the Step 10 live check |
+| 2026-11-16 | Digests are Telegram rich messages, design "E5f" (owner, Step 11, after 6 rounds of previews on the TEST bot) | the owner found it the most elegant; real headings, boxes, quote boxes and dividers are not possible in a plain message |
+| 2026-11-16 | One layout object (`LAYOUT` in `digest.js`) makes every piece of a digest, and the length cut measures those same pieces | the cut can never drift from the format; checked against Telegram: its stored text equals our count exactly (plain and rich) |
+| 2026-11-16 | Rich-message length = the visible text in UTF-16 with no separators between blocks; limit still 3,900 | Telegram stores the blocks' text with no separators (checked on real messages); its own limit counts Unicode characters, never more than UTF-16 |
+| 2026-11-16 | A "⚙️ Settings" web_app button under every digest and quiet note, in the reader's language | owner; one tap to the Mini App |
 | 2026-11-15 | pre_checkout_query is answered from the invoice payload alone (no database read) | Telegram cancels the payment after 10 s; measured a few microseconds |
 | 2026-11-15 | Table `tips`: user, amount, Telegram charge id (UNIQUE), time, refunded time; nothing else | the owner's rule; the charge id is needed for refunds, and UNIQUE makes a repeated update count once |
 | 2026-11-15 | /paysupport forwards the user's note to the owner; /terms states the tip terms; the owner refunds from Admin after a confirm (refundStarPayment) | Telegram's rules for bots that take Stars |
@@ -184,7 +195,12 @@ bot @axiom_news_bot at the end.
   translation instead of turning a digest English; "Support Axiom ⭐" voluntary Stars tips with
   /support, /paysupport, /terms and refunds from Admin. Details in
   `reports/step-10-translation-hold-and-stars.md`.
-- The owner is the only user.
+- **Step 11 done (2026-11-16): Ukraine wording, simpler tips, new digest design.** Russian says
+  "на Украине" (prompt, check, topic name); tips 100/500/1000 for everyone, section always open;
+  digests are rich messages in the owner's design "E5f" with a Settings button, in every language.
+  Worker 185 tests, Python 119; 11 rules broken on purpose, all caught. Details in
+  `reports/step-11-design.md`.
+- Two users: the owner (reads Russian) and one more (Russian).
 
 ## Next step
 Switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, which also sets
@@ -219,6 +235,11 @@ Google News code (`job/gnews.py`, `job/shadow.py`).
   and prompt changes.
 - **Fold limit checked on Android only.** iPhone and Telegram Desktop were not tested; the limit
   (3,900) is under the hard 4,096 anyway.
+- **Rich messages (Step 11) are new (Bot API 10.1, June 2026)** and were seen only on the owner's
+  Android phone. Telegram documents no per-platform support; it says outdated apps show an "update
+  the app" placeholder for new features. A reader on an old app version would see that instead of
+  the digest. Ask new users to update Telegram; if one cannot, switching `LAYOUT` back to `CLASSIC`
+  in `worker/src/digest.js` is a one-line change.
 - **Line emojis** from word rules (`config/line_emoji.json`) are now only a fallback for stories
   the editor did not write emojis for.
 - **No usable feeds** from Reuters, AP (both blocked), Armenpress, 1lurer, Panorama, Shamshyan
