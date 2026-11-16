@@ -53,13 +53,12 @@
   const I = {
     clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
     pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="4" height="14" rx="1.3"/><rect x="13.5" y="5" width="4" height="14" rx="1.3"/></svg>',
-    globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3Z"/></svg>',
     paper: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5 4h11v15a1 1 0 0 0 1 1H6a1 1 0 0 1-1-1V4Z"/><path d="M16 9h3v10a1 1 0 0 1-2 0"/><path d="M8 8h5M8 12h5M8 16h3" stroke-linecap="round"/></svg>',
     send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4 18-7Z"/></svg>',
     play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v4h-4"/></svg>',
     warn: '<svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm0 4a1 1 0 0 0-1 1v4a1 1 0 1 0 2 0V7a1 1 0 0 0-1-1Zm0 7.2a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Z"/></svg>',
-    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
-    star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3.2 2.6 5.5 6 .8-4.4 4.1 1.1 5.9L12 16.6l-5.3 2.9 1.1-5.9-4.4-4.1 6-.8L12 3.2Z"/></svg>',
+    tick: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5.5 12.5 4 4 9-9"/></svg>',
+    bang: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5.5v8M12 18.5v.01"/></svg>',
     okC: '<svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm3.7 5.3a.9.9 0 0 0-1.3.1l-3.3 4-1.6-1.6a.9.9 0 1 0-1.3 1.3l2.3 2.3c.4.4 1 .3 1.3-.1l4-4.7a.9.9 0 0 0-.1-1.3Z"/></svg>',
   };
 
@@ -205,29 +204,10 @@
   const switchEl = '<span class="switch" aria-hidden="true"><span class="knob"></span></span>';
 
   // ---------------------------------------------------------------- shell
-  // Step 12 trial: three designs of the Settings tab, switchable by the owner only (remembered on
-  // this phone). Everyone else sees design 1.
-  const DESIGNS = ["1", "2", "3"];
-  let DESIGN = "1";
-  function pickDesign() {
-    let d = "1";
-    if (S.st && S.st.is_owner) { try { const v = localStorage.getItem("axiom.design"); if (DESIGNS.includes(v)) d = v; } catch { /* no storage */ } }
-    setDesign(d, false);
-  }
-  function setDesign(d, remember = true) {
-    DESIGN = DESIGNS.includes(d) ? d : "1";
-    document.documentElement.dataset.design = DESIGN;
-    if (remember) { try { localStorage.setItem("axiom.design", DESIGN); } catch { /* no storage */ } }
-    applyTheme();
-  }
   function renderShell() {
     const owner = S.st.is_owner;
     app.removeAttribute("aria-busy");
-    const dsw = owner ? `<div class="seg dsw" role="tablist" id="design-switch" aria-label="Design">
-        <span class="seg-thumb" style="width:calc(33.333% - 1.333px);transform:translateX(${(+DESIGN - 1) * 100}%)"></span>
-        ${DESIGNS.map((d) => `<button role="tab" aria-selected="${d === DESIGN}" data-action="design" data-value="${d}">Design ${d}</button>`).join("")}
-      </div>` : "";
-    app.innerHTML = `<header class="top">${dsw}<h1 class="title" id="title"></h1>${owner ? `
+    app.innerHTML = `<header class="top"><h1 class="title" id="title"></h1>${owner ? `
       <div class="seg" role="tablist" id="tabs">
         <span class="seg-thumb" style="width:calc(50% - 2px)"></span>
         <button role="tab" data-action="tab" data-value="settings">${esc(tr("app.tab_settings"))}</button>
@@ -251,7 +231,8 @@
 
   // ---------------------------------------------------------------- settings
   // Step 12: no helper texts, no "Saved" toast (a light haptic tap instead). One button component
-  // (.b) on a 6-column grid: a time spans 1 column, a tip 2, a language (and a topic in design 3) 3.
+  // (.b) on a 6-column grid: a time spans 1 column, a tip 2, a language 3, so every grid lines up.
+  // Rows (topics, pause) carry a small coloured square and a red switch (the owner's design 1).
   function heroHTML() {
     const u = S.st.user;
     if (u.paused) {
@@ -272,7 +253,7 @@
     `<section class="section" ${attrs}>${head ? `<h2 class="section-head">${esc(head)}</h2>` : ""}${body}</section>`;
   const card = (rows) => `<div class="group">${rows}</div>`;
   const grid = (buttons) => `<div class="grid">${buttons}</div>`;
-  // A soft colour per topic for design 1's squares (iOS system hues at low strength)
+  // A soft colour per topic for its square (iOS system hues at low strength)
   const TINT = { politics: "0, 122, 255", wars_conflicts: "142, 142, 147", armenia: "255, 149, 0", russia: "88, 86, 214",
     iran_war: "52, 199, 89", ukraine_war: "255, 204, 0" };
   const tint = (tag) => `--tint: rgba(${TINT[tag] || "142, 142, 147"}, 0.18)`;
@@ -280,16 +261,8 @@
   function topicsHTML() {
     const { user: u, topics } = S.st;
     const on = (t) => u.topics.includes(t.tag);
-    const attrs = (t, role) => `role="${role}" aria-checked="${on(t)}" data-action="topic" data-value="${esc(t.tag)}"`;
-    if (DESIGN === "3") {
-      return grid(topics.map((t) => `<button class="b s3" ${attrs(t, "switch")}><span class="emo" aria-hidden="true">${esc(t.emoji)}</span>` +
-        `<span class="lbl">${esc(t.label)}</span></button>`).join(""));
-    }
-    if (DESIGN === "2") {
-      return card(topics.map((t) => `<button class="row tap" ${attrs(t, "checkbox")}><span class="emo" aria-hidden="true">${esc(t.emoji)}</span>` +
-        `<span class="row-main row-title">${esc(t.label)}</span><span class="check" aria-hidden="true">${I.check}</span></button>`).join(""));
-    }
-    return card(topics.map((t) => `<button class="row has-icon tap" ${attrs(t, "switch")}><span class="sq" style="${tint(t.tag)}" aria-hidden="true">${esc(t.emoji)}</span>` +
+    const attrs = (t) => `role="switch" aria-checked="${on(t)}" data-action="topic" data-value="${esc(t.tag)}"`;
+    return card(topics.map((t) => `<button class="row has-icon tap" ${attrs(t)}><span class="sq" style="${tint(t.tag)}" aria-hidden="true">${esc(t.emoji)}</span>` +
       `<span class="row-main row-title">${esc(t.label)}</span>${switchEl}</button>`).join(""));
   }
 
@@ -311,13 +284,6 @@
   function pauseHTML() {
     const p = S.st.user.paused;
     const label = esc(tr("app.pause"));
-    if (DESIGN === "3") {
-      return sec("", grid(`<button class="b s6" role="switch" aria-checked="${p}" data-action="pause" id="pause-row"><span class="emo" aria-hidden="true">🔕</span><span class="lbl">${label}</span></button>`));
-    }
-    if (DESIGN === "2") {
-      return sec("", card(`<button class="row tap" role="switch" aria-checked="${p}" data-action="pause" id="pause-row"><span class="emo" aria-hidden="true">🔕</span>` +
-        `<span class="row-main row-title">${label}</span>${switchEl}</button>`));
-    }
     return sec("", card(`<button class="row has-icon tap" role="switch" aria-checked="${p}" data-action="pause" id="pause-row"><span class="sq solid" aria-hidden="true">${I.pause}</span>` +
       `<span class="row-main row-title">${label}</span>${switchEl}</button>`));
   }
@@ -493,7 +459,7 @@
     const h = A.health;
     const lr = h.last_run;
     const lvl = { ok: ["All systems normal", ""], warn: ["Needs a look", "warn"], bad: ["Something is wrong", "bad"] }[h.level];
-    const status = `<div class="status ${lvl[1]}"><span class="dot"></span><div class="row-main"><div class="status-title">${lvl[0]}</div>
+    const status = `<div class="status ${lvl[1]}"><span class="dot" aria-hidden="true">${h.level === "ok" ? I.tick : I.bang}</span><div class="row-main"><div class="status-title">${lvl[0]}</div>
       <div class="status-sub">${h.problems.length ? esc(h.problems.join(" ")) : "The news job, digests and alerts are working."}</div></div></div>`;
     const st = lr ? STATUS[lr.status] || [lr.status, "mute"] : null;
     const runRow = lr ? row({ title: "Last news job", sub: esc([duration(lr.duration_s), providerLabel(lr.provider)].filter(Boolean).join(" · ")),
@@ -654,7 +620,6 @@
       case "time": toggleTime(el); break;
       case "pause": togglePause(el); break;
       case "lang": chooseLanguage(el); break;
-      case "design": if (v !== DESIGN) { setDesign(v); haptic("select"); renderShell(); renderView(true); } break;
       case "tip": payTip(Number(v)); break;
       case "refund": refundAction(el); break;
       case "range": S.range = v; haptic("select"); renderView(); break;
@@ -689,7 +654,6 @@
       return;
     }
     setLang(S.st.user.lang);
-    pickDesign();
     renderShell();
     renderView();
   }

@@ -1,6 +1,6 @@
 // End-to-end check of the Mini App in headless Edge against the local preview (real API code,
 // demo database): taps every setting like a user would and confirms each change through the API.
-// Step 12: also the house rules of the new design: no helper texts, no toast on a save (a light
+// Step 12: also the house rules of the owner's design ("design 1", iOS Settings): no helper texts, no toast on a save (a light
 // haptic tap instead), language buttons with flags, the time zone as one line at the bottom,
 // Support with three buttons only, one size for every row and button, grids on shared columns,
 // 44 px tap targets, and nothing overflowing at 360 and 430 px, in English and Russian.
@@ -66,11 +66,13 @@ const layoutOk = (x) => x.heights.length === 1 && x.heights[0] === x.H && x.radi
 
 await fetch(`${BASE}/__reset`, { method: "POST" });
 const b = await openBrowser();
+let r0;
 try {
   await b.open(`${BASE}/app/?theme=light&as=friend`);
   const start = await b.run(`${SERVER} return await server();`);
   check("friend sees no Admin tab and no design switch", await b.run("return !document.querySelector('#tabs, #design-switch');"));
-  check("friend sees design 1", await b.run("return document.documentElement.dataset.design === '1';"));
+  r0 = await b.run(`return [...document.querySelectorAll('[data-action=topic]')].map((x) => [x.getAttribute('role'), !!x.querySelector('.sq'), !!x.querySelector('.switch')].join('/'));`);
+  check("topics: rows with a coloured square and a red switch", r0.length === 6 && r0.every((x) => x === "switch/true/true"), r0.join(" "));
 
   // Step 12 rules
   let r = await b.run(LAYOUT);
@@ -165,45 +167,31 @@ try {
   check("the server refuses a half-hour time too", r[0] === 400 && /on the hour/.test(r[1]), r.join(" "));
   check("no console errors (friend)", b.consoleErrors().length === 0, JSON.stringify(b.consoleErrors()[0]?.params ?? "").slice(0, 200));
 
-  // ------------------------------------------------------------ the owner: three designs (Step 12 trial)
+  // ------------------------------------------------------------ the owner
   await b.open(`${BASE}/app/?theme=dark&as=owner`, "dark");
   r = await b.run(`return { chip: getComputedStyle(document.querySelector('[data-action=time][aria-pressed=true]')).backgroundColor,
-    bg: getComputedStyle(document.body).backgroundColor, sw: [...document.querySelectorAll('#design-switch button')].map((x) => x.textContent.trim()) };`);
-  check("dark mode: brighter red fill, black page", r.chip === RED_DARK && r.bg === "rgb(0, 0, 0)", `${r.chip} / ${r.bg}`);
-  check("owner sees the Design 1 / 2 / 3 switch", r.sw.join("|") === "Design 1|Design 2|Design 3", r.sw.join("|"));
+    bg: getComputedStyle(document.body).backgroundColor, sw: !!document.querySelector('#design-switch, [data-action=design]'),
+    header: (window.__calls || []).filter((c) => c.startsWith('setHeaderColor')).at(-1) };`);
+  check("dark mode: brighter red fill, black page, Telegram's header black too", r.chip === RED_DARK && r.bg === "rgb(0, 0, 0)" &&
+    r.header === "setHeaderColor #000000", `${r.chip} / ${r.bg} / ${r.header}`);
+  check("no design switch any more (the trial is over), not even for the owner", !r.sw);
   r = await b.run(ICON_OFFSETS);
   check("dark mode: icons centred too", r.length >= 2 && Math.max(...r.flatMap((x) => [x.dx, x.dy].map(Math.abs))) <= 0.5, r.map((x) => `${x.dx},${x.dy}`).join("; "));
-  const KIND = { 1: "row switch", 2: "row check", 3: "button" };
-  for (const d of ["2", "1", "3"]) {
-    r = await b.run(`${SERVER} click('[data-action=design][data-value="${d}"]'); await wait(400);
-      const tp = document.querySelector('[data-action=topic]');
-      const kind = tp.classList.contains('b') ? 'button' : tp.querySelector('.check') ? 'row check' : tp.querySelector('.switch') ? 'row switch' : '?';
-      const n = calls(), t = window.__toasts.length, was = (await server()).topics.includes(tp.dataset.value);
-      click(tp); await settled(); const u = await server();
-      click('#pause-row'); await settled(); const p = (await server()).paused; click('#pause-row'); await settled();
-      click('[data-action=topic][data-value="' + tp.dataset.value + '"]'); await settled();
-      return { kind, saved: u.topics.includes(tp.dataset.value) !== was, p, toasts: window.__toasts.slice(t),
-        hap: since(n).filter((c) => c === 'haptic impact light').length, stored: localStorage.getItem('axiom.design'),
-        header: (window.__calls || []).filter((c) => c.startsWith('setHeaderColor')).at(-1) };`);
-    check(`design ${d}: topics as ${KIND[d]}, a topic and pause save, haptic each time, no toast, remembered`,
-      r.kind === KIND[d] && r.saved && r.p === true && !r.toasts.length && r.hap === 4 && r.stored === d, JSON.stringify(r));
-    check(`design ${d}: Telegram's header matches the page`, r.header === `setHeaderColor #000000`, r.header);
-    const L = await b.run(LAYOUT);
-    check(`design ${d}: layout rules (one size, shared columns, 44 px, no helper text)`, layoutOk(L), JSON.stringify(L));
-  }
+  r = await b.run(LAYOUT);
+  check("owner, dark: layout rules (one size, shared columns, 44 px, no helper text)", layoutOk(r), JSON.stringify(r));
   await b.open(`${BASE}/app/?theme=light&as=owner`);
-  r = await b.run("return { d: document.documentElement.dataset.design, header: (window.__calls || []).filter((c) => c.startsWith('setHeaderColor')).at(-1) };");
-  check("the owner's design choice survives a reopen", r.d === "3", r.d);
-  r = await b.run(`click('[data-action=design][data-value="2"]'); await wait(300);
-    return [(window.__calls || []).filter((c) => c.startsWith('setHeaderColor')).at(-1), getComputedStyle(document.body).backgroundColor];`);
-  check("design 2: a white page, and Telegram's header white too", r[0] === "setHeaderColor #ffffff" && r[1] === "rgb(255, 255, 255)", r.join(" / "));
-  await b.run("click('[data-action=design][data-value=\"1\"]'); await wait(200);");
   r = await b.run("return [...document.querySelectorAll('#support [data-action=tip]')].map((x) => x.dataset.value).join(',');");
   check("owner: the same three amounts, no 1-Star test amount", r === "100,500,1000", r);
 
   r = await b.run(`click('[data-value=admin]'); await until(() => document.querySelector('.status'));
     const bad = document.querySelector('.badge.bad');
     const res = { editor: document.body.innerText.includes('Editor pass'), bad: bad ? getComputedStyle(bad).color : null };
+    const sq = (s) => { const e = document.querySelector(s); const c = getComputedStyle(e); const r = e.getBoundingClientRect(); return [Math.round(r.width), c.borderTopLeftRadius, c.backgroundColor]; };
+    const st = { short: [...document.querySelectorAll('#view .row')].filter((e) => e.getBoundingClientRect().height < 47.5).length,
+      radii: [...new Set([...document.querySelectorAll('#view .group')].map((e) => getComputedStyle(e).borderTopLeftRadius))],
+      health: sq('.status .dot'), action: sq('[data-action=digest-now] .row-icon') };
+    st.ok = !st.short && st.radii.join() === '12px' && st.health.join() === '30,8px,rgb(52, 199, 89)' && st.action.join() === '30,8px,${RED}';
+    res.style = st;
     const calls0 = (window.__calls || []).length;
     click('[data-action=digest-now]'); await until(() => /Sent/.test(text('#toast')));
     res.t1 = text('#toast');
@@ -212,6 +200,7 @@ try {
     res.t2 = text('#toast');
     return res;`);
   check("Admin shows the editor pass", r.editor);
+  check("Admin in the Settings style: rows 48 px or more, 12 px cards, solid squares (green health, red actions)", r.style.ok, JSON.stringify(r.style));
   check("Admin failure badges are orange, not red", r.bad === "rgb(176, 58, 6)", String(r.bad));
   check("owner: Send me a digest now asks first, then sends", r.confirmed && /Sent: (\d+ stor|a short note)/.test(r.t1), r.t1);
   check("owner: Run news job now respects the 20-minute gap", /last ran at \d\d:\d\d/.test(r.t2) || /Started/.test(r.t2), r.t2);
@@ -226,24 +215,20 @@ try {
   await b.close();
 }
 
-// ------------------------------------------------------------ 360 and 430 px, English and Russian, every design
+// ------------------------------------------------------------ 360 and 430 px, English and Russian, light and dark
 for (const [width, port] of [[360, 9334], [430, 9335]]) {
   const w = await openBrowser({ width, port });
   try {
     for (const lang of ["ru", "en"]) {
       await w.open(`${BASE}/app/?theme=light&as=owner`);
       await w.run(API({ lang }));
-      const bad = [];
-      for (const d of ["1", "2", "3"]) {
-        await w.open(`${BASE}/app/?theme=light&as=owner`);
-        await w.run(`localStorage.setItem('axiom.design', '${d}');`);
-        await w.open(`${BASE}/app/?theme=light&as=owner`);
+      for (const scheme of ["light", "dark"]) {
+        await w.open(`${BASE}/app/?theme=${scheme}&as=owner`, scheme);
         const L = await w.run(LAYOUT);
-        if (!layoutOk(L)) bad.push(`design ${d}: ${JSON.stringify(L)}`);
+        check(`${width} px, ${lang === "ru" ? "Russian" : "English"}, ${scheme}: the layout rules hold`, layoutOk(L), JSON.stringify(L).slice(0, 600));
       }
-      check(`${width} px, ${lang === "ru" ? "Russian" : "English"}: every design keeps the layout rules`, !bad.length, bad.join(" | ").slice(0, 600));
     }
-    await w.run("localStorage.setItem('axiom.design', '1');");
+    await w.run(API({ lang: "en" }));
   } catch (e) {
     check(`${width} px ran to the end`, false, e.message);
   } finally {

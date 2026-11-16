@@ -12,7 +12,6 @@
 :root {
   --bg: #f2f2f7;
   --card: #ffffff;
-  --btn: var(--card);                /* button surface (design 2: a grey fill) */
   --text: #000000;
   --text-2: #8a8a8e;                 /* secondary text, section titles */
   --sep: rgba(60, 60, 67, 0.29);     /* hairlines (drawn at 0.5 px) */
@@ -70,9 +69,6 @@
   --warn-soft: rgba(245, 180, 0, 0.2);
   color-scheme: dark;
 }
-/* Design 2 (pure minimal): a plain page, grey buttons, more air */
-:root[data-design="2"] { --bg: #ffffff; --btn: var(--fill); --sec: 36px; }
-:root[data-design="2"][data-scheme="dark"] { --bg: #000000; }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; background: var(--bg); color: var(--text); transition: background-color 0.3s; }
@@ -115,9 +111,6 @@ button:disabled { cursor: default; }
 }
 .seg button[aria-selected="false"] { opacity: 0.7; }
 .seg.small { margin: 0 0 var(--gap); }
-/* Step 12 trial only: the owner's "Design 1 / 2 / 3" switch */
-.dsw { margin: 0 0 10px; }
-.dsw button { height: 28px; font-size: 13px; }
 
 .view { animation: fadeUp 0.32s var(--ease) both; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
@@ -133,7 +126,7 @@ button:disabled { cursor: default; }
   position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: var(--h);
   padding: 6px var(--pad); text-align: left; transition: background-color 0.15s;
 }
-.row + .row::before {
+.row + .row::before, .status + .row::before {
   content: ""; position: absolute; top: 0; right: 0; left: var(--pad); height: 1px; background: var(--sep);
   transform: scaleY(0.5); transform-origin: top;
 }
@@ -144,7 +137,7 @@ button.row:active, .tap:active { background: var(--press); }
 }
 /* Icons in rounded squares: block-level SVGs, so no text baseline or line box can push them off
    centre (Step 5 fix; ui-check.mjs measures every tile). */
-.row-icon.tile { border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); line-height: 0; }
+.row-icon.tile { border-radius: 8px; background: var(--accent); color: #fff; line-height: 0; transition: background-color 0.2s; }
 .row-icon svg, .hero-icon svg, .empty-icon svg { display: block; }
 .row-icon.tile svg { width: 18px; height: 18px; }
 .row-main { flex: 1 1 auto; min-width: 0; }
@@ -153,12 +146,14 @@ button.row:active, .tap:active { background: var(--press); }
 .row-right { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; color: var(--text-2); font-size: 17px; }
 .row-right .value { max-width: 46vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row.action .row-title { color: var(--accent-text); }
-.row.action:disabled .row-title, .row.action:disabled .row-icon { color: var(--text-2); }
+.row.action.has-icon .row-title { color: var(--text); }
+.row.action:disabled .row-title { color: var(--text-2); }
+.row.action:disabled .row-icon.tile { background: var(--fill-2); color: var(--text-2); }
 .row.action:disabled { background: none; }
 .ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .clamp { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
 
-/* Design 1: a small coloured square on every Settings row */
+/* A small coloured square on every Settings row */
 .sq {
   flex: 0 0 30px; width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center;
   font-size: 18px; line-height: 1; background: var(--tint, var(--fill));
@@ -166,19 +161,17 @@ button.row:active, .tap:active { background: var(--press); }
 .sq.solid { background: #8e8e93; color: #fff; line-height: 0; }
 .sq.solid svg { display: block; width: 16px; height: 16px; }
 .emo { flex: 0 0 auto; font-size: 20px; line-height: 1; }
-.row .emo { flex: 0 0 28px; width: 28px; text-align: center; }   /* emoji differ in width; names must line up */
 
 /* ------------------------------------------------------------------ the one button */
 .grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--gap); }
 .b {
-  grid-column: span 1; height: var(--h); min-width: 0; border-radius: var(--r); background: var(--btn); color: var(--text);
+  grid-column: span 1; height: var(--h); min-width: 0; border-radius: var(--r); background: var(--card); color: var(--text);
   display: flex; align-items: center; justify-content: center; gap: 7px; padding: 0 10px;
   font-size: 15px; line-height: 18px; font-weight: 500; text-align: center;
   transition: background-color 0.2s var(--ease), color 0.2s var(--ease), transform 0.15s var(--ease);
 }
 .b.s2 { grid-column: span 2; }
 .b.s3 { grid-column: span 3; }
-.b.s6 { grid-column: span 6; }
 .b.t { padding: 0; }
 .b:active { transform: scale(0.96); }
 .b:disabled { opacity: 0.5; }
@@ -210,35 +203,20 @@ button.row:active, .tap:active { background: var(--press); }
 }
 [aria-checked="true"] > .row-right .switch, [aria-checked="true"] > .switch, .switch[aria-checked="true"] { background: var(--accent); }
 [aria-checked="true"] > .row-right .switch .knob, [aria-checked="true"] > .switch .knob, .switch[aria-checked="true"] .knob { transform: translateX(20px); }
-.check { flex: 0 0 22px; color: var(--accent-text); line-height: 0; opacity: 0; transform: scale(0.6);
-  transition: opacity 0.2s var(--ease), transform 0.25s var(--ease); }
-.check svg { display: block; width: 22px; height: 22px; }
-[aria-checked="true"] > .check { opacity: 1; transform: none; }
 
 .link { color: var(--accent-text); font-size: inherit; }
 
 /* The time zone, one quiet line at the very bottom */
 .tzline { margin: 32px 0 0; text-align: center; font-size: 13px; line-height: 18px; color: var(--text-2); }
 
-/* ------------------------------------------------------------------ design 2: pure minimal */
-:root[data-design="2"] .group { background: none; border-radius: 0; overflow: visible; }
-:root[data-design="2"] .row { padding: 6px 2px; }
-:root[data-design="2"] .row + .row::before { left: 42px; }
-:root[data-design="2"] .section-head { margin-left: 2px; margin-right: 2px; }
-:root[data-design="2"] .hero { padding: 4px 2px 0; min-height: 0; }
-:root[data-design="2"] .hero-icon { display: none; }
-:root[data-design="2"] .hero-value { font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -0.025em; }
-:root[data-design="2"] .title { margin-left: 2px; }
-/* ------------------------------------------------------------------ design 3: all buttons */
-:root[data-design="3"] .hero { justify-content: center; text-align: center; }
-:root[data-design="3"] .hero-icon { display: none; }
-
 /* ------------------------------------------------------------------ admin */
+/* The health line: a solid square like the Settings rows (green, amber or orange, never the brand red) */
 .status { display: flex; gap: 12px; align-items: center; padding: 14px var(--pad); min-height: var(--h); }
-.status .dot { flex: 0 0 12px; height: 12px; border-radius: 50%; background: var(--ok);
-  box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.18); }
-.status.warn .dot { background: var(--warn); box-shadow: 0 0 0 4px var(--warn-soft); }
-.status.bad .dot { background: var(--bad); box-shadow: 0 0 0 4px var(--bad-soft); }
+.status .dot { flex: 0 0 30px; width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center;
+  background: var(--ok); color: #fff; line-height: 0; }
+.status .dot svg { display: block; width: 18px; height: 18px; }
+.status.warn .dot { background: var(--warn); }
+.status.bad .dot { background: var(--bad); }
 .status-title { font-size: 17px; font-weight: 600; line-height: 22px; }
 .status-sub { font-size: 13px; color: var(--text-2); line-height: 17px; margin-top: 1px; }
 .badge {

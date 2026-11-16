@@ -37,16 +37,22 @@ bot @axiom_news_bot at the end.
   once translated (inside its 24 h); only a digest left with no story at all goes out wholly in
   English. In Russian, "digest" is always сводка, and Ukraine always takes на (Step 11, owner):
   the topic is "Война на Украине", translations say "на Украине" (the job rejects "в Украине").
-- **Telegram Mini App settings:** topics, digest times (hourly grid), pause; the time zone is
-  shown read-only (Step 5 removed stories per digest, the format choice and the zone picker). An Admin tab, visible
-  only to the owner, shows stats, errors and AI usage, plus a "Send me a digest now" button.
+- **Telegram Mini App settings:** the next digest, topics, digest times (hourly grid), language,
+  pause, Support; the time zone is one quiet line at the bottom ("Yerevan · GMT+4"), from the phone
+  (Step 5 removed stories per digest, the format choice and the zone picker). **Design (owner,
+  Step 12: "design 1", iOS Settings):** iOS grouped colours (light #f2f2f7 with white cards, dark
+  #000 with #1c1c1e), every row and button 48 px high with 12 px corners and 8 px gaps, button
+  grids on six shared columns, a small coloured square and a red switch on every row, no helper
+  texts, no "Saved" toast (a light haptic tap; errors still show). An Admin tab, visible only to
+  the owner, in the same style, shows stats, errors and AI usage, plus a "Send me a digest now"
+  button.
 - **AI:** Gemini free tier, falling back to Groq; if both fail, items wait an hour. About 82
   calls/day (about 57 first pass + 25 editor), independent of user count; plus about 20 a day per
   reader language other than English while someone reads it (Step 9).
 - **Hosting:** GitHub Actions hourly job, plus Cloudflare Worker + D1 (webhook, Mini App API,
   static Mini App, digest cron).
-- **Tips (Step 10, amounts Step 11):** "Support Axiom" (always open at the bottom of the Mini App
-  settings: a short text, then 100, 500 and 1000 Stars) and /support (the same three buttons):
+- **Tips (Step 10, amounts Step 11):** "Support Axiom" (always open near the bottom of the Mini App
+  settings: the title and 100, 500 and 1000 Stars buttons, no text since Step 12) and /support (the same three buttons):
   voluntary Telegram Stars tips, the same for everyone (no test amount). Nothing is locked and a tip
   changes nothing else. /paysupport and /terms as Telegram requires; the owner refunds from Admin.
 - **Not in v1:** paid features, ads, user-added sources, instant alerts, channels.
@@ -137,6 +143,11 @@ bot @axiom_news_bot at the end.
 | 2026-11-16 | One layout object (`LAYOUT` in `digest.js`) makes every piece of a digest, and the length cut measures those same pieces | the cut can never drift from the format; checked against Telegram: its stored text equals our count exactly (plain and rich) |
 | 2026-11-16 | Rich-message length = the visible text in UTF-16 with no separators between blocks; limit still 3,900 | Telegram stores the blocks' text with no separators (checked on real messages); its own limit counts Unicode characters, never more than UTF-16 |
 | 2026-11-16 | A "⚙️ Settings" web_app button under every digest and quiet note, in the reader's language | owner; one tap to the Mini App |
+| 2026-11-16 | Mini App design "design 1" (owner, Step 12, from three versions live on the TEST bot): iOS Settings with coloured squares and red switches | the owner's choice over a pure minimal page and an all-buttons page |
+| 2026-11-16 | One size for everything in the Mini App (`--h` 48 px, `--r` 12 px, `--gap` 8 px) and button grids on 6 columns (a time spans 1, a tip 2, a language 3); `ui-check.mjs` measures it at 360, 390 and 430 px in English and Russian | owner: homogeneous and symmetric; the columns of every grid line up |
+| 2026-11-16 | No helper texts and no "Saved" toast; a saved change is one light haptic tap (`impactOccurred("light")`), errors still show (owner, Step 12) | owner: default is no text |
+| 2026-11-16 | The Mini App uses its own iOS palette, light or dark as Telegram is, and sets Telegram's header, background and bottom bar to that exact colour (hex, Telegram 6.9+) | Telegram's theme greys differ per platform (Android's dark is blue-grey); the edges always match the page |
+| 2026-11-16 | Language buttons carry a flag from `config/languages.json` (`flags`), passed to the Mini App in `i18n.js` | one place per language |
 | 2026-11-15 | pre_checkout_query is answered from the invoice payload alone (no database read) | Telegram cancels the payment after 10 s; measured a few microseconds |
 | 2026-11-15 | Table `tips`: user, amount, Telegram charge id (UNIQUE), time, refunded time; nothing else | the owner's rule; the charge id is needed for refunds, and UNIQUE makes a repeated update count once |
 | 2026-11-15 | /paysupport forwards the user's note to the owner; /terms states the tip terms; the owner refunds from Admin after a confirm (refundStarPayment) | Telegram's rules for bots that take Stars |
@@ -200,10 +211,15 @@ bot @axiom_news_bot at the end.
   digests are rich messages in the owner's design "E5f" with a Settings button, in every language.
   Worker 185 tests, Python 119; 11 rules broken on purpose, all caught. Details in
   `reports/step-11-design.md`.
+- **Step 12 done (2026-11-16): the Mini App redesign.** Three Settings designs went live on the TEST bot
+  with an owner-only switch; the owner chose design 1 (iOS Settings). The switch and the other two
+  are removed; Admin uses the same style. Details in `reports/step-12-settings-design.md`.
 - Two users: the owner (reads Russian) and one more (Russian).
 
 ## Next step
-Switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, which also sets
+"My topics": readers add up to 3 custom topics (a text field, Add, rows they can remove); the
+look is planned in `reports/step-12-settings-design.md` (one more card under Topics, same rows).
+Then switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, which also sets
 the Russian command list, then invite the first users). Watch the first real Russian reader's
 digests: the first hourly run after they choose Russian translates about 70 stories in one call;
 Admin's "Languages" section shows calls, tokens, stories held for translation and full English
@@ -249,8 +265,9 @@ Google News code (`job/gnews.py`, `job/shadow.py`).
   its own story.
 - **News.am and 168.am** (now big Armenia suppliers) were linked by JAMnews (2021) to one
   opposition bloc; 168.am is tier 3 so it is linked last.
-- **The Mini App was only seen in a desktop browser with a stand-in for Telegram.** The Step 5
-  version (red, hourly grid) still needs the owner's eyes on a real phone.
+- **The Mini App design (Step 12)** was checked in headless Edge with a stand-in for Telegram and
+  chosen by the owner on the TEST bot; not seen on an iPhone. Telegram clients older than 6.9 keep
+  their own header colour (the page itself is unchanged).
 - **Step 6 shadow step (paused):** if switched on again, its D1 rows (about 15-20k written a day) are not in
   Admin's "D1 today", and Google News feeds are for "personal, non-commercial use" per their own
   notice (owner to decide before adoption). Its old rows stay in `shadow_items` (its prune only runs
