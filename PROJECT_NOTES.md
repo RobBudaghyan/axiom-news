@@ -55,6 +55,20 @@ bot @axiom_news_bot at the end.
   settings: the title and 100, 500 and 1000 Stars buttons, no text since Step 12) and /support (the same three buttons):
   voluntary Telegram Stars tips, the same for everyone (no test amount). Nothing is locked and a tip
   changes nothing else. /paysupport and /terms as Telegram requires; the owner refunds from Admin.
+- **Custom topics (Step 13, "My topics"):** a reader adds up to 3 topics of their own in the Mini
+  App. Shared: two readers with "Colombia" (or "Colombian news") follow one topic. The Worker checks
+  each new name ONCE with AI (sensible news topic; not nonsense, offensive or a private person;
+  normalised name in four languages, emoji, 2-5 Google News searches, a boost cap 0-2); 5 checks a
+  reader a day (owner unlimited); a main topic is refused; blocked names cannot come back. The
+  hourly job searches Google News for topics with an active, unpaused follower (40 requests a run,
+  8 new headlines a topic, no-AI dedupe against the pool); pass 1 and the editor know the custom
+  topics (sport and the like count as news for them); digests treat them like main topics, in
+  their own section. A topic with no follower for 7 days is deleted.
+- **AI budget guard (Step 13):** calls and 429s per model since midnight Pacific time. A Gemini 429
+  in the last hour or 80% of a soft limit (250 a day per model, `config/ai_budget.json`): new topic
+  checks wait ("try again in a few minutes"). Every Gemini model refusing, or the limit reached:
+  translations wait too. Pass 1 and the editor never wait. Admin shows it; the owner gets one
+  alert a day.
 - **Not in v1:** paid features, ads, user-added sources, instant alerts, channels.
 - **Digest format (owner, Step 11: design "E5f").** A Telegram **rich message**
   (`sendRichMessage`). One line: "**Good evening, Sam** · 6 stories since 2 PM" (12-hour time in
@@ -148,6 +162,15 @@ bot @axiom_news_bot at the end.
 | 2026-11-16 | No helper texts and no "Saved" toast; a saved change is one light haptic tap (`impactOccurred("light")`), errors still show (owner, Step 12) | owner: default is no text |
 | 2026-11-16 | The Mini App uses its own iOS palette, light or dark as Telegram is, and sets Telegram's header, background and bottom bar to that exact colour (hex, Telegram 6.9+) | Telegram's theme greys differ per platform (Android's dark is blue-grey); the edges always match the page |
 | 2026-11-16 | Language buttons carry a flag from `config/languages.json` (`flags`), passed to the Mini App in `i18n.js` | one place per language |
+| 2026-11-16 | Custom topics (Step 13, owner): anyone may add up to 3; shared and normalised by one AI check; Google News search feeds as their source (owner accepts the terms-of-use risk); stories from our RSS feeds count too | readers asked for topics we do not curate (e.g. Colombia); one topic row per subject keeps searches and AI cost per topic, not per reader |
+| 2026-11-16 | The topic check runs in the Worker with its own Gemini and Groq keys (owner): 5 checks a reader a day, owner exempt, input refused before any AI call, every call logged in `ai_calls` (kind `topic_check`) | an answer in a few seconds; the guard and Admin count these calls with the job's |
+| 2026-11-16 | A main topic typed as a custom topic is refused with its name, not switched on (owner) | the reader stays in control of the main switches |
+| 2026-11-16 | The check prompt says the model's knowledge may be out of date | the first version rejected "Pope Leo" ("there is no current Pope named Leo") |
+| 2026-11-16 | Google searches: 40 requests a run (topics searched longest ago first, `when:` since the last search, 2-12 h), at most 8 new headlines a topic a search, no-AI title check against the pool at 0.5 (Step 6), tier 4, marked "headline only"; a Google 429/503 stops the rest of the run | measured: busy topics return 100+ results in 2 h, so the item cap sets the cost; 15 a topic cost twice as much for little gain |
+| 2026-11-16 | Custom topics follow the main-topic rules: the AI's boost cap (0-2) in `topic_boost_max`, the topic path, the length cut, never twice; a custom section is the most specific | owner: same rules. Consequence: a niche topic (sport) reaches a digest only if its story scores 4+ globally |
+| 2026-11-16 | Google links of stories that could reach a digest are resolved to the outlet (10 a run, one try each); a failure keeps the Google link | Step 6 method; a Google link still works |
+| 2026-11-16 | `custom_topics.id` is AUTOINCREMENT | a deleted topic's tag (c12) must never be reused: old stories still carry it |
+| 2026-11-16 | AI budget guard: level 1 (a Gemini 429 in the last hour, or 80% of a soft limit) delays topic checks; level 2 (every Gemini model 429 in the last hour, or the soft limit) also delays translations; never pass 1 or the editor; one owner alert a Pacific day | owner: safety without hurting users; the Pacific day computed by the US rule (no tz database in the Worker) |
 | 2026-11-15 | pre_checkout_query is answered from the invoice payload alone (no database read) | Telegram cancels the payment after 10 s; measured a few microseconds |
 | 2026-11-15 | Table `tips`: user, amount, Telegram charge id (UNIQUE), time, refunded time; nothing else | the owner's rule; the charge id is needed for refunds, and UNIQUE makes a repeated update count once |
 | 2026-11-15 | /paysupport forwards the user's note to the owner; /terms states the tip terms; the owner refunds from Admin after a confirm (refundStarPayment) | Telegram's rules for bots that take Stars |
@@ -214,18 +237,17 @@ bot @axiom_news_bot at the end.
 - **Step 12 done (2026-11-16): the Mini App redesign.** Three Settings designs went live on the TEST bot
   with an owner-only switch; the owner chose design 1 (iOS Settings). The switch and the other two
   are removed; Admin uses the same style. Details in `reports/step-12-settings-design.md`.
-- Two users: the owner (reads Russian) and one more (Russian).
+- **Step 13 done (2026-11-16): custom topics ("My topics") and the AI budget guard**, on the TEST bot.
+  Details in `reports/step-13-custom-topics.md`.
+- Two users: the owner and one more (Russian).
 
 ## Next step
-"My topics": readers add up to 3 custom topics (a text field, Add, rows they can remove); the
-look is planned in `reports/step-12-settings-design.md` (one more card under Topics, same rows).
-Then switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, which also sets
+Watch the custom topics for a few days (Admin: Custom topics, AI budget). Then switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, which also sets
 the Russian command list, then invite the first users). Watch the first real Russian reader's
 digests: the first hourly run after they choose Russian translates about 70 stories in one call;
 Admin's "Languages" section shows calls, tokens, stories held for translation and full English
 fallbacks. Admin's "Tips" section shows Stars received. Before that: a few days of real digests with the Step 8 rules, and a look at the
-fold on an iPhone if any user has one. Later: custom topics (e.g. "Colombia") can reuse the paused
-Google News code (`job/gnews.py`, `job/shadow.py`).
+fold on an iPhone if any user has one.
 
 ## Known issues / open questions
 - **Translations (Step 9):** the code checks catch numbers, names, alphabets and accents, not a
@@ -275,5 +297,10 @@ Google News code (`job/gnews.py`, `job/shadow.py`).
 - **Tips (Step 10):** the per-chat command list of a reader who picked Russian before Step 10 keeps
   the old two commands until they change language again (none exist yet). Telegram may ask the bot
   to handle disputes; Stars received can be withdrawn only through Telegram's own rules (not set up).
+- **Custom topics (Step 13):** Google News may block us (then custom topics get only what our RSS
+  feeds have); its headlines have no text, so the editor's descriptions for them are short and the
+  fact guard has little to check against. A niche topic (Formula 1) reaches digests only with a
+  global score of 4+ (boost cap 2, owner's same-rules decision). Gemini answered 503 on about a
+  third of the test checks (the fallback model or Groq answered; up to 14 s).
 - **Admin "D1 today" for the Worker is a slight undercount** (counts of short-lived Worker instances
   that end between ticks are lost). The job's numbers are exact and are most of the total.
