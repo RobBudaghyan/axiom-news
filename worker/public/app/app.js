@@ -268,34 +268,105 @@
       `<span class="row-main row-title">${esc(t.label)}</span>${switchEl}</button>`).join(""));
   }
 
-  // Step 13, "My topics" (the plan in reports/step-12-settings-design.md): each custom topic is a row
-  // with a grey square (📌), its name in the reader's language and a round grey "x" (drawn 22 px, tap
-  // area 44 px) that removes it at once. The last row adds one: a solid red "+", a text field and a
-  // red "Add" once something is typed (Enter does the same). While the AI checks it, a small spinner
-  // stands where "Add" was. At the limit the add row is gone. No helper texts; errors in the bubble.
+  // Step 13 fixes (owner, after his test): each custom topic row looks exactly like a main topic
+  // row: the topic's own emoji from the AI check in a tinted square, its name in the reader's
+  // language and a red switch (off keeps it in the list and its slot). "Edit" at the right of the
+  // section title switches to iOS edit mode: a red minus on each row removes it, "Done" leaves.
+  // The last row adds one: a solid red "+", the field and a red "Add" once something is typed
+  // (Enter does the same); a spinner while the AI checks; the new row slides in and its switch
+  // turns on with a light tap. At 3 topics (on or off) the add row is gone. No helper texts.
+
+  // The square's tint comes from the emoji itself: it is drawn once on a small canvas, its strongly
+  // coloured pixels are sorted into the iOS system hues the main topics use, and the most common
+  // hue wins (🇯🇵 red, 🇨🇴 yellow, 🏎️ red, 🤖 grey). No strong colour, or no canvas: grey. (No pink: the
+  // main topics do not use it, and crimson flags read as red.)
+  const HUES = [["255, 59, 48", 4], ["255, 149, 0", 33], ["255, 204, 0", 50], ["52, 199, 89", 135], ["48, 176, 199", 190],
+    ["0, 122, 255", 213], ["88, 86, 214", 243], ["175, 82, 222", 285]];
+  const GREY = "142, 142, 147";
+  const tints = new Map();
+  function hueOf(px) {
+    const count = new Array(HUES.length).fill(0);
+    let opaque = 0;
+    for (let i = 0; i < px.length; i += 4) {
+      if (px[i + 3] < 160) continue;
+      opaque++;
+      const r = px[i] / 255, g = px[i + 1] / 255, b = px[i + 2] / 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+      if (max < 0.35 || d / max < 0.45) continue;   // white, black, grey and pale pixels do not count
+      let h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+      h = (h * 60 + 360) % 360;
+      let best = 0, bd = 999;
+      HUES.forEach(([, at], k) => { const dist = Math.min(Math.abs(h - at), 360 - Math.abs(h - at)); if (dist < bd) { bd = dist; best = k; } });
+      count[best]++;
+    }
+    if (!opaque) return null;   // nothing drawn yet (the emoji font is still loading)
+    const top = count.indexOf(Math.max(...count));
+    return count[top] >= opaque * 0.06 ? HUES[top][0] : GREY;
+  }
+  let retintTimer = 0;
+  function emojiTint(emoji) {
+    if (tints.has(emoji)) return tints.get(emoji);
+    let rgb = null;
+    try {
+      const c = document.createElement("canvas");
+      c.width = c.height = 40;
+      const x = c.getContext("2d", { willReadFrequently: true });
+      x.textAlign = "center";
+      x.textBaseline = "middle";
+      x.font = `30px ${getComputedStyle(document.body).fontFamily}`;
+      x.fillText(emoji, 20, 22);
+      rgb = hueOf(x.getImageData(0, 0, 40, 40).data);
+      if (rgb === null) {   // try again once the font is there; grey meanwhile
+        clearTimeout(retintTimer);
+        retintTimer = setTimeout(retint, 300);
+        try { document.fonts.ready.then(() => setTimeout(retint, 50)); } catch { /* no font API */ }
+        return GREY;
+      }
+    } catch { rgb = GREY; }   // no canvas: grey
+    tints.set(emoji, rgb);
+    return rgb;
+  }
+  function retint() {
+    document.querySelectorAll("#my-topics .sq[data-e]").forEach((q) => { q.style.setProperty("--tint", `rgba(${emojiTint(q.dataset.e)}, 0.18)`); });
+  }
+  const customTint = (emoji) => `--tint: rgba(${emojiTint(emoji)}, 0.18)`;
+
   function myTopicsHTML() {
     const list = S.st.custom || [];
     const max = (S.st.limits && S.st.limits.max_custom) || 3;
-    const rows = list.map((c) => `<div class="row has-icon ct${S.justAdded === c.id ? " new" : ""}" data-id="${c.id}">` +
-      `<span class="sq" aria-hidden="true">📌</span><span class="row-main row-title ellipsis">${esc(c.name)}</span>` +
-      `<button class="xbtn" data-action="remove-topic" data-value="${c.id}" aria-label="${esc(tr("app.remove_topic", { name: c.name }))}"` +
-      `${S.busy.addTopic ? " disabled" : ""}><span class="x" aria-hidden="true">${I.x}</span></button></div>`).join("");
+    const editing = !!S.editTopics && list.length > 0;
+    const sq = (c) => `<span class="sq" style="${customTint(c.emoji)}" data-e="${esc(c.emoji)}" aria-hidden="true">${esc(c.emoji)}</span>`;
+    const name = (c) => `<span class="row-main row-title ellipsis">${esc(c.name)}</span>`;
+    const rows = list.map((c) => editing
+      ? `<div class="row has-icon ct editing" data-id="${c.id}"><button class="minus" data-action="remove-topic" data-value="${c.id}" ` +
+        `aria-label="${esc(tr("app.remove_topic", { name: c.name }))}"><span class="mc" aria-hidden="true"></span></button>${sq(c)}${name(c)}</div>`
+      : `<button class="row has-icon tap ct${S.justAdded === c.id ? " new" : ""}" role="switch" ` +
+        `aria-checked="${S.justAdded === c.id ? false : !!c.on}" data-action="custom-switch" data-value="${c.id}"` +
+        `${S.busy.addTopic ? " disabled" : ""}>${sq(c)}${name(c)}${switchEl}</button>`).join("");
     const busy = !!S.busy.addTopic;
     const draft = S.draft || "";
-    const add = list.length < max ? `<form class="row has-icon add-row${draft.trim() ? " has-text" : ""}${busy ? " busy" : ""}" id="add-topic" novalidate>` +
+    const add = list.length < max && !editing ? `<form class="row has-icon add-row${draft.trim() ? " has-text" : ""}${busy ? " busy" : ""}" id="add-topic" novalidate>` +
       `<span class="sq add" aria-hidden="true">${I.plus}</span>` +
       `<input class="add-input" id="topic-input" type="text" enterkeyhint="done" autocomplete="off" autocapitalize="sentences" spellcheck="false" ` +
       `maxlength="${(S.st.limits && S.st.limits.custom_name_max) || 40}" placeholder="${esc(tr("app.add_topic"))}" aria-label="${esc(tr("app.add_topic"))}" ` +
       `value="${esc(draft)}"${busy ? " disabled" : ""}>` +
       (busy ? `<span class="add-spin"><span class="spinner spin-sm" role="status" aria-label="${esc(tr("app.checking"))}"></span></span>`
         : `<button type="submit" class="add-go" data-action="add-topic">${esc(tr("app.add"))}</button>`) + "</form>" : "";
-    return card(rows + add);
+    // the title with "Edit" (or "Done") at its right, only while there is something to edit
+    const head = `<h2 class="section-head has-action"><span>${esc(tr("app.sec_my_topics"))}</span>` +
+      (list.length ? `<button class="head-link" data-action="edit-topics" aria-pressed="${editing}">${esc(tr(editing ? "app.done" : "app.edit"))}</button>` : "") +
+      "</h2>";
+    return `<section class="section${editing ? " editing" : ""}" id="my-topics">${head}${card(rows + add)}</section>`;
   }
   function renderMyTopics(focus = false) {
-    const el = $("#my-topics .group");
+    const el = $("#my-topics");
     if (!el) return;
+    if (!(S.st.custom || []).length) S.editTopics = false;
     el.outerHTML = myTopicsHTML();
+    // a new row slides in with its switch off, and the switch turns on as it lands
+    const fresh = S.justAdded != null && $(`#my-topics .ct[data-value="${S.justAdded}"]`);
     S.justAdded = null;
+    if (fresh) setTimeout(() => fresh.setAttribute("aria-checked", "true"), 260);
     const input = $("#topic-input");
     if (focus && input) { input.focus(); const n = input.value.length; try { input.setSelectionRange(n, n); } catch { /* not a text field */ } }
   }
@@ -315,13 +386,12 @@
       const before = new Set((S.st.custom || []).map((c) => c.id));
       S.st = r;
       S.busy.addTopic = false;
-      if (res.kind === "added" || res.kind === "joined") {
+      if (res.kind === "added" || res.kind === "joined") {   // joined (someone had made it) looks the same
         S.draft = "";
         const fresh = (S.st.custom || []).find((c) => !before.has(c.id));
         S.justAdded = fresh ? fresh.id : null;
         renderMyTopics();
         haptic("impact", "light");
-        if (res.kind === "joined") toast(tr("app.joined", { name: res.name }), "ok", 2600);
       } else {   // rejected, a main topic, or "try again in a few minutes": the text stays to edit
         renderMyTopics();
         haptic("error");
@@ -335,23 +405,54 @@
     }
   }
 
+  // Is anything else switched on (a main topic or another custom topic)? The last one cannot go.
+  const otherOn = (id) => S.st.user.topics.length > 0 || (S.st.custom || []).some((c) => c.on && c.id !== id);
+
+  function toggleCustom(el) {
+    const id = Number(el.dataset.value);
+    const c = (S.st.custom || []).find((x) => x.id === id);
+    if (!c) return;
+    const on = !!c.on;
+    if (on && !otherOn(id)) {
+      haptic("warning");
+      shake(el);
+      toast(tr("app.keep_topic"), "err");
+      return;
+    }
+    c.on = !on;
+    el.setAttribute("aria-checked", String(!on));
+    chain = chain.then(async () => {
+      try {
+        S.st = await api("/api/topics/switch", { id, on: !on });
+        updateHero();
+        haptic("impact", "light");
+      } catch (e) {
+        c.on = on;
+        renderMyTopics();
+        haptic("error");
+        toast(e.message, "err", 3200);
+      }
+    });
+  }
+
   function removeTopic(el) {
     const id = Number(el.dataset.value);
     const list = S.st.custom || [];
-    if (list.length === 1 && !S.st.user.topics.length) {
+    const row = el.closest(".row");
+    if (!otherOn(id)) {
       haptic("warning");
-      shake(el.closest(".row"));
+      shake(row);
       toast(tr("app.keep_topic"), "err");
       return;
     }
     const before = list;
     S.st.custom = list.filter((c) => c.id !== id);
-    renderMyTopics();
+    haptic("impact", "light");
+    row.classList.add("gone");   // collapses, then the card is drawn again
+    setTimeout(() => renderMyTopics(), 220);
     chain = chain.then(async () => {
       try {
         S.st = await api("/api/topics/remove", { id });
-        renderMyTopics();
-        haptic("impact", "light");
       } catch (e) {
         S.st.custom = before;
         renderMyTopics();
@@ -389,7 +490,7 @@
   function settingsHTML() {
     return `<section class="section">${heroHTML()}</section>
       ${sec(tr("app.sec_topics"), topicsHTML(), 'id="topics"')}
-      ${sec(tr("app.sec_my_topics"), myTopicsHTML(), 'id="my-topics"')}
+      ${myTopicsHTML()}
       ${sec(tr("app.sec_times"), timesHTML(), 'id="times"')}
       ${languagesHTML()}
       ${pauseHTML()}
@@ -454,7 +555,7 @@
     const u = S.st.user;
     const tag = el.dataset.value;
     const on = u.topics.includes(tag);
-    if (on && u.topics.length === 1 && !(S.st.custom || []).length) {   // Step 13: a custom topic counts too
+    if (on && u.topics.length === 1 && !(S.st.custom || []).some((c) => c.on)) {   // Step 13: a custom topic switched on counts too
       haptic("warning");
       shake(el);
       toast(tr("app.keep_topic"), "err");
@@ -636,7 +737,7 @@
 
     // Step 13: custom topics and the AI budget guard (Admin stays English)
     const C = A.custom || { topics: [], checks_24h: {}, recent_checks: [], blocks: [], guard: { level: 0, reasons: [], models: [] } };
-    const ctRows = C.topics.map((x) => row({ icon: `<span class="sq" aria-hidden="true">${esc(x.emoji || "📌")}</span>`,
+    const ctRows = C.topics.map((x) => row({ icon: `<span class="sq" aria-hidden="true">${esc(x.emoji && x.emoji !== "📌" ? x.emoji : "🗞️")}</span>`,
       title: `<span class="ellipsis">${esc(x.name)}</span> ${x.orphan_since ? badge("No followers", "mute") : ""}`,
       sub: esc(`${plural(x.followers, "follower", "followers")}${x.active !== x.followers ? ` (${x.active} active)` : ""} · ` +
         `${plural(x.queries.length, "search", "searches")}, +${x.boost_max} cap · today ${n(x.today.searches)} requests, ` +
@@ -753,6 +854,12 @@
   // ---------------------------------------------------------------- events
   document.addEventListener("click", (ev) => {
     const el = ev.target.closest("[data-action]");
+    // the whole "Add a topic" row is tappable: a tap anywhere on it opens the field
+    if (!el && ev.target.closest && ev.target.closest(".add-row") && ev.target.id !== "topic-input") {
+      const input = $("#topic-input");
+      if (input && !input.disabled) input.focus();
+      return;
+    }
     if (!el || el.disabled) return;
     const v = el.dataset.value;
     switch (el.dataset.action) {
@@ -772,6 +879,8 @@
       case "tip": payTip(Number(v)); break;
       case "add-topic": ev.preventDefault(); addTopic(); break;
       case "remove-topic": removeTopic(el); break;
+      case "custom-switch": toggleCustom(el); break;
+      case "edit-topics": S.editTopics = !S.editTopics; haptic("select"); renderMyTopics(); break;
       case "refund": refundAction(el); break;
       case "topic-admin": topicAdminAction(el); break;
       case "range": S.range = v; haptic("select"); renderView(); break;

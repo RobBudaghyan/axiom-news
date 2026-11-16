@@ -1,0 +1,7 @@
+POST /api/open (3 custom topics, one off; Russian): 141 microseconds each
+POST /api/topics/switch (off): 73 microseconds each
+POST /api/topics/switch (on): 88 microseconds each
+POST /api/topics/remove (edit mode): 52 microseconds each
+POST /api/settings (a time): 78 microseconds each
+(digest: 36 stories, 4627 characters)
+planDigest, 40 candidates, 2 custom sections (Russian, new rule): 177 microseconds each

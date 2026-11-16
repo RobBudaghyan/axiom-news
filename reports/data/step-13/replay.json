@@ -1,0 +1,219 @@
+{
+ "now": 1794849188,
+ "new_headlines_24h": {
+  "c1": 161,
+  "c2": 91
+ },
+ "per_hour": [
+  {
+   "c1": 2,
+   "c2": 1
+  },
+  {
+   "c1": 3,
+   "c2": 1
+  },
+  {
+   "c1": 2,
+   "c2": 0
+  },
+  {
+   "c1": 5,
+   "c2": 2
+  },
+  {
+   "c1": 5,
+   "c2": 2
+  },
+  {
+   "c1": 4,
+   "c2": 4
+  },
+  {
+   "c1": 8,
+   "c2": 2
+  },
+  {
+   "c1": 8,
+   "c2": 2
+  },
+  {
+   "c1": 8,
+   "c2": 1
+  },
+  {
+   "c1": 8,
+   "c2": 5
+  },
+  {
+   "c1": 8,
+   "c2": 2
+  },
+  {
+   "c1": 8,
+   "c2": 4
+  },
+  {
+   "c1": 8,
+   "c2": 0
+  },
+  {
+   "c1": 8,
+   "c2": 0
+  },
+  {
+   "c1": 8,
+   "c2": 2
+  },
+  {
+   "c1": 8,
+   "c2": 5
+  },
+  {
+   "c1": 8,
+   "c2": 7
+  },
+  {
+   "c1": 8,
+   "c2": 8
+  },
+  {
+   "c1": 8,
+   "c2": 3
+  },
+  {
+   "c1": 8,
+   "c2": 8
+  },
+  {
+   "c1": 8,
+   "c2": 8
+  },
+  {
+   "c1": 8,
+   "c2": 8
+  },
+  {
+   "c1": 8,
+   "c2": 8
+  },
+  {
+   "c1": 4,
+   "c2": 8
+  }
+ ],
+ "pass1_items": 252,
+ "pass1_tokens": [
+  24644,
+  4681
+ ],
+ "pass1_calls": 2,
+ "editor_rerun": true,
+ "editor_calls": 2,
+ "editor_tokens": [
+  4343,
+  1388
+ ],
+ "topics": {
+  "c1": {
+   "name": "Japan",
+   "stories": 7,
+   "edited": 7,
+   "main_topic": 6,
+   "topic_score_counts": {
+    "5": 3,
+    "6": 3
+   },
+   "new_rule": 3,
+   "old_rule": 3,
+   "picked": [
+    {
+     "headline": "Japan economy shrinks 0.1 percent in third quarter",
+     "score": 5,
+     "topic_score": 6
+    },
+    {
+     "headline": "Bank of Japan board member urges interest rate hikes",
+     "score": 4,
+     "topic_score": 6
+    },
+    {
+     "headline": "Japan's Fugaku supercomputer suffers unauthorized access",
+     "score": 4,
+     "topic_score": 6
+    }
+   ],
+   "below_bar_examples": [
+    {
+     "headline": "Japan Prime Minister Takaichi travels to Asia summits",
+     "score": 5,
+     "topic_score": 5
+    },
+    {
+     "headline": "Colombia and Japan reactivate economic partnership dialogue",
+     "score": 4,
+     "topic_score": 5
+    },
+    {
+     "headline": "Japan to release defense AI guidelines",
+     "score": 4,
+     "topic_score": 5
+    }
+   ],
+   "rss_pool_24h": {
+    "stories": 9,
+    "score_7_plus": 0,
+    "examples": [
+     "Poll shows majority of Japanese oppose nuclear submarine navy",
+     "Bloomberg television reported from Tokyo and Sydney on the Asia Trade as world leaders gathered in Asia.",
+     "Bank of Japan board member calls for nimble interest rate approach",
+     "Analysts doubt diplomatic thaw between China and Japan at APEC",
+     "Russian diplomat accuses Germany, Italy and Japan of historical amnesia",
+     "Japan and Asian Development Bank work on nuclear power memorandum for Asia"
+    ]
+   }
+  },
+  "c2": {
+   "name": "Colombia",
+   "stories": 6,
+   "edited": 6,
+   "main_topic": 4,
+   "topic_score_counts": {
+    "5": 1,
+    "6": 2,
+    "7": 1
+   },
+   "new_rule": 3,
+   "old_rule": 3,
+   "picked": [
+    {
+     "headline": "Colombia drops plan to tax basic food items",
+     "score": 5,
+     "topic_score": 7
+    },
+    {
+     "headline": "Colombia announces plan to counter drone attacks",
+     "score": 5,
+     "topic_score": 6
+    },
+    {
+     "headline": "Ecuador alleges assassination plot against Noboa originating in Colombia",
+     "score": 5,
+     "topic_score": 6
+    }
+   ],
+   "below_bar_examples": [
+    {
+     "headline": "United States may transfer C-130 aircraft to Colombia",
+     "score": 4,
+     "topic_score": 5
+    }
+   ],
+   "rss_pool_24h": {
+    "stories": 0,
+    "score_7_plus": 0,
+    "examples": []
+   }
+  }
+ }
+}

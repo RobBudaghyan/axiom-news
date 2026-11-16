@@ -124,6 +124,8 @@
     "joined": "Sujet partagé : {name}",
     "remove_topic": "Supprimer {name}",
     "checking": "Vérification",
+    "edit": "Modifier",
+    "done": "OK",
     "keep_topic": "Gardez au moins un sujet",
     "keep_time": "Gardez au moins une heure",
     "max_times": "Jusqu'à {max} fois par jour. Retirez-en une d'abord.",

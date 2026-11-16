@@ -1,0 +1,222 @@
+{
+ "now": 1794849188,
+ "new_headlines_24h": {
+  "c1": 161,
+  "c2": 91
+ },
+ "per_hour": [
+  {
+   "c1": 2,
+   "c2": 1
+  },
+  {
+   "c1": 3,
+   "c2": 1
+  },
+  {
+   "c1": 2,
+   "c2": 0
+  },
+  {
+   "c1": 5,
+   "c2": 2
+  },
+  {
+   "c1": 5,
+   "c2": 2
+  },
+  {
+   "c1": 4,
+   "c2": 4
+  },
+  {
+   "c1": 8,
+   "c2": 2
+  },
+  {
+   "c1": 8,
+   "c2": 2
+  },
+  {
+   "c1": 8,
+   "c2": 1
+  },
+  {
+   "c1": 8,
+   "c2": 5
+  },
+  {
+   "c1": 8,
+   "c2": 2
+  },
+  {
+   "c1": 8,
+   "c2": 4
+  },
+  {
+   "c1": 8,
+   "c2": 0
+  },
+  {
+   "c1": 8,
+   "c2": 0
+  },
+  {
+   "c1": 8,
+   "c2": 2
+  },
+  {
+   "c1": 8,
+   "c2": 5
+  },
+  {
+   "c1": 8,
+   "c2": 7
+  },
+  {
+   "c1": 8,
+   "c2": 8
+  },
+  {
+   "c1": 8,
+   "c2": 3
+  },
+  {
+   "c1": 8,
+   "c2": 8
+  },
+  {
+   "c1": 8,
+   "c2": 8
+  },
+  {
+   "c1": 8,
+   "c2": 8
+  },
+  {
+   "c1": 8,
+   "c2": 8
+  },
+  {
+   "c1": 4,
+   "c2": 8
+  }
+ ],
+ "pass1_items": 252,
+ "pass1_tokens": [
+  24644,
+  4681
+ ],
+ "pass1_calls": 2,
+ "editor_calls": 2,
+ "editor_tokens": [
+  4343,
+  2794
+ ],
+ "topics": {
+  "c1": {
+   "name": "Japan",
+   "stories": 7,
+   "edited": 7,
+   "main_topic": 6,
+   "topic_score_counts": {
+    "5": 1,
+    "6": 5
+   },
+   "new_rule": 5,
+   "old_rule": 5,
+   "picked": [
+    {
+     "headline": "Japan's economy contracts by 0.1 percent in third quarter",
+     "score": 5,
+     "topic_score": 6
+    },
+    {
+     "headline": "Bank of Japan board member Takata calls for interest rate hikes",
+     "score": 4,
+     "topic_score": 6
+    },
+    {
+     "headline": "Japan Prime Minister Takaichi travels to Asia for international summits",
+     "score": 5,
+     "topic_score": 6
+    },
+    {
+     "headline": "Colombia and Japan resume talks on Economic Partnership Agreement",
+     "score": 5,
+     "topic_score": 6
+    },
+    {
+     "headline": "Japan's Fugaku supercomputer suffers unauthorized access",
+     "score": 5,
+     "topic_score": 6
+    }
+   ],
+   "below_bar_examples": [
+    {
+     "headline": "Japan Defense Ministry to publish AI guidelines by late November",
+     "score": 4,
+     "topic_score": 5
+    }
+   ],
+   "rss_pool_24h": {
+    "stories": 9,
+    "score_7_plus": 0,
+    "examples": [
+     "Poll shows majority of Japanese oppose nuclear submarine navy",
+     "Bloomberg television reported from Tokyo and Sydney on the Asia Trade as world leaders gathered in Asia.",
+     "Bank of Japan board member calls for nimble interest rate approach",
+     "Analysts doubt diplomatic thaw between China and Japan at APEC",
+     "Russian diplomat accuses Germany, Italy and Japan of historical amnesia",
+     "Japan and Asian Development Bank work on nuclear power memorandum for Asia"
+    ]
+   }
+  },
+  "c2": {
+   "name": "Colombia",
+   "stories": 6,
+   "edited": 6,
+   "main_topic": 5,
+   "topic_score_counts": {
+    "6": 2,
+    "7": 3
+   },
+   "new_rule": 5,
+   "old_rule": 6,
+   "picked": [
+    {
+     "headline": "Colombia cancels plan to apply VAT to basic food items",
+     "score": 5,
+     "topic_score": 7
+    },
+    {
+     "headline": "Colombia announces security plan against drone attacks in 16 departments",
+     "score": 6,
+     "topic_score": 7
+    },
+    {
+     "headline": "Ecuador alleges assassination plot against President Noboa originated in Colombia",
+     "score": 6,
+     "topic_score": 7
+    },
+    {
+     "headline": "United States considers transferring three C-130 Hercules aircraft to Colombia",
+     "score": 5,
+     "topic_score": 6
+    },
+    {
+     "headline": "Fossil fuel transition coalition continues without Colombia",
+     "score": 5,
+     "topic_score": 6
+    }
+   ],
+   "below_bar_examples": [],
+   "rss_pool_24h": {
+    "stories": 0,
+    "score_7_plus": 0,
+    "examples": []
+   }
+  }
+ },
+ "_note": "Full replay (searches, pass 1, editor) with the sharpened editor prompt. Its old_rule count for Colombia (6) also counted a story whose main topic was Japan; fixed in the script afterwards (5). replay.json is a second editor run on the same pass-1 stories."
+}

@@ -143,17 +143,21 @@ READER_TOPICS = """
 READER_BOOST = """
    - reader topics ({tags}): the readers chose these subjects themselves, so for an event whose
      topic is a reader topic, ignore the boost rules above. Its topic_score answers only: how
-     important is this for someone who follows this subject closely? It may be far above the
+     important is this for someone who follows this subject closely? Do not copy the score: the
+     score is for a general world reader who does not follow this subject, so for a real
+     development the topic score is usually 1 to 3 points higher, and it may be far above the
      score (a race result can have score 1 and topic score 8). 6 or more means a follower would
-     be sorry to miss it; most events on a busy subject are routine and stay at 5 or less.
+     be sorry to miss it; routine items stay at 5 or less.
      Examples (topic score):
      - a sport (Formula 1): 8 a Grand Prix result, a world title decided; 6 a driver signs for
        another team, a race-changing penalty, a big rule change; 4 practice or qualifying times,
        a team boss's comments, rumours, previews.
      - a country (Japan, Colombia): 8 an election result, a new head of government, a disaster
-       with deaths, a major law or central bank decision; 6 a notable government decision, a big
-       scandal or arrest of a known figure, a real step with another country; 4 a minister's
-       statement, a local crime, a festival, a poll, a company result.
+       with deaths, a major law or central bank decision; 6 a new minister, official figures
+       that show a turn (the economy shrinks, inflation jumps), a notable government decision,
+       a leader's visit with an outcome, a big scandal or arrest of a known figure, a real step
+       with another country; 4 a minister's statement, a local crime, a festival, a poll, a
+       company result, a friendly match, aid or grants to another country.
      - a technology or field (AI regulation): 8 a major law passed or a ban; 6 a regulator opens
        a formal case, a big new rule is proposed; 4 a speech, a report, an opinion piece, a
        product launch.

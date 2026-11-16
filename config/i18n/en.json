@@ -124,6 +124,8 @@
     "joined": "Joined: {name}",
     "remove_topic": "Remove {name}",
     "checking": "Checking",
+    "edit": "Edit",
+    "done": "Done",
     "keep_topic": "Keep at least one topic",
     "keep_time": "Keep at least one digest time",
     "max_times": "Up to {max} times a day. Remove one first.",

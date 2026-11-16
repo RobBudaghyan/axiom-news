@@ -1,0 +1,26 @@
+switch saved (on/off written): 3
+off topic still counts toward 3: 1
+off means not in digests: the cron SQL filter alone (a second guard behind withCustomTopics): 0
+off means not in digests: both guards (cron SQL and withCustomTopics): 2
+off means not in digest topics (withCustomTopics alone): 1
+last topic on cannot be switched off (API): 1
+a switched-off custom topic is not 'on' for main topics: 1
+the topic's own emoji, never the pin: 1
+7-day clock: a switched-off follower keeps it (Worker): 1
+custom rule: no 'above the score' (qualifies): 2
+custom rule: no cap (topicScore): 1
+custom rule: no 'above the score' (SQL): 1
+custom rule: no cap (SQL): 1
+custom rule: the bar stays 6 (custom path): 1
+off means not searched (job): 1
+7-day rule counts switched-off followers (job, both statements): 1
+custom rule in translation (Python): 2
+custom rule in translation (SQL): 2
+editor prompt: custom examples: 1
+editor prompt: no cap for reader topics: 1
+UI: Edit shows a red minus, hides switches: 13
+UI: the minus removes the topic: 3
+UI: the switch is saved: 3
+UI: tint from the emoji: 14
+UI: the new row's switch turns on: 3
+UI: last topic on cannot be switched off (app): 1

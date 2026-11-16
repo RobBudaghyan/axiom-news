@@ -4,6 +4,7 @@
 // haptic tap instead), language buttons with flags, the time zone as one line at the bottom,
 // Support with three buttons only, one size for every row and button, grids on shared columns,
 // 44 px tap targets, and nothing overflowing at 360 and 430 px, in English and Russian.
+// Step 13 fixes: the switch on each custom row, its own emoji and tint, Edit/Done with a red minus.
 // Step 13: "My topics" (add with Enter or Add, checking, added, joined, rejected, main topic,
 // delayed by the AI guard, remove, the limit of 3, a long name cut with "...") and the same layout
 // rules on the new card at 360, 390 and 430 px, English and Russian, light and dark.
@@ -34,10 +35,17 @@ const MY = `const addT = (name, how = 'enter') => { const i = document.querySele
     i.dispatchEvent(new Event('input', { bubbles: true })); if (how === 'enter') i.form.requestSubmit(); else click('[data-action=add-topic]'); };
   const done = async () => { await wait(60); await until(() => !document.querySelector('#my-topics .add-spin'), 6000); await wait(200); };
   const mine = () => [...document.querySelectorAll('#my-topics .ct .row-title')].map((e) => e.textContent);
+  const ct = (name) => [...document.querySelectorAll('#my-topics .ct')].find((e) => e.querySelector('.row-title').textContent === name);
+  const serverOn = async () => (await (await fetch('/api/open', { method: 'POST', headers: { authorization: 'tma ' + Telegram.WebApp.initData,
+    'content-type': 'application/json' }, body: '{}' })).json()).custom.map((c) => c.name + ':' + (c.on ? 'on' : 'off'));
   const serverMine = async () => (await (await fetch('/api/open', { method: 'POST', headers: { authorization: 'tma ' + Telegram.WebApp.initData,
     'content-type': 'application/json' }, body: '{}' })).json()).custom.map((c) => c.name);`;
 const ADD = (name) => `await fetch('/api/topics/add', { method: 'POST', headers: { authorization: 'tma ' + Telegram.WebApp.initData,
   'content-type': 'application/json' }, body: JSON.stringify({ name: ${JSON.stringify(name)} }) });`;
+const SWITCH = (name, on) => `{ const h = { authorization: 'tma ' + Telegram.WebApp.initData, 'content-type': 'application/json' };
+  const st = await (await fetch('/api/open', { method: 'POST', headers: h, body: '{}' })).json();
+  const id = st.custom.find((c) => c.name === ${JSON.stringify(name)}).id;
+  await fetch('/api/topics/switch', { method: 'POST', headers: h, body: JSON.stringify({ id, on: ${on} }) }); }`;
 const API = (body) => `await fetch('/api/settings', { method: 'POST', headers: { authorization: 'tma ' + Telegram.WebApp.initData,
   'content-type': 'application/json' }, body: JSON.stringify(${JSON.stringify(body)}) });`;
 
@@ -172,11 +180,15 @@ try {
   r = await b.run(`${SERVER} ${MY} const sec = document.querySelector('#my-topics'); const add = sec.querySelector('.add-row');
     const sq = getComputedStyle(add.querySelector('.sq')); const i = add.querySelector('input');
     return { after: document.querySelector('#topics').nextElementSibling?.id, head: text('#my-topics .section-head'), rows: mine(),
+      edit: !!document.querySelector('#my-topics [data-action=edit-topics]'), phColor: getComputedStyle(i, '::placeholder').color,
       sq: sq.backgroundColor, plus: !!add.querySelector('.sq svg'), ph: i.placeholder, font: getComputedStyle(i).fontSize,
       go: getComputedStyle(add.querySelector('.add-go')).display, h: Math.round(add.getBoundingClientRect().height) };`);
-  check("My topics: a card right under Topics, the add row with a red + and 'Add a topic' (17 px), Add hidden while empty",
+  check("My topics: a card right under Topics, the add row with a red + and 'Add a topic' (17 px), Add hidden while empty, no Edit while empty",
     r.after === "my-topics" && r.head === "My topics" && !r.rows.length && r.sq === RED && r.plus && r.ph === "Add a topic" &&
-    r.font === "17px" && r.go === "none" && r.h === 48, JSON.stringify(r));
+    r.font === "17px" && r.go === "none" && r.h === 48 && !r.edit, JSON.stringify(r));
+  r = await b.run(`click('#my-topics .add-row .sq'); await wait(80); return document.activeElement?.id;`);
+  check("My topics: the whole add row is tappable (a tap on the + opens the field)", r === "topic-input", String(r));
+  await b.run("document.activeElement.blur();");
   r = await b.run(`${MY} const i = document.querySelector('#topic-input'); i.value = 'Col'; i.dispatchEvent(new Event('input', { bubbles: true }));
     const shown = getComputedStyle(document.querySelector('.add-go')).display, word = text('.add-go');
     i.value = ''; i.dispatchEvent(new Event('input', { bubbles: true })); return { shown, word, hidden: getComputedStyle(document.querySelector('.add-go')).display };`);
@@ -185,17 +197,35 @@ try {
     const checking = { spin: !!document.querySelector('#my-topics .add-spin .spinner'), locked: document.querySelector('#topic-input').disabled,
       go: !!document.querySelector('.add-go') };
     await done(); return { checking, rows: mine(), server: await serverMine(), input: document.querySelector('#topic-input').value,
-      toasts: window.__toasts.slice(t), haptics: since(n).filter((c) => c.startsWith('haptic')), slid: !!document.querySelector('.ct.new') };`);
+      toasts: window.__toasts.slice(t), haptics: since(n).filter((c) => c.startsWith('haptic')), slid: !!document.querySelector('.ct.new'),
+      landing: ct('Colombia').getAttribute('aria-checked'), on: (await wait(350), ct('Colombia').getAttribute('aria-checked')) };`);
   check("My topics: while the AI checks, a spinner stands where Add was and the field is locked", r.checking.spin && r.checking.locked && !r.checking.go,
     JSON.stringify(r.checking));
-  check("My topics: Enter adds it: the row slides in, the field clears, one light haptic tap, no toast",
+  check("My topics: Enter adds it: the row slides in and its switch turns on, the field clears, one light haptic tap, no toast",
     JSON.stringify(r.rows) === '["Colombia"]' && JSON.stringify(r.server) === '["Colombia"]' && r.input === "" && !r.toasts.length &&
-    JSON.stringify(r.haptics) === '["haptic impact light"]' && r.slid, JSON.stringify(r));
+    JSON.stringify(r.haptics) === '["haptic impact light"]' && r.slid && r.on === "true", JSON.stringify(r));
+  r = await b.run(`${MY} const row = ct('Colombia'), main = document.querySelector('[data-action=topic][data-value=armenia]');
+    const look = (e) => { const q = e.querySelector('.sq'), sw = e.querySelector('.switch'); const a = q.getBoundingClientRect(), h = e.getBoundingClientRect();
+      return { tag: e.tagName, role: e.getAttribute('role'), sq: [Math.round(a.width), Math.round(a.height), getComputedStyle(q).borderTopLeftRadius],
+        h: Math.round(h.height), sw: sw ? getComputedStyle(sw).backgroundColor : null, title: getComputedStyle(e.querySelector('.row-title')).fontSize }; };
+    return { emoji: row.querySelector('.sq').textContent, tint: getComputedStyle(row.querySelector('.sq')).backgroundColor, row: look(row), main: look(main),
+      pins: document.querySelectorAll('#my-topics .sq').length && [...document.querySelectorAll('#my-topics .sq')].some((q) => q.textContent.includes('\u{1F4CC}')),
+      x: !!document.querySelector('#my-topics .xbtn, #my-topics .minus'), edit: text('#my-topics [data-action=edit-topics]') };`);
+  check("My topics: a custom row is a main-topic row: its own emoji 🇨🇴 (never 📌) in a tinted square, the name, a red switch; no x; Edit at the title's right",
+    r.emoji === "🇨🇴" && r.tint === "rgba(255, 204, 0, 0.18)" && JSON.stringify({ ...r.row, sw: 0 }) === JSON.stringify({ ...r.main, sw: 0 }) && r.row.sw === RED &&
+    !r.pins && !r.x && r.edit === "Edit", JSON.stringify(r));
+  r = await b.run(`${SERVER} ${MY} const n = calls(), t = window.__toasts.length; ct('Colombia').click(); await settled();
+    const off = { ui: ct('Colombia').getAttribute('aria-checked'), sw: getComputedStyle(ct('Colombia').querySelector('.switch')).backgroundColor,
+      server: await serverOn(), rows: mine(), toasts: window.__toasts.slice(t), haptics: since(n).filter((c) => c.startsWith('haptic')) };
+    ct('Colombia').click(); await settled(); return { off, back: await serverOn() };`);
+  check("My topics: the switch turns it off (saved, still in the list, a light tap, no toast) and on again",
+    r.off.ui === "false" && r.off.sw !== RED && JSON.stringify(r.off.server) === '["Colombia:off"]' && JSON.stringify(r.off.rows) === '["Colombia"]' &&
+    !r.off.toasts.length && JSON.stringify(r.off.haptics) === '["haptic impact light"]' && JSON.stringify(r.back) === '["Colombia:on"]', JSON.stringify(r));
   r = await b.run(`${SERVER} ${MY} const t = window.__toasts.length; addT('F1', 'button'); await done();
     return { rows: mine(), server: await serverMine(), toasts: window.__toasts.slice(t) };`);
-  check("My topics: the Add word works too; 'F1' joins the shared topic Formula 1 that someone else made",
+  check("My topics: the Add word works too; 'F1' joins the shared topic Formula 1 that someone else made, with no message (it just slides in)",
     JSON.stringify(r.rows) === '["Colombia","Formula 1"]' && JSON.stringify(r.server) === '["Colombia","Formula 1"]' &&
-    JSON.stringify(r.toasts) === '["Joined: Formula 1"]', JSON.stringify(r));
+    !r.toasts.length, JSON.stringify(r));
   r = await b.run(`${SERVER} ${MY} const n = calls(), t = window.__toasts.length; addT('asdfgh'); await done();
     return { rows: mine(), toasts: window.__toasts.slice(t), input: document.querySelector('#topic-input').value,
       haptics: since(n).filter((c) => c.startsWith('haptic')) };`);
@@ -206,22 +236,35 @@ try {
     return { rows: mine(), toasts: window.__toasts.slice(t) };`);
   check("My topics: a main topic is refused with its name", r.rows.length === 2 &&
     JSON.stringify(r.toasts) === '["Armenia is already a main topic. Switch it on above."]', JSON.stringify(r));
-  r = await b.run(`${SERVER} ${MY} addT('AI regulation'); await done();
-    return { rows: mine(), add: !!document.querySelector('#my-topics .add-row'), server: await serverMine() };`);
-  check("My topics: at 3 topics the add row disappears", r.rows.length === 3 && !r.add && r.server.length === 3, JSON.stringify(r));
+  r = await b.run(`${SERVER} ${MY} ct('Formula 1').click(); await settled(); addT('AI regulation'); await done();
+    return { rows: mine(), add: !!document.querySelector('#my-topics .add-row'), server: await serverOn() };`);
+  check("My topics: at 3 topics the add row disappears; a switched-off topic still counts",
+    r.rows.length === 3 && !r.add && JSON.stringify(r.server) === '["Colombia:on","Formula 1:off","AI regulation:on"]', JSON.stringify(r));
   r = await b.run(LAYOUT);
-  check("My topics: the layout rules hold with three topics (48 px rows, x targets 44 px, no helper text)", layoutOk(r), JSON.stringify(r).slice(0, 500));
-  r = await b.run(`const x = document.querySelector('#my-topics .xbtn'); const c = x.querySelector('.x'); const a = x.getBoundingClientRect(), d = c.getBoundingClientRect();
-    return { tap: [Math.round(a.width), Math.round(a.height)], drawn: [Math.round(d.width), Math.round(d.height)], round: getComputedStyle(c).borderTopLeftRadius,
-      label: x.getAttribute('aria-label') };`);
-  check("My topics: a round grey x, drawn 22 px with a 44 px tap area", r.tap.join() === "44,44" && r.drawn.join() === "22,22" && r.round === "50%" &&
-    r.label === "Remove Colombia", JSON.stringify(r));
-  r = await b.run(`${SERVER} ${MY} const n = calls(), t = window.__toasts.length; click('#my-topics .ct:nth-child(2) .xbtn'); await settled();
-    return { rows: mine(), server: await serverMine(), add: !!document.querySelector('#my-topics .add-row'), toasts: window.__toasts.slice(t),
-      haptics: since(n).filter((c) => c.startsWith('haptic')) };`);
-  check("My topics: x removes it at once (no confirm, no toast, a light haptic tap) and the add row is back",
-    JSON.stringify(r.rows) === '["Colombia","AI regulation"]' && JSON.stringify(r.server) === '["Colombia","AI regulation"]' && r.add &&
-    !r.toasts.length && JSON.stringify(r.haptics) === '["haptic impact light"]', JSON.stringify(r));
+  check("My topics: the layout rules hold with three topics (48 px rows, 44 px targets, no helper text)", layoutOk(r), JSON.stringify(r).slice(0, 500));
+  r = await b.run(`${SERVER} ${MY} const n = calls(); click('[data-action=edit-topics]'); await wait(300);
+    const m = document.querySelector('#my-topics .minus'), c = m.querySelector('.mc'); const a = m.getBoundingClientRect(), d = c.getBoundingClientRect();
+    return { head: text('#my-topics [data-action=edit-topics]'), minus: document.querySelectorAll('#my-topics .minus').length,
+      switches: document.querySelectorAll('#my-topics .switch').length, add: !!document.querySelector('#my-topics .add-row'),
+      tap: [Math.round(a.width), Math.round(a.height)], drawn: [Math.round(d.width), Math.round(d.height)], round: getComputedStyle(c).borderTopLeftRadius,
+      color: getComputedStyle(c).backgroundColor, label: m.getAttribute('aria-label'), left: Math.round(d.left - document.querySelector('#my-topics .group').getBoundingClientRect().left),
+      h: [...document.querySelectorAll('#my-topics .ct')].map((e) => Math.round(e.getBoundingClientRect().height)), haptics: since(n).filter((c) => c.startsWith('haptic')) };`);
+  check("My topics: Edit shows a red minus (drawn 22 px, 44 px tap area) on each row, hides the switches, says Done",
+    r.head === "Done" && r.minus === 3 && r.switches === 0 && r.drawn.join() === "22,22" && r.tap.join() === "44,44" && r.round === "50%" &&
+    r.color === RED && r.label === "Remove Colombia" && r.left === 16 && r.h.every((x) => x === 48), JSON.stringify(r));
+  r = await b.run(LAYOUT);
+  check("My topics: the layout rules hold in edit mode", layoutOk(r), JSON.stringify(r).slice(0, 500));
+  r = await b.run(`${SERVER} ${MY} const n = calls(), t = window.__toasts.length; click('#my-topics .ct:nth-child(2) .minus'); await settled();
+    const inEdit = { rows: mine(), server: await serverMine(), head: text('#my-topics [data-action=edit-topics]'),
+      toasts: window.__toasts.slice(t), haptics: since(n).filter((c) => c.startsWith('haptic')),
+      confirms: since(n).filter((c) => c.startsWith('confirm')).length };
+    click('[data-action=edit-topics]'); await wait(300);
+    return { inEdit, head: text('#my-topics [data-action=edit-topics]'), switches: document.querySelectorAll('#my-topics .switch').length,
+      add: !!document.querySelector('#my-topics .add-row'), minus: document.querySelectorAll('#my-topics .minus').length };`);
+  check("My topics: the minus removes it at once (no confirm, no toast, a light tap), edit mode stays; Done brings back the switches and the add row",
+    JSON.stringify(r.inEdit.rows) === '["Colombia","AI regulation"]' && JSON.stringify(r.inEdit.server) === '["Colombia","AI regulation"]' &&
+    r.inEdit.head === "Done" && !r.inEdit.toasts.length && !r.inEdit.confirms && JSON.stringify(r.inEdit.haptics) === '["haptic impact light"]' &&
+    r.head === "Edit" && r.switches === 2 && r.add && !r.minus, JSON.stringify(r));
   r = await b.run(`${SERVER} ${MY} const t = window.__toasts.length; addT('Tennis'); await done();
     return { rows: mine(), toasts: window.__toasts.slice(t) };`);
   check("My topics: a sixth AI check in a day is refused before any AI call (5 a day per reader)",
@@ -230,6 +273,13 @@ try {
       const el = document.querySelector('[data-action=topic][data-value=' + t + ']'); if (el.getAttribute('aria-checked') === 'true') { el.click(); await wait(150); } }
     await settled(); return (await server()).topics;`);
   check("with a custom topic, every main topic may be off", Array.isArray(r) && r.length === 0, JSON.stringify(r));
+  r = await b.run(`${SERVER} ${MY} ct('AI regulation').click(); await settled(); const n = calls(), t = window.__toasts.length;
+    ct('Colombia').click(); await settled();
+    return { ui: ct('Colombia').getAttribute('aria-checked'), server: await serverOn(), toasts: window.__toasts.slice(t),
+      haptics: since(n).filter((c) => c.startsWith('haptic')) };`);
+  check("the last topic switched on (all main topics off, one custom on) cannot be switched off",
+    r.ui === "true" && JSON.stringify(r.server) === '["Colombia:on","AI regulation:off"]' && JSON.stringify(r.toasts) === '["Keep at least one topic"]' &&
+    r.haptics.includes("haptic warning"), JSON.stringify(r));
   await fetch(`${BASE}/__reset`, { method: "POST" });
   await fetch(`${BASE}/__guard429`, { method: "POST" });
   await b.open(`${BASE}/app/?theme=light&as=friend`);
@@ -302,12 +352,14 @@ try {
 
 // ------------------------------------------------------------ 360, 390 and 430 px, English and Russian, light and dark
 // Step 13: the owner first gets two custom topics, one with a long name (cut with "..." in its row).
+// Step 13 fixes: Japan (its flag on a red tint) and the long one switched off; each size is also
+// checked in edit mode.
 await fetch(`${BASE}/__reset`, { method: "POST" });
 for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
   const w = await openBrowser({ width, port });
   try {
     await w.open(`${BASE}/app/?theme=light&as=owner`);
-    await w.run(`${ADD("Colombia")} ${ADD("International Space Station research")}`);
+    await w.run(`${ADD("Japan")} ${ADD("International Space Station research")} ${SWITCH("International Space Station research", false)}`);
     for (const lang of ["ru", "en"]) {
       await w.open(`${BASE}/app/?theme=light&as=owner`);
       await w.run(API({ lang }));
@@ -316,12 +368,20 @@ for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
         const L = await w.run(LAYOUT);
         check(`${width} px, ${lang === "ru" ? "Russian" : "English"}, ${scheme}: the layout rules hold (My topics too)`, layoutOk(L), JSON.stringify(L).slice(0, 600));
         const M = await w.run(`const t = [...document.querySelectorAll('#my-topics .ct .row-title')];
-          return { n: t.length, head: text('#my-topics .section-head'), ph: document.querySelector('#topic-input')?.placeholder,
+          return { n: t.length, head: text('#my-topics .section-head span'), edit: text('#my-topics [data-action=edit-topics]'),
+            ph: document.querySelector('#topic-input')?.placeholder, names: t.map((e) => e.textContent),
+            flag: document.querySelector('#my-topics .ct .sq').textContent, tint: getComputedStyle(document.querySelector('#my-topics .ct .sq')).backgroundColor,
+            on: [...document.querySelectorAll('#my-topics .ct')].map((e) => e.getAttribute('aria-checked')),
             long: t.map((e) => [e.scrollWidth > e.clientWidth, getComputedStyle(e).textOverflow, Math.round(e.closest('.row').getBoundingClientRect().height)]) };`);
         const ru = lang === "ru";
-        check(`${width} px, ${ru ? "Russian" : "English"}, ${scheme}: My topics in the reader's language; a long name ends in "..." on one 48 px row`,
-          M.n === 2 && M.head === (ru ? "Мои темы" : "My topics") && M.ph === (ru ? "Добавить тему" : "Add a topic") &&
+        check(`${width} px, ${ru ? "Russian" : "English"}, ${scheme}: My topics in the reader's language (Edit too), 🇯🇵 on a red tint, on and off; a long name ends in "..." on one 48 px row`,
+          M.n === 2 && M.head === (ru ? "Мои темы" : "My topics") && M.edit === (ru ? "Изменить" : "Edit") && M.ph === (ru ? "Добавить тему" : "Add a topic") &&
+          M.names[0] === (ru ? "Япония" : "Japan") && M.flag === "🇯🇵" && M.tint === "rgba(255, 59, 48, 0.18)" && M.on.join() === "true,false" &&
           M.long.every((x) => x[1] === "ellipsis" && x[2] === 48) && (width > 400 || M.long[1][0]), JSON.stringify(M));
+        const E = await w.run(`click('[data-action=edit-topics]'); await wait(300); const L = (() => { ${LAYOUT} })();
+          const done = text('#my-topics [data-action=edit-topics]'); click('[data-action=edit-topics]'); await wait(200); return { L, done };`);
+        check(`${width} px, ${ru ? "Russian" : "English"}, ${scheme}: edit mode keeps the layout rules ("${ru ? "Готово" : "Done"}")`,
+          layoutOk(E.L) && E.done === (ru ? "Готово" : "Done"), JSON.stringify(E).slice(0, 600));
       }
     }
     await w.run(API({ lang: "en" }));

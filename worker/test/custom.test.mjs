@@ -457,6 +457,10 @@ describe("Step 13: custom topics in digests", () => {
     const [rows] = await db.batch([candidateStatement({ id: 9, topics: JSON.stringify(data.tags), last_digest_at: null }, T_NOW,
       { ...cfg, candidate_limit: 1000 })]);
     assert.deepEqual(rows.map((r) => r.id).sort((a, b) => a - b), data.cases.filter((c) => c.eligible).map((c) => c.id));
+    // a cap written for a custom tag in the settings changes nothing: custom topics have no cap
+    const capped = { ...cfg, candidate_limit: 1000, topic_boost_max: { ...cfg.topic_boost_max, c1: 0, c2: 0 } };
+    const [again] = await db.batch([candidateStatement({ id: 9, topics: JSON.stringify(data.tags), last_digest_at: null }, T_NOW, capped)]);
+    assert.deepEqual(again.map((r) => r.id).sort((a, b) => a - b), data.cases.filter((c) => c.eligible).map((c) => c.id));
   });
 
   test("its own section, in the reader's language, before broader sections; SQL agrees", async () => {

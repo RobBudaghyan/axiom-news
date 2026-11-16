@@ -162,26 +162,45 @@ button.row:active, .tap:active { background: var(--press); }
 .sq.solid svg { display: block; width: 16px; height: 16px; }
 .emo { flex: 0 0 auto; font-size: 20px; line-height: 1; }
 
-/* Step 13, "My topics": a row per custom topic with a round grey "x"; the last row adds one */
+/* Step 13, "My topics" (fixes after the owner's test): custom topic rows are main-topic rows (the
+   emoji in a tinted square, the name, the red switch). "Edit" at the right of the section title
+   shows a red minus on each row (iOS edit mode); "Done" leaves. The last row adds one. */
+.section-head.has-action { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.head-link { flex: 0 0 auto; min-width: 44px; text-align: right; padding: 13px 0 13px 16px; margin: -13px 0; font-size: 15px; line-height: 18px; font-weight: 500;
+  color: var(--accent-text); }
+.head-link:active { opacity: 0.5; }
 .sq.add { background: var(--accent); color: #fff; line-height: 0; }
 .sq.add svg { display: block; width: 16px; height: 16px; }
-.xbtn { flex: 0 0 44px; width: 44px; height: 44px; margin: -4px -11px -4px 0; display: grid; place-items: center; }
-.xbtn .x { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; line-height: 0;
-  background: var(--fill-2); color: var(--text-2); transition: background-color 0.15s; }
-.xbtn .x svg { display: block; width: 9px; height: 9px; }
-.xbtn:active .x { background: var(--track); }
+.minus { flex: 0 0 44px; width: 44px; height: 44px; margin: -4px -8px -4px -11px; display: grid; place-items: center;
+  animation: minusIn 0.22s var(--ease) both; }
+.minus .mc { position: relative; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); }
+.minus .mc::after { content: ""; position: absolute; left: 6px; right: 6px; top: 10px; height: 2px; border-radius: 1px; background: #fff; }
+.minus:active .mc { transform: scale(0.9); }
+@keyframes minusIn { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: none; } }
+#my-topics.editing .row + .row::before { left: calc(var(--pad) + 79px); }
 .add-input {
   flex: 1 1 auto; min-width: 0; height: 36px; padding: 0; border: 0; outline: 0; background: transparent;
   font: inherit; font-size: 17px; line-height: 22px; color: var(--text); -webkit-appearance: none; appearance: none;
 }
-.add-input::placeholder { color: var(--text-2); opacity: 1; }
+.add-row { cursor: text; }
+.add-input::placeholder { color: var(--accent-text); opacity: 1; }
+.add-input:focus::placeholder { color: var(--text-2); }
 .add-input:disabled { color: var(--text-2); -webkit-text-fill-color: var(--text-2); opacity: 1; }
 .add-go { display: none; flex: 0 0 auto; height: 44px; min-width: 44px; margin: -4px 0; padding: 0 0 0 8px; font-size: 17px; font-weight: 600;
   color: var(--accent-text); }
 .add-row.has-text .add-go { display: block; }
 .add-spin { flex: 0 0 auto; display: grid; place-items: center; width: 44px; height: 44px; margin: -4px -11px -4px 0; }
-.ct.new { animation: slideIn 0.32s var(--ease) both; }
-@keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+/* a new row grows open and slides in (its switch turns on as it lands, app.js); a removed one closes */
+.ct.new { animation: rowIn 0.34s var(--ease) both; overflow: hidden; }
+@keyframes rowIn {
+  from { opacity: 0; transform: translateY(-10px); max-height: 0; min-height: 0; padding-top: 0; padding-bottom: 0; }
+  to { opacity: 1; transform: none; max-height: var(--h); min-height: var(--h); }
+}
+.ct.gone { animation: rowOut 0.22s var(--ease) both; overflow: hidden; pointer-events: none; }
+@keyframes rowOut {
+  from { opacity: 1; max-height: var(--h); min-height: var(--h); }
+  to { opacity: 0; max-height: 0; min-height: 0; padding-top: 0; padding-bottom: 0; }
+}
 
 /* ------------------------------------------------------------------ the one button */
 .grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--gap); }

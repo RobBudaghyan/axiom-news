@@ -14,6 +14,8 @@ const KNOWN = [
     queries: [{ q: "Colombia", ed: "en" }, { q: "Colombia Petro", ed: "es_co" }, { q: "Bogotá", ed: "es_co" }], boost: 2 },
   { re: /formula 1|formula one|\bf1\b|формул/i, names: { en: "Formula 1", ru: "Формула-1", hy: "Ֆորմուլա 1", fr: "Formule 1" },
     emoji: "🏎️", queries: [{ q: "Formula 1", ed: "en" }, { q: "F1 Grand Prix", ed: "en_gb" }], boost: 2 },
+  { re: /japan|япони/i, names: { en: "Japan", ru: "Япония", hy: "Ճապոնիա", fr: "Japon" }, emoji: "🇯🇵",
+    queries: [{ q: "Japan news", ed: "en" }, { q: "日本 ニュース", ed: "ja" }], boost: 2 },
   { re: /ai regulation|регулирован/i, names: { en: "AI regulation", ru: "Регулирование ИИ", hy: "ԱԲ կարգավորում", fr: "Régulation de l'IA" },
     emoji: "🤖", queries: [{ q: "AI regulation", ed: "en" }, { q: "AI Act", ed: "en_gb" }], boost: 1 },
 ];
