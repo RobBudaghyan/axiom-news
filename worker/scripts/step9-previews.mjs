@@ -12,7 +12,7 @@ import { loadEnv, d1Rest } from "./digest-cli.mjs";
 import { CONFIG, planDigest, visibleLength } from "../src/digest.js";
 import { welcomeText } from "../src/bot.js";
 import { LANGS, t } from "../src/i18n.js";
-import { sendHtml, sendPlain, settingsButton } from "../src/telegram.js";
+import { sendDigestMessage, sendPlain, settingsButton } from "../src/telegram.js";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const toml = readFileSync(`${ROOT}worker/wrangler.toml`, "utf8");
@@ -37,7 +37,7 @@ const reader = { ...user, id: 0, topics: JSON.stringify(topics.map((x) => x.tag)
 
 async function send(text, extra) {
   if (dry) { console.log(`\n----- (${visibleLength(text)} characters)\n${text}`); return; }
-  const r = extra ? await sendPlain(env.TELEGRAM_BOT_TOKEN, owner, text, extra) : await sendHtml(env.TELEGRAM_BOT_TOKEN, owner, text);
+  const r = extra ? await sendPlain(env.TELEGRAM_BOT_TOKEN, owner, text, extra) : await sendDigestMessage(env.TELEGRAM_BOT_TOKEN, owner, text, { kind: "rich" });
   console.log(`sent: message ${r.message_id} (${visibleLength(text)} characters)`);
 }
 

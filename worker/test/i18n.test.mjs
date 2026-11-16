@@ -189,23 +189,27 @@ describe("Russian grammar", () => {
     const u = user("ru", { first_name: "Rob" });
     const s = story("Big news", ["politics"], 8);
     const tr = { ...s, tr_headline: "Большая новость", tr_description: "Подробности." };
-    const at = (h) => planDigest(u, [tr], TOPICS, yerevan(h, 5), CONFIG).text.split("\n")[0];
-    assert.equal(at(9), "Доброе утро, Rob. С 14:00 для вас 1 история:");
-    assert.equal(at(14), "Добрый день, Rob. С 14:00 для вас 1 история:");
-    assert.equal(at(20), "Добрый вечер, Rob. С 14:00 для вас 1 история:");
+    const first = (text) => text.split("</p>")[0] + "</p>";
+    const at = (h) => first(planDigest(u, [tr], TOPICS, yerevan(h, 5), CONFIG).text);
+    assert.equal(at(9), "<p><b>Доброе утро, Rob</b> · 1 история с 14:00</p>");
+    assert.equal(at(14), "<p><b>Добрый день, Rob</b> · 1 история с 14:00</p>");
+    assert.equal(at(20), "<p><b>Добрый вечер, Rob</b> · 1 история с 14:00</p>");
     const five = Array.from({ length: 5 }, (_, i) => ({ ...story(`News ${i}`, ["politics"], 8), tr_headline: `Новость ${i}`, tr_description: "Текст." }));
-    assert.equal(planDigest({ ...u, last_digest_at: null }, five, TOPICS, yerevan(20, 5), CONFIG).text.split("\n")[0],
-      "Добрый вечер, Rob. За последние 24 часа для вас 5 историй:");
+    assert.equal(first(planDigest({ ...u, last_digest_at: null }, five, TOPICS, yerevan(20, 5), CONFIG).text),
+      "<p><b>Добрый вечер, Rob</b> · 5 историй за последние 24 часа</p>");
     assert.equal(planDigest({ ...u, last_digest_at: yerevan(9, 30) }, [], TOPICS, yerevan(20, 5), CONFIG).text,
-      "Добрый вечер, Rob. Спокойный период: с 09:30 ничего важного по вашим темам.");
+      "<p><b>Добрый вечер, Rob</b> · Спокойный период: с 09:30 ничего важного по вашим темам.</p>");
   });
 
   test("Armenian and French headers", () => {
     const s = { ...story("Big news", ["armenia"], 8), tr_headline: "Նորություն", tr_description: "Մանրամասներ։" };
-    assert.equal(planDigest(user("hy"), [s, { ...s, id: nextId++ }], TOPICS, yerevan(20, 5), CONFIG, { lang: "hy" }).text.split("\n")[0],
-      "Բարի երեկո, Rob։ 14:00-ից ի վեր ձեզ համար կա 2 նորություն։");
-    assert.equal(planDigest(user("fr"), [s], TOPICS, yerevan(9, 5), CONFIG, { lang: "fr" }).text.split("\n")[0],
-      "Bonjour, Rob. Depuis 14:00, 1 actualité pour vous :");
+    const first = (text) => text.split("</p>")[0] + "</p>";
+    const hy = planDigest(user("hy"), [s, { ...s, id: nextId++ }], TOPICS, yerevan(20, 5), CONFIG, { lang: "hy" });
+    assert.equal(first(hy.text), "<p><b>Բարի երեկո, Rob</b> · 14:00-ից ի վեր 2 նորություն</p>");
+    assert.equal(hy.button, "⚙️ Կարգավորումներ");
+    const fr = planDigest(user("fr"), [s], TOPICS, yerevan(9, 5), CONFIG, { lang: "fr" });
+    assert.equal(first(fr.text), "<p><b>Bonjour, Rob</b> · 1 actualité depuis 14:00</p>");
+    assert.equal(fr.button, "⚙️ Réglages");
   });
 });
 
@@ -221,11 +225,12 @@ describe("never a mixed-language digest", () => {
     const plan = planDigest(user("ru"), two(), TOPICS, yerevan(20, 5), CONFIG);
     assert.equal(plan.lang, "ru");
     assert.equal(plan.fallback, null);
-    assert.match(plan.text, /^Добрый вечер, Rob\. С 14:00 для вас 2 истории:/);
-    assert.match(plan.text, /🇦🇲 <b><u>Армения<\/u><\/b>\n\n1\. 🇦🇲🇹🇷 <b>Армения и Турция договорились открыть границу<\/b>/);
-    assert.match(plan.text, /🇺🇦 <b><u>Война на Украине<\/u><\/b>/);
+    assert.match(plan.text, /^<p><b>Добрый вечер, Rob<\/b> · 2 истории с 14:00<\/p>/);
+    assert.match(plan.text, /<th align="center">🇦🇲 Армения<\/th><\/tr><\/table><p>🇦🇲🇹🇷 <b>Армения и Турция договорились открыть границу<\/b>/);
+    assert.match(plan.text, /<th align="center">🇺🇦 Война на Украине<\/th>/);
     assert.match(plan.text, />Alpha Times<\/a>/);
-    assert.doesNotMatch(plan.text, /Armenia and Turkey|Good evening|stories for you/);
+    assert.equal(plan.button, "⚙️ Настройки");
+    assert.doesNotMatch(plan.text, /Armenia and Turkey|Good evening|stories/);
   });
 
   test("one story without a translation is held (Step 10): the digest stays wholly Russian", () => {
@@ -234,8 +239,8 @@ describe("never a mixed-language digest", () => {
     assert.equal(plan.lang, "ru");
     assert.equal(plan.fallback, null);
     assert.deepEqual(plan.heldIds, [b.id]);
-    assert.match(plan.text, /^Добрый вечер, Rob\. С 14:00 для вас 1 история:/);
-    assert.doesNotMatch(plan.text, /Ukraine and Russia|Good evening|stories for you/);
+    assert.match(plan.text, /^<p><b>Добрый вечер, Rob<\/b> · 1 история с 14:00<\/p>/);
+    assert.doesNotMatch(plan.text, /Ukraine and Russia|Good evening|stories/);
   });
 
   test("no story translated: the WHOLE digest is English, and the fallback is reported", () => {
@@ -243,13 +248,14 @@ describe("never a mixed-language digest", () => {
     const plan = planDigest(user("ru"), [a, b], TOPICS, yerevan(20, 5), CONFIG);
     assert.equal(plan.lang, "en");
     assert.deepEqual(plan.fallback, { lang: "ru", missing: 2, of: 2 });
-    assert.match(plan.text, /^Good evening, Rob\. Since 2 PM, 2 stories for you:/);
-    assert.match(plan.text, /<b><u>Armenia<\/u><\/b>/);
+    assert.match(plan.text, /^<p><b>Good evening, Rob<\/b> · 2 stories since 2 PM<\/p>/);
+    assert.match(plan.text, /<th align="center">🇦🇲 Armenia<\/th>/);
+    assert.equal(plan.button, "⚙️ Settings");
     assert.doesNotMatch(plan.text, /[А-Яа-яЁё]/);   // not one Russian letter
   });
 
   test("a quiet note is always in the reader's language; a hidden language means English with no fallback", () => {
-    assert.match(planDigest(user("ru"), [], TOPICS, yerevan(20, 5), CONFIG).text, /^Добрый вечер, Rob\. Спокойный период/);
+    assert.match(planDigest(user("ru"), [], TOPICS, yerevan(20, 5), CONFIG).text, /^<p><b>Добрый вечер, Rob<\/b> · Спокойный период/);
     const hidden = LANGS.enabled.includes("hy") ? null : planDigest(user("hy"), two(), TOPICS, yerevan(20, 5), CONFIG);
     if (hidden) {
       assert.equal(hidden.lang, "en");
@@ -284,7 +290,7 @@ describe("never a mixed-language digest", () => {
     const io = { send: async (chat, text) => outbox.push(text), alert: async () => {} };
     const out = await runTick(db, io, now);
     assert.equal(out.lang_fallback, 1);
-    assert.match(outbox[0], /^Good afternoon, Owner\. Since 9 AM, 2 stories for you:/);
+    assert.match(outbox[0], /^<p><b>Good afternoon, Owner<\/b> · 2 stories since 9 AM<\/p>/);
     const err = sqlite.prepare("SELECT component, message FROM errors WHERE component = 'digest'").get();
     assert.match(err.message, /^language fallback \(ru\): user 42 got English, none of 2 stories has a ru translation/);
     const admin = shapeAdmin(await db.batch(adminStatements(now)), now);
@@ -303,7 +309,7 @@ describe("never a mixed-language digest", () => {
     const outbox = [];
     const out = await runTick(db, { send: async (c, text) => outbox.push(text), alert: async () => {} }, now);
     assert.equal(out.lang_fallback, undefined);
-    assert.match(outbox[0], /^Добрый день, Owner\. С 09:00 для вас 1 история:\n\n🇦🇲 <b><u>Армения<\/u><\/b>\n\n1\. .*История об Армении/);
+    assert.match(outbox[0], /^<p><b>Добрый день, Owner<\/b> · 1 история с 09:00<\/p><table bordered><tr><th align="center">🇦🇲 Армения<\/th><\/tr><\/table><p>.*История об Армении/);
     assert.equal(sqlite.prepare("SELECT count(*) AS n FROM errors").get().n, 0);
   });
 });

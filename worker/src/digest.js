@@ -227,11 +227,6 @@ function greetingParts(opts, cfg) {
   return { hello, since, sinceStart, lang };
 }
 
-function headerText(count, { hello, since, sinceStart, lang }) {
-  if (!count) return t(lang, "digest.quiet", { hello, since });
-  return t(lang, "digest.header", { hello, since: sinceStart, count, stories: plural(lang, count, "digest.stories") });
-}
-
 // ------------------------------------------------------------------ fallback line emoji
 
 // Used only when the editor gave a story no emojis (its call failed, or it was not edited):
@@ -292,17 +287,59 @@ export function lineEmoji(headline, fallback = "") {
   return fallback;
 }
 
-// ------------------------------------------------------------------ building the messages
+// ------------------------------------------------------------------ layouts (Step 11)
 
-// "<n>. <emojis> <b>headline</b>", a blank line, the description, then the outlet as a link.
-function storyBlock(n, s) {
-  const emojis = s.emojis || s.fallbackEmoji;
-  const head = `${n}. ${emojis ? `${emojis} ` : ""}<b>${escapeHtml(s.headline)}</b>`;
-  const desc = s.description ? `\n\n${escapeHtml(s.description)}` : "";
-  return `${head}${desc}\n<a href="${escapeAttr(s.best_url)}">${escapeHtml(s.best_source)}</a>`;
-}
+export const storyLink = (s, inner) => `<a href="${escapeAttr(s.best_url)}">${inner}</a>`;
 
-const headingOf = (t) => `${t.emoji ? `${t.emoji} ` : ""}<b><u>${escapeHtml(t.label)}</u></b>`;
+// A layout is how a digest looks. Every piece of the message comes from it, and the length cut
+// (fitToLength) measures those same pieces, so the cut always counts the format that is sent:
+//   header(parts, count)    the first line when there are stories; quiet(parts) the note when none
+//   heading({label, emoji}, i) the title of the i-th topic section (0 = the first);
+//                           story(s, n) one story (n: its number)
+//   label(text)             an optional preview label above everything
+//   gap                     what joins the pieces; count(text) the length the way Telegram counts it
+//   kind                    "html" (sendMessage, HTML parse mode) or "rich" (sendRichMessage)
+// CLASSIC is the Step 5 format (format B): numbered stories with the editor's emojis, an
+// underlined heading with the topic emoji, the outlet alone on the last line.
+export const CLASSIC = {
+  name: "classic", kind: "html", gap: "\n\n", count: visibleLength, label: (x) => x,
+  header: ({ hello, sinceStart, lang }, count) =>
+    t(lang, "digest.header", { hello, since: sinceStart, count, stories: plural(lang, count, "digest.stories") }),
+  quiet: ({ hello, since, lang }) => t(lang, "digest.quiet", { hello, since }),
+  heading: (x) => `${x.emoji ? `${x.emoji} ` : ""}<b><u>${escapeHtml(x.label)}</u></b>`,
+  story: (s, n) => {
+    const emojis = s.emojis || s.fallbackEmoji;
+    const head = `${n}. ${emojis ? `${emojis} ` : ""}<b>${escapeHtml(s.headline)}</b>`;
+    const desc = s.description ? `\n\n${escapeHtml(s.description)}` : "";
+    return `${head}${desc}\n${storyLink(s, escapeHtml(s.best_source))}`;
+  },
+};
+
+// Step 11 (owner's choice, design "E5f" of reports/step-11-design.md): a Telegram rich message
+// (sendRichMessage, Bot API 10.1+). A one-line greeting; each topic in a centred, bordered box
+// with its emoji, a divider line between topics; each story: the editor's emojis, the headline in
+// bold, " · Outlet" in italics as the link, then the description in a quote box. No numbers.
+// Telegram stores the text of these blocks with no separators, so its count is visibleLength
+// (UTF-16; Telegram's own limit is in Unicode characters, never more than this).
+export const RICH = {
+  name: "rich", kind: "rich", gap: "", count: visibleLength,
+  label: (x) => `<p>${x}</p>`,
+  header: ({ hello, since, lang }, count) =>
+    `<p><b>${hello}</b> · ${t(lang, "digest.count_line", { count, stories: plural(lang, count, "digest.stories"), since })}</p>`,
+  quiet: ({ hello, since, lang }) => `<p><b>${hello}</b> · ${t(lang, "digest.quiet_line", { since })}</p>`,
+  heading: (x, i) => `${i ? "<hr/>" : ""}<table bordered><tr><th align="center">${x.emoji ? `${x.emoji} ` : ""}` +
+    `${escapeHtml(x.label)}</th></tr></table>`,
+  story: (s) => {
+    const emojis = s.emojis || s.fallbackEmoji;
+    return `<p>${emojis ? `${emojis} ` : ""}<b>${escapeHtml(s.headline)}</b> <i>· ${storyLink(s, escapeHtml(s.best_source))}</i></p>` +
+      (s.description ? `<blockquote>${escapeHtml(s.description)}</blockquote>` : "");
+  },
+};
+
+// The layout every digest uses (the Worker cron, Admin "digest now", digest-cli). opts.layout
+// overrides it (design previews, the Step 8 fold test).
+export const LAYOUT = RICH;
+const layoutOf = (opts) => opts.layout ?? LAYOUT;
 
 // topics: rows of the D1 `topics` table. Returns {tag: {label, emoji}}, labels in `lang` (Step 9).
 export function topicInfoFrom(topics, lang = "en") {
@@ -312,18 +349,19 @@ export function topicInfoFrom(topics, lang = "en") {
   }
   return out;
 }
+const infoOf = (topicInfo, tag) => topicInfo[tag] ?? { label: tag, emoji: "" };
 
 // Topic groups in the order of their best story; the numbering runs on across groups.
-function groupsOf(stories, topicInfo) {
+function groupsOf(stories, topicInfo, L) {
   const groups = new Map();
   for (const s of stories) {
     if (!groups.has(s.primary)) groups.set(s.primary, []);
     groups.get(s.primary).push(s);
   }
   let n = 0;
-  return [...groups].map(([tag, list]) => ({
-    heading: headingOf(topicInfo[tag] ?? { label: tag, emoji: "" }),
-    blocks: list.map((s) => ({ id: s.id, text: storyBlock(++n, s) })),
+  return [...groups].map(([tag, list], i) => ({
+    heading: L.heading(infoOf(topicInfo, tag), i),
+    blocks: list.map((s) => ({ id: s.id, text: L.story(s, ++n) })),
   }));
 }
 
@@ -337,6 +375,7 @@ function prepare(stories, topicInfo) {
     return {
       ...s, headline, prepared: true,
       description: s.description ? cut(cleanText(s.description), MAX_DESCRIPTION) : "",
+      best_source: cleanText(s.best_source),   // an outlet name with a long dash would stop the digest (Step 11)
       // from the English headline, so a translated digest shows the same emojis (Step 9)
       fallbackEmoji: s.emojis ? "" : lineEmoji(s.en_headline ? cleanHeadline(s.en_headline) : headline,
                                                 topicInfo[s.primary]?.emoji),
@@ -346,30 +385,32 @@ function prepare(stories, topicInfo) {
 
 // Step 8: a digest is ONE message, never so long that Telegram folds it ("Show more"). The
 // stories (best first, from pickStories) are cut until the message fits in
-// cfg.message_char_limit visible characters:
+// cfg.message_char_limit characters, counted the way Telegram counts them (layout.count):
 //  - the best story of each section (each followed topic in the digest) is kept while any other
 //    story can go;
 //  - otherwise the lowest relevance goes first; on a tie, from the section with the most stories
 //    (what the old 40% topic cap was for), then the lower global score, then the older story.
-// Each piece is measured once; story numbers are counted as two digits and the story count in the
-// greeting as "99", so the estimate is never shorter than the real message.
-// Returns {kept, cut}, both in the input order.
+// Each piece is measured once with the layout that sends it (Step 11); story numbers and the story
+// count in the greeting are measured as "99", so the estimate is never shorter than the real
+// message. Returns {kept, cut}, both in the input order.
 export function fitToLength(stories, opts, cfg = CONFIG) {
   const topicInfo = opts.topicInfo ?? {};
+  const L = layoutOf(opts);
   const list = prepare(stories, topicInfo);
   const limit = cfg.message_char_limit;
-  const fixed = (opts.label ? visibleLength(opts.label) + 2 : 0) + visibleLength(headerText(99, greetingParts(opts, cfg)));
-  const blockLen = new Map(list.map((s) => [s.id, visibleLength(storyBlock(0, s)) + 1]));
+  const gap = L.count(L.gap);
+  const fixed = (opts.label ? L.count(L.label(opts.label)) + gap : 0) + L.count(L.header(greetingParts(opts, cfg), 99));
+  const blockLen = new Map(list.map((s) => [s.id, L.count(L.story(s, 99))]));
   const headLen = new Map();
   for (const s of list) {
-    if (!headLen.has(s.primary)) headLen.set(s.primary, visibleLength(headingOf(topicInfo[s.primary] ?? { label: s.primary, emoji: "" })));
+    if (!headLen.has(s.primary)) headLen.set(s.primary, L.count(L.heading(infoOf(topicInfo, s.primary), 1)));
   }
   const size = (keep) => {
     let n = fixed;
     const seen = new Set();
     for (const s of keep) {
-      if (!seen.has(s.primary)) { seen.add(s.primary); n += 2 + headLen.get(s.primary); }
-      n += 2 + blockLen.get(s.id);
+      if (!seen.has(s.primary)) { seen.add(s.primary); n += gap + headLen.get(s.primary); }
+      n += gap + blockLen.get(s.id);
     }
     return n;
   };
@@ -395,23 +436,25 @@ export function fitToLength(stories, opts, cfg = CONFIG) {
   return { kept: keep, cut: list.filter((s) => !kept.has(s.id)) };
 }
 
-// Builds the digest message (HTML) from stories in display order: greeting, then topic sections
-// in the order of their best story, numbering running on across sections. Returns
-// {text, storyIds, stories}. Refuses an em/en dash and anything over Telegram's 4,096 characters;
-// planDigest keeps it under the (lower) fold limit.
+// Builds the digest message from stories in display order: the header (or the quiet note), then
+// topic sections in the order of their best story, numbering running on across sections. Returns
+// {text, storyIds, stories, kind}. Refuses an em/en dash and anything over Telegram's 4,096
+// characters; planDigest keeps it under the (lower) fold limit.
 export function buildMessage(stories, opts, cfg = CONFIG) {
   const topicInfo = opts.topicInfo ?? {};
+  const L = layoutOf(opts);
   const list = prepare(stories, topicInfo);
-  const pieces = [...(opts.label ? [opts.label] : []), headerText(list.length, greetingParts(opts, cfg))];
+  const parts = greetingParts(opts, cfg);
+  const pieces = [...(opts.label ? [L.label(opts.label)] : []), list.length ? L.header(parts, list.length) : L.quiet(parts)];
   const storyIds = [];
-  for (const g of groupsOf(list, topicInfo)) {
+  for (const g of groupsOf(list, topicInfo, L)) {
     pieces.push(g.heading, ...g.blocks.map((b) => b.text));
     storyIds.push(...g.blocks.map((b) => b.id));
   }
-  const text = pieces.join("\n\n");
+  const text = pieces.join(L.gap);
   if (FORBIDDEN.test(text)) throw new Error("em/en dash in user-facing text");
-  if (visibleLength(text) > 4096) throw new Error(`message too long (${visibleLength(text)})`);
-  return { text, storyIds, stories: list };
+  if (L.count(text) > 4096) throw new Error(`message too long (${L.count(text)})`);
+  return { text, storyIds, stories: list, kind: L.kind };
 }
 
 // Never a mixed-language digest. Step 10 (owner): a picked story with no translation into the
@@ -438,25 +481,26 @@ export function chooseDigestLanguage(picked, want) {
 // One user's whole digest from candidate rows: pick (two-score rule), choose the language (holding
 // untranslated stories), then cut to one unfolded message (measured on the text actually sent, so
 // the room a held story leaves goes to the next translated story), format. No I/O.
-// Returns {text, storyIds, stories, cut, nextAt, lang, fallback, heldIds}.
+// Returns {text, kind, storyIds, stories, cut, nextAt, lang, fallback, heldIds, button}: kind says how it
+// is sent ("rich" or "html"), button is the label of the "⚙️ Settings" button under it (Step 11).
 export function planDigest(user, candidates, topics, now, cfg = CONFIG, opts = {}) {
   const chosen = chooseDigestLanguage(pickStories(candidates, parseList(user.topics), cfg),
                                       opts.lang ?? effectiveLang(user));
   const picked = chosen.stories;
   const tz = user.timezone || cfg.default_timezone;
   const mopts = { now, tz, lastDigestAt: user.last_digest_at, name: user.first_name, lang: chosen.lang,
-                  topicInfo: topicInfoFrom(topics, chosen.lang), label: opts.label };
+                  topicInfo: topicInfoFrom(topics, chosen.lang), label: opts.label, layout: opts.layout };
   mopts.greeting = greetingParts(mopts, cfg);
   let { kept, cut } = fitToLength(picked, mopts, cfg);
   let msg = buildMessage(kept, mopts, cfg);
-  while (visibleLength(msg.text) > cfg.message_char_limit && kept.length > 1) {   // cannot happen (the estimate is high); a guard
+  while (layoutOf(mopts).count(msg.text) > cfg.message_char_limit && kept.length > 1) {   // cannot happen (the estimate is high); a guard
     cut = [...cut, kept[kept.length - 1]];
     kept = kept.slice(0, -1);
     msg = buildMessage(kept, mopts, cfg);
   }
   const times = parseList(user.digest_times, cfg.default_times);
   return { ...msg, cut: cut.length, nextAt: nextSlot(now, tz, times), lang: chosen.lang, fallback: chosen.fallback,
-           heldIds: chosen.held.map((s) => s.id) };
+           heldIds: chosen.held.map((s) => s.id), button: t(chosen.lang, "digest.settings_button") };
 }
 
 // Step 10: one digest_holds row per held story (the last digest that held it wins).

@@ -6,7 +6,7 @@ import { d1Binding, logError } from "./db.js";
 import { handleUpdate } from "./bot.js";
 import { runTick } from "./cron.js";
 import { dispatchJob } from "./github.js";
-import { sendHtml, sendPlain, tgCall } from "./telegram.js";
+import { sendDigestMessage, sendPlain, tgCall } from "./telegram.js";
 import { handleApi, json } from "./api.js";
 import { t } from "./i18n.js";
 
@@ -50,7 +50,7 @@ export default {
       const now = nowS();
       try {
         return await handleApi(request, env, db, now, {
-          send: (chatId, html) => sendHtml(env.TELEGRAM_BOT_TOKEN, chatId, html),
+          send: (chatId, text, extra) => sendDigestMessage(env.TELEGRAM_BOT_TOKEN, chatId, text, extra),
           dispatch: (e) => dispatchJob(e),
           tg: (method, body) => tgCall(env.TELEGRAM_BOT_TOKEN, method, body),
           appUrl: appUrl(env, url),
@@ -75,7 +75,8 @@ export default {
         if (!r.ok) extraProblems.push(r.problem);
       }
       const out = await runTick(db, {
-        send: (chatId, html) => sendHtml(env.TELEGRAM_BOT_TOKEN, chatId, html),
+        send: (chatId, text, extra) => sendDigestMessage(env.TELEGRAM_BOT_TOKEN, chatId, text, extra),
+        appUrl: env.APP_URL,
         alert: (text) => sendPlain(env.TELEGRAM_BOT_TOKEN, Number(env.OWNER_TELEGRAM_ID), text),
       }, now, { digests: !hourly, extraProblems });
       console.log(JSON.stringify({ tick: event.cron, hourly, ...out }));

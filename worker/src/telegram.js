@@ -23,11 +23,24 @@ export async function tgCall(token, method, body) {
   return data.result;
 }
 
-// A digest: HTML parse mode, link previews off.
-export function sendHtml(token, chatId, text) {
+// A message in HTML parse mode, link previews off (owner alerts, the Step 8 fold test).
+export function sendHtml(token, chatId, text, extra = {}) {
   return tgCall(token, "sendMessage", {
-    chat_id: chatId, text, parse_mode: "HTML", link_preview_options: { is_disabled: true },
+    chat_id: chatId, text, parse_mode: "HTML", link_preview_options: { is_disabled: true }, ...extra,
   });
+}
+
+// A rich message (Bot API 10.1+, Step 11): rich_message.html with headings, tables, quotes and
+// dividers. Plain URLs, hashtags and the like are not turned into links (skip_entity_detection).
+export function sendRich(token, chatId, html, extra = {}) {
+  return tgCall(token, "sendRichMessage", {
+    chat_id: chatId, rich_message: { html, skip_entity_detection: true }, ...extra,
+  });
+}
+
+// A digest, the way its layout says (plan.kind), with any extra fields (the Settings button).
+export function sendDigestMessage(token, chatId, text, { kind = "html", ...extra } = {}) {
+  return kind === "rich" ? sendRich(token, chatId, text, extra) : sendHtml(token, chatId, text, extra);
 }
 
 export function sendPlain(token, chatId, text, extra = {}) {

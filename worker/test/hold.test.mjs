@@ -36,12 +36,10 @@ describe("planDigest: untranslated stories are held", () => {
     assert.equal(plan.fallback, null);
     assert.deepEqual(plan.heldIds, [b.id]);
     assert.deepEqual(plan.storyIds, [a.id, c.id]);
-    assert.match(plan.text, /^Добрый вечер, Rob\. С 14:00 для вас 2 истории:/);   // 2, not 3
-    assert.doesNotMatch(plan.text, /Ukraine|prisoners|Good evening|stories for you/);
+    assert.match(plan.text, /^<p><b>Добрый вечер, Rob<\/b> · 2 истории с 14:00<\/p>/);   // 2, not 3
+    assert.doesNotMatch(plan.text, /Ukraine|prisoners|Good evening|stories/);
     assert.doesNotMatch(plan.text, /Война на Украине/);   // no empty heading for the held story's topic
-    assert.match(plan.text, /1\. .*Перевод/);
-    assert.match(plan.text, /2\. .*Перевод/);
-    assert.doesNotMatch(plan.text, /3\. /);
+    assert.equal((plan.text.match(/<b>Перевод/g) ?? []).length, 2);
   });
 
   test("the length cut runs after the drop: the room a held story leaves goes to translated stories", () => {
@@ -60,7 +58,7 @@ describe("planDigest: untranslated stories are held", () => {
     assert.equal(plan.storyIds.length, 6);
     assert.equal(plan.cut, 0);
     assert.ok(visibleLength(plan.text) <= CONFIG.message_char_limit);
-    assert.match(plan.text, /для вас 6 историй:/);
+    assert.match(plan.text, /· 6 историй с 14:00</);
   });
 
   test("a translated story that still does not fit is cut, and only the held one is held", () => {
@@ -81,17 +79,18 @@ describe("planDigest: untranslated stories are held", () => {
     assert.deepEqual(plan.fallback, { lang: "ru", missing: 2, of: 2 });
     assert.deepEqual(plan.heldIds, []);
     assert.deepEqual(plan.storyIds.sort(), [a.id, b.id].sort());
-    assert.match(plan.text, /^Good evening, Rob\. Since 2 PM, 2 stories for you:/);
+    assert.match(plan.text, /^<p><b>Good evening, Rob<\/b> · 2 stories since 2 PM<\/p>/);
     assert.doesNotMatch(plan.text, CYR);   // never mixed
   });
 
   test("nothing qualifies: the quiet note in Russian; an English reader never holds anything", () => {
     const quiet = planDigest(user(), [], TOPICS, yerevan(20, 5), CONFIG);
-    assert.equal(quiet.text, "Добрый вечер, Rob. Спокойный период: с 14:00 ничего важного по вашим темам.");
+    assert.equal(quiet.text, "<p><b>Добрый вечер, Rob</b> · Спокойный период: с 14:00 ничего важного по вашим темам.</p>");
+    assert.equal(quiet.button, "⚙️ Настройки");
     assert.equal(quiet.fallback, null);
     assert.deepEqual(quiet.heldIds, []);
     const weak = planDigest(user(), [story("Weak", ["politics"], 4)], TOPICS, yerevan(20, 5), CONFIG);
-    assert.match(weak.text, /^Добрый вечер, Rob\. Спокойный период/);
+    assert.match(weak.text, /^<p><b>Добрый вечер, Rob<\/b> · Спокойный период/);
     const en = planDigest(user({ lang: "en" }), [story("No tr", ["politics"], 8)], TOPICS, yerevan(20, 5), CONFIG);
     assert.deepEqual(en.heldIds, []);
     assert.equal(en.storyIds.length, 1);
@@ -115,7 +114,7 @@ describe("cron: a held story waits for its translation", () => {
     const out = await runTick(db, io(outbox), yerevan(14, 2));
     assert.equal(out.held, 1);
     assert.equal(out.lang_fallback, undefined);
-    assert.match(outbox[0], /^Добрый день, Owner\. С 09:00 для вас 1 история:/);
+    assert.match(outbox[0], /^<p><b>Добрый день, Owner<\/b> · 1 история с 09:00<\/p>/);
     assert.doesNotMatch(outbox[0], /Politics story/);
     assert.deepEqual(sentIds(sqlite), [a]);                           // the held story is NOT marked sent
     assert.deepEqual(holds(sqlite), [{ story_id: b, lang: "ru", at: yerevan(14, 2) }]);
@@ -123,7 +122,7 @@ describe("cron: a held story waits for its translation", () => {
     // B was updated at 13:00, before the last digest (14:00): only the hold keeps it a candidate.
     addTranslation(sqlite, b, "ru", "История о политике");
     await runTick(db, io(outbox), yerevan(20, 2));
-    assert.match(outbox[1], /^Добрый вечер, Owner\. С 14:00 для вас 1 история:/);
+    assert.match(outbox[1], /^<p><b>Добрый вечер, Owner<\/b> · 1 история с 14:00<\/p>/);
     assert.match(outbox[1], /История о политике/);
     assert.deepEqual(sentIds(sqlite), [a, b]);
     // never resent after that, even though its hold row stays (for Admin)
@@ -140,7 +139,7 @@ describe("cron: a held story waits for its translation", () => {
     addTranslation(sqlite, c, "ru", "История о России");
     const out = await runTick(db, io(outbox), yerevan(20, 2));
     assert.equal(out.held, 1);
-    assert.match(outbox[1], /^Добрый вечер, Owner\. С 14:00 для вас 1 история:[\s\S]*История о России/);
+    assert.match(outbox[1], /^<p><b>Добрый вечер, Owner<\/b> · 1 история с 14:00<\/p>[\s\S]*История о России/);
     assert.deepEqual(sentIds(sqlite), [a, c]);
     assert.deepEqual(holds(sqlite).map((h) => [h.story_id, h.at]), [[b, yerevan(20, 2)]]);
   });
@@ -166,7 +165,7 @@ describe("cron: a held story waits for its translation", () => {
     const out = await runTick(db, io(outbox), yerevan(14, 2));
     assert.equal(out.lang_fallback, 1);
     assert.equal(out.held, undefined);
-    assert.match(outbox[0], /^Good afternoon, Owner\. Since 9 AM, 2 stories for you:/);
+    assert.match(outbox[0], /^<p><b>Good afternoon, Owner<\/b> · 2 stories since 9 AM<\/p>/);
     assert.doesNotMatch(outbox[0], CYR);
     assert.deepEqual(sentIds(sqlite), [a, b]);
     const err = sqlite.prepare("SELECT message FROM errors WHERE component = 'digest'").get();

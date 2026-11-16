@@ -11,7 +11,10 @@
     "last24_mid": "վերջին 24 ժամում",
     "header": "{hello}։ {since} ձեզ համար կա {count} {stories}։",
     "quiet": "{hello}։ Հանգիստ ժամանակ է. {since} ձեր թեմաներով կարևոր նորություն չկա։",
-    "stories": {"one": "նորություն", "other": "նորություն"}
+    "stories": {"one": "նորություն", "other": "նորություն"},
+    "count_line": "{since} {count} {stories}",
+    "quiet_line": "Հանգիստ ժամանակ է. {since} ձեր թեմաներով կարևոր նորություն չկա։",
+    "settings_button": "⚙️ Կարգավորումներ"
   },
   "topics": {
     "politics": "Քաղաքականություն",

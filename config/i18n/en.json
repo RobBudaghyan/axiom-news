@@ -11,7 +11,10 @@
     "last24_mid": "in the last 24 hours",
     "header": "{hello}. {since}, {count} {stories} for you:",
     "quiet": "{hello}. Quiet period: nothing important on your topics {since}.",
-    "stories": {"one": "story", "other": "stories"}
+    "stories": {"one": "story", "other": "stories"},
+    "count_line": "{count} {stories} {since}",
+    "quiet_line": "Quiet period: nothing important on your topics {since}.",
+    "settings_button": "⚙️ Settings"
   },
   "topics": {
     "politics": "Politics",

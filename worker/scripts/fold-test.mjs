@@ -4,7 +4,7 @@
 //
 //   node scripts/fold-test.mjs --dry      print the lengths, send nothing
 //   node scripts/fold-test.mjs            send (refuses unless the bot is the TEST bot)
-import { CONFIG, buildMessage, topicInfoFrom, visibleLength } from "../src/digest.js";
+import { CLASSIC, CONFIG, buildMessage, topicInfoFrom, visibleLength } from "../src/digest.js";
 import { tgCall, sendHtml } from "../src/telegram.js";
 import { d1Rest, loadEnv } from "./digest-cli.mjs";
 
@@ -31,13 +31,14 @@ function build(list, n, target) {
   const label = `<i>Fold test ${n} of ${TARGETS.length}, about ${target.toLocaleString("en-US")} characters. ` +
     "Not a digest, nothing is recorded.</i>";
   return buildMessage(list, { now, tz: user.timezone || CONFIG.default_timezone, lastDigestAt: now - 5 * 3600,
-    name: user.first_name, topicInfo, label }, cfg);
+    name: user.first_name, topicInfo, label, layout: CLASSIC }, cfg);   // Step 11: the plain Step 5 layout, as tested
 }
 
 const messages = TARGETS.map((target, i) => {
   let list = [];
   for (const s of pool) {
-    const next = build([...list, s], i + 1, target);
+    let next;
+    try { next = build([...list, s], i + 1, target); } catch { continue; }   // over 4,096: try a shorter story
     if (visibleLength(next.text) > target + 60) continue;
     list = [...list, s];
     if (visibleLength(next.text) >= target - 60) break;

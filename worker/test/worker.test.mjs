@@ -13,7 +13,8 @@ afterEach(() => fetchMock?.restore());
 
 function env(binding) {
   return { DB: binding, TELEGRAM_BOT_TOKEN: "TOKEN", TELEGRAM_WEBHOOK_SECRET: SECRET, OWNER_TELEGRAM_ID: String(OWNER),
-    GITHUB_DISPATCH_TOKEN: "GH", GITHUB_REPO: "owner/axiom-news", GITHUB_WORKFLOW: "hourly.yml", GITHUB_REF: "main" };
+    GITHUB_DISPATCH_TOKEN: "GH", GITHUB_REPO: "owner/axiom-news", GITHUB_WORKFLOW: "hourly.yml", GITHUB_REF: "main",
+    APP_URL: "https://w.test/app/" };
 }
 const update = (text, from = { id: OWNER, first_name: "Ruben", language_code: "en" }) =>
   ({ update_id: 1, message: { message_id: 5, from, chat: { id: from.id, type: "private" }, text } });
@@ -91,8 +92,8 @@ describe("digest cron", () => {
     addStory(sqlite, "Iran fires missiles at a tanker in the Gulf", ["iran_war", "wars_conflicts"], 6, now - 300,
       { final_score: 7 });
     const outbox = [];
-    const io = { send: async (id, text) => { outbox.push({ id, text }); return { message_id: outbox.length }; },
-      alert: async (t) => outbox.push({ alert: t }) };
+    const io = { send: async (id, text, extra) => { outbox.push({ id, text, extra }); return { message_id: outbox.length }; },
+      alert: async (t) => outbox.push({ alert: t }), appUrl: "https://w.test/app/" };
     return { db, sqlite, now, outbox, io };
   }
 
@@ -102,12 +103,17 @@ describe("digest cron", () => {
     const out = await runTick(db, io, now);
     assert.equal(out.sent, 1);
     assert.equal(outbox.length, 1);
-    assert.equal(outbox[0].text, "Good afternoon, Owner. Since 9 AM, 2 stories for you:\n\n" +
-      "🇦🇲 <b><u>Armenia</u></b>\n\n1. 🇦🇲🇦🇿📝 <b>Armenia and Azerbaijan sign a border deal</b>\n\n" +
-      'Both sides signed in Washington.\n<a href="https://a.test/x">Alpha Times</a>\n\n' +
+    assert.equal(outbox[0].text, "<p><b>Good afternoon, Owner</b> · 2 stories since 9 AM</p>" +
+      '<table bordered><tr><th align="center">🇦🇲 Armenia</th></tr></table>' +
+      '<p>🇦🇲🇦🇿📝 <b>Armenia and Azerbaijan sign a border deal</b> <i>· <a href="https://a.test/x">Alpha Times</a></i></p>' +
+      "<blockquote>Both sides signed in Washington.</blockquote><hr/>" +
       // no editor text: the summary and the dictionary emoji (the first actor named)
-      "🇮🇷 <b><u>Iran War</u></b>\n\n2. 🇮🇷 <b>Iran fires missiles at a tanker in the Gulf</b>\n" +
-      '<a href="https://a.test/x">Alpha Times</a>');
+      '<table bordered><tr><th align="center">🇮🇷 Iran War</th></tr></table>' +
+      '<p>🇮🇷 <b>Iran fires missiles at a tanker in the Gulf</b> <i>· <a href="https://a.test/x">Alpha Times</a></i></p>');
+    // Step 11: a rich message with the "⚙️ Settings" button that opens the Mini App
+    assert.equal(outbox[0].extra.kind, "rich");
+    assert.deepEqual(outbox[0].extra.reply_markup,
+      { inline_keyboard: [[{ text: "⚙️ Settings", web_app: { url: "https://w.test/app/" } }]] });
     assert.equal(sqlite.prepare("SELECT COUNT(*) AS n FROM sent").get().n, 2);
     const u = sqlite.prepare("SELECT * FROM users").get();
     assert.equal(u.last_digest_at, yerevan(14));   // the slot, so the next header says "Since 14:00"
@@ -121,17 +127,19 @@ describe("digest cron", () => {
     sqlite.prepare("UPDATE stories SET updated_at = ?").run(now + 60);
     sqlite.prepare("UPDATE users SET next_digest_at = ?").run(now + 100);
     await runTick(db, io, now + 300);
-    assert.equal(outbox[1].text, "Good afternoon, Owner. Quiet period: nothing important on your topics since 2 PM.");
+    assert.equal(outbox[1].text, "<p><b>Good afternoon, Owner</b> · Quiet period: nothing important on your topics since 2 PM.</p>");
+    assert.equal(outbox[1].extra.kind, "rich");
+    assert.equal(outbox[1].extra.reply_markup.inline_keyboard[0][0].text, "⚙️ Settings");   // the quiet note has it too
   });
 
   test("a digest is ONE message: too long, the weaker story is cut and stays unsent (Step 8)", async () => {
     const { db, sqlite, now, outbox, io } = setup();
     addUser(sqlite, { next_digest_at: yerevan(14) });
-    const cfg = { ...(await import("../src/digest.js")).CONFIG, message_char_limit: 260 };
+    const cfg = { ...(await import("../src/digest.js")).CONFIG, message_char_limit: 180 };
     const out = await runTick(db, io, now, {}, cfg);
     assert.equal(outbox.length, 1);
-    assert.ok(outbox[0].text.replace(/<[^>]+>/g, "").length <= 260);
-    assert.match(outbox[0].text, /^Good afternoon, Owner\. In the last 24 hours, 1 story for you:\n\n🇦🇲 <b><u>Armenia/);
+    assert.ok(outbox[0].text.replace(/<[^>]+>/g, "").length <= 180);
+    assert.match(outbox[0].text, /^<p><b>Good afternoon, Owner<\/b> · 1 story in the last 24 hours<\/p><table bordered><tr><th align="center">🇦🇲 Armenia/);
     assert.equal(out.stories, 1);
     assert.equal(out.cut, 1);
     assert.deepEqual(sqlite.prepare("SELECT story_id FROM sent").all().map((r) => r.story_id), [1]);   // the cut one is not
@@ -187,8 +195,12 @@ describe("digest cron", () => {
     fetchMock = mockFetch((url) => (url.includes("api.github.com") ? { status: 204 } : undefined));
     await worker.scheduled({ cron: "*/5 * * * *", scheduledTime: now * 1000 }, env(binding));
     assert.equal(fetchMock.calls.length, 1);
-    assert.equal(fetchMock.calls[0].body.parse_mode, "HTML");
-    assert.deepEqual(fetchMock.calls[0].body.link_preview_options, { is_disabled: true });
+    // Step 11: a rich message (sendRichMessage) with the Settings button, no automatic links
+    assert.match(fetchMock.calls[0].url, /\/sendRichMessage$/);
+    assert.match(fetchMock.calls[0].body.rich_message.html, /^<p><b>Good /);
+    assert.equal(fetchMock.calls[0].body.rich_message.skip_entity_detection, true);
+    assert.equal(fetchMock.calls[0].body.text, undefined);
+    assert.deepEqual(fetchMock.calls[0].body.reply_markup.inline_keyboard[0][0].web_app, { url: env(binding).APP_URL });
     await worker.scheduled({ cron: HOURLY_CRON, scheduledTime: now * 1000 }, env(binding));
     const gh = fetchMock.calls[1];
     assert.equal(gh.url, "https://api.github.com/repos/owner/axiom-news/actions/workflows/hourly.yml/dispatches");

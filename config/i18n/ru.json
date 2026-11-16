@@ -11,7 +11,10 @@
     "last24_mid": "за последние 24 часа",
     "header": "{hello}. {since} для вас {count} {stories}:",
     "quiet": "{hello}. Спокойный период: {since} ничего важного по вашим темам.",
-    "stories": {"one": "история", "few": "истории", "many": "историй"}
+    "stories": {"one": "история", "few": "истории", "many": "историй"},
+    "count_line": "{count} {stories} {since}",
+    "quiet_line": "Спокойный период: {since} ничего важного по вашим темам.",
+    "settings_button": "⚙️ Настройки"
   },
   "topics": {
     "politics": "Политика",

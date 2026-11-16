@@ -3,7 +3,7 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import {
-  CONFIG, buildMessage, candidateStatement, cleanHeadline, clock12, dedupe, digestSince, fitToLength, lineEmoji,
+  CLASSIC, CONFIG, buildMessage, candidateStatement, cleanHeadline, clock12, dedupe, digestSince, fitToLength, lineEmoji,
   nextSlot, pickStories, planDigest, primaryTopic, qualifies, storyScore, topicInfoFrom, topicScore, visibleLength,
   zonedToUtc,
 } from "../src/digest.js";
@@ -269,7 +269,7 @@ describe("length cut: ONE message under the fold limit", () => {
     const small = planDigest(user(ALL), list.slice(0, 2), TOPICS, yerevan(14, 5), CFG);
     assert.equal(small.cut, 0);
     assert.equal(small.storyIds.length, 2);
-    assert.match(small.text, /^Good afternoon, Sam\. Since 9 AM, 2 stories for you:/);
+    assert.match(small.text, /^<p><b>Good afternoon, Sam<\/b> · 2 stories since 9 AM<\/p>/);
   });
 });
 
@@ -278,7 +278,8 @@ describe("quiet note", () => {
     const weak = [story("Routine", ["politics"], 5), story("Armenia routine", ["armenia"], 4, { topic_score: 5, main_topic: "armenia" })];
     for (const cands of [[], weak]) {
       const plan = planDigest(user(ALL), cands, TOPICS, yerevan(14, 5), CFG);
-      assert.equal(plan.text, "Good afternoon, Sam. Quiet period: nothing important on your topics since 9 AM.");
+      assert.equal(plan.text, "<p><b>Good afternoon, Sam</b> · Quiet period: nothing important on your topics since 9 AM.</p>");
+      assert.equal(plan.kind, "rich");
       assert.deepEqual(plan.storyIds, []);
       assert.equal(plan.cut, 0);
     }
@@ -289,14 +290,40 @@ describe("message format", () => {
   const S = (summary, topics, extra = {}) => ({ ...story(summary, topics, 7, extra), primary: primaryTopic(topics, ALL) });
   const opts = (o = {}) => ({ now: yerevan(20, 30), tz: TZ, lastDigestAt: yerevan(14), topicInfo: INFO, name: "Sam", ...o });
 
-  test("greeting, underlined topic headings, numbered stories with emojis, description and the outlet link", () => {
-    const { text, storyIds } = buildMessage([
-      S("x", ["armenia", "politics"], { headline: "Armenia and Turkey agree to open the border.", emojis: "🇦🇲🇹🇷🤝",
-        description: "Pashinyan said the border opens in March — after talks.", best_url: "https://ft.test/a?x=1&y=2",
-        best_source: "Financial Times" }),
-      S("Iran fires missiles at a tanker", ["iran_war", "wars_conflicts"]),
-      S("y", ["armenia"], { headline: "A <b> & C", emojis: "🇦🇲" }),
-    ], opts());
+  const THREE = () => [
+    S("x", ["armenia", "politics"], { headline: "Armenia and Turkey agree to open the border.", emojis: "🇦🇲🇹🇷🤝",
+      description: "Pashinyan said the border opens in March — after talks.", best_url: "https://ft.test/a?x=1&y=2",
+      best_source: "Financial Times" }),
+    S("Iran fires missiles at a tanker", ["iran_war", "wars_conflicts"]),
+    S("y", ["armenia"], { headline: "A <b> & C", emojis: "🇦🇲" }),
+  ];
+
+  test("Step 11 rich message: one-line greeting, a centred box per topic with a line between topics, the editor's " +
+       "emojis, bold headline, the outlet as the link, the description in a quote box, no numbers", () => {
+    const { text, storyIds, kind } = buildMessage(THREE(), opts());
+    assert.equal(kind, "rich");
+    assert.equal(text,
+      "<p><b>Good evening, Sam</b> · 3 stories since 2 PM</p>" +
+      '<table bordered><tr><th align="center">🇦🇲 Armenia</th></tr></table>' +
+      '<p>🇦🇲🇹🇷🤝 <b>Armenia and Turkey agree to open the border</b> <i>· <a href="https://ft.test/a?x=1&amp;y=2">Financial Times</a></i></p>' +
+      "<blockquote>Pashinyan said the border opens in March, after talks.</blockquote>" +
+      '<p>🇦🇲 <b>A &lt;b&gt; &amp; C</b> <i>· <a href="https://x.test/a">Alpha Times</a></i></p>' +          // no description: no quote
+      "<hr/>" +                                                                                             // a line between topics
+      '<table bordered><tr><th align="center">🇮🇷 Iran War</th></tr></table>' +
+      '<p>🇮🇷 <b>Iran fires missiles at a tanker</b> <i>· <a href="https://x.test/a">Alpha Times</a></i></p>');  // dictionary emoji
+    assert.equal(storyIds.length, 3);
+    assert.doesNotMatch(text, /[—–]/);
+    assert.doesNotMatch(text, /<p>d+./);
+    // what Telegram stores: the text of the blocks, no separators (checked on a real rich message)
+    assert.equal(visibleLength(text), ("Good evening, Sam · 3 stories since 2 PM" + "🇦🇲 Armenia" +
+      "🇦🇲🇹🇷🤝 Armenia and Turkey agree to open the border · Financial Times" +
+      "Pashinyan said the border opens in March, after talks." + "🇦🇲 A <b> & C · Alpha Times" +
+      "🇮🇷 Iran War" + "🇮🇷 Iran fires missiles at a tanker · Alpha Times").length);
+  });
+
+  test("the Step 5 layout (CLASSIC) still renders as before, for the fold test and design A", () => {
+    const { text, storyIds, kind } = buildMessage(THREE(), opts({ layout: CLASSIC }));
+    assert.equal(kind, "html");
     assert.equal(text,
       "Good evening, Sam. Since 2 PM, 3 stories for you:\n\n" +
       "🇦🇲 <b><u>Armenia</u></b>\n\n" +
@@ -319,17 +346,17 @@ describe("message format", () => {
     assert.equal(clock12({ hour: 0, minute: 5 }), "12:05 AM");
     assert.equal(clock12({ hour: 9, minute: 0 }), "9 AM");
     const one = [S("x", ["politics"])];
-    assert.match(buildMessage(one, opts({ name: "" })).text, /^Good evening\. Since 2 PM, 1 story for you:/);
+    assert.match(buildMessage(one, opts({ name: "" })).text, /^<p><b>Good evening<\/b> · 1 story since 2 PM<\/p>/);
     assert.match(buildMessage(one, opts({ now: yerevan(9), lastDigestAt: null })).text,
-      /^Good morning, Sam\. In the last 24 hours, 1 story for you:/);
+      /^<p><b>Good morning, Sam<\/b> · 1 story in the last 24 hours<\/p>/);
     assert.match(buildMessage(one, opts({ now: yerevan(9), lastDigestAt: yerevan(9, 0, 11) })).text,
-      /^Good morning, Sam\. In the last 24 hours/);                // more than 24 h ago
+      /^<p><b>Good morning, Sam<\/b> · 1 story in the last 24 hours/);                // more than 24 h ago
     for (const [h, word] of [[11, "Good morning"], [12, "Good afternoon"], [17, "Good afternoon"], [18, "Good evening"]]) {
-      assert.ok(buildMessage(one, opts({ now: yerevan(h), lastDigestAt: null })).text.startsWith(word), `${h}`);
+      assert.ok(buildMessage(one, opts({ now: yerevan(h), lastDigestAt: null })).text.startsWith(`<p><b>${word}`), `${h}`);
     }
     assert.equal(buildMessage([], opts({ now: yerevan(14, 5), lastDigestAt: yerevan(9) })).text,
-      "Good afternoon, Sam. Quiet period: nothing important on your topics since 9 AM.");
-    assert.match(buildMessage(one, opts({ name: "<Ann>" })).text, /^Good evening, &lt;Ann&gt;\./);
+      "<p><b>Good afternoon, Sam</b> · Quiet period: nothing important on your topics since 9 AM.</p>");
+    assert.match(buildMessage(one, opts({ name: "<Ann>" })).text, /^<p><b>Good evening, &lt;Ann&gt;<\/b>/);
   });
 
   test("dashes are cleaned; a dash in a label is refused", () => {
@@ -392,6 +419,7 @@ describe("planDigest", () => {
       TOPICS, yerevan(14, 5));
     assert.equal(plan.stories.length, 1);
     assert.equal(plan.nextAt, yerevan(20));
-    assert.match(plan.text, /^Good afternoon, Sam\. In the last 24 hours, 1 story for you:\n\n🇦🇲 <b><u>Armenia<\/u><\/b>\n\n1\. 🇦🇲 <b>Armenia passes/);
+    assert.match(plan.text, /^<p><b>Good afternoon, Sam<\/b> · 1 story in the last 24 hours<\/p><table bordered><tr><th align="center">🇦🇲 Armenia<\/th><\/tr><\/table><p>🇦🇲 <b>Armenia passes/);
+    assert.equal(plan.button, "⚙️ Settings");
   });
 });

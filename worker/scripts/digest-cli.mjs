@@ -19,8 +19,8 @@ import {
   CONFIG, candidateStatement, hhmm, localParts, parseList, planDigest, storyScore, topicScore,
   visibleLength,
 } from "../src/digest.js";
-import { sendHtml } from "../src/telegram.js";
-import { digestWrites } from "../src/cron.js";
+import { sendDigestMessage } from "../src/telegram.js";
+import { digestExtra, digestWrites } from "../src/cron.js";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 
@@ -64,7 +64,7 @@ export function d1Rest(env) {
 
 function arg(name, fallback) {
   const i = process.argv.indexOf(name);
-  if (i < 0) return undefined;
+  if (i < 0) return fallback;
   const v = process.argv[i + 1];
   return v && !v.startsWith("--") ? v : fallback;
 }
@@ -222,13 +222,15 @@ async function main() {
   const previewing = process.argv.includes("--preview");
   const st = candidateStatement(previewing ? { ...user, id: 0, last_digest_at: null } : user, now, cfg);
   const cands = await db.query(st.sql, st.params);
-  const label = previewing ? `<i>${arg("--label", "Preview of the new digest (last 24 hours). Nothing is recorded.")}</i>` : undefined;
+  const label = previewing ? `<i>${arg("--label", "Preview of the digest (last 24 hours). Nothing is recorded.")}</i>` : undefined;
   const plan = planDigest(previewing ? { ...user, last_digest_at: null } : user, cands, topics, now, cfg, { label });
   console.log(plan.text);
   console.log(`\n[${plan.stories.length} stories from ${cands.length} candidates, ${plan.cut} cut for length, ` +
-    `visible length ${visibleLength(plan.text)} of ${cfg.message_char_limit}]`);
+    `${plan.kind} message, length ${visibleLength(plan.text)} of ${cfg.message_char_limit} (as Telegram counts)]`);
   if ((process.argv.includes("--send") || previewing) && !process.argv.includes("--dry")) {
-    const result = await sendHtml(env.TELEGRAM_BOT_TOKEN, owner, plan.text);
+    // the same message the Worker sends (Step 11: a rich message with the Settings button)
+    const appUrl = /^APP_URL\s*=\s*"([^"]+)"/m.exec(readFileSync(`${ROOT}worker/wrangler.toml`, "utf8"))?.[1];
+    const result = await sendDigestMessage(env.TELEGRAM_BOT_TOKEN, owner, plan.text, digestExtra(plan, appUrl));
     console.log(`[sent: Telegram message_id ${result.message_id}]`);
     if (!previewing) {
       await db.batch(digestWrites(user, plan, plan.storyIds, now));

@@ -5,6 +5,7 @@
 import { CONFIG, afterSendStatements, candidateStatement, holdStatements, nextSlot, parseList, planDigest } from "./digest.js";
 import { HEALTH_STATEMENTS, assessHealth } from "./health.js";
 import { errorStatement, takeUsage, usageStatement } from "./db.js";
+import { settingsButton } from "./telegram.js";
 
 const DUE_SQL = `SELECT * FROM users
 WHERE next_digest_at IS NOT NULL AND next_digest_at <= ?1 AND paused = 0 AND blocked = 0
@@ -31,14 +32,20 @@ export function digestWrites(user, plan, sentIds, now) {
   ];
 }
 
+// How a digest is sent (Step 11): its kind ("rich" or "html") and the "⚙️ Settings" button under it,
+// which opens the Mini App (when the app's address is known), on every digest and quiet note.
+export function digestExtra(plan, appUrl) {
+  return { kind: plan.kind ?? "html", ...(appUrl ? settingsButton(appUrl, plan.button) : {}) };
+}
+
 // Sends a digest: always ONE message since Step 8 (planDigest cuts it to fit). A failure is
 // thrown (retried at the next tick). Returns the ids of the stories sent.
 export async function sendDigest(io, chatId, plan) {
-  await io.send(chatId, plan.text);
+  await io.send(chatId, plan.text, digestExtra(plan, io.appUrl));
   return plan.storyIds;
 }
 
-// io: {send(chatId, html), alert(text)}. opts: {digests: bool, extraProblems: []}.
+// io: {send(chatId, text, {kind, reply_markup}), alert(text), appUrl}. opts: {digests: bool, extraProblems: []}.
 export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
   const digests = opts.digests !== false;
   const reads = [
