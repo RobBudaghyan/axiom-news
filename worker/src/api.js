@@ -19,7 +19,7 @@ import { digestWrites, sendDigest } from "./cron.js";
 import { errorStatement } from "./db.js";
 import { LANGS, chooseLang, effectiveLang, t, topicLabel } from "./i18n.js";
 import { setChatLanguage } from "./bot.js";
-import { allowedAmount, amountsFor, invoiceFields, refundTip, tipsStatements, shapeTips } from "./tips.js";
+import { TIP_AMOUNTS, allowedAmount, invoiceFields, refundTip, tipsStatements, shapeTips } from "./tips.js";
 
 const TOPICS_SQL = "SELECT tag, label_en, emoji, sort, is_default FROM topics ORDER BY sort";
 const USER_SQL = "SELECT * FROM users WHERE id = ?1";
@@ -42,7 +42,7 @@ function state(user, topics, isOwner, cfg) {
     topics: topics.map((x) => ({ tag: x.tag, label: topicLabel(lang, x.tag, x.label_en), emoji: x.emoji ?? "" })),
     languages: LANGS.enabled.map((code) => ({ code, name: LANGS.names[code] ?? code })),   // the picker (Step 9)
     limits: { ...L },
-    tips: { amounts: amountsFor(isOwner) },   // Step 10 (the owner also sees the 1-Star test amount)
+    tips: { amounts: [...TIP_AMOUNTS] },   // Step 11: 100, 500, 1000 for everyone
     is_owner: isOwner,
   };
 }
@@ -163,10 +163,10 @@ async function runJobNow(db, env, now, cfg, io) {
 // ------------------------------------------------------------------ tips (Step 10)
 
 // A tip changes nothing for the user: no user row is read or written.
-async function tipLink(tgUser, body, isOwner, io) {
+async function tipLink(tgUser, body, io) {
   const amount = Number(body?.amount);
   const lang = chooseLang(tgUser.language_code);   // only for the invoice texts
-  if (!allowedAmount(amount, isOwner)) return fail(400, "tip_amount");
+  if (!allowedAmount(amount)) return fail(400, "tip_amount");
   if (!io?.tg) return fail(500, "server");
   const link = await io.tg("createInvoiceLink", invoiceFields(body?.lang && LANGS.enabled.includes(body.lang) ? body.lang : lang, amount));
   return json(200, { ok: true, link, amount });
@@ -202,7 +202,7 @@ export async function handleApi(request, env, db, now, io, cfg = CONFIG) {
     switch (route) {
       case "POST /api/open": return json(200, await open(db, tg, body, now, cfg, isOwner));
       case "POST /api/settings": return await saveSettings(db, tg, body, now, cfg, isOwner, io);
-      case "POST /api/tip": return await tipLink(tg, body, isOwner, io);
+      case "POST /api/tip": return await tipLink(tg, body, io);
       case "GET /api/admin":
       case "POST /api/admin/digest":
       case "POST /api/admin/run-job":

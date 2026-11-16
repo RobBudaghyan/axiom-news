@@ -8,7 +8,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import worker from "../src/index.js";
-import { DICTS, FORBIDDEN, LANGS, chooseLang, effectiveLang, plural, pluralCategory, t } from "../src/i18n.js";
+import { DICTS, FORBIDDEN, LANGS, chooseLang, effectiveLang, plural, pluralCategory, t, topicLabel } from "../src/i18n.js";
 import { CONFIG, buildMessage, candidateStatement, planDigest, primaryTopic, qualifies, topicInfoFrom } from "../src/digest.js";
 import { helpText, settingsText, welcomeText } from "../src/bot.js";
 import { runTick } from "../src/cron.js";
@@ -150,6 +150,21 @@ describe("owner rule: in Russian, digest is always сводка", () => {
   });
 });
 
+describe("owner rule: in Russian, Ukraine takes на (Step 11)", () => {
+  test("the topic is Война на Украине everywhere, and no Russian text says в Украине", () => {
+    const bad = /(^|[^\p{L}-])[вВ]о?\s+Украин[еу]/u;
+    assert.equal(DICTS.ru.topics.ukraine_war, "Война на Украине");
+    assert.equal(topicLabel("ru", "ukraine_war", "Ukraine War"), "Война на Украине");
+    for (const s of strings({ ...DICTS.ru, _comment: "" })) assert.doesNotMatch(s, bad, s);
+    const app = JSON.parse(i18nSource().split(" = ")[1].replace(/;\s*$/, "")).dicts.ru;
+    assert.equal(app.topics.ukraine_war, "Война на Украине");
+    const topicsYaml = readFileSync(new URL("../../config/topics.yaml", import.meta.url), "utf8");
+    assert.match(topicsYaml, /ru: "Война на Украине"/);
+    const prompt = readFileSync(new URL("../../prompts/translate.md", import.meta.url), "utf8");
+    assert.match(prompt, /на Украине/);
+  });
+});
+
 describe("Russian grammar", () => {
   test("plural forms: 1 история, 2 истории, 5 историй, 11-14 историй, 21 история, 22 истории, 111 историй", () => {
     const cases = { 1: "история", 2: "истории", 4: "истории", 5: "историй", 11: "историй", 12: "историй", 14: "историй",
@@ -208,7 +223,7 @@ describe("never a mixed-language digest", () => {
     assert.equal(plan.fallback, null);
     assert.match(plan.text, /^Добрый вечер, Rob\. С 14:00 для вас 2 истории:/);
     assert.match(plan.text, /🇦🇲 <b><u>Армения<\/u><\/b>\n\n1\. 🇦🇲🇹🇷 <b>Армения и Турция договорились открыть границу<\/b>/);
-    assert.match(plan.text, /🇺🇦 <b><u>Война в Украине<\/u><\/b>/);
+    assert.match(plan.text, /🇺🇦 <b><u>Война на Украине<\/u><\/b>/);
     assert.match(plan.text, />Alpha Times<\/a>/);
     assert.doesNotMatch(plan.text, /Armenia and Turkey|Good evening|stories for you/);
   });
@@ -317,7 +332,7 @@ describe("language defaults and the language setting", () => {
     const [reply, ...setup] = fetchMock.calls;
     assert.match(reply.body.text, /^Добро пожаловать в Axiom News, Rob!/);
     assert.match(reply.body.text, /в 09:00, 14:00 и 20:00 \(часовой пояс: Ереван\)/);
-    assert.match(reply.body.text, /Темы: Политика, Войны и конфликты, Армения, Россия, Война в Иране и Война в Украине\./);
+    assert.match(reply.body.text, /Темы: Политика, Войны и конфликты, Армения, Россия, Война в Иране и Война на Украине\./);
     assert.equal(reply.body.reply_markup.inline_keyboard[0][0].text, "Открыть настройки");
     const cmd = setup.find((c) => c.url.endsWith("/setMyCommands")).body;
     assert.deepEqual(cmd.scope, { type: "chat", chat_id: OWNER });

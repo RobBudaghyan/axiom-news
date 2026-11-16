@@ -82,6 +82,8 @@ FRENCH_ACCENT = re.compile(r"[àâäçéèêëîïôöùûüÿœæ]", re.I)
 FRENCH_NO_APOSTROPHE = re.compile(r"(?<![\w'’])(?:[ldjmnstc]|qu|jusqu|lorsqu|puisqu) (?=[aeiouyhàâéèêîôûAEIOUYHÀÂÉÈÊÎÔÛ])")
 # Owner rule (Step 9): in Russian the word for "digest" is сводка, never дайджест.
 RUSSIAN_DIGEST = re.compile(r"дайджест", re.I)
+# Owner rule (Step 11): Ukraine takes на in Russian (на Украине, на Украину), never в.
+RUSSIAN_V_UKRAINE = re.compile(r"(?<![\w-])[вВ]о?\s+Украин[еу](?!\w)")
 # An Armenian sentence that ends with a colon instead of the Armenian full stop ։.
 ARMENIAN_COLON_END = re.compile(r":(?=\s+[Ա-Ֆ]|\s*$)")
 # A number with its group or decimal separators: 3,500 / 3 500 / 3.5 / 3,5 all compare as digits.
@@ -216,6 +218,8 @@ def check_translation(lang: str, english: dict, raw_head: str, raw_desc: str,
         problems.append(f"letters of another alphabet: {''.join(sorted(set(FOREIGN_SCRIPT[lang].findall(both))))}")
     if lang == "ru" and RUSSIAN_DIGEST.search(both):      # owner rule: digest is сводка
         problems.append("write сводка, never дайджест")
+    if lang == "ru" and RUSSIAN_V_UKRAINE.search(both):   # owner rule: на Украине
+        problems.append("write на Украине, never в Украине")
     if lang == "fr":
         if len(both) > 80 and not FRENCH_ACCENT.search(both):
             problems.append("French written without accents")

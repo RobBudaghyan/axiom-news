@@ -12,18 +12,14 @@
 // language. The owner can refund a tip from Admin (refundStarPayment), after a confirm step.
 import { t } from "./i18n.js";
 
-export const TIP_AMOUNTS = [50, 100, 250, 500];
-export const TEST_AMOUNT = 1;   // hidden, only for the owner's account (live test on the TEST bot)
+// Step 11 (owner): three amounts, the same for everyone (the Step 10 owner-only 1-Star test amount is gone).
+export const TIP_AMOUNTS = [100, 500, 1000];
 const PAYLOAD_RE = /^tip:(\d{1,5})$/;
 
-export const isOwnerId = (id, ownerId) => ownerId != null && String(id) === String(ownerId);
 
-export function allowedAmount(amount, isOwner) {
-  return Number.isInteger(amount) && (TIP_AMOUNTS.includes(amount) || (isOwner && amount === TEST_AMOUNT));
+export function allowedAmount(amount) {
+  return Number.isInteger(amount) && TIP_AMOUNTS.includes(amount);
 }
-
-// The amounts a user may pick (the owner also sees the 1-Star test amount).
-export const amountsFor = (isOwner) => (isOwner ? [...TIP_AMOUNTS, TEST_AMOUNT] : [...TIP_AMOUNTS]);
 
 export const payloadFor = (amount) => `tip:${amount}`;
 export function amountOf(payload) {
@@ -44,15 +40,14 @@ export function invoiceFields(lang, amount) {
 }
 
 // pre_checkout_query: ok only for a tip invoice in Stars whose amount matches its payload and is
-// allowed for this user. Pure: no I/O, so the answer goes out within milliseconds.
-export function checkPreCheckout(q, ownerId) {
+// one of TIP_AMOUNTS. Pure: no I/O, so the answer goes out within milliseconds.
+export function checkPreCheckout(q) {
   const amount = amountOf(q?.invoice_payload);
-  return q?.currency === "XTR" && amount != null && q.total_amount === amount &&
-    allowedAmount(amount, isOwnerId(q.from?.id, ownerId));
+  return q?.currency === "XTR" && amount != null && q.total_amount === amount && allowedAmount(amount);
 }
 
-export async function answerPreCheckout(q, tg, ownerId, lang) {
-  const ok = checkPreCheckout(q, ownerId);
+export async function answerPreCheckout(q, tg, lang) {
+  const ok = checkPreCheckout(q);
   await tg("answerPreCheckoutQuery", ok ? { pre_checkout_query_id: q.id, ok: true }
     : { pre_checkout_query_id: q.id, ok: false, error_message: t(lang, "bot.tip_bad") });
   return ok;

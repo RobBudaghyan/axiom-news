@@ -124,6 +124,7 @@ button:disabled { cursor: default; }
   letter-spacing: 0.02em; color: var(--head);
 }
 .section-foot { margin: 7px 16px 0; font-size: 13px; line-height: 18px; color: var(--hint); }
+.support-text { margin: 0; padding: 12px 16px 0; font-size: 15px; line-height: 20px; color: var(--text); }
 .group { background: var(--cell); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
 
 .row {

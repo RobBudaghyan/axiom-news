@@ -38,7 +38,7 @@ describe("planDigest: untranslated stories are held", () => {
     assert.deepEqual(plan.storyIds, [a.id, c.id]);
     assert.match(plan.text, /^Добрый вечер, Rob\. С 14:00 для вас 2 истории:/);   // 2, not 3
     assert.doesNotMatch(plan.text, /Ukraine|prisoners|Good evening|stories for you/);
-    assert.doesNotMatch(plan.text, /Война в Украине/);   // no empty heading for the held story's topic
+    assert.doesNotMatch(plan.text, /Война на Украине/);   // no empty heading for the held story's topic
     assert.match(plan.text, /1\. .*Перевод/);
     assert.match(plan.text, /2\. .*Перевод/);
     assert.doesNotMatch(plan.text, /3\. /);

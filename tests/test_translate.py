@@ -251,6 +251,18 @@ class Guards(unittest.TestCase):
         self.assertEqual(self.check("Запущен еженедельный Дайджест армянских новостей", "", "ru", en)[2],
                          ["write сводка, never дайджест"])
 
+    def test_russian_ukraine_takes_na_never_v(self):
+        en = {"headline": "Drone strikes in Ukraine", "summary": "", "description": "Aid was sent to Ukraine."}
+        self.assertEqual(self.check("Удары беспилотников на Украине", "Помощь отправили на Украину.", "ru", en)[2], [])
+        self.assertEqual(self.check("Удары беспилотников в Украине", "Помощь отправили на Украину.", "ru", en)[2],
+                         ["write на Украине, never в Украине"])
+        self.assertEqual(self.check("Удары беспилотников на Украине", "Помощь отправили в Украину.", "ru", en)[2],
+                         ["write на Украине, never в Украине"])
+        self.assertEqual(self.check("В Украине удары беспилотников", "Помощь отправили на Украину.", "ru", en)[2],
+                         ["write на Украине, never в Украине"])
+        # other words are not touched: "в украинском", "из Украины", "Украине помогли"
+        self.assertEqual(self.check("Удары по украинским городам", "Помощь Украине: в украинском МИД.", "ru", en)[2], [])
+
     def test_armenian_classical_spelling_becomes_reformed(self):
         self.assertEqual(translate.armenian_reformed("Երեւանը եւ Եւրոպան, Գեւորգ. Եւ նա"),
                          "Երևանը և Եվրոպան, Գևորգ. Եվ նա")

@@ -1,6 +1,6 @@
 // Step 10, part B: voluntary tips in Telegram Stars. Invoice creation (Mini App link and /support
-// buttons), pre_checkout_query (answered at once, only valid tips accepted, the 1-Star test amount
-// only for the owner), successful_payment stored once (a repeated update does not count twice),
+// buttons), pre_checkout_query (answered at once, only valid tips accepted; Step 11: 100, 500, 1000 for
+// everyone, no test amount), successful_payment stored once (a repeated update does not count twice),
 // the thank-you in the user's language, the refund path (owner only, Bot API, marked once), the
 // Admin totals, /paysupport and /terms, the command list, and every dictionary key.
 import { test, describe, afterEach } from "node:test";
@@ -56,27 +56,29 @@ describe("invoices", () => {
     assert.ok(c.body.title.length <= 32 && c.body.description.length <= 255);
   });
 
-  test("only 50, 100, 250 and 500; the 1-Star test amount only for the owner", async () => {
+  test("only 100, 500 and 1000, for everyone: the old amounts and the 1-Star test amount are refused, the owner too", async () => {
+    assert.deepEqual(TIP_AMOUNTS, [100, 500, 1000]);
     const { binding } = fakeD1();
     fetchMock = telegram("https://t.me/$x");
-    for (const bad of [0, 1, 75, 1000, -50, "100abc", null]) {
-      const r = await api(binding, "/api/tip", FRIEND, { amount: bad });
-      assert.equal(r.status, 400, String(bad));
-      assert.equal(r.body.code, "tip_amount");
+    for (const id of [FRIEND, OWNER]) {
+      for (const bad of [0, 1, 50, 75, 250, 2000, -100, "100abc", null]) {
+        const r = await api(binding, "/api/tip", id, { amount: bad });
+        assert.equal(r.status, 400, `${id} ${bad}`);
+        assert.equal(r.body.code, "tip_amount");
+      }
     }
     for (const a of TIP_AMOUNTS) assert.equal((await api(binding, "/api/tip", FRIEND, { amount: a })).status, 200);
-    assert.equal((await api(binding, "/api/tip", OWNER, { amount: 1 })).status, 200);
-    assert.equal(fetchMock.calls.length, TIP_AMOUNTS.length + 1);   // refused amounts never reach Telegram
+    assert.equal(fetchMock.calls.length, TIP_AMOUNTS.length);   // refused amounts never reach Telegram
   });
 
-  test("the settings state lists the amounts: the owner also sees the test amount", async () => {
+  test("the settings state lists the same three amounts for everyone, the owner included", async () => {
     const { binding } = fakeD1();
     fetchMock = telegram();
-    assert.deepEqual((await api(binding, "/api/open", FRIEND, { tz: "Asia/Yerevan" })).body.tips.amounts, [50, 100, 250, 500]);
-    assert.deepEqual((await api(binding, "/api/open", OWNER, { tz: "Asia/Yerevan" })).body.tips.amounts, [50, 100, 250, 500, 1]);
+    assert.deepEqual((await api(binding, "/api/open", FRIEND, { tz: "Asia/Yerevan" })).body.tips.amounts, [100, 500, 1000]);
+    assert.deepEqual((await api(binding, "/api/open", OWNER, { tz: "Asia/Yerevan" })).body.tips.amounts, [100, 500, 1000]);
   });
 
-  test("/support: the short text and four amount buttons (five for the owner); a tap sends an invoice", async () => {
+  test("/support: the short text and one row of three amount buttons (the owner too); a tap sends an invoice", async () => {
     const { binding, sqlite } = fakeD1();
     addUser(sqlite, { id: FRIEND, lang: "ru" });
     fetchMock = telegram();
@@ -84,23 +86,26 @@ describe("invoices", () => {
     const reply = fetchMock.calls[0].body;
     assert.match(reply.text, /^Axiom News бесплатен/);
     assert.match(reply.text, /\/terms$/);
-    assert.deepEqual(reply.reply_markup.inline_keyboard.flat().map((b) => b.callback_data), ["tip:50", "tip:100", "tip:250", "tip:500"]);
-    assert.equal(reply.reply_markup.inline_keyboard.flat()[0].text, "50 ⭐");
+    assert.deepEqual(reply.reply_markup.inline_keyboard.map((r) => r.map((b) => b.callback_data)), [["tip:100", "tip:500", "tip:1000"]]);
+    assert.deepEqual(reply.reply_markup.inline_keyboard[0].map((b) => b.text), ["100 ⭐", "500 ⭐", "1000 ⭐"]);
     await hook(binding, msg({ text: "/support" }, OWNER));
-    assert.deepEqual(fetchMock.calls[1].body.reply_markup.inline_keyboard.flat().map((b) => b.callback_data).at(-1), "tip:1");
+    assert.deepEqual(fetchMock.calls[1].body.reply_markup, reply.reply_markup);
 
     const tap = (data, id = FRIEND) => hook(binding, { callback_query: { id: "cb1", from: from(id), data,
       message: { message_id: 9, chat: { id, type: "private" } } } });
     fetchMock.calls.length = 0;
-    await tap("tip:250");
+    await tap("tip:500");
     assert.deepEqual(fetchMock.calls.map(methodOf), ["answerCallbackQuery", "sendInvoice"]);
     assert.equal(fetchMock.calls[1].body.chat_id, FRIEND);
-    assert.deepEqual(fetchMock.calls[1].body.prices, [{ label: "Чаевые", amount: 250 }]);
+    assert.deepEqual(fetchMock.calls[1].body.prices, [{ label: "Чаевые", amount: 500 }]);
     assert.equal(fetchMock.calls[1].body.currency, "XTR");
     fetchMock.calls.length = 0;
-    await tap("tip:1");                                        // the test amount, not the owner: refused
-    assert.deepEqual(fetchMock.calls.map(methodOf), ["answerCallbackQuery", "sendMessage"]);
-    assert.match(fetchMock.calls[1].body.text, /^Такая сумма недоступна/);
+    for (const [data, id] of [["tip:1", FRIEND], ["tip:1", OWNER], ["tip:50", FRIEND], ["tip:250", OWNER]]) {
+      fetchMock.calls.length = 0;
+      await tap(data, id);                                     // old or test amounts: refused for everyone
+      assert.deepEqual(fetchMock.calls.map(methodOf), ["answerCallbackQuery", "sendMessage"], `${data} ${id}`);
+      assert.match(fetchMock.calls[1].body.text, /^(Такая сумма недоступна|This tip amount is not available)/);
+    }
   });
 });
 
@@ -113,16 +118,16 @@ describe("pre_checkout_query", () => {
       [["answerPreCheckoutQuery", { pre_checkout_query_id: "pcq1", ok: true }]]);
   });
 
-  test("refused with a reason: wrong currency, amount not matching the payload, unknown amount, the test amount for others", async () => {
-    const owner = String(OWNER);
+  test("refused with a reason: wrong currency, amount not matching the payload, unknown or old amount, the old test amount", async () => {
     const q = (amount, extra = {}, id = FRIEND) => precheckout(amount, extra, id).pre_checkout_query;
-    assert.equal(checkPreCheckout(q(50), owner), true);
-    assert.equal(checkPreCheckout(q(50, { currency: "USD" }), owner), false);
-    assert.equal(checkPreCheckout(q(50, { total_amount: 5 }), owner), false);
-    assert.equal(checkPreCheckout(q(50, { invoice_payload: "other" }), owner), false);
-    assert.equal(checkPreCheckout(q(75), owner), false);
-    assert.equal(checkPreCheckout(q(1), owner), false);
-    assert.equal(checkPreCheckout(q(1, {}, OWNER), owner), true);
+    for (const a of [100, 500, 1000]) assert.equal(checkPreCheckout(q(a)), true, String(a));
+    assert.equal(checkPreCheckout(q(100, { currency: "USD" })), false);
+    assert.equal(checkPreCheckout(q(100, { total_amount: 5 })), false);
+    assert.equal(checkPreCheckout(q(100, { invoice_payload: "other" })), false);
+    for (const a of [75, 50, 250, 1]) {
+      assert.equal(checkPreCheckout(q(a)), false, String(a));
+      assert.equal(checkPreCheckout(q(a, {}, OWNER)), false, `owner ${a}`);   // no test amount for the owner any more
+    }
     fetchMock = telegram();
     await hook(fakeD1().binding, precheckout(75));
     assert.equal(fetchMock.calls[0].body.ok, false);
@@ -167,7 +172,7 @@ describe("refunds and the Admin tab (owner only)", () => {
     addUser(sqlite, { id: OWNER, first_name: "Rob" });
     fetchMock = telegram();
     await hook(binding, paid(500, "ch_1"));
-    await hook(binding, paid(1, "ch_2", OWNER));
+    await hook(binding, paid(100, "ch_2", OWNER));
     fetchMock.calls.length = 0;
     return { binding, sqlite };
   }
@@ -183,8 +188,8 @@ describe("refunds and the Admin tab (owner only)", () => {
   test("Admin shows total Stars, the count and the last tips; the owner refunds one through the Bot API", async () => {
     const { binding, sqlite } = await withTips();
     let a = (await api(binding, "/api/admin", OWNER)).body.tips;
-    assert.deepEqual([a.stars, a.tips, a.refunded], [501, 2, 0]);
-    assert.deepEqual(a.last.map((x) => [x.name, x.amount]).sort(), [["Ann", 500], ["Rob", 1]]);
+    assert.deepEqual([a.stars, a.tips, a.refunded], [600, 2, 0]);
+    assert.deepEqual(a.last.map((x) => [x.name, x.amount]).sort(), [["Ann", 500], ["Rob", 100]]);
     assert.ok(a.last.every((x) => x.at > 0 && x.refunded_at === null));
     const ann = a.last.find((x) => x.name === "Ann");
     const r = await api(binding, "/api/admin/refund", OWNER, { id: ann.id });
@@ -196,7 +201,7 @@ describe("refunds and the Admin tab (owner only)", () => {
     ]);
     assert.ok(tipRows(sqlite)[0].refunded_at > 0);
     a = (await api(binding, "/api/admin", OWNER)).body.tips;
-    assert.deepEqual([a.stars, a.tips, a.refunded, a.refunded_stars], [1, 1, 1, 500]);
+    assert.deepEqual([a.stars, a.tips, a.refunded, a.refunded_stars], [100, 1, 1, 500]);
     // a second tap: refused, Telegram not called again
     fetchMock.calls.length = 0;
     assert.equal((await api(binding, "/api/admin/refund", OWNER, { id: ann.id })).status, 409);
@@ -252,10 +257,10 @@ describe("/paysupport, /terms, commands and texts", () => {
   });
 
   test("every new text exists in every language (en, ru, hy, fr), with no em dash, and Russian never says дайджест", () => {
-    const keys = ["bot.support", "bot.support_amount", "bot.support_test", "bot.tip_title", "bot.tip_description", "bot.tip_label",
+    const keys = ["bot.support", "bot.support_amount", "bot.tip_title", "bot.tip_description", "bot.tip_label",
       "bot.tip_thanks", "bot.tip_refunded", "bot.tip_bad", "bot.paysupport", "bot.paysupport_sent", "bot.terms",
-      "commands.support", "commands.paysupport", "commands.terms", "errors.tip_amount", "app.sec_support", "app.support_button",
-      "app.support_foot", "app.tip_amount", "app.tip_test", "app.tip_thanks", "app.tip_failed", "app.tip_unavailable"];
+      "commands.support", "commands.paysupport", "commands.terms", "errors.tip_amount", "app.sec_support",
+      "app.support_text", "app.tip_amount", "app.tip_thanks", "app.tip_failed", "app.tip_unavailable"];
     const missing = [];
     for (const lang of ["en", "ru", "hy", "fr"]) {
       for (const k of keys) {

@@ -64,7 +64,7 @@ topics:
       item does not involve Iran (those are wars_conflicts or politics).
 
   - tag: ukraine_war
-    label: {en: "Ukraine War", ru: "Война в Украине"}
+    label: {en: "Ukraine War", ru: "Война на Украине"}
     emoji: "🇺🇦"
     default: true
     definition: >-

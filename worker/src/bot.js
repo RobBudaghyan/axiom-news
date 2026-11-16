@@ -9,7 +9,7 @@ import { CONFIG, describeSlot, nextSlot, parseList } from "./digest.js";
 import { chooseLang, commandList, effectiveLang, listJoin, t, topicLabel, zoneName } from "./i18n.js";
 import { settingsButton } from "./telegram.js";
 import { errorStatement } from "./db.js";
-import { amountOf, amountsFor, allowedAmount, answerPreCheckout, invoiceFields, isOwnerId, recordPayment } from "./tips.js";
+import { TIP_AMOUNTS, amountOf, allowedAmount, answerPreCheckout, invoiceFields, recordPayment } from "./tips.js";
 
 export function settingsText(lang = "en") {
   return t(lang, "bot.settings");
@@ -59,15 +59,11 @@ export async function setChatLanguage(tg, chatId, lang, appUrl) {
   return problems;
 }
 
-// Step 10: the /support reply's amount buttons (callback "tip:<n>"); the owner also gets the hidden
-// 1-Star test amount.
-export function supportKeyboard(lang, isOwner) {
-  const btn = (a) => ({ text: a === 1 ? t(lang, "bot.support_test") : t(lang, "bot.support_amount", { amount: a }),
-                        callback_data: `tip:${a}` });
-  const list = amountsFor(isOwner);
-  const rows = [list.slice(0, 2).map(btn), list.slice(2, 4).map(btn)];
-  if (list.length > 4) rows.push(list.slice(4).map(btn));
-  return { reply_markup: { inline_keyboard: rows } };
+// The /support reply's amount buttons (callback "tip:<n>"): one row of three, the same for everyone
+// (Step 11).
+export function supportKeyboard(lang) {
+  const btn = (a) => ({ text: t(lang, "bot.support_amount", { amount: a }), callback_data: `tip:${a}` });
+  return { reply_markup: { inline_keyboard: [TIP_AMOUNTS.map(btn)] } };
 }
 
 const userLang = async (db, id, code) => {
@@ -81,7 +77,7 @@ export async function handleUpdate(update, ctx) {
   // answered first and without any database read.
   if (update.pre_checkout_query) {
     const q = update.pre_checkout_query;
-    const ok = await answerPreCheckout(q, ctx.tg, ctx.ownerId, chooseLang(q.from?.language_code));
+    const ok = await answerPreCheckout(q, ctx.tg, chooseLang(q.from?.language_code));
     return { handled: true, command: "pre_checkout", ok };
   }
   if (update.callback_query) return handleCallback(update.callback_query, ctx);
@@ -149,7 +145,7 @@ export async function handleUpdate(update, ctx) {
     return { handled: true, command: "settings", lang };
   }
   if (/^\/support(@\w+)?(\s|$)/.test(text)) {
-    await ctx.reply(id, t(lang, "bot.support"), supportKeyboard(lang, isOwnerId(id, ctx.ownerId)));
+    await ctx.reply(id, t(lang, "bot.support"), supportKeyboard(lang));
     return { handled: true, command: "support", lang };
   }
   if (/^\/terms(@\w+)?(\s|$)/.test(text)) {
@@ -184,7 +180,7 @@ async function handleCallback(cq, ctx) {
   try { await ctx.tg("answerCallbackQuery", { callback_query_id: cq.id }); } catch { /* the button just stops spinning later */ }
   if (amount == null || cq.message?.chat?.type !== "private") return { handled: false };
   const lang = await userLang(ctx.db, cq.from.id, cq.from.language_code);
-  if (!allowedAmount(amount, isOwnerId(cq.from.id, ctx.ownerId))) {
+  if (!allowedAmount(amount)) {
     await ctx.reply(chatId, t(lang, "bot.tip_bad"));
     return { handled: true, command: "tip", ok: false };
   }

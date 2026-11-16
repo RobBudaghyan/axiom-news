@@ -39,6 +39,15 @@ try {
   check("no stories stepper, format choice or time zone picker any more",
     await b.run("return !document.querySelector('[data-action=step], [data-action=format], [data-action=open-tz], .stepper, .fmt');"));
 
+  // Step 11: "Support Axiom" is always open: the short text, then 100, 500, 1000 (no toggle, no test amount).
+  const sup = await b.run(`const s = document.querySelector('#support'); const g = s && s.querySelector('.group');
+    return { last: s && !s.nextElementSibling?.matches('.section'), toggle: !!document.querySelector('[data-action=support], #support-row'),
+      first: g && g.firstElementChild?.className, text: text('#support .support-text'),
+      chips: [...document.querySelectorAll('#support [data-action=tip]')].map((x) => x.dataset.value + '=' + x.textContent.trim()) };`);
+  check("Support Axiom: always open at the bottom, text first, then 100, 500, 1000 Stars",
+    sup.last && !sup.toggle && sup.first === "support-text" && /free/.test(sup.text) &&
+    JSON.stringify(sup.chips) === JSON.stringify(["100=100 ⭐", "500=500 ⭐", "1000=1000 ⭐"]), JSON.stringify(sup));
+
   let r = await b.run(`${SERVER} click('[data-value=wars_conflicts]'); await settled(); return { u: await server(), toast: text('#toast') };`);
   check("topic switched on is saved", r.u.topics.includes("wars_conflicts"), r.u.topics.join(","));
   check("a subtle 'Saved' confirmation appears", /Saved/.test(r.toast), r.toast);
@@ -100,6 +109,8 @@ try {
   check("dark mode: brighter red fill and light red icons", r.chip === "rgb(208, 35, 42)" && r.icon === "rgb(255, 107, 107)", `${r.chip} / ${r.icon}`);
   r = await b.run(ICON_OFFSETS);
   check("dark mode: icons centred too", Math.max(...r.flatMap((x) => [x.dx, x.dy].map(Math.abs))) <= 0.5, r.map((x) => `${x.dx},${x.dy}`).join("; "));
+  r = await b.run("return [...document.querySelectorAll('#support [data-action=tip]')].map((x) => x.dataset.value).join(',');");
+  check("owner: the same three amounts, no 1-Star test amount", r === "100,500,1000", r);
   r = await b.run(`click('[data-value=admin]'); await until(() => document.querySelector('.status'));
     const bad = document.querySelector('.badge.bad');
     const res = { editor: document.body.innerText.includes('Editor pass'), bad: bad ? getComputedStyle(bad).color : null };

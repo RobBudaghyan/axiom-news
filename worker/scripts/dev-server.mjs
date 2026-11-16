@@ -102,8 +102,8 @@ function seed() {
   // Step 10: three made-up tips (one refunded) for the Admin "Tips" section
   const tip = sqlite.prepare("INSERT INTO tips (user_id, amount, charge_id, at, refunded_at) VALUES (?,?,?,?,?)");
   tip.run(FRIEND, 100, "demo_1", now - 26 * H, null);
-  tip.run(FRIEND, 50, "demo_2", now - 5 * H, now - 4 * H);
-  tip.run(OWNER, 250, "demo_3", now - 2 * H, null);
+  tip.run(FRIEND, 500, "demo_2", now - 5 * H, now - 4 * H);
+  tip.run(OWNER, 1000, "demo_3", now - 2 * H, null);
   return binding;
 }
 

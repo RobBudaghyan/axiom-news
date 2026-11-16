@@ -292,17 +292,17 @@
       <p class="fine">${esc(tr("app.fine"))}</p>`;
   }
 
-  // Step 10: "Support Axiom ⭐", a voluntary tip in Telegram Stars. Tapping the button shows the
-  // amounts; an amount opens Telegram's own payment sheet. A tip changes nothing else.
+  // "Support Axiom", a voluntary tip in Telegram Stars (Step 10). Always open (Step 11, owner): the
+  // short text, then the three amounts; an amount opens Telegram's own payment sheet. A tip
+  // changes nothing else.
   function supportHTML() {
     const amounts = (S.st.tips && S.st.tips.amounts) || [];
     if (!amounts.length) return "";
-    const btn = row({ icon: I.star, tile: true, title: esc(tr("app.support_button")), tag: "button", cls: "action tap",
-      attrs: `data-action="support" aria-expanded="${!!S.tipOpen}" id="support-row"` });
-    const chips = S.tipOpen ? `<div class="times-block"><div class="chips">${amounts.map((a) =>
+    const text = `<p class="support-text">${esc(tr("app.support_text"))}</p>`;
+    const chips = `<div class="times-block"><div class="chips">${amounts.map((a) =>
       `<button class="chip-btn tnum" data-action="tip" data-value="${a}" ${S.busy.tip ? "disabled" : ""}>${
-        esc(a === 1 ? tr("app.tip_test") : tr("app.tip_amount", { amount: a }))}</button>`).join("")}</div></div>` : "";
-    return section(esc(tr("app.sec_support")), btn + chips, esc(tr("app.support_foot")), 'id="support"');
+        esc(tr("app.tip_amount", { amount: a }))}</button>`).join("")}</div></div>`;
+    return section(esc(tr("app.sec_support")), text + chips, "", 'id="support"');
   }
 
   async function payTip(amount) {
@@ -618,7 +618,6 @@
       case "time": toggleTime(el); break;
       case "pause": togglePause(el); break;
       case "lang": chooseLanguage(el); break;
-      case "support": S.tipOpen = !S.tipOpen; haptic("select"); renderView(); break;
       case "tip": payTip(Number(v)); break;
       case "refund": refundAction(el); break;
       case "range": S.range = v; haptic("select"); renderView(); break;

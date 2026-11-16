@@ -5,7 +5,8 @@
 //  3. Admin answers with the Tips section;
 //  4. Telegram's refundStarPayment answers a made-up charge id with an error (the method and
 //     parameters are right; no real charge exists to refund);
-//  5. the 1-Star test amount is refused for a stranger and allowed for the owner (invoice links only).
+//  5. Step 11: the old 1-Star test amount is refused for everyone, the owner too; 100 gives an
+//     invoice link (invoice links only, nothing is paid).
 //   node scripts/step10-live-check.mjs
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -48,6 +49,8 @@ try {
 r = await call("/api/tip", STRANGER, { amount: 1 });
 check("1-Star test amount refused for a stranger", r.status === 400, `HTTP ${r.status}`);
 r = await call("/api/tip", owner, { amount: 1 });
-check("1-Star test amount gives the owner an invoice link", r.status === 200 && /^https:\/\/t\.me\/\$/.test(r.body.link ?? ""), `HTTP ${r.status}`);
+check("1-Star test amount refused for the owner too (Step 11)", r.status === 400, `HTTP ${r.status}`);
+r = await call("/api/tip", owner, { amount: 100 });
+check("100 Stars gives the owner an invoice link", r.status === 200 && /^https:\/\/t\.me\/\$/.test(r.body.link ?? ""), `HTTP ${r.status}`);
 console.log(failed ? `${failed} check(s) failed` : "all checks passed");
 process.exit(failed ? 1 : 0);
