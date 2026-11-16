@@ -6,16 +6,16 @@ import { CONFIG, afterSendStatements, candidateStatement, holdStatements, nextSl
 import { HEALTH_STATEMENTS, assessHealth } from "./health.js";
 import { errorStatement, takeUsage, usageStatement } from "./db.js";
 import { settingsButton } from "./telegram.js";
-import { asTopicRows, guardAlert, withCustomCaps, withCustomTopics } from "./custom.js";
+import { asTopicRows, guardAlert, withCustomTopics } from "./custom.js";
 import { countStatement } from "./guard.js";
 
 const DUE_WHERE = "next_digest_at IS NOT NULL AND next_digest_at <= ?1 AND paused = 0 AND blocked = 0";
 const DUE_SQL = `SELECT * FROM users WHERE ${DUE_WHERE} ORDER BY next_digest_at LIMIT ?2`;
 // Step 13: the custom topics the due users follow, in the same read batch (one transaction, so the
 // same users as DUE_SQL).
-const DUE_CUSTOM_SQL = `SELECT f.user_id, t.id, t.tag, t.names, t.emoji, t.boost_max FROM custom_follows f
+const DUE_CUSTOM_SQL = `SELECT f.user_id, t.id, t.tag, t.names, t.emoji, t.boost_max, f.enabled FROM custom_follows f
 JOIN custom_topics t ON t.id = f.topic_id
-WHERE t.tag IS NOT NULL AND f.user_id IN (SELECT id FROM users WHERE ${DUE_WHERE} ORDER BY next_digest_at LIMIT ?2)
+WHERE t.tag IS NOT NULL AND f.enabled = 1 AND f.user_id IN (SELECT id FROM users WHERE ${DUE_WHERE} ORDER BY next_digest_at LIMIT ?2)
 ORDER BY f.at, t.id`;
 const TOPICS_SQL = "SELECT tag, label_en, emoji, sort, is_default FROM topics ORDER BY sort";
 const GIVE_UP_S = 3600;   // a slot that keeps failing for an hour is skipped
@@ -77,10 +77,11 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
       if (!mine.has(r.user_id)) mine.set(r.user_id, []);
       mine.get(r.user_id).push(r);
     }
-    // each user's custom topics join their topic list, their caps and their section names
+    // each user's switched-on custom topics join their topic list and their section names (Step 13
+    // fixes: no boost cap for them; digest.js uses the editor's topic score as it is)
     const plans = due.map((u) => {
       const rows = mine.get(u.id) ?? [];
-      return { user: withCustomTopics(u, rows), cfg: withCustomCaps(cfg, rows), topics: rows.length ? [...topics, ...asTopicRows(rows)] : topics };
+      return { user: withCustomTopics(u, rows), cfg, topics: rows.length ? [...topics, ...asTopicRows(rows)] : topics };
     });
     const cands = await db.batch(plans.map((p) => candidateStatement(p.user, now, p.cfg)));
     for (let i = 0; i < due.length; i++) {

@@ -4,7 +4,7 @@
 //   node scripts/step13-cpu.mjs
 import { CONFIG, planDigest } from "../src/digest.js";
 import { runTick } from "../src/cron.js";
-import { addTopic, asTopicRows, guardAlert, shapeCustomAdmin, validateAnswer, withCustomCaps, withCustomTopics } from "../src/custom.js";
+import { addTopic, asTopicRows, guardAlert, shapeCustomAdmin, validateAnswer, withCustomTopics } from "../src/custom.js";
 import { TOPIC_ROWS } from "../test/helpers.mjs";
 
 const NOW = 1_800_000_000 + 12 * 3600;
@@ -42,8 +42,8 @@ const user = { id: 7, first_name: "Sam", timezone: "Asia/Yerevan", topics: JSON.
 const plain = cands(40, false), mixed = cands(40, true);
 await measure("planDigest, 40 candidates, no custom topics (before Step 13)", async () => planDigest(user, plain, TOPICS, NOW, CONFIG), 2000);
 await measure("planDigest, 40 candidates, 3 custom sections (Russian)", async () => {
-  const u = withCustomTopics(user, CUSTOM), cfg = withCustomCaps(CONFIG, CUSTOM);
-  return planDigest(u, mixed, [...TOPICS, ...asTopicRows(CUSTOM)], NOW, cfg);
+  const u = withCustomTopics(user, CUSTOM);
+  return planDigest(u, mixed, [...TOPICS, ...asTopicRows(CUSTOM)], NOW, CONFIG);
 }, 2000);
 
 // one cron tick: 8 due users, each with 3 custom topics (stand-in database)

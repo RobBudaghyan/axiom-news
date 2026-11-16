@@ -44,7 +44,7 @@ LIVE_SCAN = 8000
 ACTIVE_SQL = """
 SELECT t.id, t.tag, t.names, t.emoji, t.definition, t.queries, t.boost_max, t.searched_at,
        (SELECT count(*) FROM custom_follows f JOIN users u ON u.id = f.user_id
-        WHERE f.topic_id = t.id AND u.paused = 0 AND u.blocked = 0) AS active
+        WHERE f.topic_id = t.id AND f.enabled = 1 AND u.paused = 0 AND u.blocked = 0) AS active
 FROM custom_topics t WHERE t.tag IS NOT NULL ORDER BY t.id"""
 
 ITEM_COLUMNS = ("url_hash", "source_key", "source_name", "tier", "url", "title", "snippet",
@@ -98,11 +98,6 @@ def load_active(db) -> list[CustomTopic]:
                                r["definition"] or "", _json(r["queries"], []),
                                max(0, min(2, int(r["boost_max"] or 0))), r["searched_at"], int(r["active"])))
     return out
-
-
-def merged_caps(base_caps: dict, topics: list[CustomTopic]) -> dict:
-    """config/digest.json topic_boost_max plus each custom topic's own cap (0-2)."""
-    return {**(base_caps or {}), **{t.tag: t.boost_max for t in topics}}
 
 
 # ---------------------------------------------------------------- search
@@ -335,7 +330,9 @@ def resolve_links(db, story_ids: list[int], *, cfg: dict | None = None,
 def cleanup(db, now: int, cfg: dict | None = None) -> int:
     """Marks topics that lost their last follower (orphan_since) and deletes those orphaned for
     `orphan_days` or more, with their stats. Returns the number deleted. The Worker sets
-    orphan_since when a reader removes a topic; this also catches anything it missed."""
+    orphan_since when a reader removes a topic; this also catches anything it missed.
+    Step 13 fixes: a follower counts whether their switch is on or off (a switched-off topic stays in
+    the reader's list), so a topic is deleted only when NO reader has it in their list."""
     cfg = cfg if cfg is not None else load_config()
     cut = now - int(cfg.get("orphan_days", 7)) * 86400
     no_followers = "NOT EXISTS (SELECT 1 FROM custom_follows f WHERE f.topic_id = custom_topics.id)"

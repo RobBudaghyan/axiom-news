@@ -1,6 +1,6 @@
 """Step 13: custom topics in the hourly job (job/custom.py, job/run.py) and the AI budget guard
 (job/guard.py): which topics are searched, the request and item caps, pre-dedupe against the pool,
-Google items in pass 1 and the editor, the custom caps in translation eligibility, link resolution,
+Google items in pass 1 and the editor, the custom-topic digest rule (no cap, Step 13 fixes), the switch, link resolution,
 the 7-day cleanup, the guard's order and that no custom-topic failure ever fails the run.
 
     venv/Scripts/python -m unittest tests.test_custom -v
@@ -41,8 +41,8 @@ def add_topic(db, tid, name, queries=None, boost=2, searched_at=None, orphan_sin
               f"News about {name}.", json.dumps(queries), boost, 1, searched_at, orphan_since])
 
 
-def follow(db, uid, tid):
-    db.query("INSERT INTO custom_follows (user_id, topic_id, at) VALUES (?,?,?)", [uid, tid, 1])
+def follow(db, uid, tid, enabled=1):
+    db.query("INSERT INTO custom_follows (user_id, topic_id, at, enabled) VALUES (?,?,?,?)", [uid, tid, 1, enabled])
 
 
 def gi(title, n=0, age_min=10, now=T0, source="Reuters"):
@@ -102,6 +102,25 @@ class TestSearchScope(unittest.TestCase):
         searched = {r["id"]: r["searched_at"] for r in db.query("SELECT id, searched_at FROM custom_topics")}
         self.assertEqual(searched[1], T0)
         self.assertTrue(all(searched[t] is None for t in (2, 3, 4)))
+
+    def test_a_switched_off_follower_is_not_searched_for(self):
+        """Step 13 fixes: the switch. Off = still in the reader's list, but not searched for them;
+        another reader with the switch on still gets the searches."""
+        db = new_db()
+        add_user(db, 1)
+        add_user(db, 2)
+        add_topic(db, 1, "Japan")
+        add_topic(db, 2, "Colombia")
+        follow(db, 1, 1, enabled=0)          # Japan: its only follower switched it off
+        follow(db, 1, 2, enabled=0)          # Colombia: off for reader 1 ...
+        follow(db, 2, 2, enabled=1)          # ... on for reader 2
+        google = FakeGoogle()
+        j, gem = job_with(db, google)
+        j.run()
+        self.assertEqual(sorted({q for q, _, _ in google.calls}), ["Colombia", "Colombia news"])
+        self.assertEqual([t.tag for t in j.custom_topics], ["c2"])
+        self.assertEqual(j.custom_topics[0].active, 1, "only the reader with the switch on counts")
+        self.assertNotIn("Japan", ai.reader_topics_block([t for t in j.ai_topics if t.get("custom")]))
 
     def test_no_follower_no_request_and_the_prompt_is_unchanged(self):
         db = new_db()
@@ -257,7 +276,13 @@ class TestAIPasses(unittest.TestCase):
         p = gem.prompts[0]
         self.assertIn("and reader topics, which some readers added themselves", p)
         self.assertIn("   - c1: Colombia, News about Colombia.", p)
-        self.assertIn("up to the cap: c1 +2.", p)
+        # Step 13 fixes: no cap for reader topics; the topic score is "how important for someone who chose it"
+        self.assertIn("reader topics (c1): the readers chose these subjects themselves", p)
+        self.assertIn("ignore the boost rules above", p)
+        self.assertIn("a sport (Formula 1): 8 a Grand Prix result", p)
+        self.assertIn("a country (Japan, Colombia): 8 an election result", p)
+        self.assertIn("a technology or field (AI regulation): 8 a major law passed", p)
+        self.assertNotIn("up to the cap", p)
         self.assertIn(f"S{ids[0]} | c1", p)                     # importance 3 passes the custom floor
         self.assertNotIn(f"S{ids[1]} | politics", p)            # importance 3 politics does not
         self.assertEqual(res.status, "ok")
@@ -271,35 +296,45 @@ class TestAIPasses(unittest.TestCase):
         self.assertEqual(editor.render_prompt(prompt.template, **args), editor.render_prompt(old, **args))
 
 
-# ---------------------------------------------------------------- translation eligibility with the custom cap
+# ---------------------------------------------------------------- the custom-topic digest rule (Step 13 fixes)
 
-class TestCaps(unittest.TestCase):
-    def test_merged_caps_in_translate_eligibility(self):
+class TestCustomRule(unittest.TestCase):
+    """Owner: for a custom main topic the topic score counts as it is (no boost cap, no "topic score
+    above the score" rule); the bar stays 6. The 6 main topics keep the Step 8 rule."""
+
+    def test_translate_eligibility_python_and_sql(self):
         db = new_db()
         t = int(T0 - H)
-        sid = db.query("INSERT INTO stories (summary, topics, importance, best_url, best_source, best_tier, source_count, "
-                       "created_at, updated_at, final_score, topic_score, main_topic, scored_at) "
-                       "VALUES ('Colombia vote', '[\"c1\"]', 5, 'u', 'X', 2, 1, ?, ?, 5, 8, 'c1', ?) RETURNING id",
-                       [t, t, t])[0]["id"]
         base = translate.load_digest_config()
         tags = [x["tag"] for x in TOPICS] + ["c1"]
-
-        def eligible(cap):
-            cfg = {**base, "topic_boost_max": {**base["topic_boost_max"], "c1": cap}}
-            rows = db.query(translate.ELIGIBLE_SQL, translate.eligible_params(T0, cfg, tags))
+        cases = [   # (main topic, score, topic score, eligible)
+            ("c1", 1, 8, True),          # a Grand Prix result: global 1, topic 8
+            ("c1", 6, 6, True),          # equal to the score: fine for a custom topic
+            ("c1", 3, 5, False),         # below the bar
+            ("c1", 5, None, False),      # no topic score: the score 5 is below the bar
+            ("armenia", 6, 6, False),    # a main topic still needs a boost (Step 8)
+            ("armenia", 4, 8, True),     # ... and keeps its cap of 2: 6, above 4
+            ("armenia", 3, 8, False),    # capped to 5
+        ]
+        ids = []
+        for main, final, topic, _ in cases:
+            ids.append(db.query("INSERT INTO stories (summary, topics, importance, best_url, best_source, best_tier, source_count, "
+                                "created_at, updated_at, final_score, topic_score, main_topic, scored_at) "
+                                "VALUES ('s', ?, 5, 'u', 'X', 2, 1, ?, ?, ?, ?, ?, ?) RETURNING id",
+                                [json.dumps([main]), t, t, final, topic, main, t])[0]["id"])
+        got = {r["id"] for r in db.query(translate.ELIGIBLE_SQL, translate.eligible_params(T0, base, tags))}
+        for sid, (main, final, topic, want) in zip(ids, cases):
             story = db.query("SELECT * FROM stories WHERE id = ?", [sid])[0]
-            self.assertEqual(bool(rows), translate.qualifies(story, cfg, tags))
-            return bool(rows)
+            self.assertEqual(translate.qualifies(story, base, tags), want, (main, final, topic))
+            self.assertEqual(sid in got, want, ("SQL", main, final, topic))
 
-        self.assertTrue(eligible(2))     # 5 + 2 = 7 >= 6 and above 5
-        self.assertTrue(eligible(1))     # 6
-        self.assertFalse(eligible(0))
-        merged = custom.merged_caps(base["topic_boost_max"], [custom.CustomTopic(1, "c1", {}, "", "", [], 2, None, 1)])
-        self.assertEqual(merged["c1"], 2)
-        self.assertEqual(merged["armenia"], 2)
+    def test_no_boost_cap_from_the_topic_row(self):
+        """The topic's old boost_max (0-2 from the check) no longer limits anything."""
+        base = translate.load_digest_config()
+        tags = [x["tag"] for x in TOPICS] + ["c1"]
+        s = {"topics": ["c1"], "final_score": 2, "topic_score": 7, "main_topic": "c1", "importance": 3}
+        self.assertTrue(translate.qualifies(s, {**base, "topic_boost_max": {**base["topic_boost_max"], "c1": 0}}, tags))
 
-
-# ---------------------------------------------------------------- links
 
 class TestLinks(unittest.TestCase):
     def add(self, db, url, state=None):
@@ -349,12 +384,12 @@ class TestLinks(unittest.TestCase):
                           "created_at, updated_at, final_score, topic_score, main_topic, scored_at) VALUES ('s', '[\"c1\"]', 6, "
                           "'https://news.google.com/rss/articles/S', 'X', 4, 1, ?, ?, 5, 7, 'c1', ?) RETURNING id",
                           [t, t, t])[0]["id"]
-        # the same scores under a topic whose cap is 0: the job's merged caps keep it out of digests
+        # a routine story (topic score 5, below the bar of 6) stays out of digests, so it is not resolved
         add_topic(db, 2, "Peru", boost=0)
         follow(db, 1, 2)
         db.query("INSERT INTO stories (summary, topics, importance, best_url, best_source, best_tier, source_count, "
                  "created_at, updated_at, final_score, topic_score, main_topic, scored_at) VALUES ('p', '[\"c2\"]', 6, "
-                 "'https://news.google.com/rss/articles/P', 'X', 4, 1, ?, ?, 5, 7, 'c2', ?)", [t, t, t])
+                 "'https://news.google.com/rss/articles/P', 'X', 4, 1, ?, ?, 5, 5, 'c2', ?)", [t, t, t])
         seen = []
         j, _ = job_with(db, link_resolver=lambda link: seen.append(link) or "https://outlet.test/a")
         j.run()
@@ -383,6 +418,22 @@ class TestCleanup(unittest.TestCase):
         self.assertEqual(rows[4], T0, "a topic with no follower starts its clock")
         self.assertEqual([r["topic_id"] for r in db.query("SELECT topic_id FROM custom_topic_days")], [1])
         self.assertEqual(custom.cleanup(db, T0 + 86400, CFG), 1)    # "Six days" is now seven
+
+    def test_a_switched_off_follower_keeps_the_topic(self):
+        """Step 13 fixes: deleted after 7 days only when NO reader has it in their list, on or off."""
+        db = new_db()
+        add_user(db, 1)
+        add_topic(db, 1, "Off for its only reader", orphan_since=T0 - 9 * 86400)
+        add_topic(db, 2, "Off, never orphaned")
+        add_topic(db, 3, "Nobody", orphan_since=T0 - 8 * 86400)
+        follow(db, 1, 1, enabled=0)
+        follow(db, 1, 2, enabled=0)
+        self.assertEqual(custom.cleanup(db, T0, CFG), 1)
+        rows = {r["id"]: r["orphan_since"] for r in db.query("SELECT id, orphan_since FROM custom_topics")}
+        self.assertEqual(sorted(rows), [1, 2])
+        self.assertIsNone(rows[1], "a switched-off follower stops the clock")
+        self.assertIsNone(rows[2], "and never starts it")
+        self.assertEqual(custom.cleanup(db, T0 + 30 * 86400, CFG), 0)
 
 
 # ---------------------------------------------------------------- the AI guard

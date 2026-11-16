@@ -482,11 +482,10 @@ class Job:
         return self.custom_cfg
 
     def merged_digest_cfg(self) -> dict:
-        """config/digest.json with each active custom topic's boost cap added (translate's
-        eligibility and link resolution use the same rule as the Worker's digest)."""
-        cfg = dict(self.digest_cfg or translate.load_digest_config())
-        cfg["topic_boost_max"] = custom.merged_caps(cfg.get("topic_boost_max") or {}, self.custom_topics)
-        return cfg
+        """config/digest.json for translate's eligibility and link resolution (the same rule as the
+        Worker's digest). Step 13 fixes: custom topics have no boost cap; the rule in
+        translate.ELIGIBLE_SQL / qualifies() uses their topic score as it is."""
+        return dict(self.digest_cfg or translate.load_digest_config())
 
     def load_custom(self, stats: RunStats) -> None:
         """The custom topics active readers follow join the AI passes' topic list. A failure

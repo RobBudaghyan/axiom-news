@@ -136,9 +136,28 @@ READER_TOPICS = """
 {lines}
    An event about a reader topic may take its tag as its topic even when it is sport,
    technology, business or culture. Its score stays the score for a general reader."""
+# Step 13 fixes (owner): the readers CHOSE a reader topic, so its topic score is not "the score plus
+# a capped boost" but only "how important is this for someone who chose this topic" (a Grand Prix
+# result can be 8 with a score of 1). Digests take it as it is, against the topic bar of 6, so the
+# examples keep routine items below 6.
 READER_BOOST = """
-   - reader topics: +0 for routine news; for a notable development that the topic's followers
-     would want to know, up to the cap: {caps}."""
+   - reader topics ({tags}): the readers chose these subjects themselves, so for an event whose
+     topic is a reader topic, ignore the boost rules above. Its topic_score answers only: how
+     important is this for someone who follows this subject closely? It may be far above the
+     score (a race result can have score 1 and topic score 8). 6 or more means a follower would
+     be sorry to miss it; most events on a busy subject are routine and stay at 5 or less.
+     Examples (topic score):
+     - a sport (Formula 1): 8 a Grand Prix result, a world title decided; 6 a driver signs for
+       another team, a race-changing penalty, a big rule change; 4 practice or qualifying times,
+       a team boss's comments, rumours, previews.
+     - a country (Japan, Colombia): 8 an election result, a new head of government, a disaster
+       with deaths, a major law or central bank decision; 6 a notable government decision, a big
+       scandal or arrest of a known figure, a real step with another country; 4 a minister's
+       statement, a local crime, a festival, a poll, a company result.
+     - a technology or field (AI regulation): 8 a major law passed or a ban; 6 a regulator opens
+       a formal case, a big new rule is proposed; 4 a speech, a report, an opinion piece, a
+       product launch.
+     On a normal day an active reader topic has about 2 to 5 events at 6 or more."""
 
 
 def reader_blocks(custom: list[dict]) -> tuple[str, str]:
@@ -146,8 +165,8 @@ def reader_blocks(custom: list[dict]) -> tuple[str, str]:
         return "", ""
     lines = "\n".join(f"   - {t['tag']}: {t['label']['en']}, {' '.join(str(t.get('definition') or '').split())}"
                       for t in custom)
-    caps = ", ".join(f"{t['tag']} +{int(t.get('boost_max') or 0)}" for t in custom)
-    return READER_TOPICS.format(lines=lines), READER_BOOST.format(caps=caps)
+    tags = ", ".join(t["tag"] for t in custom)
+    return READER_TOPICS.format(lines=lines), READER_BOOST.format(tags=tags)
 
 
 def render_prompt(template: str, *, today: str, topics: list[dict], facts: list[str], facts_checked: str,

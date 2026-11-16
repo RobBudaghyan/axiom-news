@@ -21,7 +21,7 @@ import {
 } from "../src/digest.js";
 import { sendDigestMessage } from "../src/telegram.js";
 import { digestExtra, digestWrites } from "../src/cron.js";
-import { asTopicRows, followedStatement, withCustomCaps, withCustomTopics } from "../src/custom.js";
+import { asTopicRows, enabledOnly, followedStatement, withCustomTopics } from "../src/custom.js";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 
@@ -154,11 +154,11 @@ async function main() {
     timezone: CONFIG.default_timezone, digest_times: JSON.stringify(CONFIG.default_times), last_digest_at: null,
   };
   const user = withCustomTopics(base, custom);
-  const topics = [...mainTopics, ...asTopicRows(custom)];
-  if (custom.length) console.log(`[custom topics: ${custom.map((c) => `${c.tag} ${JSON.parse(c.names).en} (cap ${c.boost_max})`).join(", ")}]`);
+  const topics = [...mainTopics, ...asTopicRows(enabledOnly(custom))];
+  if (custom.length) console.log(`[custom topics: ${custom.map((c) => `${c.tag} ${JSON.parse(c.names).en}${Number(c.enabled ?? 1) ? "" : " (off)"}`).join(", ")}]`);
   // --bars 7,6 or several: --bars "7,5;7,6;7,7" (editorial,topic)
   const barSets = (arg("--bars") ?? `${CONFIG.editorial_bar},${CONFIG.topic_bar}`).split(";")
-    .map((b) => ({ ...withCustomCaps(CONFIG, custom), editorial_bar: Number(b.split(",")[0]), topic_bar: Number(b.split(",")[1]),
+    .map((b) => ({ ...CONFIG, editorial_bar: Number(b.split(",")[0]), topic_bar: Number(b.split(",")[1]),
       ...(b.split(",")[2] === "noboost" ? { topic_needs_boost: false } : {}) }));
   const limit = arg("--limit");
   if (limit) for (const c of barSets) c.message_char_limit = Number(limit);

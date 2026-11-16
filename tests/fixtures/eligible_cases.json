@@ -1,5 +1,5 @@
 {
-"_comment": "Writes tests/fixtures/eligible_cases.json: 300 generated stories and whether each could reach a\ndigest (the two-score rule for a reader who follows every topic), with the digest settings used.\nBoth test suites check it: tests/test_translate.py (job/translate.py: the Python rule and its\nSQL) and worker/test/i18n.test.mjs (worker/src/digest.js qualifies()), so the job never\ntranslates a different set of stories than the Worker can pick. Re-run only to change the cases.",
+"_comment": "Writes tests/fixtures/eligible_cases.json: 400 generated stories (100 on two custom topics, Step 13 fixes) and whether each could reach a\ndigest (the two-score rule for a reader who follows every topic), with the digest settings used.\nBoth test suites check it: tests/test_translate.py (job/translate.py: the Python rule and its\nSQL) and worker/test/i18n.test.mjs (worker/src/digest.js qualifies()), so the job never\ntranslates a different set of stories than the Worker can pick. Re-run only to change the cases.",
 "cfg": {
 "editorial_bar": 7,
 "topic_bar": 6,
@@ -20,7 +20,9 @@
 "armenia",
 "russia",
 "iran_war",
-"ukraine_war"
+"ukraine_war",
+"c1",
+"c2"
 ],
 "cases": [
 {
@@ -3611,6 +3613,1162 @@
 "topic_score": 10,
 "main_topic": "unknown_tag",
 "eligible": true
+},
+{
+"id": 301,
+"topics": [
+"politics",
+"armenia"
+],
+"importance": 3,
+"final_score": 2,
+"topic_score": 2,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 302,
+"topics": [
+"c1"
+],
+"importance": 7,
+"final_score": 8,
+"topic_score": 10,
+"main_topic": "c1",
+"eligible": true
+},
+{
+"id": 303,
+"topics": [
+"c1"
+],
+"importance": 8,
+"final_score": 4,
+"topic_score": 4,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 304,
+"topics": [
+"c2",
+"armenia"
+],
+"importance": 7,
+"final_score": 5,
+"topic_score": 10,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 305,
+"topics": [
+"armenia",
+"politics"
+],
+"importance": 5,
+"final_score": 5,
+"topic_score": 8,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 306,
+"topics": [
+"c2",
+"armenia"
+],
+"importance": 3,
+"final_score": 7,
+"topic_score": 9,
+"main_topic": "c2",
+"eligible": true
+},
+{
+"id": 307,
+"topics": [
+"politics",
+"c2"
+],
+"importance": 3,
+"final_score": 7,
+"topic_score": 9,
+"main_topic": "c2",
+"eligible": true
+},
+{
+"id": 308,
+"topics": [
+"c2",
+"politics"
+],
+"importance": 2,
+"final_score": 3,
+"topic_score": 6,
+"main_topic": "c2",
+"eligible": true
+},
+{
+"id": 309,
+"topics": [
+"armenia",
+"c2"
+],
+"importance": 7,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 310,
+"topics": [
+"c2"
+],
+"importance": 3,
+"final_score": 2,
+"topic_score": 7,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 311,
+"topics": [
+"politics",
+"c2"
+],
+"importance": 3,
+"final_score": 3,
+"topic_score": 6,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 312,
+"topics": [
+"armenia"
+],
+"importance": 6,
+"final_score": 3,
+"topic_score": 2,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 313,
+"topics": [
+"c2",
+"armenia"
+],
+"importance": 4,
+"final_score": 3,
+"topic_score": 9,
+"main_topic": "c2",
+"eligible": true
+},
+{
+"id": 314,
+"topics": [
+"c1"
+],
+"importance": 8,
+"final_score": 6,
+"topic_score": 10,
+"main_topic": "c1",
+"eligible": true
+},
+{
+"id": 315,
+"topics": [
+"c1",
+"politics"
+],
+"importance": 3,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 316,
+"topics": [
+"c1",
+"c2"
+],
+"importance": 6,
+"final_score": 4,
+"topic_score": 4,
+"main_topic": "c2",
+"eligible": false
+},
+{
+"id": 317,
+"topics": [
+"c1"
+],
+"importance": 4,
+"final_score": 5,
+"topic_score": 10,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 318,
+"topics": [
+"politics"
+],
+"importance": 7,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 319,
+"topics": [
+"c2"
+],
+"importance": 7,
+"final_score": 4,
+"topic_score": 5,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 320,
+"topics": [
+"politics"
+],
+"importance": 6,
+"final_score": 3,
+"topic_score": 7,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 321,
+"topics": [
+"c1",
+"c2"
+],
+"importance": 1,
+"final_score": 6,
+"topic_score": 6,
+"main_topic": "c1",
+"eligible": true
+},
+{
+"id": 322,
+"topics": [
+"c2",
+"armenia"
+],
+"importance": 1,
+"final_score": 7,
+"topic_score": 10,
+"main_topic": "armenia",
+"eligible": true
+},
+{
+"id": 323,
+"topics": [
+"armenia",
+"c1"
+],
+"importance": 3,
+"final_score": 2,
+"topic_score": 2,
+"main_topic": "c1",
+"eligible": false
+},
+{
+"id": 324,
+"topics": [
+"politics"
+],
+"importance": 6,
+"final_score": 4,
+"topic_score": 6,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 325,
+"topics": [
+"c1"
+],
+"importance": 6,
+"final_score": 5,
+"topic_score": 9,
+"main_topic": "c1",
+"eligible": true
+},
+{
+"id": 326,
+"topics": [
+"c2",
+"c1"
+],
+"importance": 3,
+"final_score": 5,
+"topic_score": 10,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 327,
+"topics": [
+"c2"
+],
+"importance": 2,
+"final_score": 2,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 328,
+"topics": [
+"politics",
+"c1"
+],
+"importance": 4,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 329,
+"topics": [
+"armenia"
+],
+"importance": 2,
+"final_score": 3,
+"topic_score": 2,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 330,
+"topics": [
+"politics"
+],
+"importance": 5,
+"final_score": 8,
+"topic_score": 8,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 331,
+"topics": [
+"politics"
+],
+"importance": 1,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 332,
+"topics": [
+"c1"
+],
+"importance": 6,
+"final_score": 1,
+"topic_score": 3,
+"main_topic": "c1",
+"eligible": false
+},
+{
+"id": 333,
+"topics": [
+"c2",
+"politics"
+],
+"importance": 2,
+"final_score": 4,
+"topic_score": 3,
+"main_topic": "c2",
+"eligible": false
+},
+{
+"id": 334,
+"topics": [
+"armenia",
+"c2"
+],
+"importance": 8,
+"final_score": 7,
+"topic_score": 7,
+"main_topic": "armenia",
+"eligible": true
+},
+{
+"id": 335,
+"topics": [
+"c1",
+"politics"
+],
+"importance": 5,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 336,
+"topics": [
+"politics",
+"c1"
+],
+"importance": 3,
+"final_score": 3,
+"topic_score": 6,
+"main_topic": "c1",
+"eligible": true
+},
+{
+"id": 337,
+"topics": [
+"armenia",
+"c2"
+],
+"importance": 4,
+"final_score": 2,
+"topic_score": 8,
+"main_topic": "c2",
+"eligible": true
+},
+{
+"id": 338,
+"topics": [
+"armenia",
+"c1"
+],
+"importance": 1,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 339,
+"topics": [
+"c2",
+"c1"
+],
+"importance": 5,
+"final_score": 1,
+"topic_score": null,
+"main_topic": "c2",
+"eligible": false
+},
+{
+"id": 340,
+"topics": [
+"armenia"
+],
+"importance": 7,
+"final_score": 9,
+"topic_score": 8,
+"main_topic": "armenia",
+"eligible": true
+},
+{
+"id": 341,
+"topics": [
+"c1"
+],
+"importance": 7,
+"final_score": 2,
+"topic_score": 2,
+"main_topic": "c1",
+"eligible": false
+},
+{
+"id": 342,
+"topics": [
+"c2",
+"armenia"
+],
+"importance": 2,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 343,
+"topics": [
+"politics"
+],
+"importance": 4,
+"final_score": 8,
+"topic_score": 10,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 344,
+"topics": [
+"armenia"
+],
+"importance": 6,
+"final_score": 3,
+"topic_score": 2,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 345,
+"topics": [
+"armenia"
+],
+"importance": 5,
+"final_score": 5,
+"topic_score": 8,
+"main_topic": "armenia",
+"eligible": true
+},
+{
+"id": 346,
+"topics": [
+"politics"
+],
+"importance": 2,
+"final_score": 2,
+"topic_score": null,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 347,
+"topics": [
+"c2"
+],
+"importance": 6,
+"final_score": 9,
+"topic_score": 8,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 348,
+"topics": [
+"armenia",
+"politics"
+],
+"importance": 5,
+"final_score": 8,
+"topic_score": 10,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 349,
+"topics": [
+"armenia",
+"politics"
+],
+"importance": 2,
+"final_score": 1,
+"topic_score": 4,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 350,
+"topics": [
+"armenia",
+"c2"
+],
+"importance": 8,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 351,
+"topics": [
+"armenia",
+"c2"
+],
+"importance": 5,
+"final_score": 9,
+"topic_score": 8,
+"main_topic": "armenia",
+"eligible": true
+},
+{
+"id": 352,
+"topics": [
+"c1"
+],
+"importance": 7,
+"final_score": 2,
+"topic_score": 4,
+"main_topic": "c1",
+"eligible": false
+},
+{
+"id": 353,
+"topics": [
+"c1",
+"armenia"
+],
+"importance": 7,
+"final_score": 1,
+"topic_score": 1,
+"main_topic": "c1",
+"eligible": false
+},
+{
+"id": 354,
+"topics": [
+"politics"
+],
+"importance": 1,
+"final_score": 2,
+"topic_score": 2,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 355,
+"topics": [
+"c2"
+],
+"importance": 2,
+"final_score": 6,
+"topic_score": 6,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 356,
+"topics": [
+"c2",
+"c1"
+],
+"importance": 6,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 357,
+"topics": [
+"c2"
+],
+"importance": 7,
+"final_score": 1,
+"topic_score": 5,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 358,
+"topics": [
+"c2",
+"armenia"
+],
+"importance": 5,
+"final_score": 4,
+"topic_score": 10,
+"main_topic": "armenia",
+"eligible": true
+},
+{
+"id": 359,
+"topics": [
+"c2",
+"c1"
+],
+"importance": 3,
+"final_score": 1,
+"topic_score": 1,
+"main_topic": "c1",
+"eligible": false
+},
+{
+"id": 360,
+"topics": [
+"politics"
+],
+"importance": 2,
+"final_score": 1,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 361,
+"topics": [
+"armenia"
+],
+"importance": 6,
+"final_score": 2,
+"topic_score": 3,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 362,
+"topics": [
+"c1",
+"armenia"
+],
+"importance": 5,
+"final_score": 7,
+"topic_score": null,
+"main_topic": "c1",
+"eligible": true
+},
+{
+"id": 363,
+"topics": [
+"c1",
+"c2"
+],
+"importance": 4,
+"final_score": 2,
+"topic_score": 8,
+"main_topic": "c1",
+"eligible": true
+},
+{
+"id": 364,
+"topics": [
+"c2",
+"armenia"
+],
+"importance": 6,
+"final_score": 6,
+"topic_score": null,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 365,
+"topics": [
+"c2",
+"c1"
+],
+"importance": 7,
+"final_score": 2,
+"topic_score": 2,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 366,
+"topics": [
+"armenia"
+],
+"importance": 3,
+"final_score": 1,
+"topic_score": 7,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 367,
+"topics": [
+"c1",
+"c2"
+],
+"importance": 5,
+"final_score": 6,
+"topic_score": 10,
+"main_topic": "c2",
+"eligible": true
+},
+{
+"id": 368,
+"topics": [
+"c2"
+],
+"importance": 8,
+"final_score": 6,
+"topic_score": 10,
+"main_topic": "c2",
+"eligible": true
+},
+{
+"id": 369,
+"topics": [
+"c1",
+"politics"
+],
+"importance": 1,
+"final_score": 8,
+"topic_score": 8,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 370,
+"topics": [
+"c1"
+],
+"importance": 5,
+"final_score": 3,
+"topic_score": 2,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 371,
+"topics": [
+"c1",
+"c2"
+],
+"importance": 3,
+"final_score": 3,
+"topic_score": 8,
+"main_topic": "c2",
+"eligible": true
+},
+{
+"id": 372,
+"topics": [
+"c2",
+"armenia"
+],
+"importance": 4,
+"final_score": 9,
+"topic_score": 10,
+"main_topic": "armenia",
+"eligible": true
+},
+{
+"id": 373,
+"topics": [
+"armenia"
+],
+"importance": 8,
+"final_score": 3,
+"topic_score": null,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 374,
+"topics": [
+"armenia",
+"politics"
+],
+"importance": 8,
+"final_score": 2,
+"topic_score": 7,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 375,
+"topics": [
+"armenia",
+"c1"
+],
+"importance": 1,
+"final_score": 8,
+"topic_score": 10,
+"main_topic": "armenia",
+"eligible": true
+},
+{
+"id": 376,
+"topics": [
+"c2",
+"c1"
+],
+"importance": 4,
+"final_score": 1,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 377,
+"topics": [
+"armenia",
+"c1"
+],
+"importance": 8,
+"final_score": 6,
+"topic_score": 7,
+"main_topic": "c1",
+"eligible": true
+},
+{
+"id": 378,
+"topics": [
+"c2"
+],
+"importance": 2,
+"final_score": 2,
+"topic_score": 1,
+"main_topic": "c2",
+"eligible": false
+},
+{
+"id": 379,
+"topics": [
+"c2",
+"politics"
+],
+"importance": 4,
+"final_score": 7,
+"topic_score": 10,
+"main_topic": "c2",
+"eligible": true
+},
+{
+"id": 380,
+"topics": [
+"armenia"
+],
+"importance": 7,
+"final_score": 1,
+"topic_score": null,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 381,
+"topics": [
+"c2"
+],
+"importance": 4,
+"final_score": 9,
+"topic_score": 8,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 382,
+"topics": [
+"politics",
+"c1"
+],
+"importance": 4,
+"final_score": 7,
+"topic_score": 7,
+"main_topic": "politics",
+"eligible": true
+},
+{
+"id": 383,
+"topics": [
+"armenia"
+],
+"importance": 4,
+"final_score": 8,
+"topic_score": 10,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 384,
+"topics": [
+"politics",
+"c2"
+],
+"importance": 2,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 385,
+"topics": [
+"armenia",
+"c1"
+],
+"importance": 5,
+"final_score": 2,
+"topic_score": 7,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 386,
+"topics": [
+"c2"
+],
+"importance": 7,
+"final_score": 6,
+"topic_score": 10,
+"main_topic": "c2",
+"eligible": true
+},
+{
+"id": 387,
+"topics": [
+"c1",
+"armenia"
+],
+"importance": 6,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 388,
+"topics": [
+"c1",
+"armenia"
+],
+"importance": 2,
+"final_score": 1,
+"topic_score": null,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 389,
+"topics": [
+"armenia"
+],
+"importance": 1,
+"final_score": 9,
+"topic_score": 8,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 390,
+"topics": [
+"politics",
+"c1"
+],
+"importance": 4,
+"final_score": 6,
+"topic_score": 6,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 391,
+"topics": [
+"c2",
+"c1"
+],
+"importance": 5,
+"final_score": 9,
+"topic_score": 10,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 392,
+"topics": [
+"politics",
+"armenia"
+],
+"importance": 2,
+"final_score": 6,
+"topic_score": 10,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 393,
+"topics": [
+"politics",
+"c1"
+],
+"importance": 1,
+"final_score": 1,
+"topic_score": 2,
+"main_topic": "c1",
+"eligible": false
+},
+{
+"id": 394,
+"topics": [
+"armenia"
+],
+"importance": 4,
+"final_score": 8,
+"topic_score": null,
+"main_topic": null,
+"eligible": true
+},
+{
+"id": 395,
+"topics": [
+"politics"
+],
+"importance": 5,
+"final_score": null,
+"topic_score": null,
+"main_topic": null,
+"eligible": false
+},
+{
+"id": 396,
+"topics": [
+"c1",
+"politics"
+],
+"importance": 7,
+"final_score": 2,
+"topic_score": 1,
+"main_topic": "politics",
+"eligible": false
+},
+{
+"id": 397,
+"topics": [
+"armenia"
+],
+"importance": 6,
+"final_score": 2,
+"topic_score": 6,
+"main_topic": "armenia",
+"eligible": false
+},
+{
+"id": 398,
+"topics": [
+"c2"
+],
+"importance": 5,
+"final_score": 5,
+"topic_score": 9,
+"main_topic": "c2",
+"eligible": true
+},
+{
+"id": 399,
+"topics": [
+"c2",
+"c1"
+],
+"importance": 4,
+"final_score": 1,
+"topic_score": 1,
+"main_topic": "c2",
+"eligible": false
+},
+{
+"id": 400,
+"topics": [
+"politics"
+],
+"importance": 1,
+"final_score": 5,
+"topic_score": 9,
+"main_topic": null,
+"eligible": false
 }
 ]
 }

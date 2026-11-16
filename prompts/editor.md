@@ -183,8 +183,10 @@ Return JSON only, matching the schema.
 ## Notes for the job code
 
 - Step 13: `{reader_topics}` lists the custom topics active readers follow (tag, name and
-  definition) and `{reader_boost}` their boost caps (0-2, set when the topic was checked); both are
-  empty when there are none, so the prompt is then unchanged. Google News articles end with
+  definition) and `{reader_boost}` how to score them (Step 13 fixes, owner: no boost and no cap;
+  "how important is this for someone who chose this topic", with 4/6/8 examples for a sport, a
+  country and a field, so routine items stay below 6); both are empty when there are none, so the
+  prompt is then unchanged. Google News articles end with
   `[headline only]`. A custom tag is a valid main topic.
 - Validate everything (`validate_events`): unknown and repeated ids are dropped (the first wins),
   the score is clamped to 1-10, an event without a usable score leaves its stories unedited.

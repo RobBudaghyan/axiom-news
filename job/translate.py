@@ -44,23 +44,27 @@ LANGUAGES = ROOT / "config" / "languages.json"
 GLOSSARY = ROOT / "config" / "glossary.yaml"
 DIGEST = ROOT / "config" / "digest.json"
 DAY = 86400
+CUSTOM_TAG = re.compile(r"^c\d+$")
 MAX_HEADLINE = 260
 MAX_DESCRIPTION = 600
 
 # Stories that could reach a digest: the Worker's CANDIDATE_SQL rule (worker/src/digest.js) for a
 # reader who follows every topic. ?1 since, ?2 unedited_offset, ?3 boost caps (JSON), ?4 editorial
-# bar, ?5 topic bar, ?6 topic_needs_boost (0/1), ?7 the topic tags (JSON).
+# bar, ?5 topic bar, ?6 topic_needs_boost (0/1), ?7 the topic tags (JSON). Step 13 fixes: a custom
+# main topic (c<id>) uses its topic score as it is (no cap, no "above the score" rule).
 ELIGIBLE_SQL = """
 SELECT id, summary, headline, description, g FROM (
   SELECT s.*, coalesce(s.final_score, s.importance - ?2) AS g,
-         s.final_score + min(max(coalesce(s.topic_score, s.final_score) - s.final_score, 0),
-                             coalesce(json_extract(?3, '$.' || s.main_topic), 10)) AS t
+         CASE WHEN s.main_topic GLOB 'c[0-9]*' THEN max(coalesce(s.topic_score, s.final_score), s.final_score)
+              ELSE s.final_score + min(max(coalesce(s.topic_score, s.final_score) - s.final_score, 0),
+                                       coalesce(json_extract(?3, '$.' || s.main_topic), 10)) END AS t
   FROM stories s
   WHERE max(s.updated_at, coalesce(s.scored_at, 0)) >= ?1
     AND s.merged_into IS NULL
     AND EXISTS (SELECT 1 FROM json_each(s.topics) x WHERE x.value IN (SELECT u.value FROM json_each(?7) u))
 )
-WHERE g >= ?4 OR (main_topic IN (SELECT u.value FROM json_each(?7) u) AND t >= ?5 AND (?6 = 0 OR t > final_score))
+WHERE g >= ?4 OR (main_topic IN (SELECT u.value FROM json_each(?7) u) AND t >= ?5
+                  AND (?6 = 0 OR t > final_score OR main_topic GLOB 'c[0-9]*'))
 ORDER BY g DESC, id DESC"""
 
 EXISTING_SQL = "SELECT story_id, ok, src, note FROM story_translations WHERE lang = ? AND story_id IN ({qs})"
@@ -138,6 +142,9 @@ def qualifies(s: dict, cfg: dict, tags: list[str]) -> bool:
         return True
     if final is None or not s.get("main_topic") or s["main_topic"] not in tags:
         return False
+    if CUSTOM_TAG.match(s["main_topic"]):   # Step 13 fixes: the reader chose it; no cap, no boost rule
+        t = max(s["topic_score"] if s.get("topic_score") is not None else final, final)
+        return t >= cfg["topic_bar"]
     boost = max(0, (s.get("topic_score") if s.get("topic_score") is not None else final) - final)
     cap = (cfg.get("topic_boost_max") or {}).get(s["main_topic"], boost)
     t = final + min(boost, cap)

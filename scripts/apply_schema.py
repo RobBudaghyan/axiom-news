@@ -41,6 +41,7 @@ MIGRATIONS = [
     "ALTER TABLE items ADD COLUMN hint_topic TEXT",
     "ALTER TABLE stories ADD COLUMN link_state INTEGER",
     "ALTER TABLE ai_calls ADD COLUMN code INTEGER",
+    "ALTER TABLE custom_follows ADD COLUMN enabled INTEGER NOT NULL DEFAULT 1",   # Step 13 fixes: the switch
 ]
 
 

@@ -22,10 +22,14 @@ const MAX_REASON = 160, MAX_NAME = 40, MAX_DEFINITION = 300, MAX_QUERY = 120;
 
 // ------------------------------------------------------------------ SQL
 
-// A reader's custom topics, in the order they were added.
-export const FOLLOWED_SQL = `SELECT t.id, t.tag, t.names, t.emoji, t.boost_max FROM custom_follows f
+// A reader's custom topics, in the order they were added, switched on or off (`enabled`, Step 13
+// fixes): a switched-off topic keeps its place in the list and its slot (it counts toward the 3),
+// but it is not in the reader's digests and not searched for them.
+export const FOLLOWED_SQL = `SELECT t.id, t.tag, t.names, t.emoji, t.boost_max, f.enabled FROM custom_follows f
 JOIN custom_topics t ON t.id = f.topic_id WHERE f.user_id = ?1 AND t.tag IS NOT NULL ORDER BY f.at, t.id`;
 export const followedStatement = (userId) => ({ sql: FOLLOWED_SQL, params: [userId] });
+// The followed topics that are switched on (the ones digests use).
+export const enabledOnly = (rows) => (rows ?? []).filter((r) => Number(r.enabled ?? 1) === 1);
 
 // ------------------------------------------------------------------ names
 
@@ -51,25 +55,26 @@ export function customName(row, lang) {
   return names[lang] || names.en || row.tag;
 }
 
-export const publicCustom = (rows, lang) =>
-  (rows ?? []).map((r) => ({ id: r.id, tag: r.tag, name: customName(r, lang), emoji: r.emoji || "" }));
+// What the Mini App shows: the topic's own emoji from the AI check (a neutral one only if it has
+// none), its name in the reader's language, and its switch.
+export const NEUTRAL_EMOJI = "🗞️";
+const shownEmoji = (e) => (e && e !== "📌" ? e : NEUTRAL_EMOJI);
+export const publicCustom = (rows, lang) => (rows ?? []).map((r) => ({ id: r.id, tag: r.tag, name: customName(r, lang),
+  emoji: shownEmoji(r.emoji), on: Number(r.enabled ?? 1) === 1 }));
 
 // Rows of custom topics in the shape of the `topics` table rows that digest.js topicInfoFrom reads
 // (custom ones carry `names`, so the heading is in the reader's language).
 export const asTopicRows = (rows) => (rows ?? []).map((r) => ({ tag: r.tag, label_en: customName(r, "en"),
-  names: r.names, emoji: r.emoji || "📌", custom: true }));
+  names: r.names, emoji: shownEmoji(r.emoji), custom: true }));
 
-// The digest settings with each followed custom topic's own boost cap (0-2) added.
-export function withCustomCaps(cfg, rows) {
-  if (!rows?.length) return cfg;
-  const caps = { ...(cfg.topic_boost_max ?? {}) };
-  for (const r of rows) caps[r.tag] = Math.max(0, Math.min(2, Number(r.boost_max ?? 0)));
-  return { ...cfg, topic_boost_max: caps };
-}
+// Step 13 fixes (owner): no boost cap for custom topics. The reader chose the subject, so the
+// editor's topic score is used as it is (digest.js topicScore); the 6 main topics keep their caps.
 
-// A user row whose `topics` also lists their custom tags (digest selection treats both alike).
-export function withCustomTopics(user, rows) {
-  if (!rows?.length) return user;
+// A user row whose `topics` also lists their switched-on custom tags (digest selection treats both
+// alike). Switched-off ones are left out.
+export function withCustomTopics(user, all) {
+  const rows = enabledOnly(all);
+  if (!rows.length) return user;
   const main = parseJson(user.topics, []);
   return { ...user, topics: JSON.stringify([...main, ...rows.map((r) => r.tag).filter((x) => !main.includes(x))]) };
 }
@@ -155,7 +160,7 @@ export function cleanText(s, max) {
 const EMOJI = /^(?:\p{Regional_Indicator}{2}|\p{Extended_Pictographic}(?:\u{FE0F}|\u{20E3}|[\u{1F3FB}-\u{1F3FF}]|\u{200D}\p{Extended_Pictographic}\u{FE0F}?)*)$/u;
 export function cleanEmoji(s) {
   const x = String(s ?? "").replace(/\s+/g, "");
-  return x && x.length <= 16 && EMOJI.test(x) ? x : "📌";
+  return x && x.length <= 16 && EMOJI.test(x) ? x : NEUTRAL_EMOJI;
 }
 
 // The answer, checked in code. Returns {verdict, reasonCode, reason, sameAs, names, emoji,
@@ -429,8 +434,16 @@ async function refuseMain(ctx, main, input, ai, result, logs = []) {
   return result("main_topic", { reason }, [...logs, checkRow(user.id, now, input, "main_topic", null, main.tag, ai)]);
 }
 
-// POST /api/topics/remove {id}: stop following. The last follower leaving starts the 7-day clock
-// (orphan_since); the hourly job deletes the topic after that.
+// POST /api/topics/switch {id, on}: switch a followed topic on or off. It stays in the list, so it
+// keeps its slot, and the topic is never orphaned by this (the 7-day clock counts follow rows, on
+// or off).
+export function switchStatement(userId, topicId, on) {
+  return { sql: "UPDATE custom_follows SET enabled = ?3 WHERE user_id = ?1 AND topic_id = ?2", params: [userId, topicId, on ? 1 : 0] };
+}
+
+// POST /api/topics/remove {id}: stop following (edit mode). The last follower leaving (no follow
+// row at all, on or off) starts the 7-day clock (orphan_since); the hourly job deletes the topic
+// after that.
 export function removeStatements(userId, topicId, now) {
   return [
     { sql: "DELETE FROM custom_follows WHERE user_id = ?1 AND topic_id = ?2", params: [userId, topicId] },
@@ -446,7 +459,7 @@ export function customAdminStatements(now) {
   return [
     { sql: `SELECT t.id, t.tag, t.names, t.emoji, t.queries, t.boost_max, t.created_at, t.searched_at, t.orphan_since,
   (SELECT count(*) FROM custom_follows f WHERE f.topic_id = t.id) AS followers,
-  (SELECT count(*) FROM custom_follows f JOIN users u ON u.id = f.user_id WHERE f.topic_id = t.id AND u.paused = 0 AND u.blocked = 0) AS active,
+  (SELECT count(*) FROM custom_follows f JOIN users u ON u.id = f.user_id WHERE f.topic_id = t.id AND f.enabled = 1 AND u.paused = 0 AND u.blocked = 0) AS active,
   d.searches, d.fetched, d.dup_dropped, d.new_items
 FROM custom_topics t LEFT JOIN custom_topic_days d ON d.topic_id = t.id AND d.day = ?1 ORDER BY t.id`, params: [day] },
     { sql: "SELECT x.value AS tag, count(*) AS stories, sum(s.main_topic = x.value) AS main FROM stories s, json_each(s.topics) x " +

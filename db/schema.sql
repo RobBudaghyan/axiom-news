@@ -189,8 +189,8 @@ CREATE INDEX IF NOT EXISTS idx_ai_calls_at ON ai_calls(at);
 
 -- Step 13: custom topics ("My topics"). Shared: two readers who add "Colombia" follow one row.
 -- Created by the Worker after one AI check (worker/src/topiccheck.js); searched hourly by the job
--- (job/custom.py) while at least one active, unpaused reader follows it; deleted by the job 7 days
--- after its last follower left (orphan_since).
+-- (job/custom.py) while at least one active, unpaused reader follows it with the switch on; deleted by
+-- the job 7 days after its last follower left (orphan_since: no follow row at all, on or off).
 CREATE TABLE IF NOT EXISTS custom_topics (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,    -- never reused: old stories keep a deleted topic's tag
   tag          TEXT UNIQUE,                          -- 'c' || id, set right after the insert
@@ -210,6 +210,7 @@ CREATE TABLE IF NOT EXISTS custom_follows (
   user_id  INTEGER NOT NULL,
   topic_id INTEGER NOT NULL,
   at       INTEGER NOT NULL,
+  enabled  INTEGER NOT NULL DEFAULT 1,              -- Step 13 fixes: the reader's switch; off = kept (counts toward the 3), not searched or sent for them
   PRIMARY KEY (user_id, topic_id)
 ) WITHOUT ROWID;
 

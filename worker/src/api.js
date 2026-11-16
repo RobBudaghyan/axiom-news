@@ -11,7 +11,8 @@
 //   POST /api/tip             {amount}  a Telegram Stars invoice link for a voluntary tip (Step 10)
 //   POST /api/admin/refund    {id}      refund one tip through the Bot API (owner only)
 //   POST /api/topics/add      {name}    Step 13: add a custom topic (one AI check), return {state, result}
-//   POST /api/topics/remove   {id}      Step 13: stop following a custom topic, return state
+//   POST /api/topics/remove   {id}      Step 13: stop following a custom topic (edit mode), return state
+//   POST /api/topics/switch   {id, on}  Step 13 fixes: switch a custom topic on or off, return state
 //   POST /api/admin/topic     {id, action}  Step 13: delete or block a custom topic (owner only)
 import { verifyInitData } from "./auth.js";
 import { CONFIG, candidateStatement, hhmm, localParts, nextSlot, planDigest } from "./digest.js";
@@ -23,8 +24,8 @@ import { errorStatement } from "./db.js";
 import { LANGS, chooseLang, effectiveLang, t, topicLabel } from "./i18n.js";
 import { setChatLanguage } from "./bot.js";
 import { TIP_AMOUNTS, allowedAmount, invoiceFields, refundTip, tipsStatements, shapeTips } from "./tips.js";
-import { CUSTOM_ADMIN_COUNT, TOPICS_CFG, addTopic, adminTopicStatements, asTopicRows, customAdminStatements,
-  followedStatement, publicCustom, removeStatements, shapeCustomAdmin, withCustomCaps, withCustomTopics } from "./custom.js";
+import { CUSTOM_ADMIN_COUNT, TOPICS_CFG, addTopic, adminTopicStatements, asTopicRows, customAdminStatements, enabledOnly,
+  followedStatement, publicCustom, removeStatements, shapeCustomAdmin, switchStatement, withCustomTopics } from "./custom.js";
 
 const TOPICS_SQL = "SELECT tag, label_en, emoji, sort, is_default FROM topics ORDER BY sort";
 const USER_SQL = "SELECT * FROM users WHERE id = ?1";
@@ -111,8 +112,8 @@ async function saveSettings(db, tg, body, now, cfg, isOwner, io) {
     followedStatement(tg.id)]);
   const user = rows[0];
   if (!user) return fail(404, "reopen_simple");
-  // Step 13: with a custom topic, every main topic may be off
-  const clean = validatePatch(body, topics.map((t) => t.tag), cfg, { custom: custom.length });
+  // Step 13: with a custom topic switched on, every main topic may be off
+  const clean = validatePatch(body, topics.map((t) => t.tag), cfg, { custom: enabledOnly(custom).length });
   const cols = {};
   for (const [k, v] of Object.entries(clean)) cols[k] = Array.isArray(v) ? JSON.stringify(v) : v;
   const after = { ...user, ...cols };
@@ -152,9 +153,26 @@ async function removeCustom(db, tg, body, now, cfg, isOwner) {
   const user = rows[0];
   if (!user) return fail(404, "reopen_simple");
   if (!custom.some((c) => c.id === id)) return json(200, state(user, topics, isOwner, cfg, custom));   // already gone
-  if (custom.length === 1 && !JSON.parse(user.topics || "[]").length) return fail(400, "keep_topic");
+  const left = custom.filter((c) => c.id !== id);
+  if (!enabledOnly(left).length && !JSON.parse(user.topics || "[]").length) return fail(400, "keep_topic");
   await db.batch(removeStatements(user.id, id, now));
-  return json(200, state(user, topics, isOwner, cfg, custom.filter((c) => c.id !== id)));
+  return json(200, state(user, topics, isOwner, cfg, left));
+}
+
+// Step 13 fixes: the switch on a custom topic row. Off keeps the topic in the list (its slot still
+// counts toward the 3); the last topic switched on (main or custom) cannot go off.
+async function switchCustom(db, tg, body, now, cfg, isOwner) {
+  const id = Number(body?.id);
+  if (!Number.isInteger(id) || id <= 0 || typeof body?.on !== "boolean") return fail(400, "bad_request");
+  const [rows, topics, custom] = await db.batch([{ sql: USER_SQL, params: [tg.id] }, { sql: TOPICS_SQL, params: [] },
+    followedStatement(tg.id)]);
+  const user = rows[0];
+  if (!user) return fail(404, "reopen_simple");
+  if (!custom.some((c) => c.id === id)) return json(200, state(user, topics, isOwner, cfg, custom));   // removed elsewhere
+  const after = custom.map((c) => (c.id === id ? { ...c, enabled: body.on ? 1 : 0 } : c));
+  if (!body.on && !enabledOnly(after).length && !JSON.parse(user.topics || "[]").length) return fail(400, "keep_topic");
+  await db.batch([switchStatement(user.id, id, body.on)]);
+  return json(200, state(user, topics, isOwner, cfg, after));
 }
 
 async function adminTopic(db, body, now) {
@@ -178,9 +196,9 @@ async function digestNow(db, ownerId, now, cfg, io) {
     followedStatement(ownerId)]);
   const user = rows[0];
   if (!user) return fail(404, "no_user");
-  const u = withCustomTopics(user, custom), c = withCustomCaps(cfg, custom);   // Step 13
-  const [cands] = await db.batch([candidateStatement(u, now, c)]);
-  const plan = planDigest(u, cands, [...topics, ...asTopicRows(custom)], now, c);
+  const u = withCustomTopics(user, custom);   // Step 13: the custom topics switched on
+  const [cands] = await db.batch([candidateStatement(u, now, cfg)]);
+  const plan = planDigest(u, cands, [...topics, ...asTopicRows(enabledOnly(custom))], now, cfg);
   const ids = await sendDigest(io, user.id, plan);
   await db.batch(digestWrites(user, plan, ids, now));
   const n = ids.length;
@@ -256,6 +274,7 @@ export async function handleApi(request, env, db, now, io, cfg = CONFIG) {
       case "POST /api/tip": return await tipLink(tg, body, io);
       case "POST /api/topics/add": return await addCustom(db, env, tg, body, now, cfg, isOwner);
       case "POST /api/topics/remove": return await removeCustom(db, tg, body, now, cfg, isOwner);
+      case "POST /api/topics/switch": return await switchCustom(db, tg, body, now, cfg, isOwner);
       case "GET /api/admin":
       case "POST /api/admin/digest":
       case "POST /api/admin/run-job":

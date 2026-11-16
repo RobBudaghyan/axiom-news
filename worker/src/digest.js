@@ -29,6 +29,9 @@ const DAY = 86400;
 // editor's first score time (scored_at): a story scored after a digest went out still reaches the
 // next one. Best relevance first: t if the main topic is followed, otherwise g. The same rule is
 // in topicScore/qualifies below (the tests check both agree).
+// Step 13 fixes (owner): for a CUSTOM main topic (c<id>) the reader chose the subject, so t is the
+// editor's topic score as it is ("how important is this for someone who chose this topic"): no
+// boost cap and no "t above g" rule. The bar stays topic_bar (6). The 6 main topics are unchanged.
 // Step 9: each row also carries its translation into the reader's language ?10 (NULL if none, or if
 // it was made from an older English text: `src` must equal the current one, compared here in SQL).
 // Step 10: a story held back from an earlier digest for want of a translation (digest_holds) stays
@@ -38,8 +41,9 @@ SELECT id, summary, headline, description, emojis, best_url, best_source, import
        topics, main_topic, updated_at, dup_group, tr_headline, tr_description
 FROM (
   SELECT s.*, coalesce(s.final_score, s.importance - ?6) AS g,
-         s.final_score + min(max(coalesce(s.topic_score, s.final_score) - s.final_score, 0),
-                             coalesce(json_extract(?8, '$.' || s.main_topic), 10)) AS t,
+         CASE WHEN s.main_topic GLOB 'c[0-9]*' THEN max(coalesce(s.topic_score, s.final_score), s.final_score)
+              ELSE s.final_score + min(max(coalesce(s.topic_score, s.final_score) - s.final_score, 0),
+                                       coalesce(json_extract(?8, '$.' || s.main_topic), 10)) END AS t,
          s.main_topic IN (SELECT u.value FROM json_each(?2) u) AS followed,
          tr.headline AS tr_headline, tr.description AS tr_description
   FROM stories s
@@ -52,7 +56,7 @@ FROM (
     AND EXISTS (SELECT 1 FROM json_each(s.topics) x WHERE x.value IN (SELECT u.value FROM json_each(?2) u))
     AND NOT EXISTS (SELECT 1 FROM sent x WHERE x.user_id = ?1 AND x.story_id = s.id)
 )
-WHERE g >= ?5 OR (followed AND t >= ?7 AND (?9 = 0 OR t > final_score))
+WHERE g >= ?5 OR (followed AND t >= ?7 AND (?9 = 0 OR t > final_score OR main_topic GLOB 'c[0-9]*'))
 ORDER BY max(g, CASE WHEN followed THEN coalesce(t, 0) ELSE 0 END) DESC, g DESC, updated_at DESC, id DESC
 LIMIT ?4`;
 
@@ -90,8 +94,10 @@ export function storyScore(s, cfg = CONFIG) {
 // a story the editor has not scored has none. The editor's boost (topic score minus score) is
 // capped per main topic in code (cfg.topic_boost_max: 0 for the broad topics, 1 for the two wars,
 // 2 for Armenia and Russia), because the model still lifts statements and routine war news.
+// Step 13 fixes: a custom main topic has no cap; its topic score is the editor's own.
 export function topicScore(s, cfg = CONFIG) {
   if (s.final_score == null) return null;
+  if (isCustomTag(s.main_topic)) return Math.max(s.topic_score ?? s.final_score, s.final_score);
   const boost = Math.max(0, (s.topic_score ?? s.final_score) - s.final_score);
   const cap = cfg.topic_boost_max?.[s.main_topic] ?? boost;
   return s.final_score + Math.min(boost, cap);
@@ -99,6 +105,7 @@ export function topicScore(s, cfg = CONFIG) {
 
 // Step 13: a reader's own topic (c<id>) is the most specific of all.
 const CUSTOM = /^c\d+$/;
+export const isCustomTag = (tag) => typeof tag === "string" && CUSTOM.test(tag);
 const rankOf = (specificity) => (t) => {
   if (CUSTOM.test(t)) return -1;
   const i = specificity.indexOf(t);
@@ -141,7 +148,7 @@ export function qualifies(s, userTopics, cfg = CONFIG) {
   if (storyScore(s, cfg) >= cfg.editorial_bar) return true;
   const t = topicScore(s, cfg);
   return t != null && !!s.main_topic && userTopics.includes(s.main_topic) && t >= cfg.topic_bar &&
-    (!cfg.topic_needs_boost || t > s.final_score);
+    (!cfg.topic_needs_boost || t > s.final_score || isCustomTag(s.main_topic));
 }
 
 // candidates: rows from CANDIDATE_SQL. Returns every story that qualifies (no fixed count, no

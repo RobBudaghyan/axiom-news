@@ -288,7 +288,9 @@ READER_TOPICS = """
    Items about a reader topic ARE news here, even when they are outside the topics above
    (sport, technology, business, culture, science): this overrides the FILTER rule for them.
    Tag them with the reader topic's tag (and any other tag that applies). Their importance is
-   still scored on the scale below, for a general reader."""
+   still scored on the scale below, for a general reader, except: an item that is a notable
+   development for the topic's followers (a race result, a title, an election, a new law, a big
+   decision) gets at least 3, so the editor sees it. Routine items keep their low score."""
 
 
 def reader_topics_block(custom: list[dict]) -> str:
