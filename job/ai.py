@@ -275,7 +275,28 @@ def estimate_tokens(text: str) -> int:
 
 def item_line(item: dict) -> str:
     snippet = f" :: {item['snippet']}" if item.get("snippet") else ""
-    return f"{item['id']} | {item['source_name']}, tier {item['tier']} | {item['title']}{snippet}"
+    # Step 13: Google News results have no text beyond the headline
+    marker = " [headline only]" if item.get("headline_only") else ""
+    return f"{item['id']} | {item['source_name']}, tier {item['tier']} | {item['title']}{snippet}{marker}"
+
+
+# Step 13: readers' own topics. Rendered right after the main topic list; empty when no custom
+# topic is followed, so the prompt is then exactly what it was before Step 13.
+READER_TOPICS = """
+   READER TOPICS. Readers also follow these topics of their own (tag: what it covers):
+{lines}
+   Items about a reader topic ARE news here, even when they are outside the topics above
+   (sport, technology, business, culture, science): this overrides the FILTER rule for them.
+   Tag them with the reader topic's tag (and any other tag that applies). Their importance is
+   still scored on the scale below, for a general reader."""
+
+
+def reader_topics_block(custom: list[dict]) -> str:
+    if not custom:
+        return ""
+    lines = "\n".join(f"   - {t['tag']}: {t['label']['en']}, {' '.join(str(t.get('definition') or '').split())}"
+                      for t in custom)
+    return READER_TOPICS.format(lines=lines)
 
 
 def story_line(story: dict) -> str:
@@ -286,10 +307,14 @@ def story_line(story: dict) -> str:
 
 def render_prompt(template: str, *, today: str, topics: list[dict], facts: list[str],
                   facts_checked: str, existing: list[dict], items: list[dict]) -> str:
-    topic_list = "\n".join(f"   - {t['tag']}: {' '.join(t['definition'].split())}" for t in topics)
+    """topics: the main topics, then any custom topics (`custom: True`, Step 13), which go in
+    their own READER TOPICS block."""
+    main = [t for t in topics if not t.get("custom")]
+    topic_list = "\n".join(f"   - {t['tag']}: {' '.join(t['definition'].split())}" for t in main)
     values = {
         "{today}": today,
         "{topic_list}": topic_list,
+        "{reader_topics}": reader_topics_block([t for t in topics if t.get("custom")]),
         "{facts_checked_date}": facts_checked,
         "{calibration_facts}": "\n".join(f"- {f}" for f in facts),
         "{recent_stories}": "\n".join(story_line(s) for s in existing) or "(none)",

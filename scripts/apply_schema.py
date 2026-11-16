@@ -36,6 +36,11 @@ MIGRATIONS = [
     "ALTER TABLE stories ADD COLUMN scored_at INTEGER",
     # Step 9: reader languages (story_translations is a new table, created above)
     "ALTER TABLE users ADD COLUMN lang TEXT NOT NULL DEFAULT 'en'",
+    # Step 13: custom topics and the AI budget guard (the new tables are created above)
+    "ALTER TABLE items ADD COLUMN headline_only INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE items ADD COLUMN hint_topic TEXT",
+    "ALTER TABLE stories ADD COLUMN link_state INTEGER",
+    "ALTER TABLE ai_calls ADD COLUMN code INTEGER",
 ]
 
 

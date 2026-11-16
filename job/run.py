@@ -20,7 +20,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 from typing import Callable
 
-from job import ai, dupes, editor, translate
+from job import ai, custom, dupes, editor, guard, translate
 from job.config import Prompt, Settings, load_env, load_prompt, load_sources, load_topics
 from job.d1 import D1, in_list_statements, insert_statements
 from job.fetch import (Entry, FeedResult, candidates, feed_caps, feed_health, fetch_all, select_new,
@@ -37,6 +37,7 @@ MIN_PLACED_SHARE = 0.10
 MAX_SKIPPED_SHARE = 0.10
 ITEM_COLUMNS = ("url_hash", "source_key", "source_name", "tier", "url", "title", "snippet",
                 "published_at", "fetched_at", "status")
+HTTP_CODE = re.compile(r"HTTP (\d{3})")
 
 
 @dataclass
@@ -75,6 +76,13 @@ class RunStats:
     failed_feeds: list[str] = field(default_factory=list)
     cap_cut: dict[str, int] = field(default_factory=dict)   # feed key -> new items its cap left out
     ai_errors: list[str] = field(default_factory=list)
+    # Step 13: custom topics and the AI budget guard
+    custom: "custom.SearchStats | None" = None
+    links: "custom.ResolveStats | None" = None
+    custom_deleted: int | None = None
+    custom_errors: list[str] = field(default_factory=list)   # written to `errors` as component 'custom'
+    guard: dict | None = None
+    translate_delayed: bool = False
 
     @property
     def provider(self) -> str | None:
@@ -120,12 +128,25 @@ class Job:
                  prompt: Prompt | None = None,
                  fetcher: Callable[[list[dict], int], list[FeedResult]] | None = None,
                  clock: Callable[[], float] = time.time, log: Callable[[str], None] = print,
-                 debug_dir: str | None = None, editor_enabled: bool = True, translate_enabled: bool = True):
+                 debug_dir: str | None = None, editor_enabled: bool = True, translate_enabled: bool = True,
+                 custom_enabled: bool = True, custom_cfg: dict | None = None, gnews_fetcher=None,
+                 link_resolver=None, budget_cfg: dict | None = None, digest_cfg: dict | None = None):
         self.db = db
         self.plans = plans
         self.s = settings or Settings()
         self.topics = topics if topics is not None else load_topics()
-        self.topic_order = [t["tag"] for t in self.topics]
+        self.main_order = [t["tag"] for t in self.topics]
+        # Step 13: the topics the AI passes see = the main topics + the custom topics active readers
+        # follow (set at the start of each run); topic_order is their tags.
+        self.ai_topics = list(self.topics)
+        self.topic_order = list(self.main_order)
+        self.custom_topics: list[custom.CustomTopic] = []
+        self.custom_enabled = custom_enabled
+        self.custom_cfg = custom_cfg
+        self.gnews_fetcher = gnews_fetcher
+        self.link_resolver = link_resolver
+        self.budget_cfg = budget_cfg
+        self.digest_cfg = digest_cfg
         self.sources = sources if sources is not None else load_sources()
         self.prompt = prompt or load_prompt()
         self.fetcher = fetcher or self._fetch
@@ -154,7 +175,7 @@ class Job:
                   "VALUES (?,?,?,?,?,?) ON CONFLICT(tag) DO UPDATE SET label_en=excluded.label_en, "
                   "label_ru=excluded.label_ru, emoji=excluded.emoji, sort=excluded.sort, "
                   "is_default=excluded.is_default", list(row)) for row in desired]
-        stmts += in_list_statements("DELETE FROM topics WHERE tag NOT IN ({qs})", self.topic_order)
+        stmts += in_list_statements("DELETE FROM topics WHERE tag NOT IN ({qs})", self.main_order)
         self.db.batch(stmts)
 
     def load_feed_health(self) -> dict | None:
@@ -196,7 +217,8 @@ class Job:
 
     def load_pending(self) -> list[dict]:
         return self.db.query(
-            "SELECT id, source_name, tier, url, title, snippet, published_at, fetched_at FROM items "
+            "SELECT id, source_name, tier, url, title, snippet, published_at, fetched_at, headline_only "
+            "FROM items "
             "WHERE status = 'pending' ORDER BY coalesce(published_at, fetched_at), id")
 
     def load_existing(self, now: int, limit: int) -> list[dict]:
@@ -212,7 +234,7 @@ class Job:
     def render(self, items: list[dict], existing: list[dict], now: int) -> str:
         return ai.render_prompt(
             self.prompt.template, today=datetime.fromtimestamp(now, timezone.utc).strftime("%Y-%m-%d"),
-            topics=self.topics, facts=self.prompt.facts, facts_checked=self.prompt.facts_checked,
+            topics=self.ai_topics, facts=self.prompt.facts, facts_checked=self.prompt.facts_checked,
             existing=existing, items=items)
 
     # ------------------------------------------------------------ AI pass
@@ -320,9 +342,11 @@ class Job:
 
     def _log_call(self, p, ok, n_items, res: ai.CallResult | None, error: str | None,
                   kind: str = "batch") -> None:
+        m = HTTP_CODE.search(error or "")   # Step 13: the guard counts 429s by this code
         self.calls_log.append((int(self.clock()), p.name, p.model, 1 if ok else 0, n_items,
                                res.input_tokens if res else None, res.output_tokens if res else None,
-                               res.ms if res else None, (error or "")[:500] or None, kind))
+                               res.ms if res else None, (error or "")[:500] or None, kind,
+                               int(m.group(1)) if m else None))
 
     def apply(self, stories: list[ai.StoryOut], chunk: list[dict], existing: list[dict],
               not_news: set[int], now: int, stats: RunStats) -> None:
@@ -410,7 +434,7 @@ class Job:
         """The second AI call (job/editor.py). Never fails the run: if it cannot edit, the
         stories keep their first-pass data and digests still work from it."""
         ed = editor.Editor(
-            self.db, self.plans, topics=self.topics, facts=self.prompt.facts,
+            self.db, self.plans, topics=self.ai_topics, facts=self.prompt.facts,
             facts_checked=self.prompt.facts_checked, settings=self.s, log=self.log,
             on_call=lambda p, ok, n, res, err: self._log_call(p, ok, n, res, err, kind="editor"),
             debug_dir=self.debug_dir)
@@ -437,6 +461,7 @@ class Job:
         English meanwhile."""
         tr = translate.Translator(
             self.db, self.plans, settings=self.s, topic_tags=self.topic_order, log=self.log,
+            digest_cfg=self.merged_digest_cfg(),
             on_call=lambda p, ok, n, res, err, kind: self._log_call(p, ok, n, res, err, kind=kind),
             debug_dir=self.debug_dir)
         try:
@@ -448,6 +473,88 @@ class Job:
         stats.ai_errors += res.errors
         self.log(res.line())
         return res
+
+    # ------------------------------------------------------------ Step 13: custom topics
+
+    def _custom_cfg(self) -> dict:
+        if self.custom_cfg is None:
+            self.custom_cfg = custom.load_config()
+        return self.custom_cfg
+
+    def merged_digest_cfg(self) -> dict:
+        """config/digest.json with each active custom topic's boost cap added (translate's
+        eligibility and link resolution use the same rule as the Worker's digest)."""
+        cfg = dict(self.digest_cfg or translate.load_digest_config())
+        cfg["topic_boost_max"] = custom.merged_caps(cfg.get("topic_boost_max") or {}, self.custom_topics)
+        return cfg
+
+    def load_custom(self, stats: RunStats) -> None:
+        """The custom topics active readers follow join the AI passes' topic list. A failure
+        leaves the run with the main topics only."""
+        try:
+            self.custom_topics = custom.load_active(self.db)
+        except Exception as exc:
+            self.custom_topics = []
+            stats.custom_errors.append(f"custom topics: load failed: {type(exc).__name__}: {exc}")
+        floor = self._custom_cfg().get("editor_floor") if self.custom_topics else None
+        self.ai_topics = list(self.topics) + [{**t.as_topic(), "floor": floor} for t in self.custom_topics]
+        self.topic_order = self.main_order + [t.tag for t in self.custom_topics]
+
+    def run_custom_search(self, now: int, stats: RunStats) -> None:
+        if not self.custom_topics:
+            return
+        try:
+            res = custom.Searcher(self.db, cfg=self._custom_cfg(), fetcher=self.gnews_fetcher,
+                                  clock=self.clock, log=self.log).run(self.custom_topics, now)
+            stats.custom = res
+            self.log(res.line())
+            if res.stopped:
+                stats.custom_errors.append(f"custom topics: {res.stopped}; the other searches wait for the next run")
+        except Exception as exc:
+            stats.custom_errors.append(f"custom topics: search failed: {type(exc).__name__}: {exc}")
+
+    def run_resolve_links(self, now: int, stats: RunStats) -> None:
+        try:
+            cfg = self.merged_digest_cfg()
+            rows = self.db.query(translate.ELIGIBLE_SQL, translate.eligible_params(now, cfg, self.topic_order))
+            res = custom.resolve_links(self.db, [int(r["id"]) for r in rows], cfg=self._custom_cfg(),
+                                       resolver=self.link_resolver, clock=self.clock)
+            stats.links = res
+            if res.tried:
+                self.log(res.line())
+            if res.failed:
+                stats.custom_errors.append(f"{res.line()}: " + "; ".join(res.errors)[:400])
+        except Exception as exc:
+            stats.custom_errors.append(f"google links: {type(exc).__name__}: {exc}")
+
+    def run_cleanup(self, now: int, stats: RunStats) -> None:
+        try:
+            stats.custom_deleted = custom.cleanup(self.db, now, self._custom_cfg())
+            if stats.custom_deleted:
+                self.log(f"custom topics: {stats.custom_deleted} deleted after 7 days without followers")
+        except Exception as exc:
+            stats.custom_errors.append(f"custom topics: cleanup failed: {type(exc).__name__}: {exc}")
+
+    def check_guard(self, now: int, stats: RunStats) -> dict:
+        """The AI budget guard (job/guard.py), counting this run's calls not yet written too. Never
+        stops pass 1 or the editor: it is asked only before translation."""
+        cfg = self.budget_cfg or guard.load_budget()
+        recent = now - int(cfg.get("recent_429_minutes", 60)) * 60
+        extra: dict = {}
+        for c in self.calls_log:
+            e = extra.setdefault(c[2], {"calls": 0, "r429": 0, "recent429": 0})
+            e["calls"] += 1
+            if c[10] == 429:
+                e["r429"] += 1
+                if c[0] >= recent:
+                    e["recent429"] += 1
+        try:
+            state = guard.check(self.db, now, cfg, extra)
+        except Exception as exc:   # an unreadable count never delays anything
+            stats.custom_errors.append(f"ai guard: {type(exc).__name__}: {exc}")
+            state = {"level": 0, "reasons": [], "day": guard.pacific_day(now)[0], "at": now, "counts": {}}
+        stats.guard = state
+        return state
 
     # ------------------------------------------------------------ housekeeping
 
@@ -483,6 +590,8 @@ class Job:
         status, error = "error", None
         try:
             self.sync_topics()
+            if self.custom_enabled:
+                self.load_custom(stats)
             since = self.lookback_since(now)
             results = self.fetcher(self.sources, now)
             self.feed_health = feed_health(self.load_feed_health(), results, now)
@@ -496,6 +605,8 @@ class Job:
             for key, n in self.cap_cut.items():   # shown nowhere yet; kept for tuning the caps
                 if key in self.feed_health["feeds"]:
                     self.feed_health["feeds"][key]["cut"] = n
+            if self.custom_enabled:
+                self.run_custom_search(now, stats)
             stats.items_expired = self.expire_old_pending(now)
             pending = self.load_pending()
             stats.items_pending_in = len(pending)
@@ -508,9 +619,18 @@ class Job:
             except Exception as exc:
                 stats.ai_errors.append(f"dupes: {type(exc).__name__}: {exc}")
             stats.editor = self.run_editor(now, stats) if self.editor_enabled else None
-            stats.translate = self.run_translate(now, stats) if self.translate_enabled else None
+            if self.custom_enabled:
+                self.run_resolve_links(now, stats)
+            state = self.check_guard(now, stats)
+            if self.translate_enabled and state["level"] >= 2:
+                stats.translate_delayed = True
+                self.log("translate: delayed by the AI guard: " + "; ".join(state["reasons"]))
+            elif self.translate_enabled:
+                stats.translate = self.run_translate(now, stats)
             stats.ai_calls = len(self.calls_log)
             stats.pruned = self.prune_daily(now)
+            if self.custom_enabled:
+                self.run_cleanup(now, stats)
             processed = stats.items_pending_in - stats.items_left_pending
             if not left:
                 status = "ok"
@@ -551,11 +671,18 @@ class Job:
                           [json.dumps(self.feed_health, separators=(",", ":"), ensure_ascii=False)]))
         stmts += insert_statements(
             "ai_calls", ("at", "provider", "model", "ok", "items", "input_tokens", "output_tokens", "ms",
-                         "error", "kind", "run_id"),
+                         "error", "kind", "code", "run_id"),
             [(*c, run_id) for c in self.calls_log])
         errors = list(stats.ai_errors) + ([error] if status == "error" and error else [])
         stmts += insert_statements("errors", ("at", "component", "message"),
-                                   [(now, "job", e[:1000]) for e in errors])
+                                   [(now, "job", e[:1000]) for e in errors]
+                                   + [(now, "custom", e[:1000]) for e in stats.custom_errors])
+        if stats.guard is not None:
+            # the Worker shows it in Admin and alerts the owner once a day when level > 0
+            g = {**stats.guard, "translate_delayed": stats.translate_delayed}
+            stmts.append(("INSERT INTO meta (key, value) VALUES ('ai_guard', ?) "
+                          "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+                          [json.dumps(g, separators=(",", ":"), ensure_ascii=False)]))
         try:
             self.db.batch(stmts)
         except Exception as exc:  # never hide the original error behind a logging failure
@@ -572,8 +699,17 @@ class Job:
             f"AI: provider {s.provider}, calls {s.ai_calls}, tokens in {s.input_tokens} out {s.output_tokens}"
             f" | pruned {s.pruned}",
             s.editor.line() if s.editor else "editor: not run",
-            s.translate.line() if s.translate else "translate: not run",
+            s.translate.line() if s.translate else
+            ("translate: delayed by the AI guard" if s.translate_delayed else "translate: not run"),
         ]
+        if s.custom:
+            lines.append(s.custom.line())
+        if s.links and s.links.tried:
+            lines.append(s.links.line())
+        if s.guard and s.guard.get("level"):
+            lines.append(f"AI guard: level {s.guard['level']}: " + "; ".join(s.guard.get("reasons") or []))
+        for e in s.custom_errors:
+            lines.append("custom: " + e[:300])
         if s.failed_feeds:
             lines.append("failed feeds: " + ", ".join(s.failed_feeds))
         if s.cap_cut:

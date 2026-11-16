@@ -21,6 +21,7 @@ import {
 } from "../src/digest.js";
 import { sendDigestMessage } from "../src/telegram.js";
 import { digestExtra, digestWrites } from "../src/cron.js";
+import { asTopicRows, followedStatement, withCustomCaps, withCustomTopics } from "../src/custom.js";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 
@@ -143,17 +144,21 @@ async function main() {
   const db = d1Rest(env);
   const owner = Number(env.OWNER_TELEGRAM_ID);
   const now = Math.floor(Date.now() / 1000);
-  const [users, topics] = await db.batch([
+  const [users, mainTopics, custom] = await db.batch([
     { sql: "SELECT * FROM users WHERE id = ?1", params: [owner] },
     { sql: "SELECT tag, label_en, emoji, sort, is_default FROM topics ORDER BY sort", params: [] },
+    followedStatement(owner),   // Step 13: the owner's custom topics, as the Worker cron adds them
   ]);
-  const user = users[0] ?? {
-    id: owner, topics: JSON.stringify(topics.map((t) => t.tag)), first_name: "",
+  const base = users[0] ?? {
+    id: owner, topics: JSON.stringify(mainTopics.map((t) => t.tag)), first_name: "",
     timezone: CONFIG.default_timezone, digest_times: JSON.stringify(CONFIG.default_times), last_digest_at: null,
   };
+  const user = withCustomTopics(base, custom);
+  const topics = [...mainTopics, ...asTopicRows(custom)];
+  if (custom.length) console.log(`[custom topics: ${custom.map((c) => `${c.tag} ${JSON.parse(c.names).en} (cap ${c.boost_max})`).join(", ")}]`);
   // --bars 7,6 or several: --bars "7,5;7,6;7,7" (editorial,topic)
   const barSets = (arg("--bars") ?? `${CONFIG.editorial_bar},${CONFIG.topic_bar}`).split(";")
-    .map((b) => ({ ...CONFIG, editorial_bar: Number(b.split(",")[0]), topic_bar: Number(b.split(",")[1]),
+    .map((b) => ({ ...withCustomCaps(CONFIG, custom), editorial_bar: Number(b.split(",")[0]), topic_bar: Number(b.split(",")[1]),
       ...(b.split(",")[2] === "noboost" ? { topic_needs_boost: false } : {}) }));
   const limit = arg("--limit");
   if (limit) for (const c of barSets) c.message_char_limit = Number(limit);

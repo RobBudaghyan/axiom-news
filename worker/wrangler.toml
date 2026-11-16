@@ -1,6 +1,7 @@
 # Cloudflare Worker for Axiom News (TEST bot during development).
 # Secrets are NOT here. They are set with `wrangler secret put` (scripts/set_secrets.py):
-#   TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, OWNER_TELEGRAM_ID, GITHUB_DISPATCH_TOKEN
+#   TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, OWNER_TELEGRAM_ID, GITHUB_DISPATCH_TOKEN,
+#   GEMINI_API_KEY, GROQ_API_KEY (Step 13: the one AI check of a reader's new custom topic)
 name = "axiom-news"
 main = "src/index.js"
 compatibility_date = "2026-10-01"
@@ -28,6 +29,10 @@ GITHUB_WORKFLOW = "hourly.yml"
 GITHUB_REF = "main"
 # The Mini App address used by the bot's Open settings button and the chat menu button.
 APP_URL = "https://axiom-news.axiom-news-worker.workers.dev/app/"
+# Step 13: the same models as the hourly job (.github/workflows/hourly.yml), for the topic check.
+GEMINI_MODEL = "gemini-3.5-flash-lite"
+GEMINI_FALLBACK_MODEL = "gemini-3.1-flash-lite"
+GROQ_MODEL = "openai/gpt-oss-120b"
 
 [observability]
 enabled = true

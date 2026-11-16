@@ -4,6 +4,9 @@
 // haptic tap instead), language buttons with flags, the time zone as one line at the bottom,
 // Support with three buttons only, one size for every row and button, grids on shared columns,
 // 44 px tap targets, and nothing overflowing at 360 and 430 px, in English and Russian.
+// Step 13: "My topics" (add with Enter or Add, checking, added, joined, rejected, main topic,
+// delayed by the AI guard, remove, the limit of 3, a long name cut with "...") and the same layout
+// rules on the new card at 360, 390 and 430 px, English and Russian, light and dark.
 // Start the preview first (node scripts/dev-server.mjs; the check resets its demo data), then:
 //   node scripts/ui-check.mjs
 import { openBrowser } from "./dev/cdp.mjs";
@@ -26,6 +29,15 @@ const SERVER = `const server = async () => (await (await fetch('/api/open', { me
     if (t.classList.contains('show')) window.__toasts.push(t.textContent); }).observe(document.querySelector('#toast'), { attributes: true }); }
   const calls = () => (window.__calls || []).length;
   const since = (n) => (window.__calls || []).slice(n);`;
+// Step 13: "My topics" helpers inside the page
+const MY = `const addT = (name, how = 'enter') => { const i = document.querySelector('#topic-input'); i.value = name;
+    i.dispatchEvent(new Event('input', { bubbles: true })); if (how === 'enter') i.form.requestSubmit(); else click('[data-action=add-topic]'); };
+  const done = async () => { await wait(60); await until(() => !document.querySelector('#my-topics .add-spin'), 6000); await wait(200); };
+  const mine = () => [...document.querySelectorAll('#my-topics .ct .row-title')].map((e) => e.textContent);
+  const serverMine = async () => (await (await fetch('/api/open', { method: 'POST', headers: { authorization: 'tma ' + Telegram.WebApp.initData,
+    'content-type': 'application/json' }, body: '{}' })).json()).custom.map((c) => c.name);`;
+const ADD = (name) => `await fetch('/api/topics/add', { method: 'POST', headers: { authorization: 'tma ' + Telegram.WebApp.initData,
+  'content-type': 'application/json' }, body: JSON.stringify({ name: ${JSON.stringify(name)} }) });`;
 const API = (body) => `await fetch('/api/settings', { method: 'POST', headers: { authorization: 'tma ' + Telegram.WebApp.initData,
   'content-type': 'application/json' }, body: JSON.stringify(${JSON.stringify(body)}) });`;
 
@@ -55,9 +67,10 @@ const LAYOUT = `const v = document.querySelector('#view');
   const radii = [...new Set([...btns, ...v.querySelectorAll('.group')].filter((e) => getComputedStyle(e).backgroundColor !== 'rgba(0, 0, 0, 0)')
     .map((e) => getComputedStyle(e).borderTopLeftRadius))];
   const offGrid = btns.filter((b) => !near(box(b).left, lefts) || !near(box(b).right, rights)).map((b) => b.textContent.trim());
-  const small = [...v.querySelectorAll('button')].filter((b) => box(b).height < 44 || box(b).width < 44).map((b) => b.textContent.trim());
-  const cut = [...v.querySelectorAll('.b, .row-title, .lbl')].filter((e) => e.scrollWidth > e.clientWidth + 1 || e.scrollHeight > e.clientHeight + 1)
-    .map((e) => e.textContent.trim());
+  const small = [...v.querySelectorAll('button')].filter((b) => b.offsetParent)   // a hidden button is no tap target (Step 13: Add while empty)
+    .filter((b) => box(b).height < 44 || box(b).width < 44).map((b) => b.textContent.trim());
+  const cut = [...v.querySelectorAll('.b, .row-title, .lbl')].filter((e) => !e.closest('.ct'))   // a custom topic's long name ends in "..." on purpose
+    .filter((e) => e.scrollWidth > e.clientWidth + 1 || e.scrollHeight > e.clientHeight + 1).map((e) => e.textContent.trim());
   const texts = [...v.querySelectorAll('p, .section-foot, .support-text, .fine, .row-sub, .hero-sub, #times-foot')].map((e) => e.id || e.className);
   return { H, R, heights, radii, offGrid, small, cut, texts, last: v.lastElementChild?.id,
     sideways: document.documentElement.scrollWidth > window.innerWidth };`;
@@ -155,6 +168,78 @@ try {
     r.on === "ru" && r.line.startsWith("Ереван · GMT") && !r.toasts.length && r.haptics.includes("haptic impact light") && r.back === "en",
     `${r.u.lang} / ${r.title} / ${r.line} / ${JSON.stringify(r.haptics)}`);
 
+  // ------------------------------------------------------------ Step 13: My topics (friend, English, light)
+  r = await b.run(`${SERVER} ${MY} const sec = document.querySelector('#my-topics'); const add = sec.querySelector('.add-row');
+    const sq = getComputedStyle(add.querySelector('.sq')); const i = add.querySelector('input');
+    return { after: document.querySelector('#topics').nextElementSibling?.id, head: text('#my-topics .section-head'), rows: mine(),
+      sq: sq.backgroundColor, plus: !!add.querySelector('.sq svg'), ph: i.placeholder, font: getComputedStyle(i).fontSize,
+      go: getComputedStyle(add.querySelector('.add-go')).display, h: Math.round(add.getBoundingClientRect().height) };`);
+  check("My topics: a card right under Topics, the add row with a red + and 'Add a topic' (17 px), Add hidden while empty",
+    r.after === "my-topics" && r.head === "My topics" && !r.rows.length && r.sq === RED && r.plus && r.ph === "Add a topic" &&
+    r.font === "17px" && r.go === "none" && r.h === 48, JSON.stringify(r));
+  r = await b.run(`${MY} const i = document.querySelector('#topic-input'); i.value = 'Col'; i.dispatchEvent(new Event('input', { bubbles: true }));
+    const shown = getComputedStyle(document.querySelector('.add-go')).display, word = text('.add-go');
+    i.value = ''; i.dispatchEvent(new Event('input', { bubbles: true })); return { shown, word, hidden: getComputedStyle(document.querySelector('.add-go')).display };`);
+  check("My topics: a red Add appears once something is typed", r.shown === "block" && r.word === "Add" && r.hidden === "none", JSON.stringify(r));
+  r = await b.run(`${SERVER} ${MY} const n = calls(), t = window.__toasts.length; addT('Colombia'); await wait(120);
+    const checking = { spin: !!document.querySelector('#my-topics .add-spin .spinner'), locked: document.querySelector('#topic-input').disabled,
+      go: !!document.querySelector('.add-go') };
+    await done(); return { checking, rows: mine(), server: await serverMine(), input: document.querySelector('#topic-input').value,
+      toasts: window.__toasts.slice(t), haptics: since(n).filter((c) => c.startsWith('haptic')), slid: !!document.querySelector('.ct.new') };`);
+  check("My topics: while the AI checks, a spinner stands where Add was and the field is locked", r.checking.spin && r.checking.locked && !r.checking.go,
+    JSON.stringify(r.checking));
+  check("My topics: Enter adds it: the row slides in, the field clears, one light haptic tap, no toast",
+    JSON.stringify(r.rows) === '["Colombia"]' && JSON.stringify(r.server) === '["Colombia"]' && r.input === "" && !r.toasts.length &&
+    JSON.stringify(r.haptics) === '["haptic impact light"]' && r.slid, JSON.stringify(r));
+  r = await b.run(`${SERVER} ${MY} const t = window.__toasts.length; addT('F1', 'button'); await done();
+    return { rows: mine(), server: await serverMine(), toasts: window.__toasts.slice(t) };`);
+  check("My topics: the Add word works too; 'F1' joins the shared topic Formula 1 that someone else made",
+    JSON.stringify(r.rows) === '["Colombia","Formula 1"]' && JSON.stringify(r.server) === '["Colombia","Formula 1"]' &&
+    JSON.stringify(r.toasts) === '["Joined: Formula 1"]', JSON.stringify(r));
+  r = await b.run(`${SERVER} ${MY} const n = calls(), t = window.__toasts.length; addT('asdfgh'); await done();
+    return { rows: mine(), toasts: window.__toasts.slice(t), input: document.querySelector('#topic-input').value,
+      haptics: since(n).filter((c) => c.startsWith('haptic')) };`);
+  check("My topics: nonsense is rejected with a short reason, an error haptic, the text stays to edit",
+    r.rows.length === 2 && JSON.stringify(r.toasts) === '["This does not look like a news topic."]' && r.input === "asdfgh" &&
+    r.haptics.includes("haptic error"), JSON.stringify(r));
+  r = await b.run(`${SERVER} ${MY} const t = window.__toasts.length; addT('Armenian news'); await done();
+    return { rows: mine(), toasts: window.__toasts.slice(t) };`);
+  check("My topics: a main topic is refused with its name", r.rows.length === 2 &&
+    JSON.stringify(r.toasts) === '["Armenia is already a main topic. Switch it on above."]', JSON.stringify(r));
+  r = await b.run(`${SERVER} ${MY} addT('AI regulation'); await done();
+    return { rows: mine(), add: !!document.querySelector('#my-topics .add-row'), server: await serverMine() };`);
+  check("My topics: at 3 topics the add row disappears", r.rows.length === 3 && !r.add && r.server.length === 3, JSON.stringify(r));
+  r = await b.run(LAYOUT);
+  check("My topics: the layout rules hold with three topics (48 px rows, x targets 44 px, no helper text)", layoutOk(r), JSON.stringify(r).slice(0, 500));
+  r = await b.run(`const x = document.querySelector('#my-topics .xbtn'); const c = x.querySelector('.x'); const a = x.getBoundingClientRect(), d = c.getBoundingClientRect();
+    return { tap: [Math.round(a.width), Math.round(a.height)], drawn: [Math.round(d.width), Math.round(d.height)], round: getComputedStyle(c).borderTopLeftRadius,
+      label: x.getAttribute('aria-label') };`);
+  check("My topics: a round grey x, drawn 22 px with a 44 px tap area", r.tap.join() === "44,44" && r.drawn.join() === "22,22" && r.round === "50%" &&
+    r.label === "Remove Colombia", JSON.stringify(r));
+  r = await b.run(`${SERVER} ${MY} const n = calls(), t = window.__toasts.length; click('#my-topics .ct:nth-child(2) .xbtn'); await settled();
+    return { rows: mine(), server: await serverMine(), add: !!document.querySelector('#my-topics .add-row'), toasts: window.__toasts.slice(t),
+      haptics: since(n).filter((c) => c.startsWith('haptic')) };`);
+  check("My topics: x removes it at once (no confirm, no toast, a light haptic tap) and the add row is back",
+    JSON.stringify(r.rows) === '["Colombia","AI regulation"]' && JSON.stringify(r.server) === '["Colombia","AI regulation"]' && r.add &&
+    !r.toasts.length && JSON.stringify(r.haptics) === '["haptic impact light"]', JSON.stringify(r));
+  r = await b.run(`${SERVER} ${MY} const t = window.__toasts.length; addT('Tennis'); await done();
+    return { rows: mine(), toasts: window.__toasts.slice(t) };`);
+  check("My topics: a sixth AI check in a day is refused before any AI call (5 a day per reader)",
+    r.rows.length === 2 && JSON.stringify(r.toasts) === '["Up to 5 new topics a day. Try again tomorrow."]', JSON.stringify(r));
+  r = await b.run(`${SERVER} for (const t of ['politics', 'armenia', 'russia', 'wars_conflicts']) {
+      const el = document.querySelector('[data-action=topic][data-value=' + t + ']'); if (el.getAttribute('aria-checked') === 'true') { el.click(); await wait(150); } }
+    await settled(); return (await server()).topics;`);
+  check("with a custom topic, every main topic may be off", Array.isArray(r) && r.length === 0, JSON.stringify(r));
+  await fetch(`${BASE}/__reset`, { method: "POST" });
+  await fetch(`${BASE}/__guard429`, { method: "POST" });
+  await b.open(`${BASE}/app/?theme=light&as=friend`);
+  r = await b.run(`${SERVER} ${MY} const t = window.__toasts.length; addT('Tennis'); await done();
+    return { rows: mine(), toasts: window.__toasts.slice(t), input: document.querySelector('#topic-input').value };`);
+  check("My topics: when Gemini refused lately (the AI guard), a new check waits: 'Try again in a few minutes'",
+    r.rows.length === 0 && JSON.stringify(r.toasts) === '["Try again in a few minutes."]' && r.input === "Tennis", JSON.stringify(r));
+  await fetch(`${BASE}/__reset`, { method: "POST" });
+  await b.open(`${BASE}/app/?theme=light&as=friend`);
+
   r = await b.run(ICON_OFFSETS);
   const worst = Math.max(...r.flatMap((x) => [x.dx, x.dy, x.boxDx, x.boxDy].map(Math.abs)));
   check("every icon is centred in its rounded square (within 0.5 px)", r.length >= 2 && worst <= 0.5,
@@ -215,17 +300,28 @@ try {
   await b.close();
 }
 
-// ------------------------------------------------------------ 360 and 430 px, English and Russian, light and dark
-for (const [width, port] of [[360, 9334], [430, 9335]]) {
+// ------------------------------------------------------------ 360, 390 and 430 px, English and Russian, light and dark
+// Step 13: the owner first gets two custom topics, one with a long name (cut with "..." in its row).
+await fetch(`${BASE}/__reset`, { method: "POST" });
+for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
   const w = await openBrowser({ width, port });
   try {
+    await w.open(`${BASE}/app/?theme=light&as=owner`);
+    await w.run(`${ADD("Colombia")} ${ADD("International Space Station research")}`);
     for (const lang of ["ru", "en"]) {
       await w.open(`${BASE}/app/?theme=light&as=owner`);
       await w.run(API({ lang }));
       for (const scheme of ["light", "dark"]) {
         await w.open(`${BASE}/app/?theme=${scheme}&as=owner`, scheme);
         const L = await w.run(LAYOUT);
-        check(`${width} px, ${lang === "ru" ? "Russian" : "English"}, ${scheme}: the layout rules hold`, layoutOk(L), JSON.stringify(L).slice(0, 600));
+        check(`${width} px, ${lang === "ru" ? "Russian" : "English"}, ${scheme}: the layout rules hold (My topics too)`, layoutOk(L), JSON.stringify(L).slice(0, 600));
+        const M = await w.run(`const t = [...document.querySelectorAll('#my-topics .ct .row-title')];
+          return { n: t.length, head: text('#my-topics .section-head'), ph: document.querySelector('#topic-input')?.placeholder,
+            long: t.map((e) => [e.scrollWidth > e.clientWidth, getComputedStyle(e).textOverflow, Math.round(e.closest('.row').getBoundingClientRect().height)]) };`);
+        const ru = lang === "ru";
+        check(`${width} px, ${ru ? "Russian" : "English"}, ${scheme}: My topics in the reader's language; a long name ends in "..." on one 48 px row`,
+          M.n === 2 && M.head === (ru ? "Мои темы" : "My topics") && M.ph === (ru ? "Добавить тему" : "Add a topic") &&
+          M.long.every((x) => x[1] === "ellipsis" && x[2] === 48) && (width > 400 || M.long[1][0]), JSON.stringify(M));
       }
     }
     await w.run(API({ lang: "en" }));

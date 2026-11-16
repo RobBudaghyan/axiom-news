@@ -1,0 +1,89 @@
+max 3 custom topics per reader: 1
+a rejected topic is not created: 1
+synonym join (the AI's same_as): 2
+exact-name join without AI: 3
+main topic refused: 2
+input checked before AI: 2
+5 AI checks a day: 2
+block list: 2
+AI guard delays topic checks: 2
+every Worker AI call logged: 5
+orphan clock on the last follower leaving: 2
+custom caps in the digest: 2
+custom section names in the reader's language: 3
+custom tag is the most specific section: 2
+cron gives due readers their custom topics: 2
+guard alert once a Pacific day: 1
+guard twin: check ratio: 2
+Pacific day (DST rule): 1
+only followed, active, unpaused topics searched: 1
+request cap: 1
+rotation: oldest search first: 1
+Google refusal stops the rest: 2
+per-topic item cap: 1
+pre-dedupe against the pool: 1
+Google items marked headline only, tier 4: 1
+headline-only marker in the prompt: 2
+custom topics in the pass-1 prompt: 1
+custom tags accepted by pass 1: 3
+custom topics in the editor prompt: 1
+custom candidate floor in the editor: 1
+custom caps in translate eligibility: 1
+link resolution: Google link kept on failure: 1
+link resolution: only digest-eligible stories: 1
+7-day cleanup: 1
+guard: level 2 skips translation: 1
+guard twin (Python): both models refusing: 2
+custom failure never fails the run: 1
+UI: Add hidden until something is typed: 2
+UI: x tap area 44 px: 14
+UI: no toast on add: 2
+UI: spinner while checking: 7
+UI: long names cut with ...: 21
+
+| Broken on purpose | Tests | Checks that failed |
+|---|---|---|
+| max 3 custom topics per reader | Worker | 1 |
+| a rejected topic is not created | Worker | 1 |
+| synonym join (the AI's same_as) | Worker | 2 |
+| exact-name join without AI | Worker | 3 |
+| main topic refused | Worker | 2 |
+| input checked before AI | Worker | 2 |
+| 5 AI checks a day | Worker | 2 |
+| block list | Worker | 2 |
+| AI guard delays topic checks | Worker | 2 |
+| every Worker AI call logged | Worker | 5 |
+| orphan clock on the last follower leaving | Worker | 2 |
+| custom caps in the digest | Worker | 2 |
+| custom section names in the reader's language | Worker | 3 |
+| custom tag is the most specific section | Worker | 2 |
+| cron gives due readers their custom topics | Worker | 2 |
+| guard alert once a Pacific day | Worker | 1 |
+| guard twin: check ratio | Worker | 2 |
+| Pacific day (DST rule) | Worker | 1 |
+| only followed, active, unpaused topics searched | Python | 1 |
+| request cap | Python | 1 |
+| rotation: oldest search first | Python | 1 |
+| Google refusal stops the rest | Python | 2 |
+| per-topic item cap | Python | 1 |
+| pre-dedupe against the pool | Python | 1 |
+| Google items marked headline only, tier 4 | Python | 1 |
+| headline-only marker in the prompt | Python | 2 |
+| custom topics in the pass-1 prompt | Python | 1 |
+| custom tags accepted by pass 1 | Python | 3 |
+| custom topics in the editor prompt | Python | 1 |
+| custom candidate floor in the editor | Python | 1 |
+| custom caps in translate eligibility | Python | 1 |
+| link resolution: Google link kept on failure | Python | 1 |
+| link resolution: only digest-eligible stories | Python | 1 |
+| 7-day cleanup | Python | 1 |
+| guard: level 2 skips translation | Python | 1 |
+| guard twin (Python): both models refusing | Python | 2 |
+| custom failure never fails the run | Python | 1 |
+| UI: Add hidden until something is typed | click-through | 2 |
+| UI: x tap area 44 px | click-through | 14 |
+| UI: no toast on add | click-through | 2 |
+| UI: spinner while checking | click-through | 7 |
+| UI: long names cut with ... | click-through | 21 |
+
+caught 42 of 42

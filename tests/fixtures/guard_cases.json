@@ -1,0 +1,7767 @@
+{
+"_comment": "Writes tests/fixtures/guard_cases.json: generated AI-call counts with the guard's verdict, and",
+"cfg": {
+"_comment": "Step 13: the AI budget guard (job/guard.py and worker/src/guard.js, kept identical by tests/fixtures/guard_cases.json). Calls are counted per model since midnight Pacific time (when Gemini's free day resets). Level 1 delays new custom-topic checks; level 2 also delays translations (stories wait, Step 10 rule). Pass 1 and the editor never wait. The soft limits are ours, below Google's real daily caps (which the API does not show); raise or lower them here.",
+"reset_tz": "America/Los_Angeles",
+"primary_model": "gemini-3.5-flash-lite",
+"gemini_models": [
+"gemini-3.5-flash-lite",
+"gemini-3.1-flash-lite"
+],
+"soft_limits": {
+"gemini-3.5-flash-lite": 250,
+"gemini-3.1-flash-lite": 250
+},
+"check_ratio": 0.8,
+"recent_429_minutes": 60
+},
+"cases": [
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 95,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 115,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 64,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 201,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 227,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 227 calls today, 91% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 84,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 219,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 2,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 1,
+"recent429": 1
+},
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 200 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 200 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 100,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 200,
+"r429": 1,
+"recent429": 1
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 200 calls today, 80% of the soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250",
+"gemini-3.1-flash-lite: 400 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 174,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 68,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 1,
+"recent429": 1
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250",
+"every Gemini model answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 1,
+"recent429": 1
+},
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 200,
+"r429": 1,
+"recent429": 1
+},
+"gemini-3.1-flash-lite": {
+"calls": 400,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 200 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 400 calls today, soft limit 250",
+"every Gemini model answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 200 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250",
+"gemini-3.1-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250",
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 3,
+"recent429": 3
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 113,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 3,
+"recent429": 3
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 230,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 307,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 307 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 200 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 400,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 146,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 400,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 186,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 200 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 46,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 1,
+"recent429": 1
+},
+"gemini-3.1-flash-lite": {
+"calls": 201,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250",
+"gemini-3.1-flash-lite: 201 calls today, 80% of the soft limit 250",
+"every Gemini model answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 118,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 150,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 400 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 165,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 123,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 36,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 200 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 3,
+"recent429": 3
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250",
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 400,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 100,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 400 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 112,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 142,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 1,
+"recent429": 1
+},
+"gemini-3.1-flash-lite": {
+"calls": 182,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 3,
+"recent429": 3
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 201,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 295,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 295 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 1,
+"recent429": 1
+},
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 100,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 289,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 289 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 200,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 200 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 135,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 194,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 87,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 200 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 3,
+"recent429": 3
+},
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250",
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 277,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 299,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 200,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 299 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 200 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 400 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 200 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 200,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 200 calls today, 80% of the soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 265,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250",
+"gemini-3.1-flash-lite: 265 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 200 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 124,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 200 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 1,
+"recent429": 1
+},
+"gemini-3.1-flash-lite": {
+"calls": 244,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 244 calls today, 98% of the soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 3,
+"recent429": 3
+},
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 280,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 262,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 280 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 200 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 100,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 230,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 230 calls today, 92% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 100,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 317,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 317 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 200,
+"r429": 3,
+"recent429": 3
+},
+"gemini-3.1-flash-lite": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 100,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 200 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 200 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 3,
+"recent429": 3
+},
+"gemini-3.1-flash-lite": {
+"calls": 200,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 200 calls today, 80% of the soft limit 250",
+"every Gemini model answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 16,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 202,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 202 calls today, 81% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 154,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 200 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 400,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 1,
+"recent429": 1
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 319,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 28,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 3,
+"recent429": 3
+},
+"gemini-3.1-flash-lite": {
+"calls": 400,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 400 calls today, soft limit 250",
+"every Gemini model answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 258,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 258 calls today, soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 201,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 27,
+"r429": 3,
+"recent429": 3
+},
+"gemini-3.1-flash-lite": {
+"calls": 201,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 3,
+"recent429": 3
+},
+"gemini-3.1-flash-lite": {
+"calls": 289,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 289 calls today, soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 1,
+"recent429": 1
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 258,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 89,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 258 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 100,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 200 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 33,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 200,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 200 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 145,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 200 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 187,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 1,
+"recent429": 1
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 2,
+"reasons": [
+"every Gemini model answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 85,
+"r429": 1,
+"recent429": 1
+},
+"gemini-3.1-flash-lite": {
+"calls": 40,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 162,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 400,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 400 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 200,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 200 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 103,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 311,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 106,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 1,
+"recent429": 1
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 200 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 201,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 400,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 172,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 307,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 307 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 400 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 3,
+"recent429": 3
+},
+"gemini-3.1-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250",
+"gemini-3.1-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 186,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 262,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 262 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 201,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 201 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 1,
+"recent429": 1
+},
+"gemini-3.1-flash-lite": {
+"calls": 400,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 400 calls today, soft limit 250",
+"every Gemini model answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 19,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 296,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 296 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 200 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 200 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 400 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 96,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 250,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 200 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 211,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 200 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 96,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 1,
+"recent429": 1
+},
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 100,
+"r429": 3,
+"recent429": 3
+},
+"gemini-3.1-flash-lite": {
+"calls": 276,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 276 calls today, soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 51,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 199,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 400,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 5,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"gemini-3.1-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 3,
+"recent429": 3
+},
+"gemini-3.1-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 200 calls today, 80% of the soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 200 calls today, 80% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 234,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 201,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 234 calls today, 94% of the soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 250,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 3,
+"recent429": 3
+},
+"gemini-3.1-flash-lite": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 249,
+"r429": 3,
+"recent429": 3
+},
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 3,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 249 calls today, 100% of the soft limit 250",
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250",
+"gemini-3.5-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.1-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 199,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.1-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 1,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 0,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 400,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 250,
+"r429": 1,
+"recent429": 1
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 400 calls today, soft limit 250",
+"gemini-3.1-flash-lite: 250 calls today, soft limit 250",
+"gemini-3.1-flash-lite answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 100,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 51,
+"r429": 1,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 251,
+"r429": 0,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 97,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 251 calls today, soft limit 250"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 201,
+"r429": 1,
+"recent429": 1
+},
+"gemini-3.1-flash-lite": {
+"calls": 199,
+"r429": 3,
+"recent429": 3
+},
+"openai/gpt-oss-120b": {
+"calls": 251,
+"r429": 3,
+"recent429": 3
+}
+},
+"level": 2,
+"reasons": [
+"gemini-3.5-flash-lite: 201 calls today, 80% of the soft limit 250",
+"every Gemini model answered 429 in the last hour"
+]
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 5,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 199,
+"r429": 0,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 3,
+"recent429": 0
+}
+},
+"level": 0,
+"reasons": []
+},
+{
+"counts": {
+"gemini-3.5-flash-lite": {
+"calls": 0,
+"r429": 1,
+"recent429": 0
+},
+"gemini-3.1-flash-lite": {
+"calls": 249,
+"r429": 0,
+"recent429": 0
+},
+"openai/gpt-oss-120b": {
+"calls": 200,
+"r429": 1,
+"recent429": 1
+}
+},
+"level": 1,
+"reasons": [
+"gemini-3.1-flash-lite: 249 calls today, 100% of the soft limit 250"
+]
+}
+],
+"days": [
+{
+"ts": 1797057386,
+"day": "2026-12-11",
+"start": 1796976000
+},
+{
+"ts": 1834931918,
+"day": "2028-02-23",
+"start": 1834905600
+},
+{
+"ts": 1830791726,
+"day": "2028-01-06",
+"start": 1830758400
+},
+{
+"ts": 1823771439,
+"day": "2027-10-17",
+"start": 1823756400
+},
+{
+"ts": 1821936005,
+"day": "2027-09-25",
+"start": 1821855600
+},
+{
+"ts": 1790325482,
+"day": "2026-09-25",
+"start": 1790319600
+},
+{
+"ts": 1800984977,
+"day": "2027-01-26",
+"start": 1800950400
+},
+{
+"ts": 1794997771,
+"day": "2026-11-18",
+"start": 1794988800
+},
+{
+"ts": 1789352099,
+"day": "2026-09-13",
+"start": 1789282800
+},
+{
+"ts": 1798159881,
+"day": "2026-12-24",
+"start": 1798099200
+},
+{
+"ts": 1840855711,
+"day": "2028-05-01",
+"start": 1840777200
+},
+{
+"ts": 1784755240,
+"day": "2026-07-22",
+"start": 1784703600
+},
+{
+"ts": 1811686620,
+"day": "2027-05-30",
+"start": 1811660400
+},
+{
+"ts": 1800459916,
+"day": "2027-01-20",
+"start": 1800432000
+},
+{
+"ts": 1770517559,
+"day": "2026-02-07",
+"start": 1770451200
+},
+{
+"ts": 1823527438,
+"day": "2027-10-14",
+"start": 1823497200
+},
+{
+"ts": 1784768908,
+"day": "2026-07-22",
+"start": 1784703600
+},
+{
+"ts": 1850956268,
+"day": "2028-08-26",
+"start": 1850886000
+},
+{
+"ts": 1816042894,
+"day": "2027-07-19",
+"start": 1815980400
+},
+{
+"ts": 1801773575,
+"day": "2027-02-04",
+"start": 1801728000
+},
+{
+"ts": 1814854264,
+"day": "2027-07-05",
+"start": 1814770800
+},
+{
+"ts": 1769438920,
+"day": "2026-01-26",
+"start": 1769414400
+},
+{
+"ts": 1842128540,
+"day": "2028-05-16",
+"start": 1842073200
+},
+{
+"ts": 1850820749,
+"day": "2028-08-25",
+"start": 1850799600
+},
+{
+"ts": 1843802891,
+"day": "2028-06-05",
+"start": 1843801200
+},
+{
+"ts": 1793713054,
+"day": "2026-11-03",
+"start": 1793692800
+},
+{
+"ts": 1793746006,
+"day": "2026-11-03",
+"start": 1793692800
+},
+{
+"ts": 1837884667,
+"day": "2028-03-28",
+"start": 1837839600
+},
+{
+"ts": 1800791868,
+"day": "2027-01-24",
+"start": 1800777600
+},
+{
+"ts": 1852727278,
+"day": "2028-09-16",
+"start": 1852700400
+},
+{
+"ts": 1784713259,
+"day": "2026-07-22",
+"start": 1784703600
+},
+{
+"ts": 1854794811,
+"day": "2028-10-10",
+"start": 1854774000
+},
+{
+"ts": 1780071794,
+"day": "2026-05-29",
+"start": 1780038000
+},
+{
+"ts": 1789649001,
+"day": "2026-09-17",
+"start": 1789628400
+},
+{
+"ts": 1795144020,
+"day": "2026-11-19",
+"start": 1795075200
+},
+{
+"ts": 1816759262,
+"day": "2027-07-28",
+"start": 1816758000
+},
+{
+"ts": 1822214658,
+"day": "2027-09-29",
+"start": 1822201200
+},
+{
+"ts": 1793285322,
+"day": "2026-10-29",
+"start": 1793257200
+},
+{
+"ts": 1816436401,
+"day": "2027-07-24",
+"start": 1816412400
+},
+{
+"ts": 1833273008,
+"day": "2028-02-04",
+"start": 1833264000
+},
+{
+"ts": 1846516629,
+"day": "2028-07-06",
+"start": 1846479600
+},
+{
+"ts": 1848053674,
+"day": "2028-07-24",
+"start": 1848034800
+},
+{
+"ts": 1784906383,
+"day": "2026-07-24",
+"start": 1784876400
+},
+{
+"ts": 1808172450,
+"day": "2027-04-19",
+"start": 1808118000
+},
+{
+"ts": 1785221464,
+"day": "2026-07-27",
+"start": 1785135600
+},
+{
+"ts": 1777574968,
+"day": "2026-04-30",
+"start": 1777532400
+},
+{
+"ts": 1794930433,
+"day": "2026-11-17",
+"start": 1794902400
+},
+{
+"ts": 1799761663,
+"day": "2027-01-12",
+"start": 1799740800
+},
+{
+"ts": 1856871295,
+"day": "2028-11-03",
+"start": 1856847600
+},
+{
+"ts": 1851125046,
+"day": "2028-08-28",
+"start": 1851058800
+},
+{
+"ts": 1804906633,
+"day": "2027-03-12",
+"start": 1804838400
+},
+{
+"ts": 1806811312,
+"day": "2027-04-03",
+"start": 1806735600
+},
+{
+"ts": 1850797975,
+"day": "2028-08-24",
+"start": 1850713200
+},
+{
+"ts": 1831698765,
+"day": "2028-01-16",
+"start": 1831622400
+},
+{
+"ts": 1839589168,
+"day": "2028-04-17",
+"start": 1839567600
+},
+{
+"ts": 1858173414,
+"day": "2028-11-18",
+"start": 1858147200
+},
+{
+"ts": 1838335048,
+"day": "2028-04-02",
+"start": 1838271600
+},
+{
+"ts": 1823464336,
+"day": "2027-10-13",
+"start": 1823410800
+},
+{
+"ts": 1784265776,
+"day": "2026-07-16",
+"start": 1784185200
+},
+{
+"ts": 1799561126,
+"day": "2027-01-09",
+"start": 1799481600
+},
+{
+"ts": 1819754088,
+"day": "2027-08-31",
+"start": 1819695600
+},
+{
+"ts": 1841170679,
+"day": "2028-05-05",
+"start": 1841122800
+},
+{
+"ts": 1789432845,
+"day": "2026-09-14",
+"start": 1789369200
+},
+{
+"ts": 1810136071,
+"day": "2027-05-12",
+"start": 1810105200
+},
+{
+"ts": 1818710431,
+"day": "2027-08-19",
+"start": 1818658800
+},
+{
+"ts": 1785416705,
+"day": "2026-07-30",
+"start": 1785394800
+},
+{
+"ts": 1807729592,
+"day": "2027-04-14",
+"start": 1807686000
+},
+{
+"ts": 1851131812,
+"day": "2028-08-28",
+"start": 1851058800
+},
+{
+"ts": 1800740326,
+"day": "2027-01-23",
+"start": 1800691200
+},
+{
+"ts": 1778334028,
+"day": "2026-05-09",
+"start": 1778310000
+},
+{
+"ts": 1843497657,
+"day": "2028-06-01",
+"start": 1843455600
+},
+{
+"ts": 1818017131,
+"day": "2027-08-11",
+"start": 1817967600
+},
+{
+"ts": 1777460927,
+"day": "2026-04-29",
+"start": 1777446000
+},
+{
+"ts": 1780679807,
+"day": "2026-06-05",
+"start": 1780642800
+},
+{
+"ts": 1798006937,
+"day": "2026-12-22",
+"start": 1797926400
+},
+{
+"ts": 1788444949,
+"day": "2026-09-03",
+"start": 1788418800
+},
+{
+"ts": 1767386777,
+"day": "2026-01-02",
+"start": 1767340800
+},
+{
+"ts": 1829744245,
+"day": "2027-12-25",
+"start": 1829721600
+},
+{
+"ts": 1840064121,
+"day": "2028-04-22",
+"start": 1839999600
+},
+{
+"ts": 1839493969,
+"day": "2028-04-16",
+"start": 1839481200
+},
+{
+"ts": 1808051976,
+"day": "2027-04-18",
+"start": 1808031600
+},
+{
+"ts": 1832773063,
+"day": "2028-01-29",
+"start": 1832745600
+},
+{
+"ts": 1805979103,
+"day": "2027-03-25",
+"start": 1805958000
+},
+{
+"ts": 1816641281,
+"day": "2027-07-26",
+"start": 1816585200
+},
+{
+"ts": 1811357539,
+"day": "2027-05-26",
+"start": 1811314800
+},
+{
+"ts": 1770901942,
+"day": "2026-02-12",
+"start": 1770883200
+},
+{
+"ts": 1831990910,
+"day": "2028-01-20",
+"start": 1831968000
+},
+{
+"ts": 1775904912,
+"day": "2026-04-11",
+"start": 1775890800
+},
+{
+"ts": 1836853963,
+"day": "2028-03-16",
+"start": 1836802800
+},
+{
+"ts": 1774304998,
+"day": "2026-03-23",
+"start": 1774249200
+},
+{
+"ts": 1823593117,
+"day": "2027-10-15",
+"start": 1823583600
+},
+{
+"ts": 1846708736,
+"day": "2028-07-08",
+"start": 1846652400
+},
+{
+"ts": 1844849313,
+"day": "2028-06-17",
+"start": 1844838000
+},
+{
+"ts": 1796117645,
+"day": "2026-12-01",
+"start": 1796112000
+},
+{
+"ts": 1829248557,
+"day": "2027-12-19",
+"start": 1829203200
+},
+{
+"ts": 1860981890,
+"day": "2028-12-20",
+"start": 1860912000
+},
+{
+"ts": 1815676861,
+"day": "2027-07-15",
+"start": 1815634800
+},
+{
+"ts": 1786660811,
+"day": "2026-08-13",
+"start": 1786604400
+},
+{
+"ts": 1827575568,
+"day": "2027-11-30",
+"start": 1827561600
+},
+{
+"ts": 1811501165,
+"day": "2027-05-28",
+"start": 1811487600
+},
+{
+"ts": 1781930896,
+"day": "2026-06-19",
+"start": 1781852400
+},
+{
+"ts": 1804138962,
+"day": "2027-03-03",
+"start": 1804060800
+},
+{
+"ts": 1782137884,
+"day": "2026-06-22",
+"start": 1782111600
+},
+{
+"ts": 1836747829,
+"day": "2028-03-15",
+"start": 1836716400
+},
+{
+"ts": 1796583557,
+"day": "2026-12-06",
+"start": 1796544000
+},
+{
+"ts": 1775371048,
+"day": "2026-04-04",
+"start": 1775286000
+},
+{
+"ts": 1798975844,
+"day": "2027-01-03",
+"start": 1798963200
+},
+{
+"ts": 1829899845,
+"day": "2027-12-27",
+"start": 1829894400
+},
+{
+"ts": 1798147681,
+"day": "2026-12-24",
+"start": 1798099200
+},
+{
+"ts": 1824712923,
+"day": "2027-10-28",
+"start": 1824706800
+},
+{
+"ts": 1819175697,
+"day": "2027-08-24",
+"start": 1819090800
+},
+{
+"ts": 1778541065,
+"day": "2026-05-11",
+"start": 1778482800
+},
+{
+"ts": 1810833137,
+"day": "2027-05-20",
+"start": 1810796400
+},
+{
+"ts": 1843704827,
+"day": "2028-06-03",
+"start": 1843628400
+},
+{
+"ts": 1858536583,
+"day": "2028-11-22",
+"start": 1858492800
+},
+{
+"ts": 1803516548,
+"day": "2027-02-24",
+"start": 1803456000
+},
+{
+"ts": 1840610897,
+"day": "2028-04-29",
+"start": 1840604400
+},
+{
+"ts": 1851812430,
+"day": "2028-09-05",
+"start": 1851750000
+},
+{
+"ts": 1834022964,
+"day": "2028-02-12",
+"start": 1833955200
+},
+{
+"ts": 1849379702,
+"day": "2028-08-08",
+"start": 1849330800
+},
+{
+"ts": 1840888577,
+"day": "2028-05-02",
+"start": 1840863600
+},
+{
+"ts": 1796643064,
+"day": "2026-12-07",
+"start": 1796630400
+},
+{
+"ts": 1828813040,
+"day": "2027-12-14",
+"start": 1828771200
+},
+{
+"ts": 1825665120,
+"day": "2027-11-08",
+"start": 1825660800
+},
+{
+"ts": 1829161223,
+"day": "2027-12-18",
+"start": 1829116800
+},
+{
+"ts": 1852386189,
+"day": "2028-09-12",
+"start": 1852354800
+},
+{
+"ts": 1851345087,
+"day": "2028-08-31",
+"start": 1851318000
+},
+{
+"ts": 1783404836,
+"day": "2026-07-06",
+"start": 1783321200
+},
+{
+"ts": 1773841137,
+"day": "2026-03-18",
+"start": 1773817200
+},
+{
+"ts": 1798613605,
+"day": "2026-12-29",
+"start": 1798531200
+},
+{
+"ts": 1791594822,
+"day": "2026-10-09",
+"start": 1791529200
+},
+{
+"ts": 1772260604,
+"day": "2026-02-27",
+"start": 1772179200
+},
+{
+"ts": 1819430692,
+"day": "2027-08-27",
+"start": 1819350000
+},
+{
+"ts": 1845652310,
+"day": "2028-06-26",
+"start": 1845615600
+},
+{
+"ts": 1859937084,
+"day": "2028-12-08",
+"start": 1859875200
+},
+{
+"ts": 1780801919,
+"day": "2026-06-06",
+"start": 1780729200
+},
+{
+"ts": 1842423120,
+"day": "2028-05-20",
+"start": 1842418800
+},
+{
+"ts": 1767273224,
+"day": "2026-01-01",
+"start": 1767254400
+},
+{
+"ts": 1861505289,
+"day": "2028-12-26",
+"start": 1861430400
+},
+{
+"ts": 1822911155,
+"day": "2027-10-07",
+"start": 1822892400
+},
+{
+"ts": 1777901006,
+"day": "2026-05-04",
+"start": 1777878000
+},
+{
+"ts": 1810754073,
+"day": "2027-05-19",
+"start": 1810710000
+},
+{
+"ts": 1811146650,
+"day": "2027-05-24",
+"start": 1811142000
+},
+{
+"ts": 1826004638,
+"day": "2027-11-11",
+"start": 1825920000
+},
+{
+"ts": 1843416506,
+"day": "2028-05-31",
+"start": 1843369200
+},
+{
+"ts": 1842539544,
+"day": "2028-05-21",
+"start": 1842505200
+},
+{
+"ts": 1856200777,
+"day": "2028-10-26",
+"start": 1856156400
+},
+{
+"ts": 1768691710,
+"day": "2026-01-17",
+"start": 1768636800
+},
+{
+"ts": 1796427949,
+"day": "2026-12-04",
+"start": 1796371200
+},
+{
+"ts": 1794792072,
+"day": "2026-11-15",
+"start": 1794729600
+},
+{
+"ts": 1812431408,
+"day": "2027-06-07",
+"start": 1812351600
+},
+{
+"ts": 1803812223,
+"day": "2027-02-28",
+"start": 1803801600
+},
+{
+"ts": 1835817930,
+"day": "2028-03-04",
+"start": 1835769600
+},
+{
+"ts": 1770183362,
+"day": "2026-02-03",
+"start": 1770105600
+},
+{
+"ts": 1784986645,
+"day": "2026-07-25",
+"start": 1784962800
+},
+{
+"ts": 1770226496,
+"day": "2026-02-04",
+"start": 1770192000
+},
+{
+"ts": 1832189415,
+"day": "2028-01-22",
+"start": 1832140800
+},
+{
+"ts": 1857488974,
+"day": "2028-11-10",
+"start": 1857456000
+},
+{
+"ts": 1802707389,
+"day": "2027-02-15",
+"start": 1802678400
+},
+{
+"ts": 1791326664,
+"day": "2026-10-06",
+"start": 1791270000
+},
+{
+"ts": 1848167191,
+"day": "2028-07-25",
+"start": 1848121200
+},
+{
+"ts": 1795196671,
+"day": "2026-11-20",
+"start": 1795161600
+},
+{
+"ts": 1804039526,
+"day": "2027-03-02",
+"start": 1803974400
+},
+{
+"ts": 1798961078,
+"day": "2027-01-02",
+"start": 1798876800
+},
+{
+"ts": 1847912997,
+"day": "2028-07-22",
+"start": 1847862000
+},
+{
+"ts": 1842199502,
+"day": "2028-05-17",
+"start": 1842159600
+},
+{
+"ts": 1780214235,
+"day": "2026-05-31",
+"start": 1780210800
+},
+{
+"ts": 1842569694,
+"day": "2028-05-21",
+"start": 1842505200
+},
+{
+"ts": 1789384900,
+"day": "2026-09-14",
+"start": 1789369200
+},
+{
+"ts": 1806396218,
+"day": "2027-03-30",
+"start": 1806390000
+},
+{
+"ts": 1845742495,
+"day": "2028-06-27",
+"start": 1845702000
+},
+{
+"ts": 1824414613,
+"day": "2027-10-24",
+"start": 1824361200
+},
+{
+"ts": 1774084206,
+"day": "2026-03-21",
+"start": 1774076400
+},
+{
+"ts": 1785550541,
+"day": "2026-07-31",
+"start": 1785481200
+},
+{
+"ts": 1839775894,
+"day": "2028-04-19",
+"start": 1839740400
+},
+{
+"ts": 1807305262,
+"day": "2027-04-09",
+"start": 1807254000
+},
+{
+"ts": 1859466187,
+"day": "2028-12-03",
+"start": 1859443200
+},
+{
+"ts": 1800124123,
+"day": "2027-01-16",
+"start": 1800086400
+},
+{
+"ts": 1807249262,
+"day": "2027-04-08",
+"start": 1807167600
+},
+{
+"ts": 1812555677,
+"day": "2027-06-09",
+"start": 1812524400
+},
+{
+"ts": 1859382798,
+"day": "2028-12-02",
+"start": 1859356800
+},
+{
+"ts": 1825519486,
+"day": "2027-11-06",
+"start": 1825484400
+},
+{
+"ts": 1780844732,
+"day": "2026-06-07",
+"start": 1780815600
+},
+{
+"ts": 1782886654,
+"day": "2026-06-30",
+"start": 1782802800
+},
+{
+"ts": 1846154226,
+"day": "2028-07-02",
+"start": 1846134000
+},
+{
+"ts": 1787185173,
+"day": "2026-08-19",
+"start": 1787122800
+},
+{
+"ts": 1771096614,
+"day": "2026-02-14",
+"start": 1771056000
+},
+{
+"ts": 1832316340,
+"day": "2028-01-24",
+"start": 1832313600
+},
+{
+"ts": 1820767566,
+"day": "2027-09-12",
+"start": 1820732400
+},
+{
+"ts": 1837936091,
+"day": "2028-03-29",
+"start": 1837926000
+},
+{
+"ts": 1834631707,
+"day": "2028-02-19",
+"start": 1834560000
+},
+{
+"ts": 1799662471,
+"day": "2027-01-11",
+"start": 1799654400
+},
+{
+"ts": 1838725078,
+"day": "2028-04-07",
+"start": 1838703600
+},
+{
+"ts": 1782613135,
+"day": "2026-06-27",
+"start": 1782543600
+},
+{
+"ts": 1807154846,
+"day": "2027-04-07",
+"start": 1807081200
+},
+{
+"ts": 1827246674,
+"day": "2027-11-26",
+"start": 1827216000
+},
+{
+"ts": 1854469019,
+"day": "2028-10-06",
+"start": 1854428400
+},
+{
+"ts": 1827650092,
+"day": "2027-12-01",
+"start": 1827648000
+},
+{
+"ts": 1861271358,
+"day": "2028-12-24",
+"start": 1861257600
+},
+{
+"ts": 1840046957,
+"day": "2028-04-22",
+"start": 1839999600
+},
+{
+"ts": 1831576288,
+"day": "2028-01-15",
+"start": 1831536000
+},
+{
+"ts": 1823068900,
+"day": "2027-10-09",
+"start": 1823065200
+},
+{
+"ts": 1801718585,
+"day": "2027-02-03",
+"start": 1801641600
+},
+{
+"ts": 1779778001,
+"day": "2026-05-25",
+"start": 1779692400
+},
+{
+"ts": 1808494258,
+"day": "2027-04-23",
+"start": 1808463600
+},
+{
+"ts": 1769972934,
+"day": "2026-02-01",
+"start": 1769932800
+},
+{
+"ts": 1826026603,
+"day": "2027-11-12",
+"start": 1826006400
+},
+{
+"ts": 1840483158,
+"day": "2028-04-27",
+"start": 1840431600
+},
+{
+"ts": 1768011998,
+"day": "2026-01-09",
+"start": 1767945600
+},
+{
+"ts": 1776372195,
+"day": "2026-04-16",
+"start": 1776322800
+},
+{
+"ts": 1820832099,
+"day": "2027-09-13",
+"start": 1820818800
+},
+{
+"ts": 1794131935,
+"day": "2026-11-08",
+"start": 1794124800
+},
+{
+"ts": 1831984427,
+"day": "2028-01-20",
+"start": 1831968000
+},
+{
+"ts": 1787357528,
+"day": "2026-08-21",
+"start": 1787295600
+},
+{
+"ts": 1773622603,
+"day": "2026-03-15",
+"start": 1773558000
+},
+{
+"ts": 1838475863,
+"day": "2028-04-04",
+"start": 1838444400
+},
+{
+"ts": 1776920216,
+"day": "2026-04-22",
+"start": 1776841200
+},
+{
+"ts": 1774905256,
+"day": "2026-03-30",
+"start": 1774854000
+},
+{
+"ts": 1843676087,
+"day": "2028-06-03",
+"start": 1843628400
+},
+{
+"ts": 1773954785,
+"day": "2026-03-19",
+"start": 1773903600
+},
+{
+"ts": 1847266420,
+"day": "2028-07-15",
+"start": 1847257200
+},
+{
+"ts": 1837971587,
+"day": "2028-03-29",
+"start": 1837926000
+},
+{
+"ts": 1816931996,
+"day": "2027-07-30",
+"start": 1816930800
+},
+{
+"ts": 1818391606,
+"day": "2027-08-15",
+"start": 1818313200
+},
+{
+"ts": 1798331381,
+"day": "2026-12-26",
+"start": 1798272000
+},
+{
+"ts": 1783623359,
+"day": "2026-07-09",
+"start": 1783580400
+},
+{
+"ts": 1802086475,
+"day": "2027-02-08",
+"start": 1802073600
+},
+{
+"ts": 1769050467,
+"day": "2026-01-21",
+"start": 1768982400
+},
+{
+"ts": 1790042035,
+"day": "2026-09-21",
+"start": 1789974000
+},
+{
+"ts": 1811730503,
+"day": "2027-05-30",
+"start": 1811660400
+},
+{
+"ts": 1857821091,
+"day": "2028-11-14",
+"start": 1857801600
+},
+{
+"ts": 1860361334,
+"day": "2028-12-13",
+"start": 1860307200
+},
+{
+"ts": 1794989217,
+"day": "2026-11-18",
+"start": 1794988800
+},
+{
+"ts": 1830310425,
+"day": "2027-12-31",
+"start": 1830240000
+},
+{
+"ts": 1846207163,
+"day": "2028-07-02",
+"start": 1846134000
+},
+{
+"ts": 1775523565,
+"day": "2026-04-06",
+"start": 1775458800
+},
+{
+"ts": 1830704884,
+"day": "2028-01-05",
+"start": 1830672000
+},
+{
+"ts": 1853024725,
+"day": "2028-09-19",
+"start": 1852959600
+},
+{
+"ts": 1818621900,
+"day": "2027-08-18",
+"start": 1818572400
+},
+{
+"ts": 1839430290,
+"day": "2028-04-15",
+"start": 1839394800
+},
+{
+"ts": 1858119766,
+"day": "2028-11-17",
+"start": 1858060800
+},
+{
+"ts": 1803440988,
+"day": "2027-02-23",
+"start": 1803369600
+},
+{
+"ts": 1826158851,
+"day": "2027-11-13",
+"start": 1826092800
+},
+{
+"ts": 1856345591,
+"day": "2028-10-28",
+"start": 1856329200
+},
+{
+"ts": 1791823531,
+"day": "2026-10-12",
+"start": 1791788400
+},
+{
+"ts": 1838125769,
+"day": "2028-03-31",
+"start": 1838098800
+},
+{
+"ts": 1859515898,
+"day": "2028-12-03",
+"start": 1859443200
+},
+{
+"ts": 1809355396,
+"day": "2027-05-03",
+"start": 1809327600
+},
+{
+"ts": 1771793122,
+"day": "2026-02-22",
+"start": 1771747200
+},
+{
+"ts": 1789165892,
+"day": "2026-09-11",
+"start": 1789110000
+},
+{
+"ts": 1827105375,
+"day": "2027-11-24",
+"start": 1827043200
+},
+{
+"ts": 1830817112,
+"day": "2028-01-06",
+"start": 1830758400
+},
+{
+"ts": 1785209076,
+"day": "2026-07-27",
+"start": 1785135600
+},
+{
+"ts": 1859285477,
+"day": "2028-12-01",
+"start": 1859270400
+},
+{
+"ts": 1790793361,
+"day": "2026-09-30",
+"start": 1790751600
+},
+{
+"ts": 1854012319,
+"day": "2028-10-01",
+"start": 1853996400
+},
+{
+"ts": 1850199925,
+"day": "2028-08-18",
+"start": 1850194800
+},
+{
+"ts": 1808770687,
+"day": "2027-04-26",
+"start": 1808722800
+},
+{
+"ts": 1811385303,
+"day": "2027-05-26",
+"start": 1811314800
+},
+{
+"ts": 1860719975,
+"day": "2028-12-17",
+"start": 1860652800
+},
+{
+"ts": 1824098104,
+"day": "2027-10-20",
+"start": 1824015600
+},
+{
+"ts": 1829086291,
+"day": "2027-12-17",
+"start": 1829030400
+},
+{
+"ts": 1830470482,
+"day": "2028-01-02",
+"start": 1830412800
+},
+{
+"ts": 1828715039,
+"day": "2027-12-13",
+"start": 1828684800
+},
+{
+"ts": 1786457544,
+"day": "2026-08-11",
+"start": 1786431600
+},
+{
+"ts": 1787901028,
+"day": "2026-08-28",
+"start": 1787900400
+},
+{
+"ts": 1812185090,
+"day": "2027-06-05",
+"start": 1812178800
+},
+{
+"ts": 1836222832,
+"day": "2028-03-09",
+"start": 1836201600
+},
+{
+"ts": 1829137311,
+"day": "2027-12-18",
+"start": 1829116800
+},
+{
+"ts": 1811916004,
+"day": "2027-06-01",
+"start": 1811833200
+},
+{
+"ts": 1791491181,
+"day": "2026-10-08",
+"start": 1791442800
+},
+{
+"ts": 1791040479,
+"day": "2026-10-03",
+"start": 1791010800
+},
+{
+"ts": 1836718439,
+"day": "2028-03-15",
+"start": 1836716400
+},
+{
+"ts": 1769984753,
+"day": "2026-02-01",
+"start": 1769932800
+},
+{
+"ts": 1852077665,
+"day": "2028-09-08",
+"start": 1852009200
+},
+{
+"ts": 1804065210,
+"day": "2027-03-03",
+"start": 1804060800
+},
+{
+"ts": 1830111934,
+"day": "2027-12-29",
+"start": 1830067200
+},
+{
+"ts": 1852961658,
+"day": "2028-09-19",
+"start": 1852959600
+},
+{
+"ts": 1835399743,
+"day": "2028-02-28",
+"start": 1835337600
+},
+{
+"ts": 1834746027,
+"day": "2028-02-21",
+"start": 1834732800
+},
+{
+"ts": 1835164926,
+"day": "2028-02-26",
+"start": 1835164800
+},
+{
+"ts": 1814074207,
+"day": "2027-06-26",
+"start": 1813993200
+},
+{
+"ts": 1781149396,
+"day": "2026-06-10",
+"start": 1781074800
+},
+{
+"ts": 1770117384,
+"day": "2026-02-03",
+"start": 1770105600
+},
+{
+"ts": 1770475454,
+"day": "2026-02-07",
+"start": 1770451200
+},
+{
+"ts": 1778558623,
+"day": "2026-05-11",
+"start": 1778482800
+},
+{
+"ts": 1802484214,
+"day": "2027-02-12",
+"start": 1802419200
+},
+{
+"ts": 1793325501,
+"day": "2026-10-29",
+"start": 1793257200
+},
+{
+"ts": 1792437869,
+"day": "2026-10-19",
+"start": 1792393200
+},
+{
+"ts": 1801423960,
+"day": "2027-01-31",
+"start": 1801382400
+},
+{
+"ts": 1770429760,
+"day": "2026-02-06",
+"start": 1770364800
+},
+{
+"ts": 1779737004,
+"day": "2026-05-25",
+"start": 1779692400
+},
+{
+"ts": 1774595579,
+"day": "2026-03-27",
+"start": 1774594800
+},
+{
+"ts": 1857713311,
+"day": "2028-11-12",
+"start": 1857628800
+},
+{
+"ts": 1819113664,
+"day": "2027-08-24",
+"start": 1819090800
+},
+{
+"ts": 1773778266,
+"day": "2026-03-17",
+"start": 1773730800
+},
+{
+"ts": 1830287352,
+"day": "2027-12-31",
+"start": 1830240000
+},
+{
+"ts": 1811666548,
+"day": "2027-05-30",
+"start": 1811660400
+},
+{
+"ts": 1840296990,
+"day": "2028-04-25",
+"start": 1840258800
+},
+{
+"ts": 1768727274,
+"day": "2026-01-18",
+"start": 1768723200
+},
+{
+"ts": 1772964000,
+"day": "2026-03-08",
+"start": 1772956800
+},
+{
+"ts": 1772960400,
+"day": "2026-03-08",
+"start": 1772956800
+},
+{
+"ts": 1793523600,
+"day": "2026-11-01",
+"start": 1793516400
+},
+{
+"ts": 1793520000,
+"day": "2026-11-01",
+"start": 1793516400
+}
+]
+}

@@ -1,0 +1,412 @@
+{
+ "measured_at": "2026-11-16T16:00:01+00:00",
+ "baseline": {
+  "runs_48h": 48,
+  "pass1": {
+   "calls_day": 68.5,
+   "in_day": 870735.0,
+   "out_day": 246857.0,
+   "items_day": 4645.5
+  },
+  "editor": {
+   "calls_day": 32.0,
+   "in_day": 331055.0,
+   "out_day": 155669.5,
+   "candidates_day": 1806.5
+  },
+  "translate": {
+   "calls_day": 13.5,
+   "stories_day": 252.0,
+   "tokens_day": 45147.0
+  }
+ },
+ "per_unit": {
+  "pass1_in_tokens_per_google_item": 37.7,
+  "pass1_out_tokens_per_google_item": 39.1,
+  "stories_per_google_item": 0.373,
+  "editor_tokens_per_candidate": 269,
+  "translate_tokens_per_story": 179,
+  "check_tokens": 1222,
+  "pass1_in_tokens_per_run_now": 36281
+ },
+ "searches": {
+  "1": {
+   "topics": 1,
+   "searches": 2,
+   "hours_between_searches": 1,
+   "window_h": 2,
+   "results": 120,
+   "same_as_pool": 1,
+   "over_cap": 111,
+   "new_items_per_search_round": 8,
+   "new_items_per_run": 8.0,
+   "failed_requests": 0,
+   "stopped": null,
+   "per_topic": {
+    "Colombia": {
+     "searches": 2,
+     "fetched": 120,
+     "dup_dropped": 1,
+     "new_items": 8
+    }
+   }
+  },
+  "5": {
+   "topics": 5,
+   "searches": 17,
+   "hours_between_searches": 1,
+   "window_h": 2,
+   "results": 513,
+   "same_as_pool": 32,
+   "over_cap": 408,
+   "new_items_per_search_round": 40,
+   "new_items_per_run": 40.0,
+   "failed_requests": 0,
+   "stopped": null,
+   "per_topic": {
+    "Colombia": {
+     "searches": 2,
+     "fetched": 120,
+     "dup_dropped": 1,
+     "new_items": 8
+    },
+    "AI regulation": {
+     "searches": 4,
+     "fetched": 65,
+     "dup_dropped": 11,
+     "new_items": 8
+    },
+    "Formula 1": {
+     "searches": 5,
+     "fetched": 124,
+     "dup_dropped": 7,
+     "new_items": 8
+    },
+    "Brazil": {
+     "searches": 2,
+     "fetched": 148,
+     "dup_dropped": 9,
+     "new_items": 8
+    },
+    "Climate policy": {
+     "searches": 4,
+     "fetched": 56,
+     "dup_dropped": 4,
+     "new_items": 8
+    }
+   }
+  },
+  "20": {
+   "topics": 20,
+   "searches": 68,
+   "hours_between_searches": 2,
+   "window_h": 3,
+   "results": 2257,
+   "same_as_pool": 270,
+   "over_cap": 1632,
+   "new_items_per_search_round": 152,
+   "new_items_per_run": 76.0,
+   "failed_requests": 0,
+   "stopped": null,
+   "per_topic": {
+    "Colombia": {
+     "searches": 2,
+     "fetched": 122,
+     "dup_dropped": 6,
+     "new_items": 8
+    },
+    "AI regulation": {
+     "searches": 4,
+     "fetched": 80,
+     "dup_dropped": 13,
+     "new_items": 8
+    },
+    "Formula 1": {
+     "searches": 5,
+     "fetched": 155,
+     "dup_dropped": 16,
+     "new_items": 8
+    },
+    "Brazil": {
+     "searches": 2,
+     "fetched": 173,
+     "dup_dropped": 8,
+     "new_items": 8
+    },
+    "Climate policy": {
+     "searches": 4,
+     "fetched": 71,
+     "dup_dropped": 4,
+     "new_items": 8
+    },
+    "Elon Musk": {
+     "searches": 3,
+     "fetched": 82,
+     "dup_dropped": 40,
+     "new_items": 8
+    },
+    "Champions League": {
+     "searches": 4,
+     "fetched": 225,
+     "dup_dropped": 32,
+     "new_items": 8
+    },
+    "Space exploration": {
+     "searches": 3,
+     "fetched": 26,
+     "dup_dropped": 2,
+     "new_items": 8
+    },
+    "Bitcoin": {
+     "searches": 4,
+     "fetched": 241,
+     "dup_dropped": 13,
+     "new_items": 8
+    },
+    "Taiwan": {
+     "searches": 4,
+     "fetched": 87,
+     "dup_dropped": 11,
+     "new_items": 8
+    },
+    "Nigeria": {
+     "searches": 4,
+     "fetched": 133,
+     "dup_dropped": 23,
+     "new_items": 8
+    },
+    "EU enlargement": {
+     "searches": 3,
+     "fetched": 43,
+     "dup_dropped": 18,
+     "new_items": 8
+    },
+    "Chess": {
+     "searches": 3,
+     "fetched": 39,
+     "dup_dropped": 7,
+     "new_items": 8
+    },
+    "Japan": {
+     "searches": 5,
+     "fetched": 159,
+     "dup_dropped": 15,
+     "new_items": 8
+    },
+    "Cybersecurity": {
+     "searches": 5,
+     "fetched": 117,
+     "dup_dropped": 9,
+     "new_items": 8
+    },
+    "Mexico": {
+     "searches": 3,
+     "fetched": 167,
+     "dup_dropped": 18,
+     "new_items": 8
+    },
+    "Oil prices": {
+     "searches": 4,
+     "fetched": 183,
+     "dup_dropped": 33,
+     "new_items": 8
+    },
+    "Electric cars": {
+     "searches": 3,
+     "fetched": 87,
+     "dup_dropped": 0,
+     "new_items": 8
+    },
+    "Georgia": {
+     "searches": 3,
+     "fetched": 67,
+     "dup_dropped": 2,
+     "new_items": 8
+    }
+   }
+  }
+ },
+ "sandbox": {
+  "items": 75,
+  "input_tokens": 4932,
+  "output_tokens": 2931,
+  "fixed_prompt_tokens": 2102,
+  "stories": 28,
+  "items_placed": 47,
+  "not_news": 28,
+  "stories_on_custom_topics": 26,
+  "importance": [
+   6,
+   6,
+   5,
+   5,
+   5,
+   5,
+   5,
+   5,
+   5,
+   5,
+   5,
+   5,
+   4,
+   4,
+   4,
+   4,
+   4,
+   4,
+   4,
+   4,
+   4,
+   4,
+   3,
+   3,
+   3,
+   2
+  ],
+  "in_per_item": 37.7,
+  "out_per_item": 39.1,
+  "stories_per_item": 0.373,
+  "check_tokens": 1222,
+  "examples": [
+   {
+    "summary": "COP31 climate negotiations enter their second week in Antalya, with discussions focusing on AI's role, healthcare resilience, and pavilion activities.",
+    "topics": [
+     "c5"
+    ],
+    "importance": 5
+   },
+   {
+    "summary": "Former Brazilian footballer Romario has publicly demanded the resignation of coach Carlo Ancelotti following Brazil's defeat to Japan.",
+    "topics": [
+     "c4"
+    ],
+    "importance": 3
+   },
+   {
+    "summary": "The Brazilian real fell as financial markets reacted to fiscal uncertainties and economic indicators.",
+    "topics": [
+     "c4"
+    ],
+    "importance": 5
+   },
+   {
+    "summary": "Authorities assessed damage to the Gran San shopping center in Bogotá following a fire.",
+    "topics": [
+     "c1"
+    ],
+    "importance": 4
+   },
+   {
+    "summary": "State financial regulators and insurance departments are increasingly integrating AI oversight and examination processes into their regulatory frameworks.",
+    "topics": [
+     "c2"
+    ],
+    "importance": 5
+   },
+   {
+    "summary": "Gorka Abascal has been ruled out of Colombia's squad for the upcoming tournament due to injury, ahead of the match against Chile.",
+    "topics": [
+     "c1"
+    ],
+    "importance": 3
+   },
+   {
+    "summary": "Formula 1 teams and drivers are making final preparations and strategic decisions ahead of the Las Vegas Grand Prix, amid ongoing discussions regarding inclusivity and rule changes.",
+    "topics": [
+     "c3"
+    ],
+    "importance": 4
+   },
+   {
+    "summary": "New reports highlight that cities receive minimal climate adaptation funding despite contributing significantly to emissions, while Northern Brazil faces severe drought and wildfires.",
+    "topics": [
+     "c4",
+     "c5"
+    ],
+    "importance": 5
+   },
+   {
+    "summary": "The Brazilian government announced plans to expand internet and cellular coverage to 30 rural locations in Alagoas.",
+    "topics": [
+     "c4"
+    ],
+    "importance": 4
+   },
+   {
+    "summary": "The United States has introduced new export controls on advanced AI chips, impacting China and several other nations due to national security concerns.",
+    "topics": [
+     "politics",
+     "c2"
+    ],
+    "importance": 6
+   },
+   {
+    "summary": "The father of María Camila Pantoja, a sub-lieutenant kidnapped by the ELN, made a public plea regarding his daughter's situation.",
+    "topics": [
+     "wars_conflicts",
+     "c1"
+    ],
+    "importance": 6
+   },
+   {
+    "summary": "The Colombian president presented a balance of his first 100 days in office, emphasizing security, reconstruction, and health initiatives.",
+    "topics": [
+     "c1"
+    ],
+    "importance": 5
+   }
+  ],
+  "editor_floor_share": 0.962,
+  "bar_share": 0.462
+ },
+ "per_day": {
+  "1": {
+   "new_items_day": 192,
+   "new_stories_day": 72,
+   "pass1_extra_calls_day": 0.0,
+   "pass1_extra_tokens_day": 14746,
+   "editor_extra_candidates_day": 69,
+   "editor_extra_calls_day": 0.0,
+   "editor_extra_tokens_day": 18562,
+   "translate_extra_stories_day": 33,
+   "translate_extra_calls_day": 0,
+   "translate_extra_tokens_day_per_language": 5928,
+   "topic_check_calls_once": 1,
+   "topic_check_tokens_once": 1222,
+   "total_extra_calls_day": 0.0,
+   "total_extra_tokens_day": 39235
+  },
+  "5": {
+   "new_items_day": 960,
+   "new_stories_day": 358,
+   "pass1_extra_calls_day": 0.5,
+   "pass1_extra_tokens_day": 73728,
+   "editor_extra_candidates_day": 344,
+   "editor_extra_calls_day": 0.5,
+   "editor_extra_tokens_day": 92811,
+   "translate_extra_stories_day": 165,
+   "translate_extra_calls_day": 0,
+   "translate_extra_tokens_day_per_language": 29638,
+   "topic_check_calls_once": 5,
+   "topic_check_tokens_once": 6110,
+   "total_extra_calls_day": 1.0,
+   "total_extra_tokens_day": 196177
+  },
+  "20": {
+   "new_items_day": 1824,
+   "new_stories_day": 680,
+   "pass1_extra_calls_day": 0.5,
+   "pass1_extra_tokens_day": 140083,
+   "editor_extra_candidates_day": 654,
+   "editor_extra_calls_day": 1.0,
+   "editor_extra_tokens_day": 176341,
+   "translate_extra_stories_day": 314,
+   "translate_extra_calls_day": 0,
+   "translate_extra_tokens_day_per_language": 56312,
+   "topic_check_calls_once": 20,
+   "topic_check_tokens_once": 24440,
+   "total_extra_calls_day": 1.5,
+   "total_extra_tokens_day": 372737
+  }
+ }
+}

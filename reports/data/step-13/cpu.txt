@@ -1,0 +1,8 @@
+planDigest, 40 candidates, no custom topics (before Step 13): 164 microseconds each
+planDigest, 40 candidates, 3 custom sections (Russian): 180 microseconds each
+cron tick: 8 due readers with 3 custom topics each (plan + format): 1.56 ms each
+cron tick: 8 due readers, no custom topics: 1.36 ms each
+add a topic (60 existing topics, prompt, checks, writes; no AI wait): 1.67 ms each
+add a topic that joins an existing one (no AI call): 302 microseconds each
+Admin shaping, 60 custom topics: 73 microseconds each
+AI guard alert check (hourly tick): 2 microseconds each

@@ -442,6 +442,55 @@ the icon centring (28 checks since Step 5).
   digest in that language only if every picked story has a translation; otherwise everything is
   English, and the fallback is logged (`errors`, component `digest`) and counted in Admin.
 
+## 4c. Custom topics and the AI budget guard (Step 13)
+
+- **What a reader does:** in the Mini App's "My topics" card (under Topics) they type a topic and
+  tap Add (or Enter). Up to 3 per reader (`config/custom_topics.json`). A row per topic with a
+  round "x" removes it at once.
+- **The one AI check** (`worker/src/custom.js`, in the Worker, owner's choice): input checks, the
+  limit of 3, 5 AI checks per reader a day (the owner has none), the block list, an exact match with
+  an existing custom topic's name or alias (joined, no AI call), a main topic's label in any language
+  (refused: "Armenia is already a main topic"), then the AI budget guard (level 1 or more: "try again
+  in a few minutes"). Then ONE call (Gemini, its second model, then Groq; each about 12 s at most):
+  a verdict with a reason code and a short reason in the reader's language (nonsense, offensive,
+  private person, no news, too broad), `same_as` (an existing custom topic or a main topic), the
+  normalised name in en/ru/hy/fr, an emoji, a one-sentence definition, 2-5 Google News searches with
+  an edition from the allowlist, and a boost cap 0-2. Code checks it all (no dashes, caps clamped,
+  editions allowlisted, at least two searches). Every call is an `ai_calls` row (kind `topic_check`,
+  with the HTTP `code`), every request a `topic_checks` row.
+- **Shared:** a topic is one `custom_topics` row (`tag` = `c<id>`, ids never reused); readers are
+  `custom_follows` rows. A synonym ("Colombian news") joins through `same_as` or a matching name, and
+  the typed text becomes an alias, so the next reader typing it joins with no AI call.
+- **Hourly job** (`job/custom.py`, every step wrapped so a failure only logs to `errors`, component
+  `custom`): topics with at least one active, unpaused follower join the topic list of pass 1 and
+  the editor (`READER TOPICS` blocks; empty, and the prompts unchanged, when there are none). Their
+  Google News searches run after the RSS feeds: the topic searched longest ago first, at most 40
+  requests a run, `when:Nh` since its last search (2-12 h), 8 at a time in a 20 s budget; a 429 or
+  503 from Google stops the rest of that run. Each result is compared without AI with the pool's
+  titles of the last 24 h (Step 6 similarity, 0.5); at most 15 new items per topic. They are normal
+  pending `items` (`source_key` gnews, tier 4 so a curated outlet always gives the link,
+  `headline_only` = 1, shown to the AI as "[headline only]", `hint_topic`). Pass 1 may tag any item,
+  also from our RSS feeds, with a custom tag; the editor may pick it as the main topic and give a
+  topic score; its candidate floor is 3 (like Armenia). After the editor, stories that could reach a
+  digest and still link to news.google.com get the outlet's URL (`gnews.resolve`, 10 a run); a
+  failure keeps the Google link (`stories.link_state` 1 or 2, one try each). A topic with no
+  follower for 7 days is deleted with its searches and stats (`orphan_since`).
+- **Digests:** the cron adds each due reader's custom tags to their topics and each topic's own cap
+  to `topic_boost_max` (`withCustomTopics`, `withCustomCaps`), so the two-score rule, the length cut
+  and "never twice" are the same as for the main topics. A custom topic is the most specific
+  section; its heading is the AI's emoji and the name in the reader's language.
+- **AI budget guard** (`job/guard.py`, `worker/src/guard.js`, kept identical by
+  `tests/fixtures/guard_cases.json`; settings in `config/ai_budget.json`): `ai_calls` per model since
+  midnight Pacific time (Gemini's free day; the US daylight rule, no tz database), and 429 answers
+  (`code`). Level 1 (a Gemini 429 in the last hour, or 80% of a model's soft limit): new topic checks
+  wait. Level 2 (every Gemini model 429 in the last hour, or the soft limit reached): translations
+  wait too (the job skips them; readers' stories are held, Step 10). Pass 1 and the editor never
+  ask the guard. The job writes `meta.ai_guard` each run; the hourly Worker tick alerts the owner
+  once per Pacific day when the level is above 0. Admin shows calls, 429s, the level and what waits.
+- **Admin:** a "Custom topics" section (followers, searches, items, stories and sent stories per
+  topic, recent checks, blocked names) with Delete and Block (Block also puts every name and alias on
+  `topic_blocks`), and an "AI budget, today" section.
+
 ## 5. Database (Cloudflare D1, SQLite)
 
 | Table | Key columns | Notes |
@@ -454,7 +503,8 @@ the icon centring (28 checks since Step 5).
 | `meta` | `key` PK, `value` | Worker: `last_alert_at`, `last_alerted_run_id` (Step 3), `last_alert_text`, `d1_worker` (its D1 rows today, Step 4). Job: `feed_health` (Step 4, one JSON row) |
 | `sent` | (`user_id`, `story_id`) PK, `sent_at` | the "never twice" guarantee; pruned with stories |
 | `job_runs` | `id`, `started_at`, `finished_at`, `status` (running/ok/partial/ai_failed/error), counts, `provider`, tokens (both AI calls), `pruned`, `error`, `d1_rows_read`, `d1_rows_written` (Step 4), `editor_status` (ok/failed/skipped), `editor_candidates`, `editor_merged` (Step 5) | Admin tab |
-| `ai_calls` | `id`, `at`, `provider`, `model`, `ok`, `input_tokens`, `output_tokens`, `ms`, `error`, `kind` (Step 5: `batch` or `editor`; Step 9: `translate_<lang>`) | Admin tab: AI usage, per language |
+| `ai_calls` | `id`, `at`, `provider`, `model`, `ok`, `input_tokens`, `output_tokens`, `ms`, `error`, `kind` (Step 5: `batch` or `editor`; Step 9: `translate_<lang>`; Step 13: `topic_check`, written by the Worker), `code` (Step 13: HTTP status of a failed call) | Admin tab: AI usage, per language; index on `at` for the AI budget guard (Step 13) |
+| `custom_topics`, `custom_follows`, `topic_blocks`, `topic_checks`, `custom_topic_days` | Step 13 (§4c): shared custom topics (`tag` c<id>, names in four languages, emoji, definition, searches, boost cap, aliases, `searched_at`, `orphan_since`), who follows what, blocked names, every add request (outcome, whether the AI was called), and per topic per day what the searches did | `custom_topics.id` is AUTOINCREMENT (a deleted topic's tag is never reused); `items.headline_only`/`hint_topic` and `stories.link_state` were added too |
 | `errors` | `id`, `at`, `component` (job/worker), `message` | Admin tab: recent errors |
 | `shadow_items`, `shadow_runs` | Step 6 experiment only (§3a): one row per Google News article (title, outlet, link, date, query, title-similarity to the live pool and to earlier shadow rows) and one row per shadow run (counts per topic, HTTP codes, errors, its own D1 rows) | read by nobody but the experiment's scripts; pruned after 3 days (runs after 30) |
 
@@ -476,9 +526,9 @@ passes numbers as REAL, so INTEGER columns convert them back.
 | Admin tab / admin API | shown only when the verified user id equals `OWNER_TELEGRAM_ID`. Hiding the tab is cosmetic; the API checks the id on every admin call and answers 403 to anyone else (tested for all three admin routes, and against the live Worker). |
 | Mini App page | served with a Content-Security-Policy (scripts from itself and telegram.org only, API calls to itself only), `nosniff`, no referrer. All text from the database is HTML-escaped before display. |
 | Worker → GitHub | fine-grained personal access token: only `RobBudaghyan/axiom-news`, only "Actions: read and write", no expiration (owner's choice, 2026-11-13). It can start workflows; it cannot read or change code or secrets. A Worker secret. |
-| Secrets | `.env` locally (gitignored). In production: GitHub Actions secrets (`GEMINI_API_KEY`, `GROQ_API_KEY`, `CLOUDFLARE_ACCOUNT_ID`, `D1_DATABASE_ID`, `CLOUDFLARE_D1_TOKEN`) and Cloudflare Worker secrets (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `OWNER_TELEGRAM_ID`, `GITHUB_DISPATCH_TOKEN`). Each side holds only what it needs. The job never sees the Telegram token, and the Worker never sees the AI keys. Values are copied from `.env` by `scripts/set_secrets.py` through stdin, never printed. |
+| Secrets | `.env` locally (gitignored). In production: GitHub Actions secrets (`GEMINI_API_KEY`, `GROQ_API_KEY`, `CLOUDFLARE_ACCOUNT_ID`, `D1_DATABASE_ID`, `CLOUDFLARE_D1_TOKEN`) and Cloudflare Worker secrets (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `OWNER_TELEGRAM_ID`, `GITHUB_DISPATCH_TOKEN`, and since Step 13 `GEMINI_API_KEY`, `GROQ_API_KEY` for the custom-topic check). Each side holds only what it needs. The job never sees the Telegram token. Values are copied from `.env` by `scripts/set_secrets.py` through stdin, never printed. |
 | Public repo | `scripts/scan_secrets.py` checks every `.env` value and common token shapes against the whole git history and every file before a push (run on its own, never piped). GitHub push protection is on. Commits use the owner's GitHub noreply address. The D1 database id is committed on purpose in `worker/wrangler.toml` (wrangler needs it; it grants nothing without the D1 token). |
-| Data sent to AI | only public news titles and snippets. No user data ever goes to an AI provider. This matters because Gemini's free tier states content is "used to improve our products". |
+| Data sent to AI | public news titles and snippets; since Step 13 also the text a reader types as a new custom topic (never their name or id; a rejected one is not kept beyond `topic_checks`). No other user data goes to an AI provider. This matters because Gemini's free tier states content is "used to improve our products". |
 
 ## 7. AI design, budget and fallback
 

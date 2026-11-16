@@ -5,10 +5,11 @@ Usage (from the project folder):
     venv/Scripts/python scripts/set_secrets.py check      # which .env names are set (no values)
     venv/Scripts/python scripts/set_secrets.py webhook    # create TELEGRAM_WEBHOOK_SECRET in .env if empty
     venv/Scripts/python scripts/set_secrets.py github     # gh secret set (the 5 the job needs)
-    venv/Scripts/python scripts/set_secrets.py worker     # wrangler secret put (the 4 the Worker needs)
+    venv/Scripts/python scripts/set_secrets.py worker     # wrangler secret put (the 6 the Worker needs)
 
-Each side gets only what it needs: the job never sees the Telegram token, the Worker never sees
-the AI keys.
+Each side gets only what it needs: the job never sees the Telegram token. Since Step 13 the Worker
+also has the two AI keys (owner's choice): it checks a reader's new custom topic once, in a few
+seconds, and logs every such call in ai_calls.
 """
 from __future__ import annotations
 
@@ -23,7 +24,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 ENV = ROOT / ".env"
 GITHUB = ("GEMINI_API_KEY", "GROQ_API_KEY", "CLOUDFLARE_ACCOUNT_ID", "D1_DATABASE_ID", "CLOUDFLARE_D1_TOKEN")
-WORKER = ("TELEGRAM_BOT_TOKEN", "TELEGRAM_WEBHOOK_SECRET", "OWNER_TELEGRAM_ID", "GITHUB_DISPATCH_TOKEN")
+WORKER = ("TELEGRAM_BOT_TOKEN", "TELEGRAM_WEBHOOK_SECRET", "OWNER_TELEGRAM_ID", "GITHUB_DISPATCH_TOKEN",
+          "GEMINI_API_KEY", "GROQ_API_KEY")   # Step 13: the custom-topic check
 REPO = os.environ.get("AXIOM_REPO", "")   # owner/name; read from git remote if empty
 
 

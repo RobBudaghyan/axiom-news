@@ -229,7 +229,8 @@ describe("open: new users and the device time zone", () => {
     assert.deepEqual(JSON.parse(u.topics), ALL);
     assert.equal(r.body.user.tz_source, "device");
     assert.equal(r.body.topics.length, 6);
-    assert.deepEqual(r.body.limits, CONFIG.settings_limits);
+    assert.deepEqual(r.body.limits, { ...CONFIG.settings_limits, max_custom: 3, custom_name_max: 40 });   // Step 13
+    assert.deepEqual(r.body.custom, []);
   });
 
   test("the zone always follows the phone, also one chosen by hand before Step 5", async () => {

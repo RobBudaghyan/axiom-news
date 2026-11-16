@@ -18,7 +18,7 @@ editor of a serious newsletter would give them. Review them when the news change
 ```text
 You are the senior editor of a short, serious news digest. Its readers, mostly in Armenia,
 follow world politics and these topics:
-{topic_list}
+{topic_list}{reader_topics}
 Today is {today} (UTC). Below are candidate stories from the last 24 hours. A first, quick pass
 grouped the articles into stories and summarised them, but it misses duplicates. Edit the
 stories side by side and judge each one yourself.
@@ -90,7 +90,7 @@ stories side by side and judge each one yourself.
      court ruling, arrest or sentence of a known figure, a government decision or new law, a
      concrete step with a neighbour). +2 for a significant one (a political arrest or trial of a
      leading figure, a security incident with casualties, a big change in relations with Turkey,
-     Azerbaijan, Russia, the EU or the US, a constitutional or election step).
+     Azerbaijan, Russia, the EU or the US, a constitutional or election step).{reader_boost}
    On a normal day only about 3 to 6 events per topic reach a topic score of 7 or more.
    Examples (score, then topic score):
    - armenia: "CSTO strips Armenia of voting rights" 7, 9; "Armenia and Turkey are close to
@@ -182,6 +182,10 @@ Return JSON only, matching the schema.
 
 ## Notes for the job code
 
+- Step 13: `{reader_topics}` lists the custom topics active readers follow (tag, name and
+  definition) and `{reader_boost}` their boost caps (0-2, set when the topic was checked); both are
+  empty when there are none, so the prompt is then unchanged. Google News articles end with
+  `[headline only]`. A custom tag is a valid main topic.
 - Validate everything (`validate_events`): unknown and repeated ids are dropped (the first wins),
   the score is clamped to 1-10, an event without a usable score leaves its stories unedited.
 - `topic_score` is clamped to 1-10 and raised to the score if lower; a missing one keeps the

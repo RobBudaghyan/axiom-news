@@ -78,7 +78,7 @@ export default {
         send: (chatId, text, extra) => sendDigestMessage(env.TELEGRAM_BOT_TOKEN, chatId, text, extra),
         appUrl: env.APP_URL,
         alert: (text) => sendPlain(env.TELEGRAM_BOT_TOKEN, Number(env.OWNER_TELEGRAM_ID), text),
-      }, now, { digests: !hourly, extraProblems });
+      }, now, { digests: !hourly, guard: hourly, extraProblems });
       console.log(JSON.stringify({ tick: event.cron, hourly, ...out }));
     } catch (e) {
       await logError(db, `cron ${event.cron}: ${e.message}`, now);

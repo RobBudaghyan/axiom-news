@@ -162,6 +162,27 @@ button.row:active, .tap:active { background: var(--press); }
 .sq.solid svg { display: block; width: 16px; height: 16px; }
 .emo { flex: 0 0 auto; font-size: 20px; line-height: 1; }
 
+/* Step 13, "My topics": a row per custom topic with a round grey "x"; the last row adds one */
+.sq.add { background: var(--accent); color: #fff; line-height: 0; }
+.sq.add svg { display: block; width: 16px; height: 16px; }
+.xbtn { flex: 0 0 44px; width: 44px; height: 44px; margin: -4px -11px -4px 0; display: grid; place-items: center; }
+.xbtn .x { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; line-height: 0;
+  background: var(--fill-2); color: var(--text-2); transition: background-color 0.15s; }
+.xbtn .x svg { display: block; width: 9px; height: 9px; }
+.xbtn:active .x { background: var(--track); }
+.add-input {
+  flex: 1 1 auto; min-width: 0; height: 36px; padding: 0; border: 0; outline: 0; background: transparent;
+  font: inherit; font-size: 17px; line-height: 22px; color: var(--text); -webkit-appearance: none; appearance: none;
+}
+.add-input::placeholder { color: var(--text-2); opacity: 1; }
+.add-input:disabled { color: var(--text-2); -webkit-text-fill-color: var(--text-2); opacity: 1; }
+.add-go { display: none; flex: 0 0 auto; height: 44px; min-width: 44px; margin: -4px 0; padding: 0 0 0 8px; font-size: 17px; font-weight: 600;
+  color: var(--accent-text); }
+.add-row.has-text .add-go { display: block; }
+.add-spin { flex: 0 0 auto; display: grid; place-items: center; width: 44px; height: 44px; margin: -4px -11px -4px 0; }
+.ct.new { animation: slideIn 0.32s var(--ease) both; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
 /* ------------------------------------------------------------------ the one button */
 .grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--gap); }
 .b {
@@ -205,6 +226,8 @@ button.row:active, .tap:active { background: var(--press); }
 [aria-checked="true"] > .row-right .switch .knob, [aria-checked="true"] > .switch .knob, .switch[aria-checked="true"] .knob { transform: translateX(20px); }
 
 .link { color: var(--accent-text); font-size: inherit; }
+.row-right .link[data-action="topic-admin"] { min-height: 44px; padding: 0 4px; font-size: 15px; }
+.link.danger { color: var(--bad-text); }
 
 /* The time zone, one quiet line at the very bottom */
 .tzline { margin: 32px 0 0; text-align: center; font-size: 13px; line-height: 18px; color: var(--text-2); }

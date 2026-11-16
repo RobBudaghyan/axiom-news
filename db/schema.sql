@@ -53,7 +53,10 @@ CREATE TABLE IF NOT EXISTS items (
   published_at INTEGER,
   fetched_at   INTEGER NOT NULL,
   status       TEXT NOT NULL DEFAULT 'pending',
-  story_id     INTEGER
+  story_id     INTEGER,
+  -- Step 13: items found by a custom-topic Google News search (source_key 'gnews', tier 4)
+  headline_only INTEGER NOT NULL DEFAULT 0,         -- 1 = Google gives the headline only, no snippet
+  hint_topic   TEXT                                 -- the custom tag whose search found it
 );
 CREATE INDEX IF NOT EXISTS idx_items_status ON items(status);
 
@@ -81,7 +84,9 @@ CREATE TABLE IF NOT EXISTS stories (
   main_topic        TEXT,                           -- the one topic it is mainly about (its digest section)
   -- Step 8:
   topic_score       INTEGER,                        -- 1..10 for readers who follow main_topic (>= final_score); NULL = use final_score
-  scored_at         INTEGER                         -- when the editor first scored it (digest window: a late score still counts)
+  scored_at         INTEGER,                        -- when the editor first scored it (digest window: a late score still counts)
+  -- Step 13:
+  link_state        INTEGER                         -- Google link: NULL not tried, 1 resolved to the outlet, 2 failed (Google link kept)
 );
 CREATE INDEX IF NOT EXISTS idx_stories_updated ON stories(updated_at);
 
@@ -176,8 +181,68 @@ CREATE TABLE IF NOT EXISTS ai_calls (
   output_tokens INTEGER,
   ms            INTEGER,
   error         TEXT,
-  kind          TEXT                                -- Step 5: 'batch' (pass 1) or 'editor'; NULL = batch
+  kind          TEXT,                               -- Step 5: 'batch' (pass 1) or 'editor'; NULL = batch. Step 13: 'topic_check' (Worker)
+  code          INTEGER                             -- Step 13: HTTP status of a failed call (429 = rate limit), NULL if none
 );
+-- Step 13: the AI budget guard counts today's calls (since midnight Pacific time).
+CREATE INDEX IF NOT EXISTS idx_ai_calls_at ON ai_calls(at);
+
+-- Step 13: custom topics ("My topics"). Shared: two readers who add "Colombia" follow one row.
+-- Created by the Worker after one AI check (worker/src/topiccheck.js); searched hourly by the job
+-- (job/custom.py) while at least one active, unpaused reader follows it; deleted by the job 7 days
+-- after its last follower left (orphan_since).
+CREATE TABLE IF NOT EXISTS custom_topics (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,    -- never reused: old stories keep a deleted topic's tag
+  tag          TEXT UNIQUE,                          -- 'c' || id, set right after the insert
+  names        TEXT NOT NULL,                        -- JSON {en, ru, hy, fr}
+  emoji        TEXT,
+  definition   TEXT NOT NULL,                        -- one English sentence for the AI passes
+  queries      TEXT NOT NULL,                        -- JSON [{q, ed}] (ed: a key of config/custom_topics.json editions)
+  boost_max    INTEGER NOT NULL DEFAULT 0,           -- 0..2, like topic_boost_max
+  aliases      TEXT NOT NULL DEFAULT '[]',           -- JSON: normalised inputs that mapped here
+  created_by   INTEGER,
+  created_at   INTEGER NOT NULL,
+  searched_at  INTEGER,                              -- last Google search
+  orphan_since INTEGER                               -- set when the last follower left
+);
+
+CREATE TABLE IF NOT EXISTS custom_follows (
+  user_id  INTEGER NOT NULL,
+  topic_id INTEGER NOT NULL,
+  at       INTEGER NOT NULL,
+  PRIMARY KEY (user_id, topic_id)
+) WITHOUT ROWID;
+
+-- Names the owner blocked in Admin: they cannot be created again (normalised form).
+CREATE TABLE IF NOT EXISTS topic_blocks (
+  norm TEXT PRIMARY KEY,
+  name TEXT,
+  at   INTEGER NOT NULL
+) WITHOUT ROWID;
+
+-- Every "add a topic" request: the 5-a-day limit and Admin's outcome counts.
+-- outcome: accepted, joined, rejected, main_topic, delayed, blocked, failed
+CREATE TABLE IF NOT EXISTS topic_checks (
+  id       INTEGER PRIMARY KEY,
+  user_id  INTEGER NOT NULL,
+  at       INTEGER NOT NULL,
+  input    TEXT NOT NULL,
+  outcome  TEXT NOT NULL,
+  topic_id INTEGER,
+  reason   TEXT,
+  ai       INTEGER NOT NULL DEFAULT 0                -- 1 = an AI call was made (counts toward the 5 a day)
+);
+
+-- Per custom topic per UTC day: what the hourly searches did (Admin).
+CREATE TABLE IF NOT EXISTS custom_topic_days (
+  topic_id    INTEGER NOT NULL,
+  day         TEXT NOT NULL,                         -- YYYY-MM-DD (UTC)
+  searches    INTEGER NOT NULL DEFAULT 0,
+  fetched     INTEGER NOT NULL DEFAULT 0,
+  dup_dropped INTEGER NOT NULL DEFAULT 0,
+  new_items   INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (topic_id, day)
+) WITHOUT ROWID;
 
 -- Small key/value state. Worker: last_alert_at, last_alerted_run_id, last_alert_text, d1_worker
 -- (its D1 rows today). Job: feed_health (JSON per feed: last ok, newest entry, last error).

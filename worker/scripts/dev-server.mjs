@@ -13,6 +13,7 @@ import worker from "../src/index.js";
 import { signInitData } from "../src/auth.js";
 import { nextSlot } from "../src/digest.js";
 import { ALL, addStory, fakeD1 } from "../test/helpers.mjs";
+import { geminiResponse, isGemini, isGroq, promptOf, topicAnswer } from "../test/fake-ai.mjs";
 
 const PORT = Number(process.env.PORT || 8790);
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -105,16 +106,37 @@ function seed() {
   tip.run(FRIEND, 100, "demo_1", now - 26 * H, null);
   tip.run(FRIEND, 500, "demo_2", now - 5 * H, now - 4 * H);
   tip.run(OWNER, 1000, "demo_3", now - 2 * H, null);
+  // Step 13: a shared custom topic someone else made ("Formula 1", followed by David and Lilit), so the
+  // preview can show "joined", plus a day of its searches for Admin
+  sqlite.prepare("INSERT INTO custom_topics (id, tag, names, emoji, definition, queries, boost_max, aliases, created_by, created_at, searched_at) " +
+    "VALUES (1, 'c1', ?, '🏎️', 'Formula 1 racing: races, drivers, teams and rules.', ?, 2, '[]', 102, ?, ?)")
+    .run(JSON.stringify({ en: "Formula 1", ru: "Формула-1", hy: "Ֆորմուլա 1", fr: "Formule 1" }),
+      JSON.stringify([{ q: "Formula 1", ed: "en" }, { q: "F1 Grand Prix", ed: "en_gb" }]), now - 3 * 86400, now - 1200);
+  sqlite.prepare("INSERT INTO custom_follows (user_id, topic_id, at) VALUES (102, 1, ?), (105, 1, ?)").run(now - 3 * 86400, now - 2 * 86400);
+  sqlite.prepare("INSERT INTO custom_topic_days (topic_id, day, searches, fetched, dup_dropped, new_items) VALUES (1, ?, 30, 412, 37, 96)")
+    .run(new Date(now * 1000).toISOString().slice(0, 10));
+  const check = sqlite.prepare("INSERT INTO topic_checks (user_id, at, input, outcome, topic_id, reason, ai) VALUES (?,?,?,?,?,?,?)");
+  check.run(102, now - 3 * 86400, "Formula 1", "accepted", 1, "A good news topic.", 1);
+  check.run(105, now - 2 * 86400, "F1", "joined", 1, null, 1);
+  check.run(103, now - 5 * H, "asdfgh", "rejected", null, "nonsense: This does not look like a news topic.", 1);
+  call.run(null, now - 5 * H, "gemini", "gemini-3.5-flash-lite", 1, 1, 980, 150, 2100, null, "topic_check");
   return binding;
 }
 
 const env = { DB: seed(), TELEGRAM_BOT_TOKEN: TOKEN, TELEGRAM_WEBHOOK_SECRET: "x".repeat(40), OWNER_TELEGRAM_ID: String(OWNER),
-  GITHUB_DISPATCH_TOKEN: "none", GITHUB_REPO: "demo/demo", GITHUB_WORKFLOW: "hourly.yml", GITHUB_REF: "main" };
+  GITHUB_DISPATCH_TOKEN: "none", GITHUB_REPO: "demo/demo", GITHUB_WORKFLOW: "hourly.yml", GITHUB_REF: "main",
+  GEMINI_API_KEY: "local-preview-not-a-key" };   // Step 13: the topic check goes to the stand-in below
 
-// No real network: Telegram and GitHub answer "ok".
+// No real network: Telegram and GitHub answer "ok"; the AI topic check is answered by test/fake-ai.mjs
+// after a short pause (so the "checking" spinner shows).
+const AI_DELAY_MS = Number(process.env.AI_DELAY_MS || 700);
 const realFetch = globalThis.fetch;
 globalThis.fetch = async (url, init) => {
   const u = String(url);
+  if (isGemini(u) || isGroq(u)) {
+    await new Promise((r) => setTimeout(r, AI_DELAY_MS));
+    return new Response(JSON.stringify(geminiResponse(topicAnswer(promptOf(JSON.parse(init.body))))));
+  }
   if (u.endsWith("/createInvoiceLink")) return new Response(JSON.stringify({ ok: true, result: "https://t.me/$demo-invoice" }));
   if (u.startsWith("https://api.telegram.org/")) return new Response(JSON.stringify({ ok: true, result: { message_id: 1 } }));
   if (u.startsWith("https://api.github.com/")) return new Response(null, { status: 204 });
@@ -147,6 +169,13 @@ createServer(async (req, res) => {
     }
     // Fresh demo data (ui-check.mjs calls this first, so it never needs a restarted preview)
     if (url.pathname === "/__reset" && req.method === "POST") { env.DB = seed(); res.writeHead(204); res.end(); return; }
+    // Step 13: Gemini "answered 429" a minute ago, so the AI guard delays new topic checks
+    if (url.pathname === "/__guard429" && req.method === "POST") {
+      await env.DB.prepare("INSERT INTO ai_calls (at, provider, model, ok, items, error, kind, code) " +
+        "VALUES (?1, 'gemini', 'gemini-3.5-flash-lite', 0, 1, 'gemini: HTTP 429: quota', 'batch', 429)")
+        .bind(Math.floor(Date.now() / 1000) - 60).all();
+      res.writeHead(204); res.end(); return;
+    }
     if (url.pathname === "/" || url.pathname === "/app") { res.writeHead(302, { location: "/app/" }); res.end(); return; }
     if (url.pathname === "/app/" || url.pathname === "/app/index.html") {
       res.writeHead(200, { "content-type": TYPES[".html"], "cache-control": "no-store" });

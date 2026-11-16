@@ -27,6 +27,8 @@ for the design.
 | `config/topics.yaml` | the 6 topics users can pick |
 | `config/sources.yaml` | the RSS feeds, with region/language/paywall/state-owned/tier labels; `enabled: false` switches one off |
 | `config/digest.json` | digest settings (editorial and topic bars, topic boost caps, the one-message length limit, dedupe threshold, users per tick, allowed times) |
+| `config/custom_topics.json` | Step 13: custom topics (3 per reader, 5 checks a day, the 40-request cap, items per topic, the Google News editions) |
+| `config/ai_budget.json` | Step 13: the AI budget guard (soft daily limits per Gemini model, Pacific day) |
 | `config/gnews_queries.yaml` | Step 6 experiment: Google News search terms per topic (paused: `enabled: false`) |
 | `config/candidates/armenia.yaml` | Step 7: Armenian feeds that were tested (the good ones are in `sources.yaml`) |
 | `config/line_emoji.json` | fallback line emojis when the editor gave none (names, capitals, groups, subjects) |
@@ -37,7 +39,7 @@ for the design.
 | `prompts/editor.md` | the editor prompt (merge, strict score, main topic, headline, description, emojis) |
 | `prompts/translate.md` | Step 9: the translation prompt, with per-language notes |
 | `db/schema.sql` | D1 tables |
-| `job/` | the hourly job (`python -m job.run`), with near-duplicate grouping (`job/dupes.py`), the editor pass (`job/editor.py`) and the translation pass (`job/translate.py`, Step 9); Step 6 shadow collection `job/shadow.py` + `job/gnews.py` |
+| `job/` | the hourly job (`python -m job.run`), with near-duplicate grouping (`job/dupes.py`), the editor pass (`job/editor.py`) and the translation pass (`job/translate.py`, Step 9); Step 6 shadow collection `job/shadow.py` + `job/gnews.py`; Step 13 custom topics `job/custom.py` and the AI budget guard `job/guard.py` |
 | `tests/` | Python unit tests for the job |
 | `worker/` | the Cloudflare Worker (`src/`), the Mini App (`public/app/`), tests (`test/`) and tools (`scripts/`) |
 | `docs/screenshots/` | the Mini App at phone width, light and dark, with invented demo data |
@@ -97,6 +99,10 @@ venv/Scripts/python scripts/shadow_ai_sample.py --dry-run     # Step 6: sandbox 
 venv/Scripts/python scripts/armenia_stats.py --hours 48       # Step 7: Armenia stories, feeds and AI use from D1
 venv/Scripts/python scripts/source_dry_run.py                 # Step 7: token cost with/without new feeds (no AI answer)
 venv/Scripts/python scripts/check_feeds.py --file config/candidates/armenia.yaml   # test feeds before adding them
+cd worker && node scripts/step13-checks.mjs                   # Step 13: the real AI topic check on 24 names (24 AI calls, writes nothing)
+venv/Scripts/python scripts/custom_topics_measure.py          # Step 13: AI cost of 1/5/20 custom topics (Google searches + 1 sandbox call)
+cd worker && node scripts/step13-cpu.mjs                      # Step 13: Worker CPU of the custom-topic code
+venv/Scripts/python scripts/make_guard_cases.py               # Step 13: regenerate the shared job/Worker AI-guard test file
 venv/Scripts/python scripts/scan_secrets.py                   # run before every push
 ```
 

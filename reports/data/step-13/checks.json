@@ -1,0 +1,922 @@
+[
+ {
+  "input": "Colombia",
+  "lang": "en",
+  "ms": 1952,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 840,
+  "output_tokens": 198,
+  "errors": [],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "You will receive news updates about Colombia.",
+  "same_as": "",
+  "names": {
+   "en": "Colombia",
+   "ru": "Колумбия",
+   "hy": "Կոլումբիա",
+   "fr": "Colombie"
+  },
+  "emoji": "🇨🇴",
+  "definition": "News about Colombian politics, economy, society, and international relations belongs to this topic, while news about other countries does not.",
+  "queries": [
+   {
+    "q": "Colombia",
+    "ed": "es_co"
+   },
+   {
+    "q": "Colombia news",
+    "ed": "en"
+   }
+  ],
+  "boost_max": 2
+ },
+ {
+  "input": "AI regulation",
+  "lang": "en",
+  "ms": 6053,
+  "model": "gemini-3.1-flash-lite",
+  "calls": 2,
+  "input_tokens": 842,
+  "output_tokens": 407,
+  "errors": [
+   "gemini: HTTP 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+  ],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "This topic covers news about government policies, laws, and ethical guidelines regarding artificial intelligence.",
+  "same_as": "",
+  "names": {
+   "en": "AI regulation",
+   "ru": "Регулирование ИИ",
+   "hy": "Արհեստական բանականության կարգավորում",
+   "fr": "Régulation de l'IA"
+  },
+  "emoji": "⚖️",
+  "definition": "This topic includes news about legislation, government policies, international agreements, and ethical frameworks governing the development and use of artificial intelligence.",
+  "queries": [
+   {
+    "q": "AI regulation OR artificial intelligence regulation",
+    "ed": "en"
+   },
+   {
+    "q": "AI act OR regulating AI",
+    "ed": "en_gb"
+   },
+   {
+    "q": "регулирование искусственного интеллекта",
+    "ed": "ru"
+   },
+   {
+    "q": "régulation de l'intelligence artificielle",
+    "ed": "fr"
+   }
+  ],
+  "boost_max": 1
+ },
+ {
+  "input": "Formula 1",
+  "lang": "en",
+  "ms": 7471,
+  "model": "openai/gpt-oss-120b",
+  "calls": 3,
+  "input_tokens": 1104,
+  "output_tokens": 460,
+  "errors": [
+   "gemini: HTTP 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+   "gemini: HTTP 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+  ],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "Formula 1 is a well‐known sport covered by news outlets.",
+  "same_as": "",
+  "names": {
+   "en": "Formula 1",
+   "ru": "Формула-1",
+   "hy": "Ֆորմուլա 1",
+   "fr": "Formule 1"
+  },
+  "emoji": "🏎️",
+  "definition": "News about the Formula 1 racing series, its teams, drivers, races and related events; not about unrelated motorsport or general automotive news.",
+  "queries": [
+   {
+    "q": "Formula 1 news",
+    "ed": "en"
+   },
+   {
+    "q": "Formula 1 latest results",
+    "ed": "en_gb"
+   },
+   {
+    "q": "Formule 1 actualités",
+    "ed": "fr"
+   },
+   {
+    "q": "Формула-1 новости",
+    "ed": "ru"
+   },
+   {
+    "q": "Formula 1 standings",
+    "ed": "en"
+   }
+  ],
+  "boost_max": 1
+ },
+ {
+  "input": "Brazil",
+  "lang": "en",
+  "ms": 1335,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 858,
+  "output_tokens": 195,
+  "errors": [],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "You are following news about Brazil.",
+  "same_as": "",
+  "names": {
+   "en": "Brazil",
+   "ru": "Бразилия",
+   "hy": "Բրազիլիա",
+   "fr": "Brésil"
+  },
+  "emoji": "🇧🇷",
+  "definition": "News about politics, economy, society, sports and major events in Brazil belongs to this topic.",
+  "queries": [
+   {
+    "q": "Brazil news",
+    "ed": "en"
+   },
+   {
+    "q": "Brasil noticias",
+    "ed": "pt_br"
+   }
+  ],
+  "boost_max": 2
+ },
+ {
+  "input": "Climate policy",
+  "lang": "en",
+  "ms": 8270,
+  "model": "gemini-3.1-flash-lite",
+  "calls": 2,
+  "input_tokens": 866,
+  "output_tokens": 394,
+  "errors": [
+   "gemini: HTTP 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+  ],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "Climate policy is a valid topic covering international agreements, environmental regulations, and government actions.",
+  "same_as": "",
+  "names": {
+   "en": "Climate policy",
+   "ru": "Климатическая политика",
+   "hy": "Կլիմայական քաղաքականություն",
+   "fr": "Politique climatique"
+  },
+  "emoji": "🌍",
+  "definition": "This topic includes news about government regulations, international agreements, and legislative actions aimed at addressing climate change and environmental sustainability.",
+  "queries": [
+   {
+    "q": "climate policy OR climate change policy",
+    "ed": "en"
+   },
+   {
+    "q": "climate policy OR environmental regulation",
+    "ed": "en_gb"
+   },
+   {
+    "q": "климатическая политика",
+    "ed": "ru"
+   },
+   {
+    "q": "politique climatique OR transition écologique",
+    "ed": "fr"
+   }
+  ],
+  "boost_max": 1
+ },
+ {
+  "input": "Elon Musk",
+  "lang": "en",
+  "ms": 1439,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 874,
+  "output_tokens": 222,
+  "errors": [],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "You are following news about Elon Musk.",
+  "same_as": "",
+  "names": {
+   "en": "Elon Musk",
+   "ru": "Илон Маск",
+   "hy": "Իլոն Մասկ",
+   "fr": "Elon Musk"
+  },
+  "emoji": "🚀",
+  "definition": "News about Elon Musk, his companies like Tesla, SpaceX, and X, his public statements, and his business ventures.",
+  "queries": [
+   {
+    "q": "Elon Musk",
+    "ed": "en"
+   },
+   {
+    "q": "Илон Маск",
+    "ed": "ru"
+   },
+   {
+    "q": "Elon Musk",
+    "ed": "fr"
+   }
+  ],
+  "boost_max": 1
+ },
+ {
+  "input": "Champions League",
+  "lang": "en",
+  "ms": 2803,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 882,
+  "output_tokens": 274,
+  "errors": [],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "You will receive the latest updates and match results from the UEFA Champions League.",
+  "same_as": "",
+  "names": {
+   "en": "Champions League",
+   "ru": "Лига чемпионов",
+   "hy": "Չեմպիոնների լիգա",
+   "fr": "Ligue des champions"
+  },
+  "emoji": "⚽",
+  "definition": "News about UEFA Champions League football matches, teams, players, scores, and tournament standings belongs to this topic, while other leagues or unrelated sports do not.",
+  "queries": [
+   {
+    "q": "Champions League",
+    "ed": "en"
+   },
+   {
+    "q": "UEFA Champions League",
+    "ed": "en_gb"
+   },
+   {
+    "q": "Лига чемпионов УЕФА",
+    "ed": "ru"
+   },
+   {
+    "q": "Ligue des champions",
+    "ed": "fr"
+   }
+  ],
+  "boost_max": 1
+ },
+ {
+  "input": "Space exploration",
+  "lang": "en",
+  "ms": 1294,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 890,
+  "output_tokens": 242,
+  "errors": [],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "Space exploration is a great topic to follow for major scientific and cosmic updates.",
+  "same_as": "",
+  "names": {
+   "en": "Space exploration",
+   "ru": "Космические исследования",
+   "hy": "Տիեզերական հետազոտություններ",
+   "fr": "Exploration spatiale"
+  },
+  "emoji": "🚀",
+  "definition": "News about space missions, astronomy discoveries, satellite launches, and aerospace agencies belongs to this topic, while general terrestrial aviation and unrelated science do not.",
+  "queries": [
+   {
+    "q": "space exploration",
+    "ed": "en"
+   },
+   {
+    "q": "освоение космоса",
+    "ed": "ru"
+   },
+   {
+    "q": "exploration spatiale",
+    "ed": "fr"
+   }
+  ],
+  "boost_max": 1
+ },
+ {
+  "input": "Bitcoin",
+  "lang": "en",
+  "ms": 8636,
+  "model": "gemini-3.1-flash-lite",
+  "calls": 2,
+  "input_tokens": 897,
+  "output_tokens": 352,
+  "errors": [
+   "gemini: HTTP 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+  ],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "Bitcoin is a major cryptocurrency and a significant topic in financial and technology news.",
+  "same_as": "",
+  "names": {
+   "en": "Bitcoin",
+   "ru": "Биткоин",
+   "hy": "Բիթքոյն",
+   "fr": "Bitcoin"
+  },
+  "emoji": "📌",
+  "definition": "News about Bitcoin, including its price movements, regulatory developments, blockchain technology updates, and adoption by institutions or countries.",
+  "queries": [
+   {
+    "q": "Bitcoin",
+    "ed": "en"
+   },
+   {
+    "q": "Bitcoin price",
+    "ed": "en_gb"
+   },
+   {
+    "q": "Биткоин",
+    "ed": "ru"
+   },
+   {
+    "q": "Bitcoin crypto",
+    "ed": "fr"
+   }
+  ],
+  "boost_max": 1
+ },
+ {
+  "input": "Taiwan",
+  "lang": "en",
+  "ms": 1595,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 904,
+  "output_tokens": 245,
+  "errors": [],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "You are following news about Taiwan.",
+  "same_as": "",
+  "names": {
+   "en": "Taiwan",
+   "ru": "Тайвань",
+   "hy": "Թայվան",
+   "fr": "Taïwan"
+  },
+  "emoji": "🇹🇼",
+  "definition": "News about Taiwan covers political developments, cross-strait relations, economic updates, technology sector news, and domestic events related to Taiwan.",
+  "queries": [
+   {
+    "q": "Taiwan",
+    "ed": "en"
+   },
+   {
+    "q": "Taiwan",
+    "ed": "en_gb"
+   },
+   {
+    "q": "Тайвань",
+    "ed": "ru"
+   },
+   {
+    "q": "Taïwan",
+    "ed": "fr"
+   }
+  ],
+  "boost_max": 2
+ },
+ {
+  "input": "Nigeria",
+  "lang": "en",
+  "ms": 13966,
+  "model": "openai/gpt-oss-120b",
+  "calls": 3,
+  "input_tokens": 1164,
+  "output_tokens": 323,
+  "errors": [
+   "gemini: HTTP 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+   "gemini: network error timeout"
+  ],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "Nigeria is a country covered regularly in news.",
+  "same_as": "",
+  "names": {
+   "en": "Nigeria",
+   "ru": "Нигерия",
+   "hy": "Նիգերիա",
+   "fr": "Nigéria"
+  },
+  "emoji": "🇳🇬",
+  "definition": "News about Nigeria includes politics, economy, society, security and culture within the country, but not unrelated foreign events.",
+  "queries": [
+   {
+    "q": "Nigeria news",
+    "ed": "en"
+   },
+   {
+    "q": "Nigeria politics",
+    "ed": "en_gb"
+   },
+   {
+    "q": "Nigeria économie",
+    "ed": "fr"
+   },
+   {
+    "q": "Nigeria seguridad",
+    "ed": "es"
+   }
+  ],
+  "boost_max": 2
+ },
+ {
+  "input": "EU enlargement",
+  "lang": "en",
+  "ms": 1178,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 921,
+  "output_tokens": 231,
+  "errors": [],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "You can follow news about the expansion of the European Union here.",
+  "same_as": "",
+  "names": {
+   "en": "EU enlargement",
+   "ru": "Расширение ЕС",
+   "hy": "ԵՄ ընդլայնում",
+   "fr": "Elargissement de l UE"
+  },
+  "emoji": "🇪🇺",
+  "definition": "News about the accession process, negotiations, and integration of candidate countries into the European Union.",
+  "queries": [
+   {
+    "q": "EU enlargement",
+    "ed": "en"
+   },
+   {
+    "q": "enlargement de l UE",
+    "ed": "fr"
+   },
+   {
+    "q": "расширение ЕС",
+    "ed": "ru"
+   }
+  ],
+  "boost_max": 2
+ },
+ {
+  "input": "Chess",
+  "lang": "en",
+  "ms": 1804,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 929,
+  "output_tokens": 240,
+  "errors": [],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "You will receive the latest news, tournament results, and updates from the world of chess.",
+  "same_as": "",
+  "names": {
+   "en": "Chess",
+   "ru": "Шахматы",
+   "hy": "Շախմատ",
+   "fr": "Échecs"
+  },
+  "emoji": "♟️",
+  "definition": "News about chess tournaments, grandmasters, world championships, and major updates from the international chess federation belongs to this topic, while general board game news does not.",
+  "queries": [
+   {
+    "q": "chess tournament",
+    "ed": "en"
+   },
+   {
+    "q": "FIDE chess",
+    "ed": "en"
+   },
+   {
+    "q": "шахматы турнир",
+    "ed": "ru"
+   }
+  ],
+  "boost_max": 1
+ },
+ {
+  "input": "Japan",
+  "lang": "en",
+  "ms": 1581,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 937,
+  "output_tokens": 276,
+  "errors": [],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "You will receive the latest news and updates about Japan.",
+  "same_as": "",
+  "names": {
+   "en": "Japan",
+   "ru": "Япония",
+   "hy": "Ճապոնիա",
+   "fr": "Japon"
+  },
+  "emoji": "🇯🇵",
+  "definition": "News about Japan includes political developments, economic updates, major cultural events, foreign policy decisions, and significant domestic occurrences within the country.",
+  "queries": [
+   {
+    "q": "Japan news",
+    "ed": "en"
+   },
+   {
+    "q": "Japan politics",
+    "ed": "en_gb"
+   },
+   {
+    "q": "Япония новости",
+    "ed": "ru"
+   },
+   {
+    "q": "Japon actualité",
+    "ed": "fr"
+   },
+   {
+    "q": "日本 ニュース",
+    "ed": "ja"
+   }
+  ],
+  "boost_max": 2
+ },
+ {
+  "input": "Cybersecurity",
+  "lang": "en",
+  "ms": 13636,
+  "model": "openai/gpt-oss-120b",
+  "calls": 3,
+  "input_tokens": 1194,
+  "output_tokens": 388,
+  "errors": [
+   "gemini: HTTP 429: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, h",
+   "gemini: network error timeout"
+  ],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "Cybersecurity is a well‐covered news field.",
+  "same_as": "",
+  "names": {
+   "en": "Cybersecurity",
+   "ru": "Кибербезопасность",
+   "hy": "Կիբերանվտանգություն",
+   "fr": "Cybersécurité"
+  },
+  "emoji": "🛡️",
+  "definition": "News about cyber attacks, data breaches, security regulations and defensive technologies belongs here; unrelated tech or crime does not.",
+  "queries": [
+   {
+    "q": "cybersecurity news",
+    "ed": "en"
+   },
+   {
+    "q": "cybersecurity breach",
+    "ed": "en_gb"
+   },
+   {
+    "q": "кибербезопасность новости",
+    "ed": "ru"
+   },
+   {
+    "q": "cybersécurité actualité",
+    "ed": "fr"
+   },
+   {
+    "q": "cybersecurity regulation",
+    "ed": "en"
+   }
+  ],
+  "boost_max": 1
+ },
+ {
+  "input": "Mexico",
+  "lang": "en",
+  "ms": 2010,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 953,
+  "output_tokens": 220,
+  "errors": [],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "You will receive news updates about Mexico.",
+  "same_as": "",
+  "names": {
+   "en": "Mexico",
+   "ru": "Мексика",
+   "hy": "Մեքսիկա",
+   "fr": "Mexique"
+  },
+  "emoji": "🇲🇽",
+  "definition": "News about Mexican politics, economy, culture, society, and international relations belongs to this topic, while unrelated international news does not.",
+  "queries": [
+   {
+    "q": "Mexico",
+    "ed": "en"
+   },
+   {
+    "q": "Mexico",
+    "ed": "es_mx"
+   },
+   {
+    "q": "Mexique",
+    "ed": "fr"
+   }
+  ],
+  "boost_max": 2
+ },
+ {
+  "input": "Oil prices",
+  "lang": "en",
+  "ms": 4185,
+  "model": "gemini-3.1-flash-lite",
+  "calls": 2,
+  "input_tokens": 962,
+  "output_tokens": 358,
+  "errors": [
+   "gemini: HTTP 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+  ],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "Tracking global oil prices and market trends.",
+  "same_as": "",
+  "names": {
+   "en": "Oil prices",
+   "ru": "Цены на нефть",
+   "hy": "Նավթի գներ",
+   "fr": "Prix du pétrole"
+  },
+  "emoji": "🛢️",
+  "definition": "This topic covers news regarding global crude oil market fluctuations, OPEC decisions, and economic impacts of oil price changes.",
+  "queries": [
+   {
+    "q": "oil prices",
+    "ed": "en"
+   },
+   {
+    "q": "crude oil market",
+    "ed": "en_gb"
+   },
+   {
+    "q": "цены на нефть",
+    "ed": "ru"
+   },
+   {
+    "q": "prix du pétrole",
+    "ed": "fr"
+   }
+  ],
+  "boost_max": 1
+ },
+ {
+  "input": "Pope Leo",
+  "lang": "en",
+  "ms": 943,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 971,
+  "output_tokens": 106,
+  "errors": [],
+  "verdict": "reject",
+  "reason_code": "no_news",
+  "reason": "There is no current Pope named Leo.",
+  "same_as": "",
+  "names": {
+   "en": "",
+   "ru": "",
+   "hy": "",
+   "fr": ""
+  },
+  "emoji": "📌",
+  "definition": "News about .",
+  "queries": [],
+  "boost_max": 0
+ },
+ {
+  "input": "Electric cars",
+  "lang": "en",
+  "ms": 1291,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 971,
+  "output_tokens": 236,
+  "errors": [],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "You will receive the latest news and updates on electric cars.",
+  "same_as": "",
+  "names": {
+   "en": "Electric cars",
+   "ru": "Электромобили",
+   "hy": "Էլեկտրամոբիլներ",
+   "fr": "Voitures électriques"
+  },
+  "emoji": "🚗",
+  "definition": "News about electric cars, battery technology, EV manufacturers, and charging infrastructure belongs to this topic, while general gasoline vehicle news does not.",
+  "queries": [
+   {
+    "q": "electric cars",
+    "ed": "en"
+   },
+   {
+    "q": "электромобили",
+    "ed": "ru"
+   },
+   {
+    "q": "voitures électriques",
+    "ed": "fr"
+   }
+  ],
+  "boost_max": 1
+ },
+ {
+  "input": "Georgia (country)",
+  "lang": "en",
+  "ms": 1555,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 981,
+  "output_tokens": 227,
+  "errors": [],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "You will receive the latest news updates about Georgia.",
+  "same_as": "",
+  "names": {
+   "en": "Georgia",
+   "ru": "Грузия",
+   "hy": "Վրաստան",
+   "fr": "Géorgie"
+  },
+  "emoji": "🇬🇪",
+  "definition": "News about political events, economy, society, and international relations involving Georgia belongs to this topic, while general world news does not.",
+  "queries": [
+   {
+    "q": "Georgia country news",
+    "ed": "en"
+   },
+   {
+    "q": "Грузия новости",
+    "ed": "ru"
+   },
+   {
+    "q": "Georgie actualites",
+    "ed": "fr"
+   }
+  ],
+  "boost_max": 2
+ },
+ {
+  "input": "asdfgh qwerty",
+  "lang": "en",
+  "ms": 1074,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 991,
+  "output_tokens": 112,
+  "errors": [],
+  "verdict": "reject",
+  "reason_code": "nonsense",
+  "reason": "Please enter a valid topic name like a country, sport, or public figure.",
+  "same_as": "",
+  "names": {
+   "en": "",
+   "ru": "",
+   "hy": "",
+   "fr": ""
+  },
+  "emoji": "📌",
+  "definition": "News about .",
+  "queries": [],
+  "boost_max": 0
+ },
+ {
+  "input": "my neighbour Ashot",
+  "lang": "ru",
+  "ms": 1414,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 990,
+  "output_tokens": 116,
+  "errors": [],
+  "verdict": "reject",
+  "reason_code": "private_person",
+  "reason": "Мы не можем отслеживать частных лиц, пожалуйста, выберите общественную тему.",
+  "same_as": "",
+  "names": {
+   "en": "",
+   "ru": "",
+   "hy": "",
+   "fr": ""
+  },
+  "emoji": "📌",
+  "definition": "News about .",
+  "queries": [],
+  "boost_max": 0
+ },
+ {
+  "input": "Armenian news",
+  "lang": "en",
+  "ms": 1952,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 989,
+  "output_tokens": 242,
+  "errors": [],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "You will receive the latest news about Armenia.",
+  "same_as": "armenia",
+  "names": {
+   "en": "Armenia",
+   "ru": "Армения",
+   "hy": "Հայաստան",
+   "fr": "Arménie"
+  },
+  "emoji": "🇦🇲",
+  "definition": "News about Armenia, its government, economy, society, foreign policy, and domestic events.",
+  "queries": [
+   {
+    "q": "Armenia",
+    "ed": "en"
+   },
+   {
+    "q": "Армения",
+    "ed": "ru"
+   },
+   {
+    "q": "Հայաստան",
+    "ed": "en"
+   },
+   {
+    "q": "Arménie",
+    "ed": "fr"
+   }
+  ],
+  "boost_max": 2
+ },
+ {
+  "input": "Colombian news",
+  "lang": "en",
+  "ms": 4983,
+  "model": "gemini-3.1-flash-lite",
+  "calls": 2,
+  "input_tokens": 989,
+  "output_tokens": 356,
+  "errors": [
+   "gemini: HTTP 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+  ],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "I will track news related to Colombia for you.",
+  "same_as": "c1",
+  "names": {
+   "en": "Colombia",
+   "ru": "Колумбия",
+   "hy": "Կոլումբիա",
+   "fr": "Colombie"
+  },
+  "emoji": "🇨🇴",
+  "definition": "This topic includes news about political, social, economic, and cultural events happening within Colombia or involving the Colombian government.",
+  "queries": [
+   {
+    "q": "Colombia news",
+    "ed": "en"
+   },
+   {
+    "q": "noticias Colombia",
+    "ed": "es_co"
+   },
+   {
+    "q": "Colombia política",
+    "ed": "es_co"
+   },
+   {
+    "q": "Colombia economy",
+    "ed": "en"
+   }
+  ],
+  "boost_max": 2
+ }
+]

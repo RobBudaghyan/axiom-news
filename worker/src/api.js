@@ -10,6 +10,9 @@
 //   POST /api/admin/run-job             start the hourly GitHub job, min-gap guard (owner only)
 //   POST /api/tip             {amount}  a Telegram Stars invoice link for a voluntary tip (Step 10)
 //   POST /api/admin/refund    {id}      refund one tip through the Bot API (owner only)
+//   POST /api/topics/add      {name}    Step 13: add a custom topic (one AI check), return {state, result}
+//   POST /api/topics/remove   {id}      Step 13: stop following a custom topic, return state
+//   POST /api/admin/topic     {id, action}  Step 13: delete or block a custom topic (owner only)
 import { verifyInitData } from "./auth.js";
 import { CONFIG, candidateStatement, hhmm, localParts, nextSlot, planDigest } from "./digest.js";
 import { SettingsError, TZ_AUTO, TZ_DEFAULT, nextDigestAfterChange, publicUser, validZone, validatePatch } from "./settings.js";
@@ -20,6 +23,8 @@ import { errorStatement } from "./db.js";
 import { LANGS, chooseLang, effectiveLang, t, topicLabel } from "./i18n.js";
 import { setChatLanguage } from "./bot.js";
 import { TIP_AMOUNTS, allowedAmount, invoiceFields, refundTip, tipsStatements, shapeTips } from "./tips.js";
+import { CUSTOM_ADMIN_COUNT, TOPICS_CFG, addTopic, adminTopicStatements, asTopicRows, customAdminStatements,
+  followedStatement, publicCustom, removeStatements, shapeCustomAdmin, withCustomCaps, withCustomTopics } from "./custom.js";
 
 const TOPICS_SQL = "SELECT tag, label_en, emoji, sort, is_default FROM topics ORDER BY sort";
 const USER_SQL = "SELECT * FROM users WHERE id = ?1";
@@ -34,14 +39,15 @@ export function json(status, body) {
 // language; `error` is the English text (Step 9).
 const fail = (status, code, vars = {}) => json(status, { error: t("en", `errors.${code}`, vars), code, vars });
 
-function state(user, topics, isOwner, cfg) {
+function state(user, topics, isOwner, cfg, custom = []) {
   const L = cfg.settings_limits;
   const lang = effectiveLang(user);
   return {
     user: publicUser(user, cfg),
     topics: topics.map((x) => ({ tag: x.tag, label: topicLabel(lang, x.tag, x.label_en), emoji: x.emoji ?? "" })),
+    custom: publicCustom(custom, lang),   // Step 13: "My topics", in the reader's language
     languages: LANGS.enabled.map((code) => ({ code, name: LANGS.names[code] ?? code })),   // the picker (Step 9)
-    limits: { ...L },
+    limits: { ...L, max_custom: TOPICS_CFG.max_per_user, custom_name_max: TOPICS_CFG.name_max },
     tips: { amounts: [...TIP_AMOUNTS] },   // Step 11: 100, 500, 1000 for everyone
     is_owner: isOwner,
   };
@@ -58,7 +64,8 @@ async function readBody(request) {
 // ------------------------------------------------------------------ settings
 
 async function open(db, tg, body, now, cfg, isOwner) {
-  const [rows, topics] = await db.batch([{ sql: USER_SQL, params: [tg.id] }, { sql: TOPICS_SQL, params: [] }]);
+  const [rows, topics, custom] = await db.batch([{ sql: USER_SQL, params: [tg.id] }, { sql: TOPICS_SQL, params: [] },
+    followedStatement(tg.id)]);
   const deviceTz = validZone(body?.tz) ? body.tz : null;
   const firstName = String(tg.first_name ?? "").slice(0, 64);
   const language = String(tg.language_code ?? "en").slice(0, 8);
@@ -96,14 +103,16 @@ async function open(db, tg, body, now, cfg, isOwner) {
       params: [...changed.map((k) => after[k]), user.id],
     }]);
   }
-  return state(after, topics, isOwner, cfg);
+  return state(after, topics, isOwner, cfg, custom);
 }
 
 async function saveSettings(db, tg, body, now, cfg, isOwner, io) {
-  const [rows, topics] = await db.batch([{ sql: USER_SQL, params: [tg.id] }, { sql: TOPICS_SQL, params: [] }]);
+  const [rows, topics, custom] = await db.batch([{ sql: USER_SQL, params: [tg.id] }, { sql: TOPICS_SQL, params: [] },
+    followedStatement(tg.id)]);
   const user = rows[0];
   if (!user) return fail(404, "reopen_simple");
-  const clean = validatePatch(body, topics.map((t) => t.tag), cfg);
+  // Step 13: with a custom topic, every main topic may be off
+  const clean = validatePatch(body, topics.map((t) => t.tag), cfg, { custom: custom.length });
   const cols = {};
   for (const [k, v] of Object.entries(clean)) cols[k] = Array.isArray(v) ? JSON.stringify(v) : v;
   const after = { ...user, ...cols };
@@ -119,17 +128,59 @@ async function saveSettings(db, tg, body, now, cfg, isOwner, io) {
     const problems = await setChatLanguage(io?.tg, user.id, clean.lang, io?.appUrl);
     if (problems.length) await db.batch(problems.map((p) => errorStatement(p, now)));
   }
-  return json(200, state(after, topics, isOwner, cfg));
+  return json(200, state(after, topics, isOwner, cfg, custom));
+}
+
+// ------------------------------------------------------------------ custom topics (Step 13)
+
+async function addCustom(db, env, tg, body, now, cfg, isOwner) {
+  const [rows, topics] = await db.batch([{ sql: USER_SQL, params: [tg.id] }, { sql: TOPICS_SQL, params: [] }]);
+  const user = rows[0];
+  if (!user) return fail(404, "reopen_simple");
+  const lang = effectiveLang(user);
+  const r = await addTopic({ db, env, user, lang, now, isOwner, mainTopics: topics }, body);
+  if (r.error) return fail(400, r.error, r.vars);
+  const [custom] = await db.batch([followedStatement(user.id)]);
+  return json(200, { ...state(user, topics, isOwner, cfg, custom), result: r.result });
+}
+
+async function removeCustom(db, tg, body, now, cfg, isOwner) {
+  const id = Number(body?.id);
+  if (!Number.isInteger(id) || id <= 0) return fail(400, "bad_request");
+  const [rows, topics, custom] = await db.batch([{ sql: USER_SQL, params: [tg.id] }, { sql: TOPICS_SQL, params: [] },
+    followedStatement(tg.id)]);
+  const user = rows[0];
+  if (!user) return fail(404, "reopen_simple");
+  if (!custom.some((c) => c.id === id)) return json(200, state(user, topics, isOwner, cfg, custom));   // already gone
+  if (custom.length === 1 && !JSON.parse(user.topics || "[]").length) return fail(400, "keep_topic");
+  await db.batch(removeStatements(user.id, id, now));
+  return json(200, state(user, topics, isOwner, cfg, custom.filter((c) => c.id !== id)));
+}
+
+async function adminTopic(db, body, now) {
+  const id = Number(body?.id);
+  const action = body?.action;
+  if (!Number.isInteger(id) || id <= 0 || !["delete", "block"].includes(action)) {
+    return json(400, { ok: false, message: "Which topic, and delete or block?" });
+  }
+  const [[topic]] = await db.batch([{ sql: "SELECT id, tag, names, aliases FROM custom_topics WHERE id = ?1", params: [id] }]);
+  if (!topic) return json(404, { ok: false, message: "That topic is already gone." });
+  await db.batch(adminTopicStatements(topic, action, now));
+  const name = JSON.parse(topic.names || "{}").en || topic.tag;
+  return json(200, { ok: true, message: action === "block" ? `Blocked "${name}": deleted, and it cannot be created again.`
+    : `Deleted "${name}". Its followers no longer have it.` });
 }
 
 // ------------------------------------------------------------------ admin actions
 
 async function digestNow(db, ownerId, now, cfg, io) {
-  const [rows, topics] = await db.batch([{ sql: USER_SQL, params: [ownerId] }, { sql: TOPICS_SQL, params: [] }]);
+  const [rows, topics, custom] = await db.batch([{ sql: USER_SQL, params: [ownerId] }, { sql: TOPICS_SQL, params: [] },
+    followedStatement(ownerId)]);
   const user = rows[0];
   if (!user) return fail(404, "no_user");
-  const [cands] = await db.batch([candidateStatement(user, now, cfg)]);
-  const plan = planDigest(user, cands, topics, now, cfg);
+  const u = withCustomTopics(user, custom), c = withCustomCaps(cfg, custom);   // Step 13
+  const [cands] = await db.batch([candidateStatement(u, now, c)]);
+  const plan = planDigest(u, cands, [...topics, ...asTopicRows(custom)], now, c);
   const ids = await sendDigest(io, user.id, plan);
   await db.batch(digestWrites(user, plan, ids, now));
   const n = ids.length;
@@ -203,20 +254,25 @@ export async function handleApi(request, env, db, now, io, cfg = CONFIG) {
       case "POST /api/open": return json(200, await open(db, tg, body, now, cfg, isOwner));
       case "POST /api/settings": return await saveSettings(db, tg, body, now, cfg, isOwner, io);
       case "POST /api/tip": return await tipLink(tg, body, io);
+      case "POST /api/topics/add": return await addCustom(db, env, tg, body, now, cfg, isOwner);
+      case "POST /api/topics/remove": return await removeCustom(db, tg, body, now, cfg, isOwner);
       case "GET /api/admin":
       case "POST /api/admin/digest":
       case "POST /api/admin/run-job":
-      case "POST /api/admin/refund": {
+      case "POST /api/admin/refund":
+      case "POST /api/admin/topic": {
         if (!isOwner) return fail(403, "owner_only");
         if (route === "GET /api/admin") {
-          const st = [...adminStatements(now), ...tipsStatements()];
-          const rows = await db.batch(st);
-          const out = shapeAdmin(rows.slice(0, -2), now, cfg);
+          const base = adminStatements(now), more = customAdminStatements(now);
+          const rows = await db.batch([...base, ...more, ...tipsStatements()]);
+          const out = shapeAdmin(rows.slice(0, base.length), now, cfg);
+          out.custom = shapeCustomAdmin(rows.slice(base.length, base.length + CUSTOM_ADMIN_COUNT), now);
           out.tips = shapeTips(...rows.slice(-2));
           return json(200, out);
         }
         if (route === "POST /api/admin/digest") return await digestNow(db, tg.id, now, cfg, io);
         if (route === "POST /api/admin/refund") return await refund(db, body, now, io);
+        if (route === "POST /api/admin/topic") return await adminTopic(db, body, now);
         return await runJobNow(db, env, now, cfg, io);
       }
       default: return fail(404, "not_found");

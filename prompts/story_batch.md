@@ -58,7 +58,7 @@ YOUR TASKS
    unclear") are news; keep them and reflect the uncertainty in the wording.
 
 3. TAG. Give each story one or more topic tags from this list (use the tag id):
-{topic_list}
+{topic_list}{reader_topics}
    A story matches a topic through direct or indirect connection: spillover from a
    conflict in another country still belongs to that conflict (e.g. "Jordan
    intercepts missile debris amid Iran-Israel strikes" -> iran_war,
@@ -150,6 +150,9 @@ line must be re-checked when it could have changed. Checked 2026-11-13.
 
 ## Notes for the job code
 
+- Step 13: `{reader_topics}` is the READER TOPICS block (`job/ai.py` READER_TOPICS) listing the
+  custom topics active readers follow, with their tags (`c12`) and definitions; empty when there
+  are none. Google News results (custom-topic searches) end with `[headline only]`.
 - Validate everything: drop unknown topic tags, unknown item ids, ids used twice
   (keep first), clamp importance to 1-10, drop stories with no valid tag or items.
 - Input size: send the title plus the first ~200 characters of the description per

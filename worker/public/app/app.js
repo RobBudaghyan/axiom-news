@@ -59,6 +59,8 @@
     warn: '<svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm0 4a1 1 0 0 0-1 1v4a1 1 0 1 0 2 0V7a1 1 0 0 0-1-1Zm0 7.2a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Z"/></svg>',
     tick: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5.5 12.5 4 4 9-9"/></svg>',
     bang: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5.5v8M12 18.5v.01"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M7 7l10 10M17 7 7 17"/></svg>',
     okC: '<svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm3.7 5.3a.9.9 0 0 0-1.3.1l-3.3 4-1.6-1.6a.9.9 0 1 0-1.3 1.3l2.3 2.3c.4.4 1 .3 1.3-.1l4-4.7a.9.9 0 0 0-.1-1.3Z"/></svg>',
   };
 
@@ -266,6 +268,99 @@
       `<span class="row-main row-title">${esc(t.label)}</span>${switchEl}</button>`).join(""));
   }
 
+  // Step 13, "My topics" (the plan in reports/step-12-settings-design.md): each custom topic is a row
+  // with a grey square (📌), its name in the reader's language and a round grey "x" (drawn 22 px, tap
+  // area 44 px) that removes it at once. The last row adds one: a solid red "+", a text field and a
+  // red "Add" once something is typed (Enter does the same). While the AI checks it, a small spinner
+  // stands where "Add" was. At the limit the add row is gone. No helper texts; errors in the bubble.
+  function myTopicsHTML() {
+    const list = S.st.custom || [];
+    const max = (S.st.limits && S.st.limits.max_custom) || 3;
+    const rows = list.map((c) => `<div class="row has-icon ct${S.justAdded === c.id ? " new" : ""}" data-id="${c.id}">` +
+      `<span class="sq" aria-hidden="true">📌</span><span class="row-main row-title ellipsis">${esc(c.name)}</span>` +
+      `<button class="xbtn" data-action="remove-topic" data-value="${c.id}" aria-label="${esc(tr("app.remove_topic", { name: c.name }))}"` +
+      `${S.busy.addTopic ? " disabled" : ""}><span class="x" aria-hidden="true">${I.x}</span></button></div>`).join("");
+    const busy = !!S.busy.addTopic;
+    const draft = S.draft || "";
+    const add = list.length < max ? `<form class="row has-icon add-row${draft.trim() ? " has-text" : ""}${busy ? " busy" : ""}" id="add-topic" novalidate>` +
+      `<span class="sq add" aria-hidden="true">${I.plus}</span>` +
+      `<input class="add-input" id="topic-input" type="text" enterkeyhint="done" autocomplete="off" autocapitalize="sentences" spellcheck="false" ` +
+      `maxlength="${(S.st.limits && S.st.limits.custom_name_max) || 40}" placeholder="${esc(tr("app.add_topic"))}" aria-label="${esc(tr("app.add_topic"))}" ` +
+      `value="${esc(draft)}"${busy ? " disabled" : ""}>` +
+      (busy ? `<span class="add-spin"><span class="spinner spin-sm" role="status" aria-label="${esc(tr("app.checking"))}"></span></span>`
+        : `<button type="submit" class="add-go" data-action="add-topic">${esc(tr("app.add"))}</button>`) + "</form>" : "";
+    return card(rows + add);
+  }
+  function renderMyTopics(focus = false) {
+    const el = $("#my-topics .group");
+    if (!el) return;
+    el.outerHTML = myTopicsHTML();
+    S.justAdded = null;
+    const input = $("#topic-input");
+    if (focus && input) { input.focus(); const n = input.value.length; try { input.setSelectionRange(n, n); } catch { /* not a text field */ } }
+  }
+
+  async function addTopic() {
+    const input = $("#topic-input");
+    const name = input ? input.value.trim() : "";
+    if (!name || S.busy.addTopic) return;
+    if (input) input.blur();
+    S.busy.addTopic = true;
+    S.draft = name;
+    renderMyTopics();
+    try {
+      const r = await api("/api/topics/add", { name });
+      const res = r.result || {};
+      delete r.result;
+      const before = new Set((S.st.custom || []).map((c) => c.id));
+      S.st = r;
+      S.busy.addTopic = false;
+      if (res.kind === "added" || res.kind === "joined") {
+        S.draft = "";
+        const fresh = (S.st.custom || []).find((c) => !before.has(c.id));
+        S.justAdded = fresh ? fresh.id : null;
+        renderMyTopics();
+        haptic("impact", "light");
+        if (res.kind === "joined") toast(tr("app.joined", { name: res.name }), "ok", 2600);
+      } else {   // rejected, a main topic, or "try again in a few minutes": the text stays to edit
+        renderMyTopics();
+        haptic("error");
+        toast(res.reason || tr("app.generic_error"), "err", 3600);
+      }
+    } catch (e) {
+      S.busy.addTopic = false;
+      renderMyTopics();
+      haptic("error");
+      toast(e.message, "err", 3200);
+    }
+  }
+
+  function removeTopic(el) {
+    const id = Number(el.dataset.value);
+    const list = S.st.custom || [];
+    if (list.length === 1 && !S.st.user.topics.length) {
+      haptic("warning");
+      shake(el.closest(".row"));
+      toast(tr("app.keep_topic"), "err");
+      return;
+    }
+    const before = list;
+    S.st.custom = list.filter((c) => c.id !== id);
+    renderMyTopics();
+    chain = chain.then(async () => {
+      try {
+        S.st = await api("/api/topics/remove", { id });
+        renderMyTopics();
+        haptic("impact", "light");
+      } catch (e) {
+        S.st.custom = before;
+        renderMyTopics();
+        haptic("error");
+        toast(e.message, "err", 3200);
+      }
+    });
+  }
+
   // 18 hours on 6 columns: one row each for morning, afternoon and evening.
   function timesHTML() {
     const u = S.st.user;
@@ -294,6 +389,7 @@
   function settingsHTML() {
     return `<section class="section">${heroHTML()}</section>
       ${sec(tr("app.sec_topics"), topicsHTML(), 'id="topics"')}
+      ${sec(tr("app.sec_my_topics"), myTopicsHTML(), 'id="my-topics"')}
       ${sec(tr("app.sec_times"), timesHTML(), 'id="times"')}
       ${languagesHTML()}
       ${pauseHTML()}
@@ -358,7 +454,7 @@
     const u = S.st.user;
     const tag = el.dataset.value;
     const on = u.topics.includes(tag);
-    if (on && u.topics.length === 1) {
+    if (on && u.topics.length === 1 && !(S.st.custom || []).length) {   // Step 13: a custom topic counts too
       haptic("warning");
       shake(el);
       toast(tr("app.keep_topic"), "err");
@@ -434,6 +530,8 @@
     if (/^parse error/i.test(e)) return "The feed could not be read";
     return e;
   }
+  const kindLabel = (k) => (k === "editor" ? "editor" : k === "topic_check" ? "topic check"
+    : /^translate_/.test(k || "") ? `translation (${k.slice(10)})` : "first pass");
   const badge = (text, kind = "") => `<span class="badge ${kind}">${esc(text)}</span>`;
   const kv = (title, value, sub = "") => row({ title, sub, right: `<span class="kv-num">${value}</span>` });
 
@@ -489,7 +587,7 @@
     const models = A.stats.models.filter((m) => m[S.range].calls).map((m) => {
       const x = m[S.range];
       const failed = x.calls - x.ok;
-      return row({ title: `<span class="ellipsis">${esc(m.model || m.provider)}</span>`, sub: `${esc(PROVIDER[m.provider] || m.provider)} · ${m.kind === "editor" ? "editor" : "first pass"} · ${compact(x.input_tokens)} in, ${compact(x.output_tokens)} out`,
+      return row({ title: `<span class="ellipsis">${esc(m.model || m.provider)}</span>`, sub: `${esc(PROVIDER[m.provider] || m.provider)} · ${kindLabel(m.kind)} · ${compact(x.input_tokens)} in, ${compact(x.output_tokens)} out`,
         right: `<span class="kv-num">${plural(x.calls, "call", "calls")}</span>${failed ? badge(`${failed} failed`, "bad") : ""}` });
     }).join("") || row({ title: "No AI calls in this period" });
 
@@ -536,6 +634,33 @@
         right: x.refunded_at ? badge("Refunded", "mute")
           : `<button class="link" data-action="refund" data-value="${x.id}" data-amount="${x.amount}" data-name="${esc(x.name)}" ${S.busy.refund ? "disabled" : ""}>Refund</button>` })).join("");
 
+    // Step 13: custom topics and the AI budget guard (Admin stays English)
+    const C = A.custom || { topics: [], checks_24h: {}, recent_checks: [], blocks: [], guard: { level: 0, reasons: [], models: [] } };
+    const ctRows = C.topics.map((x) => row({ icon: `<span class="sq" aria-hidden="true">${esc(x.emoji || "📌")}</span>`,
+      title: `<span class="ellipsis">${esc(x.name)}</span> ${x.orphan_since ? badge("No followers", "mute") : ""}`,
+      sub: esc(`${plural(x.followers, "follower", "followers")}${x.active !== x.followers ? ` (${x.active} active)` : ""} · ` +
+        `${plural(x.queries.length, "search", "searches")}, +${x.boost_max} cap · today ${n(x.today.searches)} requests, ` +
+        `${n(x.today.new_items)} new items (${n(x.today.dup_dropped)} already in the pool) · 24 h: ` +
+        `${plural(x.stories_24h, "story", "stories")} (${x.main_24h} as main topic), ${n(x.sent_24h)} sent` +
+        (x.orphan_since ? ` · deleted 7 days after ${when(x.orphan_since, tz)}` : "")),
+      right: `<button class="link" data-action="topic-admin" data-act="delete" data-value="${x.id}" data-name="${esc(x.name)}" ${S.busy.topicAdmin ? "disabled" : ""}>Delete</button>` +
+        `<button class="link danger" data-action="topic-admin" data-act="block" data-value="${x.id}" data-name="${esc(x.name)}" ${S.busy.topicAdmin ? "disabled" : ""}>Block</button>` })).join("");
+    const outcomes = Object.entries(C.checks_24h).map(([k, v]) => `${v} ${k.replace("_", " ")}`).join(", ");
+    const checkRows = kv("Topic checks, 24 h", n(Object.values(C.checks_24h).reduce((a, b) => a + b, 0)), outcomes || "none")
+      + C.recent_checks.map((c) => row({ title: `<span class="ellipsis">${esc(c.input)}</span> ${badge(c.outcome.replace("_", " "),
+        c.outcome === "accepted" || c.outcome === "joined" ? "" : c.outcome === "delayed" || c.outcome === "failed" ? "warn" : "mute")}`,
+        sub: esc(`${c.name || "?"} · ${when(c.at, tz)}${c.reason ? ` · ${c.reason}` : ""}`) })).join("")
+      + (C.blocks.length ? row({ title: "Blocked names", sub: esc(C.blocks.map((b) => b.norm).join(", ")) }) : "");
+    const G = C.guard;
+    const glvl = [["Normal", ""], ["Topic checks delayed", "warn"], ["Topic checks and translations delayed", "bad"]][Math.max(G.level, G.job_level || 0)] || ["?", "mute"];
+    const guardRows = row({ title: "AI budget", sub: esc(G.reasons.length ? G.reasons.join("; ") : "Calls are counted per model since midnight Pacific time."),
+      right: badge(glvl[0], glvl[1]) })
+      + G.models.map((m) => row({ title: `<span class="ellipsis">${esc(m.model)}</span>`,
+        sub: esc(`${plural(m.r429, "answer", "answers")} 429 today${m.recent429 ? `, ${m.recent429} in the last hour` : ""}`),
+        right: `<span class="kv-num">${n(m.calls)}${m.soft_limit ? ` of ${n(m.soft_limit)}` : ""}</span>` })).join("")
+      + (G.translate_delayed ? row({ title: "Translations", right: badge("Delayed by the last run", "bad") }) : "")
+      + (G.alerted_day ? row({ title: "Last AI budget alert", right: `<span class="tnum">${esc(G.alerted_day)}</span>` }) : "");
+
     const D = A.d1;
     const meter = (label, used, limit) => {
       const pct = Math.min(100, (used / limit) * 100);
@@ -555,6 +680,8 @@
       ${section("Actions", actions, "Both ask before they run.")}
       <section class="section"><h2 class="section-head">News pipeline</h2>${seg}<div class="group">${stats}</div></section>
       ${section("AI by model", models)}
+      ${section("AI budget, today", guardRows, "Over 80% of a soft limit, or a 429 from Gemini in the last hour: new topic checks wait. Over the limit, or every Gemini model refusing: translations wait too. The first pass and the editor never wait.")}
+      ${section("Custom topics", (ctRows || row({ title: "No custom topics yet" })) + checkRows, C.topics.length ? "Delete removes it from its followers. Block also stops anyone creating it again. Both ask first." : "")}
       ${feeds}
       ${section("Users", tiles + userRows)}
       ${section("Tips", tipRows, T.last.length ? "Last 10 tips. Refund returns the Stars to the person (asks first)." : "No tips yet.")}
@@ -601,6 +728,28 @@
     loadAdmin(true);
   }
 
+  // Step 13: delete or block a custom topic (owner only)
+  async function topicAdminAction(el) {
+    const act = el.dataset.act, name = el.dataset.name || "this topic";
+    haptic("impact", "medium");
+    const msg = act === "block"
+      ? `Block "${name}"? It is deleted for every follower and nobody can create it again.`
+      : `Delete "${name}"? Its followers lose it; anyone can add it again later.`;
+    if (!(await confirmBox(msg))) return;
+    S.busy.topicAdmin = true;
+    renderView();
+    try {
+      const r = await api("/api/admin/topic", { id: Number(el.dataset.value), action: act });
+      haptic("success");
+      toast(r.message, "ok", 3600);
+    } catch (e) {
+      haptic("error");
+      toast(e.message, "err", 4200);
+    }
+    S.busy = {};
+    loadAdmin(true);
+  }
+
   // ---------------------------------------------------------------- events
   document.addEventListener("click", (ev) => {
     const el = ev.target.closest("[data-action]");
@@ -621,7 +770,10 @@
       case "pause": togglePause(el); break;
       case "lang": chooseLanguage(el); break;
       case "tip": payTip(Number(v)); break;
+      case "add-topic": ev.preventDefault(); addTopic(); break;
+      case "remove-topic": removeTopic(el); break;
       case "refund": refundAction(el); break;
+      case "topic-admin": topicAdminAction(el); break;
       case "range": S.range = v; haptic("select"); renderView(); break;
       case "refresh": haptic("impact", "light"); loadAdmin(true); renderView(); break;
       case "all-errors": S.allErrors = true; renderView(); break;
@@ -629,6 +781,17 @@
       case "run-job": adminAction("run"); break;
       case "retry": boot(); break;
       default: break;
+    }
+  });
+
+  // Step 13: the add-a-topic field. Enter submits (the form); "Add" shows only once something is typed.
+  document.addEventListener("submit", (ev) => {
+    if (ev.target && ev.target.id === "add-topic") { ev.preventDefault(); addTopic(); }
+  });
+  document.addEventListener("input", (ev) => {
+    if (ev.target && ev.target.id === "topic-input") {
+      S.draft = ev.target.value;
+      ev.target.closest("form").classList.toggle("has-text", !!S.draft.trim());
     }
   });
 

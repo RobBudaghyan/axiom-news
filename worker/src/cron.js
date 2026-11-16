@@ -6,10 +6,17 @@ import { CONFIG, afterSendStatements, candidateStatement, holdStatements, nextSl
 import { HEALTH_STATEMENTS, assessHealth } from "./health.js";
 import { errorStatement, takeUsage, usageStatement } from "./db.js";
 import { settingsButton } from "./telegram.js";
+import { asTopicRows, guardAlert, withCustomCaps, withCustomTopics } from "./custom.js";
+import { countStatement } from "./guard.js";
 
-const DUE_SQL = `SELECT * FROM users
-WHERE next_digest_at IS NOT NULL AND next_digest_at <= ?1 AND paused = 0 AND blocked = 0
-ORDER BY next_digest_at LIMIT ?2`;
+const DUE_WHERE = "next_digest_at IS NOT NULL AND next_digest_at <= ?1 AND paused = 0 AND blocked = 0";
+const DUE_SQL = `SELECT * FROM users WHERE ${DUE_WHERE} ORDER BY next_digest_at LIMIT ?2`;
+// Step 13: the custom topics the due users follow, in the same read batch (one transaction, so the
+// same users as DUE_SQL).
+const DUE_CUSTOM_SQL = `SELECT f.user_id, t.id, t.tag, t.names, t.emoji, t.boost_max FROM custom_follows f
+JOIN custom_topics t ON t.id = f.topic_id
+WHERE t.tag IS NOT NULL AND f.user_id IN (SELECT id FROM users WHERE ${DUE_WHERE} ORDER BY next_digest_at LIMIT ?2)
+ORDER BY f.at, t.id`;
 const TOPICS_SQL = "SELECT tag, label_en, emoji, sort, is_default FROM topics ORDER BY sort";
 const GIVE_UP_S = 3600;   // a slot that keeps failing for an hour is skipped
 
@@ -48,21 +55,39 @@ export async function sendDigest(io, chatId, plan) {
 // io: {send(chatId, text, {kind, reply_markup}), alert(text), appUrl}. opts: {digests: bool, extraProblems: []}.
 export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
   const digests = opts.digests !== false;
+  // Step 13: the AI budget guard is checked on the hourly tick (once an hour is enough for one alert a day)
+  const guard = !!opts.guard;
   const reads = [
     ...HEALTH_STATEMENTS,
-    ...(digests ? [{ sql: DUE_SQL, params: [now, cfg.max_users_per_tick] }, { sql: TOPICS_SQL, params: [] }] : []),
+    ...(digests ? [{ sql: DUE_SQL, params: [now, cfg.max_users_per_tick] }, { sql: TOPICS_SQL, params: [] },
+                   { sql: DUE_CUSTOM_SQL, params: [now, cfg.max_users_per_tick] }] : []),
+    ...(guard ? [countStatement(now),
+                 { sql: "SELECT key, value FROM meta WHERE key IN ('ai_guard', 'ai_guard_alert_day')", params: [] }] : []),
   ];
-  const [runs, lastOk, meta, due = [], topics = []] = await db.batch(reads);
+  const got = await db.batch(reads);
+  const [runs, lastOk, meta] = got;
+  const [due = [], topics = [], custom = []] = digests ? got.slice(3, 6) : [];
+  const [guardCounts, guardMeta] = guard ? got.slice(digests ? 6 : 3) : [];
   const writes = [];
   const out = { due: due.length, sent: 0, quiet: 0, blocked: 0, failed: 0, stories: 0, cut: 0, alert: false };
 
   if (due.length) {
-    const cands = await db.batch(due.map((u) => candidateStatement(u, now, cfg)));
+    const mine = new Map();
+    for (const r of custom) {
+      if (!mine.has(r.user_id)) mine.set(r.user_id, []);
+      mine.get(r.user_id).push(r);
+    }
+    // each user's custom topics join their topic list, their caps and their section names
+    const plans = due.map((u) => {
+      const rows = mine.get(u.id) ?? [];
+      return { user: withCustomTopics(u, rows), cfg: withCustomCaps(cfg, rows), topics: rows.length ? [...topics, ...asTopicRows(rows)] : topics };
+    });
+    const cands = await db.batch(plans.map((p) => candidateStatement(p.user, now, p.cfg)));
     for (let i = 0; i < due.length; i++) {
       const user = due[i];
       let plan, sentIds;
       try {
-        plan = planDigest(user, cands[i], topics, now, cfg);
+        plan = planDigest(plans[i].user, cands[i], plans[i].topics, now, plans[i].cfg);
         sentIds = await sendDigest(io, user.id, plan);
       } catch (e) {
         out.failed++;
@@ -99,6 +124,18 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
       out.alert = true;
     } catch (e) {
       writes.push(errorStatement(`alert to owner failed: ${e.message}`, now));
+    }
+  }
+  if (guard) {
+    const g = guardAlert(guardCounts, guardMeta, now);
+    if (g) {
+      try {
+        await io.alert(g.text);
+        writes.push(...g.writes);
+        out.guard_alert = true;
+      } catch (e) {
+        writes.push(errorStatement(`AI budget alert to owner failed: ${e.message}`, now));
+      }
     }
   }
   // D1 rows this isolate used so far (this tick's reads plus any Mini App calls it served), for the

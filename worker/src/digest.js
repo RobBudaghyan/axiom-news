@@ -97,7 +97,10 @@ export function topicScore(s, cfg = CONFIG) {
   return s.final_score + Math.min(boost, cap);
 }
 
+// Step 13: a reader's own topic (c<id>) is the most specific of all.
+const CUSTOM = /^c\d+$/;
 const rankOf = (specificity) => (t) => {
+  if (CUSTOM.test(t)) return -1;
   const i = specificity.indexOf(t);
   return i < 0 ? specificity.length : i;
 };
@@ -342,10 +345,19 @@ export const LAYOUT = RICH;
 const layoutOf = (opts) => opts.layout ?? LAYOUT;
 
 // topics: rows of the D1 `topics` table. Returns {tag: {label, emoji}}, labels in `lang` (Step 9).
+// Step 13: rows of custom topics carry `names` (JSON {en, ru, hy, fr}, written by the AI check).
 export function topicInfoFrom(topics, lang = "en") {
   const out = {};
   for (const x of topics ?? []) {
-    out[x.tag] = { label: topicLabel(lang, x.tag, x.label_en ?? x.label ?? x.tag), emoji: x.emoji ?? "" };
+    let label;
+    if (x.names) {
+      let names = {};
+      try { names = typeof x.names === "string" ? JSON.parse(x.names) : x.names; } catch { /* keep {} */ }
+      label = names?.[lang] || names?.en || x.label_en || x.tag;
+    } else {
+      label = topicLabel(lang, x.tag, x.label_en ?? x.label ?? x.tag);
+    }
+    out[x.tag] = { label, emoji: x.emoji ?? "" };
   }
   return out;
 }

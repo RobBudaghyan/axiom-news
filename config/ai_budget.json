@@ -1,0 +1,9 @@
+{
+  "_comment": "Step 13: the AI budget guard (job/guard.py and worker/src/guard.js, kept identical by tests/fixtures/guard_cases.json). Calls are counted per model since midnight Pacific time (when Gemini's free day resets). Level 1 delays new custom-topic checks; level 2 also delays translations (stories wait, Step 10 rule). Pass 1 and the editor never wait. The soft limits are ours, below Google's real daily caps (which the API does not show); raise or lower them here.",
+  "reset_tz": "America/Los_Angeles",
+  "primary_model": "gemini-3.5-flash-lite",
+  "gemini_models": ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"],
+  "soft_limits": {"gemini-3.5-flash-lite": 250, "gemini-3.1-flash-lite": 250},
+  "check_ratio": 0.8,
+  "recent_429_minutes": 60
+}

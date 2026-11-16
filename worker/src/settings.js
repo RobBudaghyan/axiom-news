@@ -61,7 +61,8 @@ export function validZone(tz) {
 
 // patch: what the Mini App sends (any subset). topicTags: the known topic tags.
 // Returns the clean column values to write. Throws SettingsError with a friendly message.
-export function validatePatch(patch, topicTags, cfg = CONFIG) {
+// extra.custom: how many custom topics the user follows (Step 13): with one, every main topic may be off.
+export function validatePatch(patch, topicTags, cfg = CONFIG, extra = {}) {
   if (!patch || typeof patch !== "object" || Array.isArray(patch)) throw new SettingsError("nothing");
   const unknown = Object.keys(patch).filter((k) => !KEYS.has(k));
   if (unknown.length) throw new SettingsError("unknown_setting", { key: unknown[0] });
@@ -71,7 +72,7 @@ export function validatePatch(patch, topicTags, cfg = CONFIG) {
     const t = patch.topics;
     if (!Array.isArray(t) || !t.every((x) => typeof x === "string")) throw new SettingsError("topics_list");
     const uniq = [...new Set(t)];
-    if (!uniq.length) throw new SettingsError("keep_topic");
+    if (!uniq.length && !extra.custom) throw new SettingsError("keep_topic");
     const bad = uniq.find((x) => !topicTags.includes(x));
     if (bad) throw new SettingsError("no_topic");
     out.topics = topicTags.filter((x) => uniq.includes(x));   // keep the official order

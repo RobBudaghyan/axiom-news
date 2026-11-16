@@ -1,0 +1,246 @@
+[
+ {
+  "input": "Pope Leo",
+  "lang": "en",
+  "ms": 7150,
+  "model": "gemini-3.1-flash-lite",
+  "calls": 2,
+  "input_tokens": 917,
+  "output_tokens": 373,
+  "errors": [
+   "gemini: HTTP 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+  ],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "Tracking news related to the historical and religious legacy of the Popes named Leo.",
+  "same_as": "",
+  "names": {
+   "en": "Pope Leo",
+   "ru": "Папа Лев",
+   "hy": "Հռոմի պապ Լեւոն",
+   "fr": "Pape Léon"
+  },
+  "emoji": "🇻🇦",
+  "definition": "News concerning the historical legacy, encyclicals, or ongoing academic and religious discussions surrounding the various Popes named Leo.",
+  "queries": [
+   {
+    "q": "Pope Leo history",
+    "ed": "en"
+   },
+   {
+    "q": "Pope Leo Catholic Church",
+    "ed": "en_gb"
+   },
+   {
+    "q": "Папа Лев",
+    "ed": "ru"
+   },
+   {
+    "q": "Pape Léon",
+    "ed": "fr"
+   }
+  ],
+  "boost_max": 1
+ },
+ {
+  "input": "Pope Leo XIV",
+  "lang": "en",
+  "ms": 1641,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 920,
+  "output_tokens": 242,
+  "errors": [],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "You can follow news about Pope Leo XIV.",
+  "same_as": "",
+  "names": {
+   "en": "Pope Leo XIV",
+   "ru": "Папа Римский Лев XIV",
+   "hy": "Հռոմի Պապ Լեոն XIV",
+   "fr": "Pape Léon XIV"
+  },
+  "emoji": "🇻🇦",
+  "definition": "News about Pope Leo XIV, his official statements, activities, and decisions related to the Vatican and the Catholic Church.",
+  "queries": [
+   {
+    "q": "Pope Leo XIV",
+    "ed": "en"
+   },
+   {
+    "q": "Папа Римский Лев XIV",
+    "ed": "ru"
+   },
+   {
+    "q": "Pape Léon XIV",
+    "ed": "fr"
+   }
+  ],
+  "boost_max": 2
+ },
+ {
+  "input": "Elon Musk",
+  "lang": "en",
+  "ms": 12615,
+  "model": "openai/gpt-oss-120b",
+  "calls": 3,
+  "input_tokens": 1168,
+  "output_tokens": 396,
+  "errors": [
+   "gemini: HTTP 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+   "gemini: HTTP 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+  ],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "Elon Musk is a well-known public figure covered by news.",
+  "same_as": "",
+  "names": {
+   "en": "Elon Musk",
+   "ru": "Элон Маск",
+   "hy": "Էլոն Մասկ",
+   "fr": "Elon Musk"
+  },
+  "emoji": "🚀",
+  "definition": "News about Elon Musk's business ventures, statements, projects, and public actions; not unrelated personal matters.",
+  "queries": [
+   {
+    "q": "Elon Musk",
+    "ed": "en"
+   },
+   {
+    "q": "Elon Musk",
+    "ed": "en_gb"
+   },
+   {
+    "q": "Элон Маск",
+    "ed": "ru"
+   },
+   {
+    "q": "Էլոն Մասկ",
+    "ed": "en"
+   },
+   {
+    "q": "Elon Musk",
+    "ed": "fr"
+   }
+  ],
+  "boost_max": 1
+ },
+ {
+  "input": "my neighbour Ashot",
+  "lang": "ru",
+  "ms": 6223,
+  "model": "gemini-3.1-flash-lite",
+  "calls": 2,
+  "input_tokens": 929,
+  "output_tokens": 324,
+  "errors": [
+   "gemini: HTTP 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+  ],
+  "verdict": "reject",
+  "reason_code": "private_person",
+  "reason": "К сожалению, я не могу отслеживать новости о частных лицах, таких как ваши соседи.",
+  "same_as": "",
+  "names": {
+   "en": "private person",
+   "ru": "частное лицо",
+   "hy": "մասնավոր անձ",
+   "fr": "particulier"
+  },
+  "emoji": "👤",
+  "definition": "This topic is not valid for news tracking as it refers to a private individual without public significance.",
+  "queries": [
+   {
+    "q": "private individual news",
+    "ed": "en"
+   },
+   {
+    "q": "частное лицо новости",
+    "ed": "ru"
+   }
+  ],
+  "boost_max": 0
+ },
+ {
+  "input": "asdfgh qwerty",
+  "lang": "en",
+  "ms": 1207,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 930,
+  "output_tokens": 109,
+  "errors": [],
+  "verdict": "reject",
+  "reason_code": "nonsense",
+  "reason": "That looks like random keystrokes rather than a news topic.",
+  "same_as": "",
+  "names": {
+   "en": "",
+   "ru": "",
+   "hy": "",
+   "fr": ""
+  },
+  "emoji": "📌",
+  "definition": "News about .",
+  "queries": [],
+  "boost_max": 0
+ },
+ {
+  "input": "Vasya Pupkin",
+  "lang": "en",
+  "ms": 1175,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 929,
+  "output_tokens": 114,
+  "errors": [],
+  "verdict": "reject",
+  "reason_code": "private_person",
+  "reason": "Vasya Pupkin refers to an unknown private individual rather than a public figure.",
+  "same_as": "",
+  "names": {
+   "en": "",
+   "ru": "",
+   "hy": "",
+   "fr": ""
+  },
+  "emoji": "📌",
+  "definition": "News about .",
+  "queries": [],
+  "boost_max": 0
+ },
+ {
+  "input": "Kim Kardashian",
+  "lang": "en",
+  "ms": 1877,
+  "model": "gemini-3.5-flash-lite",
+  "calls": 1,
+  "input_tokens": 927,
+  "output_tokens": 206,
+  "errors": [],
+  "verdict": "accept",
+  "reason_code": "ok",
+  "reason": "You can follow news about Kim Kardashian.",
+  "same_as": "",
+  "names": {
+   "en": "Kim Kardashian",
+   "ru": "Ким Кардашьян",
+   "hy": "Քիմ Քարդաշյան",
+   "fr": "Kim Kardashian"
+  },
+  "emoji": "🌟",
+  "definition": "News about Kim Kardashian, her business ventures, public appearances, and personal life belongs to this topic, while general celebrity news about unrelated individuals does not.",
+  "queries": [
+   {
+    "q": "Kim Kardashian",
+    "ed": "en"
+   },
+   {
+    "q": "Kim Kardashian",
+    "ed": "fr"
+   }
+  ],
+  "boost_max": 1
+ }
+]

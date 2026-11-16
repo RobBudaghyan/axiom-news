@@ -46,7 +46,7 @@ POOL_SQL = ("SELECT id, summary, topics, importance, best_url, best_source, best
             "topic_score, scored_at "
             "FROM stories WHERE updated_at >= ? AND merged_into IS NULL AND importance >= ? "
             "ORDER BY importance DESC, updated_at DESC, id DESC")
-ITEMS_SQL = ("SELECT story_id, source_name, tier, title, snippet, published_at FROM items "
+ITEMS_SQL = ("SELECT story_id, source_name, tier, title, snippet, published_at, headline_only FROM items "
              "WHERE story_id IN ({qs})")
 
 
@@ -124,18 +124,44 @@ def candidate_block(s: dict, items: list[dict], edited: bool) -> str:
     lines = [head, f"  first-pass summary: {s['summary']}"]
     for it in items:
         snippet = f" :: {it['snippet']}" if it.get("snippet") else ""
-        lines.append(f"  - {it['source_name']}, tier {it['tier']} | {it['title']}{snippet}")
+        marker = " [headline only]" if it.get("headline_only") else ""   # Step 13: Google News result
+        lines.append(f"  - {it['source_name']}, tier {it['tier']} | {it['title']}{snippet}{marker}")
     return "\n".join(lines)
+
+
+# Step 13: readers' own topics (custom topics). Both blocks are empty when none is followed, so the
+# prompt is then exactly what it was before.
+READER_TOPICS = """
+   and reader topics, which some readers added themselves (tag: name, what it covers):
+{lines}
+   An event about a reader topic may take its tag as its topic even when it is sport,
+   technology, business or culture. Its score stays the score for a general reader."""
+READER_BOOST = """
+   - reader topics: +0 for routine news; for a notable development that the topic's followers
+     would want to know, up to the cap: {caps}."""
+
+
+def reader_blocks(custom: list[dict]) -> tuple[str, str]:
+    if not custom:
+        return "", ""
+    lines = "\n".join(f"   - {t['tag']}: {t['label']['en']}, {' '.join(str(t.get('definition') or '').split())}"
+                      for t in custom)
+    caps = ", ".join(f"{t['tag']} +{int(t.get('boost_max') or 0)}" for t in custom)
+    return READER_TOPICS.format(lines=lines), READER_BOOST.format(caps=caps)
 
 
 def render_prompt(template: str, *, today: str, topics: list[dict], facts: list[str], facts_checked: str,
                   new: list[dict], compare: list[dict], items: dict[int, list[dict]]) -> str:
-    topic_list = "\n".join(f"   - {t['tag']}: {t['label']['en']}" for t in topics)
+    main = [t for t in topics if not t.get("custom")]
+    topic_list = "\n".join(f"   - {t['tag']}: {t['label']['en']}" for t in main)
+    reader_topics, reader_boost = reader_blocks([t for t in topics if t.get("custom")])
     blocks = [candidate_block(s, items.get(s["id"], []), False) for s in new]
     blocks += [candidate_block(s, items.get(s["id"], []), True) for s in compare]
     values = {
         "{today}": today,
         "{topic_list}": topic_list,
+        "{reader_topics}": reader_topics,
+        "{reader_boost}": reader_boost,
         "{facts_checked_date}": facts_checked,
         "{calibration_facts}": "\n".join(f"- {f}" for f in facts),
         "{candidates}": "\n\n".join(blocks),
@@ -537,6 +563,9 @@ class Editor:
         self.log = log
         self.debug_dir = Path(debug_dir) if debug_dir else None
         self.dry_run = dry_run
+        # Step 13: a custom topic carries its own candidate floor (like Armenia's 3)
+        self.floors = {**(self.s.editor_topic_floor or {}),
+                       **{t["tag"]: t["floor"] for t in topics if t.get("floor") is not None}}
 
     def pool(self, now: int, min_importance: int | None = None, hours: float = 24) -> list[dict]:
         """Stories of the last `hours` the editor may see. The floor is editor_min_importance,
@@ -544,7 +573,7 @@ class Editor:
         if min_importance is not None:
             return self.db.query(POOL_SQL, [int(now - hours * 3600), min_importance])
         base = self.s.editor_min_importance
-        floors = self.s.editor_topic_floor or {}
+        floors = self.floors
         low = min([base, *floors.values()])
         rows = self.db.query(POOL_SQL, [int(now - hours * 3600), low])
         return [r for r in rows if r["importance"] >= base
