@@ -3,6 +3,7 @@
   "default": "en",
   "enabled": ["en", "ru"],
   "available": ["en", "ru", "hy", "fr"],
+  "flags": {"en": "🇬🇧", "ru": "🇷🇺", "hy": "🇦🇲", "fr": "🇫🇷"},
   "names": {"en": "English", "ru": "Русский", "hy": "Հայերեն", "fr": "Français"},
   "english_names": {"en": "English", "ru": "Russian", "hy": "Armenian", "fr": "French"},
   "locale": {"en": "en-GB", "ru": "ru-RU", "hy": "hy-AM", "fr": "fr-FR"}

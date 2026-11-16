@@ -144,8 +144,8 @@ describe("owner rule: in Russian, digest is always сводка", () => {
       helpText(null, now, "ru"), helpText({ ...u, paused: 1 }, now, "ru"), settingsText("ru")]) assert.doesNotMatch(x, bad, x);
     assert.doesNotMatch(JSON.stringify(JSON.parse(i18nSource().split(" = ")[1].replace(/;\s*$/, "")).dicts.ru), bad);
     assert.equal(t("ru", "app.hero_label"), "Следующая сводка");
-    assert.deepEqual(["one", "few", "many"].map((f) => DICTS.ru.app.times_summary[f].split(" ").slice(0, 2).join(" ")),
-      ["Одна сводка", "{count} сводки", "{count} сводок"]);
+    assert.equal(t("ru", "app.hero_paused_label"), "Сводки");
+    assert.equal(t("ru", "app.sec_times"), "Время сводок");
     assert.match(welcomeText(u, TOPICS, now, true, "ru"), /Я присылаю короткую сводку самых важных новостей/);
   });
 });

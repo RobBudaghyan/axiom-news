@@ -4,6 +4,7 @@
 //
 //   node scripts/dev-server.mjs            then open http://localhost:8790/app/?theme=dark&as=owner
 //   query: theme=light|dark, as=owner|friend, confirm=0 (the confirm popup answers Cancel)
+//   POST /__reset puts the demo data back as it was at start
 import { createServer } from "node:http";
 import { readFileSync, existsSync } from "node:fs";
 import { extname, join, normalize } from "node:path";
@@ -107,8 +108,7 @@ function seed() {
   return binding;
 }
 
-const DB = seed();
-const env = { DB, TELEGRAM_BOT_TOKEN: TOKEN, TELEGRAM_WEBHOOK_SECRET: "x".repeat(40), OWNER_TELEGRAM_ID: String(OWNER),
+const env = { DB: seed(), TELEGRAM_BOT_TOKEN: TOKEN, TELEGRAM_WEBHOOK_SECRET: "x".repeat(40), OWNER_TELEGRAM_ID: String(OWNER),
   GITHUB_DISPATCH_TOKEN: "none", GITHUB_REPO: "demo/demo", GITHUB_WORKFLOW: "hourly.yml", GITHUB_REF: "main" };
 
 // No real network: Telegram and GitHub answer "ok".
@@ -145,6 +145,8 @@ createServer(async (req, res) => {
       res.end(Buffer.from(await r.arrayBuffer()));
       return;
     }
+    // Fresh demo data (ui-check.mjs calls this first, so it never needs a restarted preview)
+    if (url.pathname === "/__reset" && req.method === "POST") { env.DB = seed(); res.writeHead(204); res.end(); return; }
     if (url.pathname === "/" || url.pathname === "/app") { res.writeHead(302, { location: "/app/" }); res.end(); return; }
     if (url.pathname === "/app/" || url.pathname === "/app/index.html") {
       res.writeHead(200, { "content-type": TYPES[".html"], "cache-control": "no-store" });

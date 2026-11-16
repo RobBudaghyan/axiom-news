@@ -74,12 +74,24 @@
     } catch { /* not supported */ }
   }
 
+  // Step 12: our own iOS palette, light or dark as Telegram is; Telegram's header, background and
+  // bottom bar get the page colour itself, so the edges never show a different grey.
   function applyTheme() {
-    if (tg && tg.colorScheme) document.documentElement.dataset.scheme = tg.colorScheme;
+    let scheme = tg && tg.colorScheme;
+    if (!scheme) { try { scheme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; } catch { scheme = "light"; } }
+    document.documentElement.dataset.scheme = scheme;
     if (!tg || !ver("6.1")) return;
-    try { tg.setHeaderColor("secondary_bg_color"); } catch { /* old client */ }
-    try { tg.setBackgroundColor("secondary_bg_color"); } catch { /* old client */ }
-    try { if (ver("7.10")) tg.setBottomBarColor("secondary_bg_color"); } catch { /* old client */ }
+    const bg = toHex(getComputedStyle(document.body).getPropertyValue("--bg")) ||
+      (scheme === "dark" ? "#000000" : "#f2f2f7");
+    try { tg.setHeaderColor(ver("6.9") ? bg : "secondary_bg_color"); } catch { /* old client */ }
+    try { tg.setBackgroundColor(bg); } catch { /* old client */ }
+    try { if (ver("7.10")) tg.setBottomBarColor(bg); } catch { /* old client */ }
+  }
+  function toHex(v) {
+    v = String(v || "").trim();
+    if (/^#[0-9a-f]{6}$/i.test(v)) return v.toLowerCase();
+    const m = /^rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(v);
+    return m ? "#" + m.slice(1, 4).map((x) => (+x).toString(16).padStart(2, "0")).join("") : "";
   }
 
   function confirmBox(text) {
@@ -164,8 +176,6 @@
       return p ? p.value : "";
     } catch { return ""; }
   }
-  const period = (t) => { const h = +t.slice(0, 2); return h < 12 ? "Morning" : h < 18 ? "Afternoon" : "Evening"; };
-  const periodEmoji = (t) => ({ Morning: "🌅", Afternoon: "☀️", Evening: "🌙" }[period(t)]);
   const n = (v) => Number(v || 0).toLocaleString("en-US");
   function compact(v) {
     v = Number(v || 0);
@@ -195,10 +205,29 @@
   const switchEl = '<span class="switch" aria-hidden="true"><span class="knob"></span></span>';
 
   // ---------------------------------------------------------------- shell
+  // Step 12 trial: three designs of the Settings tab, switchable by the owner only (remembered on
+  // this phone). Everyone else sees design 1.
+  const DESIGNS = ["1", "2", "3"];
+  let DESIGN = "1";
+  function pickDesign() {
+    let d = "1";
+    if (S.st && S.st.is_owner) { try { const v = localStorage.getItem("axiom.design"); if (DESIGNS.includes(v)) d = v; } catch { /* no storage */ } }
+    setDesign(d, false);
+  }
+  function setDesign(d, remember = true) {
+    DESIGN = DESIGNS.includes(d) ? d : "1";
+    document.documentElement.dataset.design = DESIGN;
+    if (remember) { try { localStorage.setItem("axiom.design", DESIGN); } catch { /* no storage */ } }
+    applyTheme();
+  }
   function renderShell() {
     const owner = S.st.is_owner;
     app.removeAttribute("aria-busy");
-    app.innerHTML = `<header class="top"><h1 class="title" id="title"></h1>${owner ? `
+    const dsw = owner ? `<div class="seg dsw" role="tablist" id="design-switch" aria-label="Design">
+        <span class="seg-thumb" style="width:calc(33.333% - 1.333px);transform:translateX(${(+DESIGN - 1) * 100}%)"></span>
+        ${DESIGNS.map((d) => `<button role="tab" aria-selected="${d === DESIGN}" data-action="design" data-value="${d}">Design ${d}</button>`).join("")}
+      </div>` : "";
+    app.innerHTML = `<header class="top">${dsw}<h1 class="title" id="title"></h1>${owner ? `
       <div class="seg" role="tablist" id="tabs">
         <span class="seg-thumb" style="width:calc(50% - 2px)"></span>
         <button role="tab" data-action="tab" data-value="settings">${esc(tr("app.tab_settings"))}</button>
@@ -221,88 +250,99 @@
   }
 
   // ---------------------------------------------------------------- settings
+  // Step 12: no helper texts, no "Saved" toast (a light haptic tap instead). One button component
+  // (.b) on a 6-column grid: a time spans 1 column, a tip 2, a language (and a topic in design 3) 3.
   function heroHTML() {
     const u = S.st.user;
     if (u.paused) {
       return `<div class="group hero paused" id="hero"><div class="hero-icon">${I.pause}</div><div>
-        <div class="hero-label">${esc(tr("app.hero_paused_label"))}</div><div class="hero-value">${esc(tr("app.hero_paused"))}</div>
-        <div class="hero-sub">${esc(tr("app.hero_paused_sub"))}</div></div></div>`;
+        <div class="hero-label">${esc(tr("app.hero_paused_label"))}</div><div class="hero-value">${esc(tr("app.hero_paused"))}</div></div></div>`;
     }
     const ts = u.next_digest_at;
     const value = ts ? tr("app.day_at", { day: dayName(ts, u.timezone), time: hm(ts, u.timezone) }) : tr("app.not_scheduled");
     return `<div class="group hero" id="hero"><div class="hero-icon">${I.clock}</div><div>
-      <div class="hero-label">${esc(tr("app.hero_label"))}</div><div class="hero-value tnum">${esc(value)}</div>
-      <div class="hero-sub">${esc(tr("app.zone_time", { zone: zoneName(u.timezone) }))}</div></div></div>`;
+      <div class="hero-label">${esc(tr("app.hero_label"))}</div><div class="hero-value tnum">${esc(value)}</div></div></div>`;
   }
   function updateHero() {
     const h = $("#hero");
     if (h) h.outerHTML = heroHTML();
   }
 
-  // "09:00, 14:00 and 20:00"
-  const listTimes = (t) => (t.length < 2 ? t.join("") : `${t.slice(0, -1).join(", ")}${tr("app.and")}${t[t.length - 1]}`);
-  function timesFoot() {
-    const u = S.st.user, L = S.st.limits;
-    return `${trn("app.times_summary", u.digest_times.length, { times: listTimes(u.digest_times) })} ` +
-      tr("app.times_hint", { max: L.max_times });
+  const sec = (head, body, attrs = "") =>
+    `<section class="section" ${attrs}>${head ? `<h2 class="section-head">${esc(head)}</h2>` : ""}${body}</section>`;
+  const card = (rows) => `<div class="group">${rows}</div>`;
+  const grid = (buttons) => `<div class="grid">${buttons}</div>`;
+  // A soft colour per topic for design 1's squares (iOS system hues at low strength)
+  const TINT = { politics: "0, 122, 255", wars_conflicts: "142, 142, 147", armenia: "255, 149, 0", russia: "88, 86, 214",
+    iran_war: "52, 199, 89", ukraine_war: "255, 204, 0" };
+  const tint = (tag) => `--tint: rgba(${TINT[tag] || "142, 142, 147"}, 0.18)`;
+
+  function topicsHTML() {
+    const { user: u, topics } = S.st;
+    const on = (t) => u.topics.includes(t.tag);
+    const attrs = (t, role) => `role="${role}" aria-checked="${on(t)}" data-action="topic" data-value="${esc(t.tag)}"`;
+    if (DESIGN === "3") {
+      return grid(topics.map((t) => `<button class="b s3" ${attrs(t, "switch")}><span class="emo" aria-hidden="true">${esc(t.emoji)}</span>` +
+        `<span class="lbl">${esc(t.label)}</span></button>`).join(""));
+    }
+    if (DESIGN === "2") {
+      return card(topics.map((t) => `<button class="row tap" ${attrs(t, "checkbox")}><span class="emo" aria-hidden="true">${esc(t.emoji)}</span>` +
+        `<span class="row-main row-title">${esc(t.label)}</span><span class="check" aria-hidden="true">${I.check}</span></button>`).join(""));
+    }
+    return card(topics.map((t) => `<button class="row has-icon tap" ${attrs(t, "switch")}><span class="sq" style="${tint(t.tag)}" aria-hidden="true">${esc(t.emoji)}</span>` +
+      `<span class="row-main row-title">${esc(t.label)}</span>${switchEl}</button>`).join(""));
   }
 
+  // 18 hours on 6 columns: one row each for morning, afternoon and evening.
   function timesHTML() {
     const u = S.st.user;
-    const all = allowedTimes(S.st.limits);
-    const block = (label, list) => list.length ? `<div class="times-block"><div class="times-label">${periodEmoji(list[0])} ${label}</div>
-      <div class="chips">${list.map((t) => `<button class="chip-btn tnum" data-action="time" data-value="${t}" aria-pressed="${u.digest_times.includes(t)}"
-        aria-label="${t}">${t}</button>`).join("")}</div></div>` : "";
-    return block(esc(tr("app.morning")), all.filter((t) => period(t) === "Morning"))
-      + block(esc(tr("app.afternoon")), all.filter((t) => period(t) === "Afternoon"))
-      + block(esc(tr("app.evening")), all.filter((t) => period(t) === "Evening"));
+    return grid(allowedTimes(S.st.limits).map((t) => `<button class="b t tnum" data-action="time" data-value="${t}" aria-pressed="${u.digest_times.includes(t)}">${t}</button>`).join(""));
   }
 
-  function tzSub(u) {
-    const off = offset(u.timezone);
-    return `${tr(u.tz_source === "device" ? "app.tz_device" : "app.tz_default")}${off ? ` · ${off}` : ""}`;
+  function languagesHTML() {
+    const langs = S.st.languages || [];
+    if (langs.length < 2) return "";
+    const flags = L10N.flags || {};
+    return sec(tr("app.sec_language"), grid(langs.map((l) => `<button class="b s3" role="radio" aria-checked="${l.code === S.st.user.lang}" data-action="lang" data-value="${esc(l.code)}">` +
+      `${flags[l.code] ? `<span class="emo" aria-hidden="true">${esc(flags[l.code])}</span>` : ""}<span class="lbl" lang="${esc(l.code)}">${esc(l.name)}</span></button>`).join("")),
+      'id="language" role="radiogroup"');
   }
+
+  function pauseHTML() {
+    const p = S.st.user.paused;
+    const label = esc(tr("app.pause"));
+    if (DESIGN === "3") {
+      return sec("", grid(`<button class="b s6" role="switch" aria-checked="${p}" data-action="pause" id="pause-row"><span class="emo" aria-hidden="true">🔕</span><span class="lbl">${label}</span></button>`));
+    }
+    if (DESIGN === "2") {
+      return sec("", card(`<button class="row tap" role="switch" aria-checked="${p}" data-action="pause" id="pause-row"><span class="emo" aria-hidden="true">🔕</span>` +
+        `<span class="row-main row-title">${label}</span>${switchEl}</button>`));
+    }
+    return sec("", card(`<button class="row has-icon tap" role="switch" aria-checked="${p}" data-action="pause" id="pause-row"><span class="sq solid" aria-hidden="true">${I.pause}</span>` +
+      `<span class="row-main row-title">${label}</span>${switchEl}</button>`));
+  }
+
+  // "Yerevan · GMT+4": the phone's zone, saved on every open (Step 12: one quiet line, no row).
+  const zoneLine = (u) => { const off = offset(u.timezone); return off ? tr("app.zone_line", { zone: zoneName(u.timezone), offset: off }) : zoneName(u.timezone); };
 
   function settingsHTML() {
-    const { user: u, topics } = S.st;
-    const topicRows = topics.map((t) => {
-      const on = u.topics.includes(t.tag);
-      return row({ icon: esc(t.emoji), title: esc(t.label), right: switchEl, tag: "button", cls: "tap",
-        attrs: `role="switch" aria-checked="${on}" data-action="topic" data-value="${esc(t.tag)}"` });
-    }).join("");
-
-    const tzRow = row({ icon: I.globe, tile: true, title: esc(tr("app.zone_time", { zone: zoneName(u.timezone) })), sub: esc(tzSub(u)), attrs: 'id="tz-row"' });
-
-    const pauseRow = row({ icon: I.pause, tile: true, title: esc(tr("app.pause")), right: switchEl, tag: "button", cls: "tap",
-      attrs: `role="switch" aria-checked="${u.paused}" data-action="pause" id="pause-row"` });
-
-    // Step 9: the language picker (only the enabled languages, each in its own name).
-    const langs = S.st.languages || [];
-    const langRows = langs.map((l) => row({ title: `<span lang="${esc(l.code)}">${esc(l.name)}</span>`,
-      right: l.code === u.lang ? `<span class="check" aria-hidden="true">${I.check}</span>` : "", tag: "button", cls: "tap",
-      attrs: `role="radio" aria-checked="${l.code === u.lang}" data-action="lang" data-value="${esc(l.code)}"` })).join("");
-
     return `<section class="section">${heroHTML()}</section>
-      ${section(esc(tr("app.sec_topics")), topicRows, esc(tr("app.topics_foot")))}
-      ${section(esc(tr("app.sec_times")), timesHTML(), `<span id="times-foot">${esc(timesFoot())}</span>`, 'id="times"')}
-      ${langs.length > 1 ? section(esc(tr("app.sec_language")), langRows, esc(tr("app.language_foot")), 'id="language" role="radiogroup"') : ""}
-      ${section(esc(tr("app.sec_zone")), tzRow, esc(tr("app.zone_foot")))}
-      ${section("", pauseRow, esc(tr("app.pause_foot")))}
+      ${sec(tr("app.sec_topics"), topicsHTML(), 'id="topics"')}
+      ${sec(tr("app.sec_times"), timesHTML(), 'id="times"')}
+      ${languagesHTML()}
+      ${pauseHTML()}
       ${supportHTML()}
-      <p class="fine">${esc(tr("app.fine"))}</p>`;
+      <p class="tzline tnum" id="tz-line">${esc(zoneLine(S.st.user))}</p>`;
   }
 
-  // "Support Axiom", a voluntary tip in Telegram Stars (Step 10). Always open (Step 11, owner): the
-  // short text, then the three amounts; an amount opens Telegram's own payment sheet. A tip
-  // changes nothing else.
+  // "Support Axiom", a voluntary tip in Telegram Stars (Step 10). Step 12: the title and the three
+  // amounts only; an amount opens Telegram's own payment sheet. /terms and /paysupport stay in the bot.
   function supportHTML() {
     const amounts = (S.st.tips && S.st.tips.amounts) || [];
     if (!amounts.length) return "";
-    const text = `<p class="support-text">${esc(tr("app.support_text"))}</p>`;
-    const chips = `<div class="times-block"><div class="chips">${amounts.map((a) =>
-      `<button class="chip-btn tnum" data-action="tip" data-value="${a}" ${S.busy.tip ? "disabled" : ""}>${
-        esc(tr("app.tip_amount", { amount: a }))}</button>`).join("")}</div></div>`;
-    return section(esc(tr("app.sec_support")), text + chips, "", 'id="support"');
+    return sec(tr("app.sec_support"), grid(amounts.map((a) =>
+      `<button class="b s2 tnum" data-action="tip" data-value="${a}" ${S.busy.tip ? "disabled" : ""}>${esc(tr("app.tip_amount", { amount: a }))}</button>`).join("")),
+      'id="support"');
   }
 
   async function payTip(amount) {
@@ -324,7 +364,8 @@
     renderView();
   }
 
-  // Saves go one after another, so a quick series of taps arrives in order.
+  // Saves go one after another, so a quick series of taps arrives in order. A saved change is a
+  // light haptic tap (Step 12, owner: never a "Saved" toast); an error still shows, briefly.
   let chain = Promise.resolve();
   function save(patch, revert) {
     chain = chain.then(async () => {
@@ -332,7 +373,7 @@
         S.st = await api("/api/settings", patch);
         if ("lang" in patch) { setLang(S.st.user.lang); renderShell(); renderView(); }   // topic names come back translated
         else updateHero();
-        toast(tr("app.saved"));
+        haptic("impact", "light");
       } catch (e) {
         if (revert) revert();
         haptic("error");
@@ -360,7 +401,6 @@
     const before = [...u.topics];
     u.topics = on ? u.topics.filter((t) => t !== tag) : S.st.topics.map((t) => t.tag).filter((t) => t === tag || u.topics.includes(t));
     el.setAttribute("aria-checked", String(!on));
-    haptic("select");
     save({ topics: u.topics }, () => { S.st.user.topics = before; });
   }
 
@@ -384,8 +424,6 @@
     const before = [...u.digest_times];
     u.digest_times = on ? u.digest_times.filter((x) => x !== t) : [...u.digest_times, t].sort();
     el.setAttribute("aria-pressed", String(!on));
-    $("#times-foot").textContent = timesFoot();
-    haptic("select");
     save({ digest_times: u.digest_times }, () => { S.st.user.digest_times = before; });
   }
 
@@ -393,7 +431,6 @@
     const u = S.st.user;
     u.paused = !u.paused;
     el.setAttribute("aria-checked", String(u.paused));
-    haptic("impact", "light");
     updateHero();
     save({ paused: u.paused }, () => { S.st.user.paused = !S.st.user.paused; });
   }
@@ -406,7 +443,6 @@
     const before = u.lang;
     u.lang = code;
     setLang(code);
-    haptic("select");
     renderShell();
     renderView();
     save({ lang: code }, () => { S.st.user.lang = before; setLang(before); renderShell(); });
@@ -618,6 +654,7 @@
       case "time": toggleTime(el); break;
       case "pause": togglePause(el); break;
       case "lang": chooseLanguage(el); break;
+      case "design": if (v !== DESIGN) { setDesign(v); haptic("select"); renderShell(); renderView(true); } break;
       case "tip": payTip(Number(v)); break;
       case "refund": refundAction(el); break;
       case "range": S.range = v; haptic("select"); renderView(); break;
@@ -652,6 +689,7 @@
       return;
     }
     setLang(S.st.user.lang);
+    pickDesign();
     renderShell();
     renderView();
   }

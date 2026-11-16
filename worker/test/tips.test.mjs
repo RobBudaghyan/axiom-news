@@ -260,7 +260,7 @@ describe("/paysupport, /terms, commands and texts", () => {
     const keys = ["bot.support", "bot.support_amount", "bot.tip_title", "bot.tip_description", "bot.tip_label",
       "bot.tip_thanks", "bot.tip_refunded", "bot.tip_bad", "bot.paysupport", "bot.paysupport_sent", "bot.terms",
       "commands.support", "commands.paysupport", "commands.terms", "errors.tip_amount", "app.sec_support",
-      "app.support_text", "app.tip_amount", "app.tip_thanks", "app.tip_failed", "app.tip_unavailable"];
+      "app.tip_amount", "app.tip_thanks", "app.tip_failed", "app.tip_unavailable"];
     const missing = [];
     for (const lang of ["en", "ru", "hy", "fr"]) {
       for (const k of keys) {
