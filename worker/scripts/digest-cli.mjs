@@ -234,8 +234,14 @@ async function main() {
   const previewing = process.argv.includes("--preview");
   const sinceLast = previewing && process.argv.includes("--since-last");
   const sinceHours = previewing ? Number(arg("--since-hours", "0")) : 0;
-  const who = !previewing || sinceLast ? user
+  let who = !previewing || sinceLast ? user
     : { ...user, id: 0, last_digest_at: sinceHours > 0 ? now - Math.round(sinceHours * 3600) : null };
+  // Step 15, previews only: --topics all (every main topic on, plus the owner's own topics),
+  // --lang en|ru (the digest language).
+  if (previewing && arg("--topics") === "all") {
+    who = { ...who, topics: JSON.stringify([...mainTopics.map((t) => t.tag), ...parseList(user.topics).filter((t) => /^c\d+$/.test(t))]) };
+  }
+  if (previewing && arg("--lang")) who = { ...who, lang: arg("--lang") };
   const st = candidateStatement(who, now, cfg);
   const cands = await db.query(st.sql, st.params);
   const label = previewing ? `<i>${arg("--label", "Preview of the digest (last 24 hours). Nothing is recorded.")}</i>` : undefined;

@@ -1,5 +1,5 @@
 
-##### all_six (politics_conflicts, economy_markets, armenia, russia, iran_war, ukraine_war) before: 105 stories in 7 digests, 0 whose main topic is switched off
+##### all_six (politics_conflicts, economy_markets, armenia, russia, iran_war, ukraine_war) before: 111 stories in 7 digests, 0 whose main topic is switched off
 --- 09:00: 15 stories, 3508 characters
   [6/t7] ukraine_war (main ukraine_war): Zelensky says Ukrainian drone attacks neutralized over 55 percent of Russia oil refining capacity
   [6/t7] russia (main russia): Estonia prepares cloud infrastructure for government continuity
@@ -32,7 +32,7 @@
   [5/t6] armenia (main armenia): Armenia moves to raise conscription age to 32
   [5/t6] russia (main russia): Shortage of epilepsy drug Depakine reported in Russia
   [5/t6] russia (main russia): Bill grants Russian Central Bank access to citizen tax data
---- 20:00: 17 stories, 3816 characters
+--- 20:00: 16 stories, 3693 characters
   [7/t8] iran_war (main iran_war): Third oil tanker catches fire after hitting naval mine in Strait of Hormuz
   [7/t8] ukraine_war (main ukraine_war): Russia reports record-breaking interception of 1,300 Ukrainian drones
   [6/t8] armenia (main armenia): Armenia expands European military cooperation after losing CSTO voting rights
@@ -49,9 +49,8 @@
   [6/t7] armenia (main armenia): Armenia and Turkey begin implementing agreements
   [6/t7] russia (main russia): Yekaterinburg architect sentenced to 12 years over enlistment office fire
   [6/t7] russia (main russia): Russia proposes nonaggression pacts with European nations amid peace talks
-  [5/t7] armenia (main armenia): Former employees of Yerevan brandy factory protest recent layoffs
---- 09:00: 17 stories, 3674 characters
-  [7/t8] ukraine_war (main ukraine_war): Ukraine strikes critically damage Crimea bridge
+--- 09:00: 17 stories, 3821 characters
+  [7/t8] ukraine_war (main ukraine_war): Ukraine heavily damages Kerch bridge linking Crimea and Russia
   [6/t8] armenia (main armenia): Azerbaijan to increase defense spending to 8.8 billion manats
   [6/t7] russia (main russia): Japan scrambles jets after Russian aircraft enter airspace
   [6/t7] ukraine_war (main ukraine_war): European representatives participate in US-Ukraine peace talks
@@ -68,7 +67,7 @@
   [5/t6] armenia (main armenia): Azerbaijan and UK foreign ministers discuss Armenia normalization
   [5/t6] armenia (main armenia): Azerbaijani Foreign Minister discusses peace process with UK Foreign Secretary
   [5/t6] armenia (main armenia): Armenian officials arrested for bribery
---- 14:00: 15 stories, 3818 characters
+--- 14:00: 15 stories, 3869 characters
   [7/t7] politics_conflicts (main politics_conflicts): Mongolian President Khurelsukh resigns amid corruption scandal
   [6/t7] ukraine_war (main ukraine_war): Ukrainian drone strikes hit Russian industrial zones and petrochemical facilities
   [6/t7] russia (main russia): Journalist regains consciousness after car bombing in Moscow
@@ -84,36 +83,43 @@
   [5/t6] russia (main russia): EU expected to approve 22nd sanctions package against Russia in December
   [5/t6] armenia (main armenia): Yerevan court president authorizes wiretapping operations against judge Masis Melkonyan
   [5/t6] armenia (main armenia): Man arrested in Syunik region for stealing 13 tons of gold ore
---- 20:00: 16 stories, 3715 characters
+--- 20:00: 15 stories, 3797 characters
   [7/t9] armenia (main armenia): Armenia signals readiness to open border crossing with Turkey
   [7/t8] ukraine_war (main ukraine_war): Russian ballistic missiles strike Kyiv main bridges and infrastructure
   [7/t8] ukraine_war (main ukraine_war): Casualties from Russian strike on Zaporizhzhia rise to 42
   [6/t8] armenia (main armenia): Iran aims to transform Norduz border crossing into major trade hub
   [6/t8] armenia (main armenia): Armenian investigators detail charges against Azerbaijani soldier for border crossing and shooting
   [7/t7] politics_conflicts (main politics_conflicts): Turkey places pro-opposition Sozcu TV under state management
-  [7/t7] politics_conflicts (main politics_conflicts): Death toll from Russian strike in Kamyshevakha rises to 72
+  [7/t7] ukraine_war (main ukraine_war): Death toll from Russian strike in Kamyshevakha rises to 72
   [6/t7] iran_war (main iran_war): Iran downs US MQ-1 reconnaissance drone over Qeshm Island
   [6/t7] russia (main russia): Deutsche Bank accused of shielding Russian oligarchs from sanctions
   [6/t7] ukraine_war (main ukraine_war): Russia rejects Ukraine joining NATO following proposed Donbas withdrawal terms
-  [6/t7] ukraine_war (main ukraine_war): Ukrainian drones target Russian oil refineries
   [6/t7] iran_war (main iran_war): Iraqi Prime Minister plans crackdown on pro-Iran militias
   [6/t7] russia (main russia): Slovakia and Hungary secure US extensions to purchase Russian oil
   [6/t7] iran_war (main iran_war): Qatar warns of Gulf escalation as Iran issues threats against Bahrain
   [6/t7] armenia (main armenia): European diplomats emphasize Armenian and Azerbaijani independence and European ties
   [6/t7] russia (main russia): Russia arrests Japanese journalist on espionage charges
---- now 21:11 (window still open): 10 stories, 2038 characters
+--- now 21:27 (window still open): 18 stories, 3809 characters
+  [7/t8] russia (main russia): Russia demands NATO withdraw from Eastern Europe
   [7/t8] iran_war (main iran_war): Iran strikes US radar system in Bahrain
-  [7/t7] ukraine_war (main ukraine_war): UK to provide over 1000 additional air defense missiles to Ukraine
+  [7/t7] ukraine_war (main ukraine_war): UK to provide over 1,000 additional air defense missiles to Ukraine
+  [6/t7] russia (main russia): Russian military plane crash in Siberia kills 17
+  [6/t7] iran_war (main iran_war): US conducts strikes on Iran Qeshm Island
+  [6/t7] iran_war (main iran_war): Hunger strike expands across Iranian prisons as three more face death penalty
+  [5/t7] armenia (main armenia): Armenia and Russia launch practical negotiations on railway concession
+  [5/t7] armenia (main armenia): Armenia permanent population reaches 3.11 million
   [5/t7] armenia (main armenia): Analyst warns Russia may seek strategic influence over new regional roads
+  [5/t6] armenia (main armenia): Armenia Justice Ministry proposes higher compensation for insults and defamation
+  [5/t6] armenia (main armenia): Armenian environmental authorities suspend catalyst recycling plant in Hrazdan
+  [5/t6] russia (main russia): Russian State Duma passes bill to raise military service age for women
+  [5/t6] economy_markets (main economy_markets): Russian seaborne oil exports reach highest level since July
   [5/t6] russia (main russia): Russia proposes bill to shield war participants from bankruptcy seizure
   [5/t6] russia (main russia): Estonian president proposes analysis of border closure with Russia
+  [5/t6] armenia (main armenia): Armenia suspends illegal water extraction at Armavir fish farm
   [5/t6] armenia (main armenia): Bulgarian businessman allegedly bypasses Armenian gambling ad ban
   [5/t6] russia (main russia): Russian authorities search Lenkom theater in financial probe
-  [5/t6] russia (main russia): Russia and China expect record trade turnover in 2026
-  [4/t6] armenia (main armenia): Armenian lawmakers consider legal amendments for mental health cases
-  [4/t6] armenia (main armenia): Andranik Piloyan remains National Hero despite corruption conviction
 
-##### all_six (politics_conflicts, economy_markets, armenia, russia, iran_war, ukraine_war) after: 105 stories in 7 digests, 0 whose main topic is switched off
+##### all_six (politics_conflicts, economy_markets, armenia, russia, iran_war, ukraine_war) after: 111 stories in 7 digests, 0 whose main topic is switched off
 --- 09:00: 15 stories, 3508 characters
   [6/t7] ukraine_war (main ukraine_war): Zelensky says Ukrainian drone attacks neutralized over 55 percent of Russia oil refining capacity
   [6/t7] russia (main russia): Estonia prepares cloud infrastructure for government continuity
@@ -146,7 +152,7 @@
   [5/t6] armenia (main armenia): Armenia moves to raise conscription age to 32
   [5/t6] russia (main russia): Shortage of epilepsy drug Depakine reported in Russia
   [5/t6] russia (main russia): Bill grants Russian Central Bank access to citizen tax data
---- 20:00: 17 stories, 3816 characters
+--- 20:00: 16 stories, 3693 characters
   [7/t8] iran_war (main iran_war): Third oil tanker catches fire after hitting naval mine in Strait of Hormuz
   [7/t8] ukraine_war (main ukraine_war): Russia reports record-breaking interception of 1,300 Ukrainian drones
   [6/t8] armenia (main armenia): Armenia expands European military cooperation after losing CSTO voting rights
@@ -163,9 +169,8 @@
   [6/t7] armenia (main armenia): Armenia and Turkey begin implementing agreements
   [6/t7] russia (main russia): Yekaterinburg architect sentenced to 12 years over enlistment office fire
   [6/t7] russia (main russia): Russia proposes nonaggression pacts with European nations amid peace talks
-  [5/t7] armenia (main armenia): Former employees of Yerevan brandy factory protest recent layoffs
---- 09:00: 17 stories, 3674 characters
-  [7/t8] ukraine_war (main ukraine_war): Ukraine strikes critically damage Crimea bridge
+--- 09:00: 17 stories, 3821 characters
+  [7/t8] ukraine_war (main ukraine_war): Ukraine heavily damages Kerch bridge linking Crimea and Russia
   [6/t8] armenia (main armenia): Azerbaijan to increase defense spending to 8.8 billion manats
   [6/t7] russia (main russia): Japan scrambles jets after Russian aircraft enter airspace
   [6/t7] ukraine_war (main ukraine_war): European representatives participate in US-Ukraine peace talks
@@ -182,7 +187,7 @@
   [5/t6] armenia (main armenia): Azerbaijan and UK foreign ministers discuss Armenia normalization
   [5/t6] armenia (main armenia): Azerbaijani Foreign Minister discusses peace process with UK Foreign Secretary
   [5/t6] armenia (main armenia): Armenian officials arrested for bribery
---- 14:00: 15 stories, 3818 characters
+--- 14:00: 15 stories, 3869 characters
   [7/t7] politics_conflicts (main politics_conflicts): Mongolian President Khurelsukh resigns amid corruption scandal
   [6/t7] ukraine_war (main ukraine_war): Ukrainian drone strikes hit Russian industrial zones and petrochemical facilities
   [6/t7] russia (main russia): Journalist regains consciousness after car bombing in Moscow
@@ -198,36 +203,43 @@
   [5/t6] russia (main russia): EU expected to approve 22nd sanctions package against Russia in December
   [5/t6] armenia (main armenia): Yerevan court president authorizes wiretapping operations against judge Masis Melkonyan
   [5/t6] armenia (main armenia): Man arrested in Syunik region for stealing 13 tons of gold ore
---- 20:00: 16 stories, 3715 characters
+--- 20:00: 15 stories, 3797 characters
   [7/t9] armenia (main armenia): Armenia signals readiness to open border crossing with Turkey
   [7/t8] ukraine_war (main ukraine_war): Russian ballistic missiles strike Kyiv main bridges and infrastructure
   [7/t8] ukraine_war (main ukraine_war): Casualties from Russian strike on Zaporizhzhia rise to 42
   [6/t8] armenia (main armenia): Iran aims to transform Norduz border crossing into major trade hub
   [6/t8] armenia (main armenia): Armenian investigators detail charges against Azerbaijani soldier for border crossing and shooting
   [7/t7] politics_conflicts (main politics_conflicts): Turkey places pro-opposition Sozcu TV under state management
-  [7/t7] politics_conflicts (main politics_conflicts): Death toll from Russian strike in Kamyshevakha rises to 72
+  [7/t7] ukraine_war (main ukraine_war): Death toll from Russian strike in Kamyshevakha rises to 72
   [6/t7] iran_war (main iran_war): Iran downs US MQ-1 reconnaissance drone over Qeshm Island
   [6/t7] russia (main russia): Deutsche Bank accused of shielding Russian oligarchs from sanctions
   [6/t7] ukraine_war (main ukraine_war): Russia rejects Ukraine joining NATO following proposed Donbas withdrawal terms
-  [6/t7] ukraine_war (main ukraine_war): Ukrainian drones target Russian oil refineries
   [6/t7] iran_war (main iran_war): Iraqi Prime Minister plans crackdown on pro-Iran militias
   [6/t7] russia (main russia): Slovakia and Hungary secure US extensions to purchase Russian oil
   [6/t7] iran_war (main iran_war): Qatar warns of Gulf escalation as Iran issues threats against Bahrain
   [6/t7] armenia (main armenia): European diplomats emphasize Armenian and Azerbaijani independence and European ties
   [6/t7] russia (main russia): Russia arrests Japanese journalist on espionage charges
---- now 21:11 (window still open): 10 stories, 2038 characters
+--- now 21:27 (window still open): 18 stories, 3809 characters
+  [7/t8] russia (main russia): Russia demands NATO withdraw from Eastern Europe
   [7/t8] iran_war (main iran_war): Iran strikes US radar system in Bahrain
-  [7/t7] ukraine_war (main ukraine_war): UK to provide over 1000 additional air defense missiles to Ukraine
+  [7/t7] ukraine_war (main ukraine_war): UK to provide over 1,000 additional air defense missiles to Ukraine
+  [6/t7] russia (main russia): Russian military plane crash in Siberia kills 17
+  [6/t7] iran_war (main iran_war): US conducts strikes on Iran Qeshm Island
+  [6/t7] iran_war (main iran_war): Hunger strike expands across Iranian prisons as three more face death penalty
+  [5/t7] armenia (main armenia): Armenia and Russia launch practical negotiations on railway concession
+  [5/t7] armenia (main armenia): Armenia permanent population reaches 3.11 million
   [5/t7] armenia (main armenia): Analyst warns Russia may seek strategic influence over new regional roads
+  [5/t6] armenia (main armenia): Armenia Justice Ministry proposes higher compensation for insults and defamation
+  [5/t6] armenia (main armenia): Armenian environmental authorities suspend catalyst recycling plant in Hrazdan
+  [5/t6] russia (main russia): Russian State Duma passes bill to raise military service age for women
+  [5/t6] economy_markets (main economy_markets): Russian seaborne oil exports reach highest level since July
   [5/t6] russia (main russia): Russia proposes bill to shield war participants from bankruptcy seizure
   [5/t6] russia (main russia): Estonian president proposes analysis of border closure with Russia
+  [5/t6] armenia (main armenia): Armenia suspends illegal water extraction at Armavir fish farm
   [5/t6] armenia (main armenia): Bulgarian businessman allegedly bypasses Armenian gambling ad ban
   [5/t6] russia (main russia): Russian authorities search Lenkom theater in financial probe
-  [5/t6] russia (main russia): Russia and China expect record trade turnover in 2026
-  [4/t6] armenia (main armenia): Armenian lawmakers consider legal amendments for mental health cases
-  [4/t6] armenia (main armenia): Andranik Piloyan remains National Hero despite corruption conviction
 
-##### armenia_only (armenia) before: 87 stories in 7 digests, 0 whose main topic is switched off
+##### armenia_only (armenia) before: 95 stories in 7 digests, 0 whose main topic is switched off
 --- 09:00: 4 stories, 950 characters
   [5/t7] armenia (main armenia): Leaders of three Armenian political parties oppose constitutional amendments
   [5/t6] armenia (main armenia): Armenian government salary increases draw criticism amid pension limits
@@ -300,7 +312,7 @@
   [5/t6] armenia (main armenia): Armenians in New York secure removal of Azerbaijani flag from Manhattan park
   [5/t6] armenia (main armenia): Edgar Muradyan released from pre-trial detention in Armenia
   [5/t6] armenia (main armenia): Analysis shows minimum consumer basket unaffordable for pensioners
---- 20:00: 16 stories, 3817 characters
+--- 20:00: 15 stories, 3700 characters
   [7/t9] armenia (main armenia): Armenia signals readiness to open border crossing with Turkey
   [6/t8] armenia (main armenia): Iran aims to transform Norduz border crossing into major trade hub
   [6/t8] armenia (main armenia): Armenian investigators detail charges against Azerbaijani soldier for border crossing and shooting
@@ -315,15 +327,23 @@
   [5/t7] armenia (main armenia): Armenian Interior Ministry sets protection of minors as political priority
   [5/t7] armenia (main armenia): Iran announces readiness to build oil refinery in Armenia
   [5/t7] armenia (main armenia): Armenian parliament discusses stricter traffic rules and electric scooter regulations
-  [5/t6] armenia (main armenia): Court hearing held for opposition leader Samvel Karapetyan
   [5/t6] armenia (main armenia): Armenian Economy Minister to travel to Moscow for EAEU talks
---- now 21:11 (window still open): 4 stories, 804 characters
+--- now 21:27 (window still open): 13 stories, 2515 characters
+  [5/t7] armenia (main armenia): Armenia and Russia launch practical negotiations on railway concession
+  [5/t7] armenia (main armenia): Armenia permanent population reaches 3.11 million
   [5/t7] armenia (main armenia): Analyst warns Russia may seek strategic influence over new regional roads
+  [5/t6] armenia (main armenia): Armenia Justice Ministry proposes higher compensation for insults and defamation
+  [5/t6] armenia (main armenia): Armenian environmental authorities suspend catalyst recycling plant in Hrazdan
+  [5/t6] armenia (main armenia): Armenia suspends illegal water extraction at Armavir fish farm
   [5/t6] armenia (main armenia): Bulgarian businessman allegedly bypasses Armenian gambling ad ban
+  [4/t6] armenia (main armenia): Armenian administrative court accepts electoral commission lawsuit against Nikoghosyan
+  [4/t6] armenia (main armenia): Armenia to tighten traffic fines and penalty points in Yerevan
+  [4/t6] armenia (main armenia): Levon Zurabyan suggests Armen Grigoryan executes western-oriented shift
+  [4/t6] armenia (main armenia): Armenian lawyer calls re-arrest of detainee illegal
   [4/t6] armenia (main armenia): Armenian lawmakers consider legal amendments for mental health cases
   [4/t6] armenia (main armenia): Andranik Piloyan remains National Hero despite corruption conviction
 
-##### armenia_only (armenia) after: 87 stories in 7 digests, 0 whose main topic is switched off
+##### armenia_only (armenia) after: 95 stories in 7 digests, 0 whose main topic is switched off
 --- 09:00: 4 stories, 950 characters
   [5/t7] armenia (main armenia): Leaders of three Armenian political parties oppose constitutional amendments
   [5/t6] armenia (main armenia): Armenian government salary increases draw criticism amid pension limits
@@ -396,7 +416,7 @@
   [5/t6] armenia (main armenia): Armenians in New York secure removal of Azerbaijani flag from Manhattan park
   [5/t6] armenia (main armenia): Edgar Muradyan released from pre-trial detention in Armenia
   [5/t6] armenia (main armenia): Analysis shows minimum consumer basket unaffordable for pensioners
---- 20:00: 16 stories, 3817 characters
+--- 20:00: 15 stories, 3700 characters
   [7/t9] armenia (main armenia): Armenia signals readiness to open border crossing with Turkey
   [6/t8] armenia (main armenia): Iran aims to transform Norduz border crossing into major trade hub
   [6/t8] armenia (main armenia): Armenian investigators detail charges against Azerbaijani soldier for border crossing and shooting
@@ -411,15 +431,23 @@
   [5/t7] armenia (main armenia): Armenian Interior Ministry sets protection of minors as political priority
   [5/t7] armenia (main armenia): Iran announces readiness to build oil refinery in Armenia
   [5/t7] armenia (main armenia): Armenian parliament discusses stricter traffic rules and electric scooter regulations
-  [5/t6] armenia (main armenia): Court hearing held for opposition leader Samvel Karapetyan
   [5/t6] armenia (main armenia): Armenian Economy Minister to travel to Moscow for EAEU talks
---- now 21:11 (window still open): 4 stories, 804 characters
+--- now 21:27 (window still open): 13 stories, 2515 characters
+  [5/t7] armenia (main armenia): Armenia and Russia launch practical negotiations on railway concession
+  [5/t7] armenia (main armenia): Armenia permanent population reaches 3.11 million
   [5/t7] armenia (main armenia): Analyst warns Russia may seek strategic influence over new regional roads
+  [5/t6] armenia (main armenia): Armenia Justice Ministry proposes higher compensation for insults and defamation
+  [5/t6] armenia (main armenia): Armenian environmental authorities suspend catalyst recycling plant in Hrazdan
+  [5/t6] armenia (main armenia): Armenia suspends illegal water extraction at Armavir fish farm
   [5/t6] armenia (main armenia): Bulgarian businessman allegedly bypasses Armenian gambling ad ban
+  [4/t6] armenia (main armenia): Armenian administrative court accepts electoral commission lawsuit against Nikoghosyan
+  [4/t6] armenia (main armenia): Armenia to tighten traffic fines and penalty points in Yerevan
+  [4/t6] armenia (main armenia): Levon Zurabyan suggests Armen Grigoryan executes western-oriented shift
+  [4/t6] armenia (main armenia): Armenian lawyer calls re-arrest of detainee illegal
   [4/t6] armenia (main armenia): Armenian lawmakers consider legal amendments for mental health cases
   [4/t6] armenia (main armenia): Andranik Piloyan remains National Hero despite corruption conviction
 
-##### owner (economy_markets, c3, c4, c5) before: 22 stories in 11 digests, 0 whose main topic is switched off
+##### owner (economy_markets, c3, c4, c5) before: 23 stories in 11 digests, 0 whose main topic is switched off
 --- 22:00: 0 stories, 78 characters
 --- 06:00: 0 stories, 79 characters
 --- 09:00: 0 stories, 78 characters
@@ -451,10 +479,11 @@
   [5/t6] c3 (main c3): Australian crossbenchers criticize Labor election funding changes
   [5/t6] c5 (main c5): Falling gold prices and investment crisis slow Turkish demand
   [4/t6] c4 (main c4): Armenian parliamentary speaker notes growing optimism over TRIPP project
---- now 21:11 (window still open): 1 stories, 239 characters
+--- now 21:27 (window still open): 2 stories, 479 characters
+  [5/t6] economy_markets (main economy_markets): Russian seaborne oil exports reach highest level since July
   [4/t6] c4 (main c4): Armenia releases 700,000 trout fry into Lake Sevan
 
-##### owner (economy_markets, c3, c4, c5) after: 22 stories in 11 digests, 0 whose main topic is switched off
+##### owner (economy_markets, c3, c4, c5) after: 23 stories in 11 digests, 0 whose main topic is switched off
 --- 22:00: 0 stories, 78 characters
 --- 06:00: 0 stories, 79 characters
 --- 09:00: 0 stories, 78 characters
@@ -486,10 +515,11 @@
   [5/t6] c3 (main c3): Australian crossbenchers criticize Labor election funding changes
   [5/t6] c5 (main c5): Falling gold prices and investment crisis slow Turkish demand
   [4/t6] c4 (main c4): Armenian parliamentary speaker notes growing optimism over TRIPP project
---- now 21:11 (window still open): 1 stories, 239 characters
+--- now 21:27 (window still open): 2 stories, 479 characters
+  [5/t6] economy_markets (main economy_markets): Russian seaborne oil exports reach highest level since July
   [4/t6] c4 (main c4): Armenia releases 700,000 trout fry into Lake Sevan
 
-##### economy_off (politics_conflicts, armenia, russia, iran_war, ukraine_war) before: 105 stories in 7 digests, 0 whose main topic is switched off
+##### economy_off (politics_conflicts, armenia, russia, iran_war, ukraine_war) before: 111 stories in 7 digests, 0 whose main topic is switched off
 --- 09:00: 15 stories, 3508 characters
   [6/t7] ukraine_war (main ukraine_war): Zelensky says Ukrainian drone attacks neutralized over 55 percent of Russia oil refining capacity
   [6/t7] russia (main russia): Estonia prepares cloud infrastructure for government continuity
@@ -522,7 +552,7 @@
   [5/t6] armenia (main armenia): Armenia moves to raise conscription age to 32
   [5/t6] russia (main russia): Shortage of epilepsy drug Depakine reported in Russia
   [5/t6] russia (main russia): Bill grants Russian Central Bank access to citizen tax data
---- 20:00: 17 stories, 3816 characters
+--- 20:00: 16 stories, 3693 characters
   [7/t8] iran_war (main iran_war): Third oil tanker catches fire after hitting naval mine in Strait of Hormuz
   [7/t8] ukraine_war (main ukraine_war): Russia reports record-breaking interception of 1,300 Ukrainian drones
   [6/t8] armenia (main armenia): Armenia expands European military cooperation after losing CSTO voting rights
@@ -539,9 +569,8 @@
   [6/t7] armenia (main armenia): Armenia and Turkey begin implementing agreements
   [6/t7] russia (main russia): Yekaterinburg architect sentenced to 12 years over enlistment office fire
   [6/t7] russia (main russia): Russia proposes nonaggression pacts with European nations amid peace talks
-  [5/t7] armenia (main armenia): Former employees of Yerevan brandy factory protest recent layoffs
---- 09:00: 17 stories, 3674 characters
-  [7/t8] ukraine_war (main ukraine_war): Ukraine strikes critically damage Crimea bridge
+--- 09:00: 17 stories, 3821 characters
+  [7/t8] ukraine_war (main ukraine_war): Ukraine heavily damages Kerch bridge linking Crimea and Russia
   [6/t8] armenia (main armenia): Azerbaijan to increase defense spending to 8.8 billion manats
   [6/t7] russia (main russia): Japan scrambles jets after Russian aircraft enter airspace
   [6/t7] ukraine_war (main ukraine_war): European representatives participate in US-Ukraine peace talks
@@ -558,7 +587,7 @@
   [5/t6] armenia (main armenia): Azerbaijan and UK foreign ministers discuss Armenia normalization
   [5/t6] armenia (main armenia): Azerbaijani Foreign Minister discusses peace process with UK Foreign Secretary
   [5/t6] armenia (main armenia): Armenian officials arrested for bribery
---- 14:00: 15 stories, 3818 characters
+--- 14:00: 15 stories, 3869 characters
   [7/t7] politics_conflicts (main politics_conflicts): Mongolian President Khurelsukh resigns amid corruption scandal
   [6/t7] ukraine_war (main ukraine_war): Ukrainian drone strikes hit Russian industrial zones and petrochemical facilities
   [6/t7] russia (main russia): Journalist regains consciousness after car bombing in Moscow
@@ -574,36 +603,43 @@
   [5/t6] russia (main russia): EU expected to approve 22nd sanctions package against Russia in December
   [5/t6] armenia (main armenia): Yerevan court president authorizes wiretapping operations against judge Masis Melkonyan
   [5/t6] armenia (main armenia): Man arrested in Syunik region for stealing 13 tons of gold ore
---- 20:00: 16 stories, 3715 characters
+--- 20:00: 15 stories, 3797 characters
   [7/t9] armenia (main armenia): Armenia signals readiness to open border crossing with Turkey
   [7/t8] ukraine_war (main ukraine_war): Russian ballistic missiles strike Kyiv main bridges and infrastructure
   [7/t8] ukraine_war (main ukraine_war): Casualties from Russian strike on Zaporizhzhia rise to 42
   [6/t8] armenia (main armenia): Iran aims to transform Norduz border crossing into major trade hub
   [6/t8] armenia (main armenia): Armenian investigators detail charges against Azerbaijani soldier for border crossing and shooting
   [7/t7] politics_conflicts (main politics_conflicts): Turkey places pro-opposition Sozcu TV under state management
-  [7/t7] politics_conflicts (main politics_conflicts): Death toll from Russian strike in Kamyshevakha rises to 72
+  [7/t7] ukraine_war (main ukraine_war): Death toll from Russian strike in Kamyshevakha rises to 72
   [6/t7] iran_war (main iran_war): Iran downs US MQ-1 reconnaissance drone over Qeshm Island
   [6/t7] russia (main russia): Deutsche Bank accused of shielding Russian oligarchs from sanctions
   [6/t7] ukraine_war (main ukraine_war): Russia rejects Ukraine joining NATO following proposed Donbas withdrawal terms
-  [6/t7] ukraine_war (main ukraine_war): Ukrainian drones target Russian oil refineries
   [6/t7] iran_war (main iran_war): Iraqi Prime Minister plans crackdown on pro-Iran militias
   [6/t7] russia (main russia): Slovakia and Hungary secure US extensions to purchase Russian oil
   [6/t7] iran_war (main iran_war): Qatar warns of Gulf escalation as Iran issues threats against Bahrain
   [6/t7] armenia (main armenia): European diplomats emphasize Armenian and Azerbaijani independence and European ties
   [6/t7] russia (main russia): Russia arrests Japanese journalist on espionage charges
---- now 21:11 (window still open): 10 stories, 2038 characters
+--- now 21:27 (window still open): 18 stories, 3745 characters
+  [7/t8] russia (main russia): Russia demands NATO withdraw from Eastern Europe
   [7/t8] iran_war (main iran_war): Iran strikes US radar system in Bahrain
-  [7/t7] ukraine_war (main ukraine_war): UK to provide over 1000 additional air defense missiles to Ukraine
+  [7/t7] ukraine_war (main ukraine_war): UK to provide over 1,000 additional air defense missiles to Ukraine
+  [6/t7] russia (main russia): Russian military plane crash in Siberia kills 17
+  [6/t7] iran_war (main iran_war): US conducts strikes on Iran Qeshm Island
+  [6/t7] iran_war (main iran_war): Hunger strike expands across Iranian prisons as three more face death penalty
+  [5/t7] armenia (main armenia): Armenia and Russia launch practical negotiations on railway concession
+  [5/t7] armenia (main armenia): Armenia permanent population reaches 3.11 million
   [5/t7] armenia (main armenia): Analyst warns Russia may seek strategic influence over new regional roads
+  [5/t6] armenia (main armenia): Armenia Justice Ministry proposes higher compensation for insults and defamation
+  [5/t6] armenia (main armenia): Armenian environmental authorities suspend catalyst recycling plant in Hrazdan
+  [5/t6] russia (main russia): Russian State Duma passes bill to raise military service age for women
   [5/t6] russia (main russia): Russia proposes bill to shield war participants from bankruptcy seizure
   [5/t6] russia (main russia): Estonian president proposes analysis of border closure with Russia
+  [5/t6] armenia (main armenia): Armenia suspends illegal water extraction at Armavir fish farm
   [5/t6] armenia (main armenia): Bulgarian businessman allegedly bypasses Armenian gambling ad ban
   [5/t6] russia (main russia): Russian authorities search Lenkom theater in financial probe
   [5/t6] russia (main russia): Russia and China expect record trade turnover in 2026
-  [4/t6] armenia (main armenia): Armenian lawmakers consider legal amendments for mental health cases
-  [4/t6] armenia (main armenia): Andranik Piloyan remains National Hero despite corruption conviction
 
-##### economy_off (politics_conflicts, armenia, russia, iran_war, ukraine_war) after: 105 stories in 7 digests, 0 whose main topic is switched off
+##### economy_off (politics_conflicts, armenia, russia, iran_war, ukraine_war) after: 111 stories in 7 digests, 0 whose main topic is switched off
 --- 09:00: 15 stories, 3508 characters
   [6/t7] ukraine_war (main ukraine_war): Zelensky says Ukrainian drone attacks neutralized over 55 percent of Russia oil refining capacity
   [6/t7] russia (main russia): Estonia prepares cloud infrastructure for government continuity
@@ -636,7 +672,7 @@
   [5/t6] armenia (main armenia): Armenia moves to raise conscription age to 32
   [5/t6] russia (main russia): Shortage of epilepsy drug Depakine reported in Russia
   [5/t6] russia (main russia): Bill grants Russian Central Bank access to citizen tax data
---- 20:00: 17 stories, 3816 characters
+--- 20:00: 16 stories, 3693 characters
   [7/t8] iran_war (main iran_war): Third oil tanker catches fire after hitting naval mine in Strait of Hormuz
   [7/t8] ukraine_war (main ukraine_war): Russia reports record-breaking interception of 1,300 Ukrainian drones
   [6/t8] armenia (main armenia): Armenia expands European military cooperation after losing CSTO voting rights
@@ -653,9 +689,8 @@
   [6/t7] armenia (main armenia): Armenia and Turkey begin implementing agreements
   [6/t7] russia (main russia): Yekaterinburg architect sentenced to 12 years over enlistment office fire
   [6/t7] russia (main russia): Russia proposes nonaggression pacts with European nations amid peace talks
-  [5/t7] armenia (main armenia): Former employees of Yerevan brandy factory protest recent layoffs
---- 09:00: 17 stories, 3674 characters
-  [7/t8] ukraine_war (main ukraine_war): Ukraine strikes critically damage Crimea bridge
+--- 09:00: 17 stories, 3821 characters
+  [7/t8] ukraine_war (main ukraine_war): Ukraine heavily damages Kerch bridge linking Crimea and Russia
   [6/t8] armenia (main armenia): Azerbaijan to increase defense spending to 8.8 billion manats
   [6/t7] russia (main russia): Japan scrambles jets after Russian aircraft enter airspace
   [6/t7] ukraine_war (main ukraine_war): European representatives participate in US-Ukraine peace talks
@@ -672,7 +707,7 @@
   [5/t6] armenia (main armenia): Azerbaijan and UK foreign ministers discuss Armenia normalization
   [5/t6] armenia (main armenia): Azerbaijani Foreign Minister discusses peace process with UK Foreign Secretary
   [5/t6] armenia (main armenia): Armenian officials arrested for bribery
---- 14:00: 15 stories, 3818 characters
+--- 14:00: 15 stories, 3869 characters
   [7/t7] politics_conflicts (main politics_conflicts): Mongolian President Khurelsukh resigns amid corruption scandal
   [6/t7] ukraine_war (main ukraine_war): Ukrainian drone strikes hit Russian industrial zones and petrochemical facilities
   [6/t7] russia (main russia): Journalist regains consciousness after car bombing in Moscow
@@ -688,31 +723,38 @@
   [5/t6] russia (main russia): EU expected to approve 22nd sanctions package against Russia in December
   [5/t6] armenia (main armenia): Yerevan court president authorizes wiretapping operations against judge Masis Melkonyan
   [5/t6] armenia (main armenia): Man arrested in Syunik region for stealing 13 tons of gold ore
---- 20:00: 16 stories, 3715 characters
+--- 20:00: 15 stories, 3797 characters
   [7/t9] armenia (main armenia): Armenia signals readiness to open border crossing with Turkey
   [7/t8] ukraine_war (main ukraine_war): Russian ballistic missiles strike Kyiv main bridges and infrastructure
   [7/t8] ukraine_war (main ukraine_war): Casualties from Russian strike on Zaporizhzhia rise to 42
   [6/t8] armenia (main armenia): Iran aims to transform Norduz border crossing into major trade hub
   [6/t8] armenia (main armenia): Armenian investigators detail charges against Azerbaijani soldier for border crossing and shooting
   [7/t7] politics_conflicts (main politics_conflicts): Turkey places pro-opposition Sozcu TV under state management
-  [7/t7] politics_conflicts (main politics_conflicts): Death toll from Russian strike in Kamyshevakha rises to 72
+  [7/t7] ukraine_war (main ukraine_war): Death toll from Russian strike in Kamyshevakha rises to 72
   [6/t7] iran_war (main iran_war): Iran downs US MQ-1 reconnaissance drone over Qeshm Island
   [6/t7] russia (main russia): Deutsche Bank accused of shielding Russian oligarchs from sanctions
   [6/t7] ukraine_war (main ukraine_war): Russia rejects Ukraine joining NATO following proposed Donbas withdrawal terms
-  [6/t7] ukraine_war (main ukraine_war): Ukrainian drones target Russian oil refineries
   [6/t7] iran_war (main iran_war): Iraqi Prime Minister plans crackdown on pro-Iran militias
   [6/t7] russia (main russia): Slovakia and Hungary secure US extensions to purchase Russian oil
   [6/t7] iran_war (main iran_war): Qatar warns of Gulf escalation as Iran issues threats against Bahrain
   [6/t7] armenia (main armenia): European diplomats emphasize Armenian and Azerbaijani independence and European ties
   [6/t7] russia (main russia): Russia arrests Japanese journalist on espionage charges
---- now 21:11 (window still open): 10 stories, 2038 characters
+--- now 21:27 (window still open): 18 stories, 3745 characters
+  [7/t8] russia (main russia): Russia demands NATO withdraw from Eastern Europe
   [7/t8] iran_war (main iran_war): Iran strikes US radar system in Bahrain
-  [7/t7] ukraine_war (main ukraine_war): UK to provide over 1000 additional air defense missiles to Ukraine
+  [7/t7] ukraine_war (main ukraine_war): UK to provide over 1,000 additional air defense missiles to Ukraine
+  [6/t7] russia (main russia): Russian military plane crash in Siberia kills 17
+  [6/t7] iran_war (main iran_war): US conducts strikes on Iran Qeshm Island
+  [6/t7] iran_war (main iran_war): Hunger strike expands across Iranian prisons as three more face death penalty
+  [5/t7] armenia (main armenia): Armenia and Russia launch practical negotiations on railway concession
+  [5/t7] armenia (main armenia): Armenia permanent population reaches 3.11 million
   [5/t7] armenia (main armenia): Analyst warns Russia may seek strategic influence over new regional roads
+  [5/t6] armenia (main armenia): Armenia Justice Ministry proposes higher compensation for insults and defamation
+  [5/t6] armenia (main armenia): Armenian environmental authorities suspend catalyst recycling plant in Hrazdan
+  [5/t6] russia (main russia): Russian State Duma passes bill to raise military service age for women
   [5/t6] russia (main russia): Russia proposes bill to shield war participants from bankruptcy seizure
   [5/t6] russia (main russia): Estonian president proposes analysis of border closure with Russia
+  [5/t6] armenia (main armenia): Armenia suspends illegal water extraction at Armavir fish farm
   [5/t6] armenia (main armenia): Bulgarian businessman allegedly bypasses Armenian gambling ad ban
   [5/t6] russia (main russia): Russian authorities search Lenkom theater in financial probe
   [5/t6] russia (main russia): Russia and China expect record trade turnover in 2026
-  [4/t6] armenia (main armenia): Armenian lawmakers consider legal amendments for mental health cases
-  [4/t6] armenia (main armenia): Andranik Piloyan remains National Hero despite corruption conviction

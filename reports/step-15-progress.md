@@ -44,7 +44,7 @@ welcome and announcements, cleanup), then `reports/step-15-final-product.md`.
   B1 📈 / B2 💹 / B3 🏦). Until he answers: 🏛️ and 📈. To apply his pick, change `emoji:` in
   `config/topics.yaml`; the next hourly run syncs the topics table.
 
-## Part 2: done except the preview digest (2026-11-17, commit 6288d97, Worker 2f8e7cd1)
+## Part 2: done (2026-11-17, commit 6288d97, Worker 2f8e7cd1)
 - Fact guard: 166 texts dropped in 30 days (errors log). 62 of them were only ordinary words at a
   sentence start (Recent, Severe, Hundreds, Analysis, Escalating, Investors...) or party names
   (Republican, Party); those now pass. 30 number drops and 74 real name drops (Moscow, Kyiv,
@@ -67,10 +67,33 @@ welcome and announcements, cleanup), then `reports/step-15-final-product.md`.
   on for him, as the brief says for every user.
 - Tests: Python 180, Worker 233, click-through 94 of 94. Mutations part 2: 13 of 13 caught.
 
-## Still to do in Part 2
-- Re-run `node worker/scripts/step15-replay.mjs` after the first editor run with the new prompts
-  (economy stories), then send the owner one labelled preview digest
-  (`node worker/scripts/digest-cli.mjs --preview --label "..."`).
+- After the first editor run with the new prompts (2026-11-17, run 102, "partial" from Gemini 503s): 15
+  stories have Economy & Markets as their main topic. Replay re-run: all six 111 stories (15.9 a digest),
+  Armenia only 95 (13.6), the owner 23 (2.1), Economy off 111 with no Economy story; before and after
+  the same again, 0 stories from switched-off topics.
+- Labelled preview digest sent (all six topics on, English, last 12 h): 15 stories, sections Armenia,
+  Politics & Conflicts, Russia, Ukraine War, Iran War, the owner's custom topics, and Economy & Markets;
+  3,882 of 3,900 characters, 41 cut for length. `digest-cli.mjs --preview` has two new options:
+  `--topics all` and `--lang`.
+
+## Part 3: done (2026-11-17, commit 681a447, Worker 44f7fa84)
+- Settings: "Help" and "Send feedback" rows (48 px, blue and green squares, chevron) between Support and
+  the time zone line; each opens its own page with Telegram's back button (no tabs on a page).
+- Help: eight short sections (what Axiom is, how stories are chosen, topics and My topics, digest times,
+  language, pause, Support Axiom, privacy) in English, Russian, Armenian and French.
+- Feedback: table `feedback` (applied live); `POST /api/feedback`; 1,000 characters, 10 a reader in 24 h;
+  forwarded to the owner with name and id (HTML escaped); a failed forward is kept (forwarded 0);
+  success = haptic and a short "Thank you!". Admin: "Recent feedback" (latest 20). /help points to
+  Settings with the button.
+- Tests: Worker 242 (9 new in `test/feedback.test.mjs`), Python 180, click-through 111 of 111 (Help and
+  Feedback flows, the limit, and both pages at 360/390/430 px, en/ru, light/dark). Mutations part 3:
+  10 of 10 caught (app and dictionary mutations re-stamp first, so only the intended test can catch them).
+- Message sent to the owner asking him to check Help and Feedback on his phone, and telling him Economy &
+  Markets is now on for him.
+
+## Waiting on the owner (also)
+- His check of Help and Send feedback on his phone.
 
 ## Next
-Part 3: Help and Feedback rows in Settings.
+Part 4: welcome flow (new vs imported users, Set up button, 3-step setup, sample digest, one reminder),
+import script, announcement tool (translate, edit, preview, batched send, never twice).

@@ -1,7 +1,7 @@
 {
- "at": "2026-11-17T17:11:41.000Z",
+ "at": "2026-11-17T17:27:56.000Z",
  "hours": 48,
- "pool": 3573,
+ "pool": 3579,
  "readers": {
   "all_six": {
    "topics": [
@@ -19,17 +19,18 @@
    ],
    "before": {
     "digests": 7,
-    "stories": 105,
-    "per_digest": 15,
-    "max": 17,
-    "cut": 180,
+    "stories": 111,
+    "per_digest": 15.9,
+    "max": 18,
+    "cut": 193,
     "from_switched_off_topics": 0,
     "by_main_topic": {
      "ukraine_war": 16,
-     "russia": 39,
-     "armenia": 41,
-     "iran_war": 6,
-     "politics_conflicts": 3
+     "russia": 41,
+     "armenia": 43,
+     "iran_war": 8,
+     "politics_conflicts": 2,
+     "economy_markets": 1
     },
     "digests_detail": [
      {
@@ -412,8 +413,8 @@
      },
      {
       "at": "20:00",
-      "stories": 17,
-      "chars": 3816,
+      "stories": 16,
+      "chars": 3693,
       "list": [
        {
         "id": 3006,
@@ -611,25 +612,13 @@
         "score": 6,
         "topic": 7,
         "headline": "Russia proposes nonaggression pacts with European nations amid peace talks"
-       },
-       {
-        "id": 2813,
-        "primary": "armenia",
-        "main": "armenia",
-        "tags": [
-         "politics_conflicts",
-         "armenia"
-        ],
-        "score": 5,
-        "topic": 7,
-        "headline": "Former employees of Yerevan brandy factory protest recent layoffs"
        }
       ]
      },
      {
       "at": "09:00",
       "stories": 17,
-      "chars": 3674,
+      "chars": 3821,
       "list": [
        {
         "id": 3735,
@@ -642,7 +631,7 @@
         ],
         "score": 7,
         "topic": 8,
-        "headline": "Ukraine strikes critically damage Crimea bridge"
+        "headline": "Ukraine heavily damages Kerch bridge linking Crimea and Russia"
        },
        {
         "id": 3121,
@@ -843,7 +832,7 @@
      {
       "at": "14:00",
       "stories": 15,
-      "chars": 3818,
+      "chars": 3869,
       "list": [
        {
         "id": 3782,
@@ -1031,8 +1020,8 @@
      },
      {
       "at": "20:00",
-      "stories": 16,
-      "chars": 3715,
+      "stories": 15,
+      "chars": 3797,
       "list": [
        {
         "id": 4688,
@@ -1108,8 +1097,8 @@
        },
        {
         "id": 4200,
-        "primary": "politics_conflicts",
-        "main": "politics_conflicts",
+        "primary": "ukraine_war",
+        "main": "ukraine_war",
         "tags": [
          "politics_conflicts",
          "ukraine_war"
@@ -1154,19 +1143,6 @@
         "score": 6,
         "topic": 7,
         "headline": "Russia rejects Ukraine joining NATO following proposed Donbas withdrawal terms"
-       },
-       {
-        "id": 4683,
-        "primary": "ukraine_war",
-        "main": "ukraine_war",
-        "tags": [
-         "politics_conflicts",
-         "russia",
-         "ukraine_war"
-        ],
-        "score": 6,
-        "topic": 7,
-        "headline": "Ukrainian drones target Russian oil refineries"
        },
        {
         "id": 4693,
@@ -1232,10 +1208,22 @@
       ]
      },
      {
-      "at": "now 21:11 (window still open)",
-      "stories": 10,
-      "chars": 2038,
+      "at": "now 21:27 (window still open)",
+      "stories": 18,
+      "chars": 3809,
       "list": [
+       {
+        "id": 5044,
+        "primary": "russia",
+        "main": "russia",
+        "tags": [
+         "politics_conflicts",
+         "russia"
+        ],
+        "score": 7,
+        "topic": 8,
+        "headline": "Russia demands NATO withdraw from Eastern Europe"
+       },
        {
         "id": 4933,
         "primary": "iran_war",
@@ -1258,7 +1246,66 @@
         ],
         "score": 7,
         "topic": 7,
-        "headline": "UK to provide over 1000 additional air defense missiles to Ukraine"
+        "headline": "UK to provide over 1,000 additional air defense missiles to Ukraine"
+       },
+       {
+        "id": 4983,
+        "primary": "russia",
+        "main": "russia",
+        "tags": [
+         "politics_conflicts",
+         "russia"
+        ],
+        "score": 6,
+        "topic": 7,
+        "headline": "Russian military plane crash in Siberia kills 17"
+       },
+       {
+        "id": 4999,
+        "primary": "iran_war",
+        "main": "iran_war",
+        "tags": [
+         "politics_conflicts",
+         "iran_war"
+        ],
+        "score": 6,
+        "topic": 7,
+        "headline": "US conducts strikes on Iran Qeshm Island"
+       },
+       {
+        "id": 5014,
+        "primary": "iran_war",
+        "main": "iran_war",
+        "tags": [
+         "politics_conflicts",
+         "iran_war"
+        ],
+        "score": 6,
+        "topic": 7,
+        "headline": "Hunger strike expands across Iranian prisons as three more face death penalty"
+       },
+       {
+        "id": 5032,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 7,
+        "headline": "Armenia and Russia launch practical negotiations on railway concession"
+       },
+       {
+        "id": 4897,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "politics_conflicts",
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 7,
+        "headline": "Armenia permanent population reaches 3.11 million"
        },
        {
         "id": 4911,
@@ -1272,6 +1319,51 @@
         "score": 5,
         "topic": 7,
         "headline": "Analyst warns Russia may seek strategic influence over new regional roads"
+       },
+       {
+        "id": 5003,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenia Justice Ministry proposes higher compensation for insults and defamation"
+       },
+       {
+        "id": 5007,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenian environmental authorities suspend catalyst recycling plant in Hrazdan"
+       },
+       {
+        "id": 5015,
+        "primary": "russia",
+        "main": "russia",
+        "tags": [
+         "russia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Russian State Duma passes bill to raise military service age for women"
+       },
+       {
+        "id": 5034,
+        "primary": "economy_markets",
+        "main": "economy_markets",
+        "tags": [
+         "economy_markets",
+         "russia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Russian seaborne oil exports reach highest level since July"
        },
        {
         "id": 4875,
@@ -1299,6 +1391,18 @@
         "headline": "Estonian president proposes analysis of border closure with Russia"
        },
        {
+        "id": 4888,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "politics_conflicts",
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenia suspends illegal water extraction at Armavir fish farm"
+       },
+       {
         "id": 4927,
         "primary": "armenia",
         "main": "armenia",
@@ -1321,41 +1425,6 @@
         "score": 5,
         "topic": 6,
         "headline": "Russian authorities search Lenkom theater in financial probe"
-       },
-       {
-        "id": 4947,
-        "primary": "russia",
-        "main": "russia",
-        "tags": [
-         "politics_conflicts",
-         "russia"
-        ],
-        "score": 5,
-        "topic": 6,
-        "headline": "Russia and China expect record trade turnover in 2026"
-       },
-       {
-        "id": 4958,
-        "primary": "armenia",
-        "main": "armenia",
-        "tags": [
-         "armenia"
-        ],
-        "score": 4,
-        "topic": 6,
-        "headline": "Armenian lawmakers consider legal amendments for mental health cases"
-       },
-       {
-        "id": 4972,
-        "primary": "armenia",
-        "main": "armenia",
-        "tags": [
-         "politics_conflicts",
-         "armenia"
-        ],
-        "score": 4,
-        "topic": 6,
-        "headline": "Andranik Piloyan remains National Hero despite corruption conviction"
        }
       ]
      }
@@ -1363,17 +1432,18 @@
    },
    "after": {
     "digests": 7,
-    "stories": 105,
-    "per_digest": 15,
-    "max": 17,
-    "cut": 180,
+    "stories": 111,
+    "per_digest": 15.9,
+    "max": 18,
+    "cut": 193,
     "from_switched_off_topics": 0,
     "by_main_topic": {
      "ukraine_war": 16,
-     "russia": 39,
-     "armenia": 41,
-     "iran_war": 6,
-     "politics_conflicts": 3
+     "russia": 41,
+     "armenia": 43,
+     "iran_war": 8,
+     "politics_conflicts": 2,
+     "economy_markets": 1
     },
     "digests_detail": [
      {
@@ -1756,8 +1826,8 @@
      },
      {
       "at": "20:00",
-      "stories": 17,
-      "chars": 3816,
+      "stories": 16,
+      "chars": 3693,
       "list": [
        {
         "id": 3006,
@@ -1955,25 +2025,13 @@
         "score": 6,
         "topic": 7,
         "headline": "Russia proposes nonaggression pacts with European nations amid peace talks"
-       },
-       {
-        "id": 2813,
-        "primary": "armenia",
-        "main": "armenia",
-        "tags": [
-         "politics_conflicts",
-         "armenia"
-        ],
-        "score": 5,
-        "topic": 7,
-        "headline": "Former employees of Yerevan brandy factory protest recent layoffs"
        }
       ]
      },
      {
       "at": "09:00",
       "stories": 17,
-      "chars": 3674,
+      "chars": 3821,
       "list": [
        {
         "id": 3735,
@@ -1986,7 +2044,7 @@
         ],
         "score": 7,
         "topic": 8,
-        "headline": "Ukraine strikes critically damage Crimea bridge"
+        "headline": "Ukraine heavily damages Kerch bridge linking Crimea and Russia"
        },
        {
         "id": 3121,
@@ -2187,7 +2245,7 @@
      {
       "at": "14:00",
       "stories": 15,
-      "chars": 3818,
+      "chars": 3869,
       "list": [
        {
         "id": 3782,
@@ -2375,8 +2433,8 @@
      },
      {
       "at": "20:00",
-      "stories": 16,
-      "chars": 3715,
+      "stories": 15,
+      "chars": 3797,
       "list": [
        {
         "id": 4688,
@@ -2452,8 +2510,8 @@
        },
        {
         "id": 4200,
-        "primary": "politics_conflicts",
-        "main": "politics_conflicts",
+        "primary": "ukraine_war",
+        "main": "ukraine_war",
         "tags": [
          "politics_conflicts",
          "ukraine_war"
@@ -2498,19 +2556,6 @@
         "score": 6,
         "topic": 7,
         "headline": "Russia rejects Ukraine joining NATO following proposed Donbas withdrawal terms"
-       },
-       {
-        "id": 4683,
-        "primary": "ukraine_war",
-        "main": "ukraine_war",
-        "tags": [
-         "politics_conflicts",
-         "russia",
-         "ukraine_war"
-        ],
-        "score": 6,
-        "topic": 7,
-        "headline": "Ukrainian drones target Russian oil refineries"
        },
        {
         "id": 4693,
@@ -2576,10 +2621,22 @@
       ]
      },
      {
-      "at": "now 21:11 (window still open)",
-      "stories": 10,
-      "chars": 2038,
+      "at": "now 21:27 (window still open)",
+      "stories": 18,
+      "chars": 3809,
       "list": [
+       {
+        "id": 5044,
+        "primary": "russia",
+        "main": "russia",
+        "tags": [
+         "politics_conflicts",
+         "russia"
+        ],
+        "score": 7,
+        "topic": 8,
+        "headline": "Russia demands NATO withdraw from Eastern Europe"
+       },
        {
         "id": 4933,
         "primary": "iran_war",
@@ -2602,7 +2659,66 @@
         ],
         "score": 7,
         "topic": 7,
-        "headline": "UK to provide over 1000 additional air defense missiles to Ukraine"
+        "headline": "UK to provide over 1,000 additional air defense missiles to Ukraine"
+       },
+       {
+        "id": 4983,
+        "primary": "russia",
+        "main": "russia",
+        "tags": [
+         "politics_conflicts",
+         "russia"
+        ],
+        "score": 6,
+        "topic": 7,
+        "headline": "Russian military plane crash in Siberia kills 17"
+       },
+       {
+        "id": 4999,
+        "primary": "iran_war",
+        "main": "iran_war",
+        "tags": [
+         "politics_conflicts",
+         "iran_war"
+        ],
+        "score": 6,
+        "topic": 7,
+        "headline": "US conducts strikes on Iran Qeshm Island"
+       },
+       {
+        "id": 5014,
+        "primary": "iran_war",
+        "main": "iran_war",
+        "tags": [
+         "politics_conflicts",
+         "iran_war"
+        ],
+        "score": 6,
+        "topic": 7,
+        "headline": "Hunger strike expands across Iranian prisons as three more face death penalty"
+       },
+       {
+        "id": 5032,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 7,
+        "headline": "Armenia and Russia launch practical negotiations on railway concession"
+       },
+       {
+        "id": 4897,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "politics_conflicts",
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 7,
+        "headline": "Armenia permanent population reaches 3.11 million"
        },
        {
         "id": 4911,
@@ -2616,6 +2732,51 @@
         "score": 5,
         "topic": 7,
         "headline": "Analyst warns Russia may seek strategic influence over new regional roads"
+       },
+       {
+        "id": 5003,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenia Justice Ministry proposes higher compensation for insults and defamation"
+       },
+       {
+        "id": 5007,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenian environmental authorities suspend catalyst recycling plant in Hrazdan"
+       },
+       {
+        "id": 5015,
+        "primary": "russia",
+        "main": "russia",
+        "tags": [
+         "russia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Russian State Duma passes bill to raise military service age for women"
+       },
+       {
+        "id": 5034,
+        "primary": "economy_markets",
+        "main": "economy_markets",
+        "tags": [
+         "economy_markets",
+         "russia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Russian seaborne oil exports reach highest level since July"
        },
        {
         "id": 4875,
@@ -2643,6 +2804,18 @@
         "headline": "Estonian president proposes analysis of border closure with Russia"
        },
        {
+        "id": 4888,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "politics_conflicts",
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenia suspends illegal water extraction at Armavir fish farm"
+       },
+       {
         "id": 4927,
         "primary": "armenia",
         "main": "armenia",
@@ -2665,41 +2838,6 @@
         "score": 5,
         "topic": 6,
         "headline": "Russian authorities search Lenkom theater in financial probe"
-       },
-       {
-        "id": 4947,
-        "primary": "russia",
-        "main": "russia",
-        "tags": [
-         "politics_conflicts",
-         "russia"
-        ],
-        "score": 5,
-        "topic": 6,
-        "headline": "Russia and China expect record trade turnover in 2026"
-       },
-       {
-        "id": 4958,
-        "primary": "armenia",
-        "main": "armenia",
-        "tags": [
-         "armenia"
-        ],
-        "score": 4,
-        "topic": 6,
-        "headline": "Armenian lawmakers consider legal amendments for mental health cases"
-       },
-       {
-        "id": 4972,
-        "primary": "armenia",
-        "main": "armenia",
-        "tags": [
-         "politics_conflicts",
-         "armenia"
-        ],
-        "score": 4,
-        "topic": 6,
-        "headline": "Andranik Piloyan remains National Hero despite corruption conviction"
        }
       ]
      }
@@ -2717,13 +2855,13 @@
    ],
    "before": {
     "digests": 7,
-    "stories": 87,
-    "per_digest": 12.4,
+    "stories": 95,
+    "per_digest": 13.6,
     "max": 19,
-    "cut": 75,
+    "cut": 78,
     "from_switched_off_topics": 0,
     "by_main_topic": {
-     "armenia": 87
+     "armenia": 95
     },
     "digests_detail": [
      {
@@ -3568,8 +3706,8 @@
      },
      {
       "at": "20:00",
-      "stories": 16,
-      "chars": 3817,
+      "stories": 15,
+      "chars": 3700,
       "list": [
        {
         "id": 4688,
@@ -3744,18 +3882,6 @@
         "headline": "Armenian parliament discusses stricter traffic rules and electric scooter regulations"
        },
        {
-        "id": 4311,
-        "primary": "armenia",
-        "main": "armenia",
-        "tags": [
-         "politics_conflicts",
-         "armenia"
-        ],
-        "score": 5,
-        "topic": 6,
-        "headline": "Court hearing held for opposition leader Samvel Karapetyan"
-       },
-       {
         "id": 4547,
         "primary": "armenia",
         "main": "armenia",
@@ -3771,10 +3897,33 @@
       ]
      },
      {
-      "at": "now 21:11 (window still open)",
-      "stories": 4,
-      "chars": 804,
+      "at": "now 21:27 (window still open)",
+      "stories": 13,
+      "chars": 2515,
       "list": [
+       {
+        "id": 5032,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 7,
+        "headline": "Armenia and Russia launch practical negotiations on railway concession"
+       },
+       {
+        "id": 4897,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "politics_conflicts",
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 7,
+        "headline": "Armenia permanent population reaches 3.11 million"
+       },
        {
         "id": 4911,
         "primary": "armenia",
@@ -3789,6 +3938,40 @@
         "headline": "Analyst warns Russia may seek strategic influence over new regional roads"
        },
        {
+        "id": 5003,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenia Justice Ministry proposes higher compensation for insults and defamation"
+       },
+       {
+        "id": 5007,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenian environmental authorities suspend catalyst recycling plant in Hrazdan"
+       },
+       {
+        "id": 4888,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "politics_conflicts",
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenia suspends illegal water extraction at Armavir fish farm"
+       },
+       {
         "id": 4927,
         "primary": "armenia",
         "main": "armenia",
@@ -3799,6 +3982,52 @@
         "score": 5,
         "topic": 6,
         "headline": "Bulgarian businessman allegedly bypasses Armenian gambling ad ban"
+       },
+       {
+        "id": 5037,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 4,
+        "topic": 6,
+        "headline": "Armenian administrative court accepts electoral commission lawsuit against Nikoghosyan"
+       },
+       {
+        "id": 5046,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 4,
+        "topic": 6,
+        "headline": "Armenia to tighten traffic fines and penalty points in Yerevan"
+       },
+       {
+        "id": 5051,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "politics_conflicts",
+         "armenia"
+        ],
+        "score": 4,
+        "topic": 6,
+        "headline": "Levon Zurabyan suggests Armen Grigoryan executes western-oriented shift"
+       },
+       {
+        "id": 4887,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "politics_conflicts",
+         "armenia"
+        ],
+        "score": 4,
+        "topic": 6,
+        "headline": "Armenian lawyer calls re-arrest of detainee illegal"
        },
        {
         "id": 4958,
@@ -3829,13 +4058,13 @@
    },
    "after": {
     "digests": 7,
-    "stories": 87,
-    "per_digest": 12.4,
+    "stories": 95,
+    "per_digest": 13.6,
     "max": 19,
-    "cut": 75,
+    "cut": 78,
     "from_switched_off_topics": 0,
     "by_main_topic": {
-     "armenia": 87
+     "armenia": 95
     },
     "digests_detail": [
      {
@@ -4680,8 +4909,8 @@
      },
      {
       "at": "20:00",
-      "stories": 16,
-      "chars": 3817,
+      "stories": 15,
+      "chars": 3700,
       "list": [
        {
         "id": 4688,
@@ -4856,18 +5085,6 @@
         "headline": "Armenian parliament discusses stricter traffic rules and electric scooter regulations"
        },
        {
-        "id": 4311,
-        "primary": "armenia",
-        "main": "armenia",
-        "tags": [
-         "politics_conflicts",
-         "armenia"
-        ],
-        "score": 5,
-        "topic": 6,
-        "headline": "Court hearing held for opposition leader Samvel Karapetyan"
-       },
-       {
         "id": 4547,
         "primary": "armenia",
         "main": "armenia",
@@ -4883,10 +5100,33 @@
       ]
      },
      {
-      "at": "now 21:11 (window still open)",
-      "stories": 4,
-      "chars": 804,
+      "at": "now 21:27 (window still open)",
+      "stories": 13,
+      "chars": 2515,
       "list": [
+       {
+        "id": 5032,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 7,
+        "headline": "Armenia and Russia launch practical negotiations on railway concession"
+       },
+       {
+        "id": 4897,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "politics_conflicts",
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 7,
+        "headline": "Armenia permanent population reaches 3.11 million"
+       },
        {
         "id": 4911,
         "primary": "armenia",
@@ -4901,6 +5141,40 @@
         "headline": "Analyst warns Russia may seek strategic influence over new regional roads"
        },
        {
+        "id": 5003,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenia Justice Ministry proposes higher compensation for insults and defamation"
+       },
+       {
+        "id": 5007,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenian environmental authorities suspend catalyst recycling plant in Hrazdan"
+       },
+       {
+        "id": 4888,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "politics_conflicts",
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenia suspends illegal water extraction at Armavir fish farm"
+       },
+       {
         "id": 4927,
         "primary": "armenia",
         "main": "armenia",
@@ -4911,6 +5185,52 @@
         "score": 5,
         "topic": 6,
         "headline": "Bulgarian businessman allegedly bypasses Armenian gambling ad ban"
+       },
+       {
+        "id": 5037,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 4,
+        "topic": 6,
+        "headline": "Armenian administrative court accepts electoral commission lawsuit against Nikoghosyan"
+       },
+       {
+        "id": 5046,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 4,
+        "topic": 6,
+        "headline": "Armenia to tighten traffic fines and penalty points in Yerevan"
+       },
+       {
+        "id": 5051,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "politics_conflicts",
+         "armenia"
+        ],
+        "score": 4,
+        "topic": 6,
+        "headline": "Levon Zurabyan suggests Armen Grigoryan executes western-oriented shift"
+       },
+       {
+        "id": 4887,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "politics_conflicts",
+         "armenia"
+        ],
+        "score": 4,
+        "topic": 6,
+        "headline": "Armenian lawyer calls re-arrest of detainee illegal"
        },
        {
         "id": 4958,
@@ -4956,15 +5276,16 @@
    ],
    "before": {
     "digests": 11,
-    "stories": 22,
-    "per_digest": 2,
+    "stories": 23,
+    "per_digest": 2.1,
     "max": 12,
     "cut": 0,
     "from_switched_off_topics": 0,
     "by_main_topic": {
      "c3": 10,
      "c5": 9,
-     "c4": 3
+     "c4": 3,
+     "economy_markets": 1
     },
     "digests_detail": [
      {
@@ -5277,10 +5598,22 @@
       ]
      },
      {
-      "at": "now 21:11 (window still open)",
-      "stories": 1,
-      "chars": 239,
+      "at": "now 21:27 (window still open)",
+      "stories": 2,
+      "chars": 479,
       "list": [
+       {
+        "id": 5034,
+        "primary": "economy_markets",
+        "main": "economy_markets",
+        "tags": [
+         "economy_markets",
+         "russia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Russian seaborne oil exports reach highest level since July"
+       },
        {
         "id": 4691,
         "primary": "c4",
@@ -5299,15 +5632,16 @@
    },
    "after": {
     "digests": 11,
-    "stories": 22,
-    "per_digest": 2,
+    "stories": 23,
+    "per_digest": 2.1,
     "max": 12,
     "cut": 0,
     "from_switched_off_topics": 0,
     "by_main_topic": {
      "c3": 10,
      "c5": 9,
-     "c4": 3
+     "c4": 3,
+     "economy_markets": 1
     },
     "digests_detail": [
      {
@@ -5620,10 +5954,22 @@
       ]
      },
      {
-      "at": "now 21:11 (window still open)",
-      "stories": 1,
-      "chars": 239,
+      "at": "now 21:27 (window still open)",
+      "stories": 2,
+      "chars": 479,
       "list": [
+       {
+        "id": 5034,
+        "primary": "economy_markets",
+        "main": "economy_markets",
+        "tags": [
+         "economy_markets",
+         "russia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Russian seaborne oil exports reach highest level since July"
+       },
        {
         "id": 4691,
         "primary": "c4",
@@ -5656,17 +6002,17 @@
    ],
    "before": {
     "digests": 7,
-    "stories": 105,
-    "per_digest": 15,
-    "max": 17,
-    "cut": 180,
+    "stories": 111,
+    "per_digest": 15.9,
+    "max": 18,
+    "cut": 192,
     "from_switched_off_topics": 0,
     "by_main_topic": {
      "ukraine_war": 16,
-     "russia": 39,
-     "armenia": 41,
-     "iran_war": 6,
-     "politics_conflicts": 3
+     "russia": 42,
+     "armenia": 43,
+     "iran_war": 8,
+     "politics_conflicts": 2
     },
     "digests_detail": [
      {
@@ -6049,8 +6395,8 @@
      },
      {
       "at": "20:00",
-      "stories": 17,
-      "chars": 3816,
+      "stories": 16,
+      "chars": 3693,
       "list": [
        {
         "id": 3006,
@@ -6248,25 +6594,13 @@
         "score": 6,
         "topic": 7,
         "headline": "Russia proposes nonaggression pacts with European nations amid peace talks"
-       },
-       {
-        "id": 2813,
-        "primary": "armenia",
-        "main": "armenia",
-        "tags": [
-         "politics_conflicts",
-         "armenia"
-        ],
-        "score": 5,
-        "topic": 7,
-        "headline": "Former employees of Yerevan brandy factory protest recent layoffs"
        }
       ]
      },
      {
       "at": "09:00",
       "stories": 17,
-      "chars": 3674,
+      "chars": 3821,
       "list": [
        {
         "id": 3735,
@@ -6279,7 +6613,7 @@
         ],
         "score": 7,
         "topic": 8,
-        "headline": "Ukraine strikes critically damage Crimea bridge"
+        "headline": "Ukraine heavily damages Kerch bridge linking Crimea and Russia"
        },
        {
         "id": 3121,
@@ -6480,7 +6814,7 @@
      {
       "at": "14:00",
       "stories": 15,
-      "chars": 3818,
+      "chars": 3869,
       "list": [
        {
         "id": 3782,
@@ -6668,8 +7002,8 @@
      },
      {
       "at": "20:00",
-      "stories": 16,
-      "chars": 3715,
+      "stories": 15,
+      "chars": 3797,
       "list": [
        {
         "id": 4688,
@@ -6745,8 +7079,8 @@
        },
        {
         "id": 4200,
-        "primary": "politics_conflicts",
-        "main": "politics_conflicts",
+        "primary": "ukraine_war",
+        "main": "ukraine_war",
         "tags": [
          "politics_conflicts",
          "ukraine_war"
@@ -6791,19 +7125,6 @@
         "score": 6,
         "topic": 7,
         "headline": "Russia rejects Ukraine joining NATO following proposed Donbas withdrawal terms"
-       },
-       {
-        "id": 4683,
-        "primary": "ukraine_war",
-        "main": "ukraine_war",
-        "tags": [
-         "politics_conflicts",
-         "russia",
-         "ukraine_war"
-        ],
-        "score": 6,
-        "topic": 7,
-        "headline": "Ukrainian drones target Russian oil refineries"
        },
        {
         "id": 4693,
@@ -6869,10 +7190,22 @@
       ]
      },
      {
-      "at": "now 21:11 (window still open)",
-      "stories": 10,
-      "chars": 2038,
+      "at": "now 21:27 (window still open)",
+      "stories": 18,
+      "chars": 3745,
       "list": [
+       {
+        "id": 5044,
+        "primary": "russia",
+        "main": "russia",
+        "tags": [
+         "politics_conflicts",
+         "russia"
+        ],
+        "score": 7,
+        "topic": 8,
+        "headline": "Russia demands NATO withdraw from Eastern Europe"
+       },
        {
         "id": 4933,
         "primary": "iran_war",
@@ -6895,7 +7228,66 @@
         ],
         "score": 7,
         "topic": 7,
-        "headline": "UK to provide over 1000 additional air defense missiles to Ukraine"
+        "headline": "UK to provide over 1,000 additional air defense missiles to Ukraine"
+       },
+       {
+        "id": 4983,
+        "primary": "russia",
+        "main": "russia",
+        "tags": [
+         "politics_conflicts",
+         "russia"
+        ],
+        "score": 6,
+        "topic": 7,
+        "headline": "Russian military plane crash in Siberia kills 17"
+       },
+       {
+        "id": 4999,
+        "primary": "iran_war",
+        "main": "iran_war",
+        "tags": [
+         "politics_conflicts",
+         "iran_war"
+        ],
+        "score": 6,
+        "topic": 7,
+        "headline": "US conducts strikes on Iran Qeshm Island"
+       },
+       {
+        "id": 5014,
+        "primary": "iran_war",
+        "main": "iran_war",
+        "tags": [
+         "politics_conflicts",
+         "iran_war"
+        ],
+        "score": 6,
+        "topic": 7,
+        "headline": "Hunger strike expands across Iranian prisons as three more face death penalty"
+       },
+       {
+        "id": 5032,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 7,
+        "headline": "Armenia and Russia launch practical negotiations on railway concession"
+       },
+       {
+        "id": 4897,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "politics_conflicts",
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 7,
+        "headline": "Armenia permanent population reaches 3.11 million"
        },
        {
         "id": 4911,
@@ -6909,6 +7301,39 @@
         "score": 5,
         "topic": 7,
         "headline": "Analyst warns Russia may seek strategic influence over new regional roads"
+       },
+       {
+        "id": 5003,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenia Justice Ministry proposes higher compensation for insults and defamation"
+       },
+       {
+        "id": 5007,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenian environmental authorities suspend catalyst recycling plant in Hrazdan"
+       },
+       {
+        "id": 5015,
+        "primary": "russia",
+        "main": "russia",
+        "tags": [
+         "russia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Russian State Duma passes bill to raise military service age for women"
        },
        {
         "id": 4875,
@@ -6934,6 +7359,18 @@
         "score": 5,
         "topic": 6,
         "headline": "Estonian president proposes analysis of border closure with Russia"
+       },
+       {
+        "id": 4888,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "politics_conflicts",
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenia suspends illegal water extraction at Armavir fish farm"
        },
        {
         "id": 4927,
@@ -6970,29 +7407,6 @@
         "score": 5,
         "topic": 6,
         "headline": "Russia and China expect record trade turnover in 2026"
-       },
-       {
-        "id": 4958,
-        "primary": "armenia",
-        "main": "armenia",
-        "tags": [
-         "armenia"
-        ],
-        "score": 4,
-        "topic": 6,
-        "headline": "Armenian lawmakers consider legal amendments for mental health cases"
-       },
-       {
-        "id": 4972,
-        "primary": "armenia",
-        "main": "armenia",
-        "tags": [
-         "politics_conflicts",
-         "armenia"
-        ],
-        "score": 4,
-        "topic": 6,
-        "headline": "Andranik Piloyan remains National Hero despite corruption conviction"
        }
       ]
      }
@@ -7000,17 +7414,17 @@
    },
    "after": {
     "digests": 7,
-    "stories": 105,
-    "per_digest": 15,
-    "max": 17,
-    "cut": 180,
+    "stories": 111,
+    "per_digest": 15.9,
+    "max": 18,
+    "cut": 192,
     "from_switched_off_topics": 0,
     "by_main_topic": {
      "ukraine_war": 16,
-     "russia": 39,
-     "armenia": 41,
-     "iran_war": 6,
-     "politics_conflicts": 3
+     "russia": 42,
+     "armenia": 43,
+     "iran_war": 8,
+     "politics_conflicts": 2
     },
     "digests_detail": [
      {
@@ -7393,8 +7807,8 @@
      },
      {
       "at": "20:00",
-      "stories": 17,
-      "chars": 3816,
+      "stories": 16,
+      "chars": 3693,
       "list": [
        {
         "id": 3006,
@@ -7592,25 +8006,13 @@
         "score": 6,
         "topic": 7,
         "headline": "Russia proposes nonaggression pacts with European nations amid peace talks"
-       },
-       {
-        "id": 2813,
-        "primary": "armenia",
-        "main": "armenia",
-        "tags": [
-         "politics_conflicts",
-         "armenia"
-        ],
-        "score": 5,
-        "topic": 7,
-        "headline": "Former employees of Yerevan brandy factory protest recent layoffs"
        }
       ]
      },
      {
       "at": "09:00",
       "stories": 17,
-      "chars": 3674,
+      "chars": 3821,
       "list": [
        {
         "id": 3735,
@@ -7623,7 +8025,7 @@
         ],
         "score": 7,
         "topic": 8,
-        "headline": "Ukraine strikes critically damage Crimea bridge"
+        "headline": "Ukraine heavily damages Kerch bridge linking Crimea and Russia"
        },
        {
         "id": 3121,
@@ -7824,7 +8226,7 @@
      {
       "at": "14:00",
       "stories": 15,
-      "chars": 3818,
+      "chars": 3869,
       "list": [
        {
         "id": 3782,
@@ -8012,8 +8414,8 @@
      },
      {
       "at": "20:00",
-      "stories": 16,
-      "chars": 3715,
+      "stories": 15,
+      "chars": 3797,
       "list": [
        {
         "id": 4688,
@@ -8089,8 +8491,8 @@
        },
        {
         "id": 4200,
-        "primary": "politics_conflicts",
-        "main": "politics_conflicts",
+        "primary": "ukraine_war",
+        "main": "ukraine_war",
         "tags": [
          "politics_conflicts",
          "ukraine_war"
@@ -8135,19 +8537,6 @@
         "score": 6,
         "topic": 7,
         "headline": "Russia rejects Ukraine joining NATO following proposed Donbas withdrawal terms"
-       },
-       {
-        "id": 4683,
-        "primary": "ukraine_war",
-        "main": "ukraine_war",
-        "tags": [
-         "politics_conflicts",
-         "russia",
-         "ukraine_war"
-        ],
-        "score": 6,
-        "topic": 7,
-        "headline": "Ukrainian drones target Russian oil refineries"
        },
        {
         "id": 4693,
@@ -8213,10 +8602,22 @@
       ]
      },
      {
-      "at": "now 21:11 (window still open)",
-      "stories": 10,
-      "chars": 2038,
+      "at": "now 21:27 (window still open)",
+      "stories": 18,
+      "chars": 3745,
       "list": [
+       {
+        "id": 5044,
+        "primary": "russia",
+        "main": "russia",
+        "tags": [
+         "politics_conflicts",
+         "russia"
+        ],
+        "score": 7,
+        "topic": 8,
+        "headline": "Russia demands NATO withdraw from Eastern Europe"
+       },
        {
         "id": 4933,
         "primary": "iran_war",
@@ -8239,7 +8640,66 @@
         ],
         "score": 7,
         "topic": 7,
-        "headline": "UK to provide over 1000 additional air defense missiles to Ukraine"
+        "headline": "UK to provide over 1,000 additional air defense missiles to Ukraine"
+       },
+       {
+        "id": 4983,
+        "primary": "russia",
+        "main": "russia",
+        "tags": [
+         "politics_conflicts",
+         "russia"
+        ],
+        "score": 6,
+        "topic": 7,
+        "headline": "Russian military plane crash in Siberia kills 17"
+       },
+       {
+        "id": 4999,
+        "primary": "iran_war",
+        "main": "iran_war",
+        "tags": [
+         "politics_conflicts",
+         "iran_war"
+        ],
+        "score": 6,
+        "topic": 7,
+        "headline": "US conducts strikes on Iran Qeshm Island"
+       },
+       {
+        "id": 5014,
+        "primary": "iran_war",
+        "main": "iran_war",
+        "tags": [
+         "politics_conflicts",
+         "iran_war"
+        ],
+        "score": 6,
+        "topic": 7,
+        "headline": "Hunger strike expands across Iranian prisons as three more face death penalty"
+       },
+       {
+        "id": 5032,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 7,
+        "headline": "Armenia and Russia launch practical negotiations on railway concession"
+       },
+       {
+        "id": 4897,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "politics_conflicts",
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 7,
+        "headline": "Armenia permanent population reaches 3.11 million"
        },
        {
         "id": 4911,
@@ -8253,6 +8713,39 @@
         "score": 5,
         "topic": 7,
         "headline": "Analyst warns Russia may seek strategic influence over new regional roads"
+       },
+       {
+        "id": 5003,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenia Justice Ministry proposes higher compensation for insults and defamation"
+       },
+       {
+        "id": 5007,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenian environmental authorities suspend catalyst recycling plant in Hrazdan"
+       },
+       {
+        "id": 5015,
+        "primary": "russia",
+        "main": "russia",
+        "tags": [
+         "russia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Russian State Duma passes bill to raise military service age for women"
        },
        {
         "id": 4875,
@@ -8278,6 +8771,18 @@
         "score": 5,
         "topic": 6,
         "headline": "Estonian president proposes analysis of border closure with Russia"
+       },
+       {
+        "id": 4888,
+        "primary": "armenia",
+        "main": "armenia",
+        "tags": [
+         "politics_conflicts",
+         "armenia"
+        ],
+        "score": 5,
+        "topic": 6,
+        "headline": "Armenia suspends illegal water extraction at Armavir fish farm"
        },
        {
         "id": 4927,
@@ -8314,29 +8819,6 @@
         "score": 5,
         "topic": 6,
         "headline": "Russia and China expect record trade turnover in 2026"
-       },
-       {
-        "id": 4958,
-        "primary": "armenia",
-        "main": "armenia",
-        "tags": [
-         "armenia"
-        ],
-        "score": 4,
-        "topic": 6,
-        "headline": "Armenian lawmakers consider legal amendments for mental health cases"
-       },
-       {
-        "id": 4972,
-        "primary": "armenia",
-        "main": "armenia",
-        "tags": [
-         "politics_conflicts",
-         "armenia"
-        ],
-        "score": 4,
-        "topic": 6,
-        "headline": "Andranik Piloyan remains National Hero despite corruption conviction"
        }
       ]
      }
