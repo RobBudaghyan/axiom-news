@@ -132,6 +132,10 @@ welcome and announcements, cleanup), then `reports/step-15-final-product.md`.
 ## Waiting on the owner (also)
 - His look at the simulated welcome, setup screenshots and sample digest.
 
-## Next
-Part 5: cleanup (archive one-off scripts, remove the Google News shadow leftovers, delete D1 test data,
-docs), then the final report.
+## Part 5: done (2026-11-17, commit f178e13)
+One-off scripts archived, the shadow experiment removed (files, workflow step, D1 tables), D1 test
+data deleted (Japan, three test checks), docs rewritten. Python 164, Worker 261, click-through 136.
+
+## Step 15 is complete
+Final report: `reports/step-15-final-product.md`. Still waiting on the owner: the emoji pick, his look
+at Help and Feedback (he already sent one feedback message) and at the simulated welcome.
