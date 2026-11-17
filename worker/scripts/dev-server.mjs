@@ -130,7 +130,8 @@ function seed() {
 
 const env = { DB: seed(), TELEGRAM_BOT_TOKEN: TOKEN, TELEGRAM_WEBHOOK_SECRET: "x".repeat(40), OWNER_TELEGRAM_ID: String(OWNER),
   GITHUB_DISPATCH_TOKEN: "none", GITHUB_REPO: "demo/demo", GITHUB_WORKFLOW: "hourly.yml", GITHUB_REF: "main",
-  GEMINI_API_KEY: "local-preview-not-a-key" };   // Step 13: the topic check goes to the stand-in below
+  GEMINI_API_KEY: "local-preview-not-a-key",
+  ENV_NAME: process.env.PREVIEW_ENV || "staging" };   // Step 16: the local preview is like staging (Admin label)   // Step 13: the topic check goes to the stand-in below
 
 // No real network: Telegram and GitHub answer "ok"; the AI topic check is answered by test/fake-ai.mjs
 // after a short pause (so the "checking" spinner shows).

@@ -7,14 +7,16 @@
 //   3. loads the Admin data as the owner (200) and as a different, validly signed user (403),
 //   4. sends a request with a tampered signature (401).
 // It does not press "Send me a digest now" or "Run news job now" (those are for the owner to try).
-//   node scripts/api-check.mjs
+//   node scripts/api-check.mjs                     production
+//   AXIOM_ENV=staging node scripts/api-check.mjs   staging (Step 16: its own Worker and D1)
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { loadEnv, d1Rest } from "./digest-cli.mjs";
+import { STAGING, loadEnv, d1Rest } from "./digest-cli.mjs";
 import { signInitData } from "../src/auth.js";
 
 const toml = readFileSync(fileURLToPath(new URL("../wrangler.toml", import.meta.url)), "utf8");
-const BASE = new URL(/^APP_URL\s*=\s*"([^"]+)"/m.exec(toml)[1]).origin;
+const BASE = new URL(/^APP_URL\s*=\s*"([^"]+)"/m.exec(toml.split("[env.staging]")[STAGING ? 1 : 0])[1]).origin;
+console.log(`checking ${BASE}`);
 const env = loadEnv();
 const owner = Number(env.OWNER_TELEGRAM_ID);
 const db = d1Rest(env);

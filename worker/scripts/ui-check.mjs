@@ -383,6 +383,8 @@ try {
   r = await b.run(`click('[data-value=admin]'); await until(() => document.querySelector('.status'));
     const bad = document.querySelector('.badge.bad');
     const res = { editor: document.body.innerText.includes('Editor pass'), bad: bad ? getComputedStyle(bad).color : null };
+    const lab = document.querySelector('#env-label');
+    res.env = lab ? [lab.textContent, getComputedStyle(lab).backgroundColor, Math.round(lab.getBoundingClientRect().height), lab === document.querySelector('#view').firstElementChild] : null;
     const sq = (s) => { const e = document.querySelector(s); const c = getComputedStyle(e); const r = e.getBoundingClientRect(); return [Math.round(r.width), c.borderTopLeftRadius, c.backgroundColor]; };
     const st = { short: [...document.querySelectorAll('#view .row')].filter((e) => e.getBoundingClientRect().height < 47.5).length,
       radii: [...new Set([...document.querySelectorAll('#view .group')].map((e) => getComputedStyle(e).borderTopLeftRadius))],
@@ -397,6 +399,8 @@ try {
     res.t2 = text('#toast');
     return res;`);
   check("Admin shows the editor pass", r.editor);
+  check("Step 16: Admin opens with a big STAGING label (amber, 48 px, first on the page)",
+    JSON.stringify(r.env) === JSON.stringify(["STAGING", "rgb(199, 119, 0)", 48, true]), JSON.stringify(r.env));
   check("Admin in the Settings style: rows 48 px or more, 12 px cards, solid squares (green health, red actions)", r.style.ok, JSON.stringify(r.style));
   check("Admin failure badges are orange, not red", r.bad === "rgb(176, 58, 6)", String(r.bad));
   check("owner: Send me a digest now asks first, then sends", r.confirmed && /Sent: (\d+ stor|a short note)/.test(r.t1), r.t1);

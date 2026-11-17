@@ -36,12 +36,7 @@ check), Part 1 (staging), Part 2 (load test on staging), Part 3 (iPhone check), 
   Asia/Dubai; restored in D1 (same GMT+4, next digest unchanged) and the check now sends the
   stored zone.
 
-## Waiting on the owner
-- His check of items 1 to 6 on his phone (message sent on the TEST bot), and the labelled
-  all-topics preview digest.
-
-## Next
-Part 1 (staging) after the owner's OK and any fixes he asks for.
+## Owner check of Part 0: OK (2026-11-17, "OK, go to staging")
 
 ## Sent to the owner (2026-11-17, TEST bot)
 - Four screenshots (setup language step in English and after tapping Русский, the hint, the
@@ -52,3 +47,28 @@ Part 1 (staging) after the owner's OK and any fixes he asks for.
   him a real all-topics reader gets about 8 new stories since 20:00 (the `--windows` replay).
 - Today is a heavy news day: an all-topics reader would have had 17, 14 and 15 stories at 09, 14
   and 20 even with the new rule (the 48 h average is 10.4).
+
+## Part 1: done (2026-11-17)
+- Staging: Worker `axiom-news-staging` (https://axiom-news-staging.axiom-news-worker.workers.dev), D1
+  `axiom-d1-staging` (same 20 tables and columns, `worker/scripts/schema-diff.mjs`). wrangler.toml
+  `[env.staging]`: crons */5 only, `JOB_DISPATCH off`, `HEALTH_ALERTS off`, `SEND_STUB off`.
+- Production: `USER_SENDS = "off"` until launch (no digests, reminders or announcements; owner alerts
+  still on). Deployed 0f0c62a1 through the guard (same code d54c4ad73000c8f9 as staging a3111df8).
+- Deploys: `npm run deploy:staging` (records the code hash), `SHIP_IT=yes npm run deploy:prod`
+  (`ship-check.mjs` refuses without SHIP_IT, with code staging does not have, or uncommitted code).
+- Secrets: `set_secrets.py worker-staging` / `worker-prod`; `.env.staging` (git-ignored) holds the
+  staging D1 id and its own webhook secret; `AXIOM_ENV=staging` makes every script and the job use it.
+- TEST bot moved: webhook and every user's chat menu point at staging (`point-bot.mjs`, `setup-bot.mjs`);
+  the webhook now also takes callback_query and pre_checkout_query (it had only message).
+- Users copied (3), with custom follows, sent (7 days) and holds; stories: `scripts/sync_staging.py`
+  (on demand `--hours 48`; the hourly job runs `--auto`: every 3 hours since the last sync; secret
+  `STAGING_D1_DATABASE_ID`; `--items` before a local job test).
+- Job tested locally against staging: 190 s, 10 AI calls, 67 stories, production untouched.
+- D1 a day (estimate from today): reads job 2.65M + prod Worker 0.1M + sync 0.05M = about 2.8M of 5M
+  (57%); writes job 40k + sync about 7k + Workers about 1k = about 48k of 100k (48%).
+- `CLAUDE.md` (rules) and PROJECT_NOTES updated. Admin shows STAGING (amber) or PRODUCTION (red).
+- Tests: Worker 294 (new `test/staging.test.mjs`), Python 164, click-through 140 of 140, live
+  `api-check.mjs` on both copies.
+
+## Next
+Part 2: the load test on staging.

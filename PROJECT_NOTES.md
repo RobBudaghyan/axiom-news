@@ -55,6 +55,15 @@ bot @axiom_news_bot at the end.
   reader language other than English while someone reads it (Step 9).
 - **Hosting:** GitHub Actions hourly job, plus Cloudflare Worker + D1 (webhook, Mini App API,
   static Mini App, digest cron).
+- **Two copies (Step 16, owner): production and staging.** Production: Worker `axiom-news`, D1
+  `axiom-d1`, the hourly job, the real bot at launch (until then it sends nothing to users,
+  `USER_SENDS = "off"`). Staging: Worker `axiom-news-staging`, its own D1 `axiom-d1-staging`, the TEST
+  bot @justatia_bot, never starts the job, no job alerts; its stories are copied from production
+  every 3 hours by `scripts/sync_staging.py` (no AI). **Rules (also in `CLAUDE.md`): every change goes
+  to staging first; production only after the owner says "ship it"
+  (`SHIP_IT=yes npm run deploy:prod`, guarded by `ship-check.mjs`); never test on production; job
+  changes run locally against staging (`AXIOM_ENV=staging venv/Scripts/python -m job.run
+  --min-gap-minutes 0`) before they are pushed to main.** Admin shows STAGING or PRODUCTION.
 - **Tips (Step 10, amounts Step 11):** "Support Axiom" (always open near the bottom of the Mini App
   settings: the title and 100, 500 and 1000 Stars buttons, no text since Step 12) and /support (the same three buttons):
   voluntary Telegram Stars tips, the same for everyone (no test amount). Nothing is locked and a tip
@@ -224,6 +233,10 @@ bot @axiom_news_bot at the end.
 | 2026-11-17 | Pause removed; every topic may be off; an all-off reader gets nothing and their slot just moves on (owner, Step 16) | simpler: switching everything off is the pause. Paused users would have been migrated to all off (there were none) |
 | 2026-11-17 | Topic bar 7 for the six main topics, 6 kept for custom topics (`custom_topic_bar`); editor examples put routine Armenia court steps, meetings and local incidents at 3-5 (advisor, Step 16) | 48 h replay: all six topics 15.7 a digest (196 cut) -> 10.4 (23 cut); Armenia only 13.6 -> 6.4; the owner unchanged. Boost caps alone barely moved it (Armenia only 13.6 -> 12) |
 | 2026-11-17 | Setup starts with a Language step; texts one idea per line with emojis; red Help and Feedback squares; one hint under Add a topic (owner, Step 16) | the owner's phone test |
+| 2026-11-17 | Staging: a second Worker and D1, the TEST bot moved there with a copy of the 3 users; production silent to users until launch (owner, Step 16) | real users never see unfinished work; one bot cannot feed two webhooks |
+| 2026-11-17 | Staging stories come from a copy of production's rows every 3 hours (end of the hourly job, self-paced by staging `meta.sync_at`), not from its own job | no extra AI calls; measured: hourly copying ~4,600 story rows a day, every 3 hours ~2,900 |
+| 2026-11-17 | Staging-made ids start high (custom topics 1,000,000, stories above a placeholder at 1,000,000,000) | a copy from production never overwrites what a local job test or a staging reader made |
+| 2026-11-17 | The TEST bot's webhook now takes `callback_query` and `pre_checkout_query` too (Step 16) | it had only `message`, so the /support buttons and Stars tips could not work on it |
 | 2026-11-15 | pre_checkout_query is answered from the invoice payload alone (no database read) | Telegram cancels the payment after 10 s; measured a few microseconds |
 | 2026-11-15 | Table `tips`: user, amount, Telegram charge id (UNIQUE), time, refunded time; nothing else | the owner's rule; the charge id is needed for refunds, and UNIQUE makes a repeated update count once |
 | 2026-11-15 | /paysupport forwards the user's note to the owner; /terms states the tip terms; the owner refunds from Admin after a confirm (refundStarPayment) | Telegram's rules for bots that take Stars |
@@ -310,13 +323,14 @@ bot @axiom_news_bot at the end.
 - Two users: the owner and one more (Russian).
 
 ## Next step
-Switch to the real bot @axiom_news_bot: new token and webhook, `setup-bot.mjs` (also the Russian
-command list), then import the old bot's readers (`worker/scripts/import-users.mjs users.json
---dry`, then without `--dry`; they get no welcome) and send them an announcement from Admin. Before
-that: the owner's check of Help and Feedback and the simulated welcome (sent 2026-11-17), his emoji
-pick for the two new topics, and a few days of real digests with the new topics. Watch: Economy &
-Markets volume, Armenia-only readers (about 12 stories a digest in the 48 h replay, from the Step 8
-topic path), keyword refreshes in Admin, and the first live reminder and sample digest.
+Step 16 (in progress, `reports/step-16-progress.md`): load test on staging, iPhone check. Then the
+launch: production gets the real bot @axiom_news_bot (new token as production's secret,
+`node scripts/point-bot.mjs` and `node scripts/setup-bot.mjs` without AXIOM_ENV, `USER_SENDS = "on"`
+in wrangler.toml, deployed only after the owner says "ship it"), then import the old bot's readers
+(`worker/scripts/import-users.mjs users.json --dry`, then without `--dry`, on production) and send them
+an announcement from production's Admin. Staging keeps the TEST bot. Watch: Economy & Markets volume,
+digest sizes after the Step 16 bar (all six topics about 10, Armenia only about 6), keyword refreshes,
+the first live reminder and sample digest, and D1 reads (about 57% of the free limit, mostly the job).
 
 ## Known issues / open questions
 - **Translations (Step 9):** the code checks catch numbers, names, alphabets and accents, not a
@@ -329,6 +343,11 @@ topic path), keyword refreshes in Admin, and the first live reminder and sample 
   chunk/min).
 - **AI grouping is the weakest part:** some over-merged stories and near-duplicates. Guarded by
   prompt and code, but it needs watching.
+- **D1 reads (Step 16 measurement):** the hourly job reads about 2.65M rows a day (53% of the free
+  5M); production's Worker about 0.1M; the staging sync about 0.05M. Writes: job 40k, sync about 7k,
+  Workers about 1k: about 48% of 100k. Reads are the limit to watch; the job's reads (about 100k a
+  run) were never optimised. A follow-up should find which job queries scan the whole pool.
+- **Staging Admin's "D1 today" job numbers are production's** (job runs are copied with the stories).
 - **Worker CPU is the tightest free limit** (10 ms). Watch Cloudflare's Metrics > Errors for
   `exceededCpu` once there are ~20 users.
 - **Duplicates:** the word-based check misses some; the editor now merges most of the rest

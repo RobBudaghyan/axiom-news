@@ -9,6 +9,9 @@ same pool as production. Old rows (7 days, like production) are removed from sta
     venv/Scripts/python scripts/sync_staging.py --hours 3       # the last 3 hours, now
     venv/Scripts/python scripts/sync_staging.py --hours 48      # on demand: a full pool
     venv/Scripts/python scripts/sync_staging.py --users         # one-off: users, their custom topics, sent, holds
+    venv/Scripts/python scripts/sync_staging.py --items --hours 6
+        # before a local job run on staging: the feed items production already saw (the job's
+        # memory), so the test run treats only really new items as new and makes few AI calls
 
 Production comes from .env (or the job's environment); the staging database id from
 STAGING_D1_DATABASE_ID (GitHub secret) or D1_DATABASE_ID in .env.staging. Prints row counts only.
@@ -32,6 +35,7 @@ PROD_ID = "2a1eb212-95b8-4715-b628-2967cbcb0367"
 STAGING_SEQ_START = 1_000_000
 RETENTION_DAYS = 7
 AUTO_EVERY_S = 3 * 3600
+STAGING_STORY_ID = 1_000_000_000
 
 # table -> (WHERE for "changed since ?", the same parameter repeated n times)
 STORY_TABLES = {
@@ -79,6 +83,7 @@ def main() -> int:
     ap.add_argument("--hours", type=float, default=3)
     ap.add_argument("--auto", action="store_true", help="every 3 hours, from the last sync (for the hourly job)")
     ap.add_argument("--users", action="store_true", help="also copy users, custom follows, sent and holds (one-off)")
+    ap.add_argument("--items", action="store_true", help="also copy the feed items of the window (before a job test)")
     a = ap.parse_args()
     if os.environ.get("AXIOM_ENV") == "staging":
         raise SystemExit("run without AXIOM_ENV: production is the source")
@@ -107,12 +112,21 @@ def main() -> int:
         staging.batch([("INSERT INTO custom_topics (id, names, definition, queries, created_at) VALUES (?, '{}', 'x', '[]', ?)",
                         [STAGING_SEQ_START, now]),
                        ("DELETE FROM custom_topics WHERE id = ?", [STAGING_SEQ_START])])
+    # stories have no AUTOINCREMENT (a new id is the highest + 1): one hidden placeholder story keeps
+    # stories made by a local job run on staging above production's ids, so a sync never overwrites
+    # them. No tag, importance 0, never deleted (updated_at far ahead): it can never reach a digest.
+    staging.batch([("INSERT OR IGNORE INTO stories (id, summary, topics, importance, best_url, best_source, best_tier, "
+                    "created_at, updated_at) VALUES (?, 'staging id placeholder', '[]', 0, '', '', 9, 0, 4000000000)",
+                    [STAGING_STORY_ID])])
 
     counts = copy(prod, staging, STORY_TABLES, since)
     fh = prod.query("SELECT key, value FROM meta WHERE key = 'feed_health'")
     staging.batch(upserts("meta", fh))
     if a.users:
         counts.update(copy(prod, staging, USER_TABLES, now - RETENTION_DAYS * 86400))
+    if a.items:
+        counts.update(copy(prod, staging, {"items": ("fetched_at >= ?", 1)}, since))
+        staging.batch([("DELETE FROM items WHERE fetched_at < ?", [now - RETENTION_DAYS * 86400])])
     cut = now - RETENTION_DAYS * 86400
     staging.batch([
         ("DELETE FROM story_translations WHERE story_id IN (SELECT id FROM stories WHERE updated_at < ?)", [cut]),
