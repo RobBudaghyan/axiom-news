@@ -238,8 +238,9 @@ async function main() {
     : { ...user, id: 0, last_digest_at: sinceHours > 0 ? now - Math.round(sinceHours * 3600) : null };
   // Step 15, previews only: --topics all (every main topic on, plus the owner's own topics),
   // --lang en|ru (the digest language).
-  if (previewing && arg("--topics") === "all") {
-    who = { ...who, topics: JSON.stringify([...mainTopics.map((t) => t.tag), ...parseList(user.topics).filter((t) => /^c\d+$/.test(t))]) };
+  if (previewing && ["all", "main"].includes(arg("--topics"))) {   // Step 16: --topics main = the six main topics only
+    const own = arg("--topics") === "all" ? parseList(user.topics).filter((t) => /^c\d+$/.test(t)) : [];
+    who = { ...who, topics: JSON.stringify([...mainTopics.map((t) => t.tag), ...own]) };
   }
   if (previewing && arg("--lang")) who = { ...who, lang: arg("--lang") };
   const st = candidateStatement(who, now, cfg);

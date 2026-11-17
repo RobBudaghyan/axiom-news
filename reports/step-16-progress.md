@@ -42,3 +42,13 @@ check), Part 1 (staging), Part 2 (load test on staging), Part 3 (iPhone check), 
 
 ## Next
 Part 1 (staging) after the owner's OK and any fixes he asks for.
+
+## Sent to the owner (2026-11-17, TEST bot)
+- Four screenshots (setup language step in English and after tapping Русский, the hint, the
+  all-off card) and a check list for items 1 to 6, with the digest length numbers.
+- A labelled preview, all six topics, since 20:00 (`digest-cli.mjs --preview --topics main`, new
+  option: main topics only). It showed 16 stories because a preview has no "already sent" history:
+  it also counts stories a real reader got at 20:00 that were updated since. A follow-up note told
+  him a real all-topics reader gets about 8 new stories since 20:00 (the `--windows` replay).
+- Today is a heavy news day: an all-topics reader would have had 17, 14 and 15 stories at 09, 14
+  and 20 even with the new rule (the 48 h average is 10.4).
