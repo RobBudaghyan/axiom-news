@@ -60,7 +60,8 @@ FROM (
              AND coalesce(s.main_topic, '') NOT IN (SELECT u.value FROM json_each(?2) u))
     AND NOT EXISTS (SELECT 1 FROM sent x WHERE x.user_id = ?1 AND x.story_id = s.id)
 )
-WHERE g >= ?5 OR (followed AND t >= ?7 AND (?9 = 0 OR t > final_score OR main_topic GLOB 'c[0-9]*'))
+WHERE g >= ?5 OR (followed AND t >= CASE WHEN main_topic GLOB 'c[0-9]*' THEN ?13 ELSE ?7 END
+                  AND (?9 = 0 OR t > final_score OR main_topic GLOB 'c[0-9]*'))
 ORDER BY max(g, CASE WHEN followed THEN coalesce(t, 0) ELSE 0 END) DESC, g DESC, updated_at DESC, id DESC
 LIMIT ?4`;
 
@@ -85,9 +86,13 @@ export function candidateStatement(user, now, cfg = CONFIG, lang = effectiveLang
     params: [user.id, JSON.stringify(parseList(user.topics)), digestSince(user.last_digest_at, now, cfg),
              cfg.candidate_limit, cfg.editorial_bar, cfg.unedited_offset, cfg.topic_bar,
              JSON.stringify(cfg.topic_boost_max ?? {}), cfg.topic_needs_boost ? 1 : 0, lang,
-             now - cfg.max_lookback_hours * 3600, JSON.stringify(mainTags(cfg))],
+             now - cfg.max_lookback_hours * 3600, JSON.stringify(mainTags(cfg)), customBar(cfg)],
   };
 }
+
+// Step 16 (advisor, digest length): the main topics' bar (topic_bar) is 7; custom topics keep the
+// owner's bar of 6 (custom_topic_bar, Step 13 fixes).
+export const customBar = (cfg = CONFIG) => cfg.custom_topic_bar ?? cfg.topic_bar;
 
 // The global score g.
 export function storyScore(s, cfg = CONFIG) {
@@ -157,7 +162,8 @@ export function qualifies(s, userTopics, cfg = CONFIG) {
   if (s.main_topic && mainTags(cfg).includes(s.main_topic) && !userTopics.includes(s.main_topic)) return false;
   if (storyScore(s, cfg) >= cfg.editorial_bar) return true;
   const t = topicScore(s, cfg);
-  return t != null && !!s.main_topic && userTopics.includes(s.main_topic) && t >= cfg.topic_bar &&
+  const bar = isCustomTag(s.main_topic) ? customBar(cfg) : cfg.topic_bar;   // Step 16: 7 for main topics, 6 for custom ones
+  return t != null && !!s.main_topic && userTopics.includes(s.main_topic) && t >= bar &&
     (!cfg.topic_needs_boost || t > s.final_score || isCustomTag(s.main_topic));
 }
 

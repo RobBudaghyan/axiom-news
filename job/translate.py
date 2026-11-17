@@ -67,7 +67,8 @@ SELECT id, summary, headline, description, g FROM (
     AND NOT (coalesce(s.main_topic, '') IN (SELECT m.value FROM json_each(?8) m)
              AND coalesce(s.main_topic, '') NOT IN (SELECT u.value FROM json_each(?7) u))
 )
-WHERE g >= ?4 OR (main_topic IN (SELECT u.value FROM json_each(?7) u) AND t >= ?5
+WHERE g >= ?4 OR (main_topic IN (SELECT u.value FROM json_each(?7) u)
+                  AND t >= CASE WHEN main_topic GLOB 'c[0-9]*' THEN ?9 ELSE ?5 END
                   AND (?6 = 0 OR t > final_score OR main_topic GLOB 'c[0-9]*'))
 ORDER BY g DESC, id DESC"""
 
@@ -132,7 +133,12 @@ def load_translate_prompt(path: Path = TRANSLATE_PROMPT) -> TranslatePrompt:
 def eligible_params(now: int, cfg: dict, tags: list[str], hours: float = 24) -> list:
     return [int(now - hours * 3600), cfg["unedited_offset"], json.dumps(cfg.get("topic_boost_max") or {}),
             cfg["editorial_bar"], cfg["topic_bar"], 1 if cfg.get("topic_needs_boost") else 0, json.dumps(tags),
-            json.dumps(main_tags(cfg))]
+            json.dumps(main_tags(cfg)), custom_bar(cfg)]
+
+
+def custom_bar(cfg: dict) -> int:
+    """Step 16: custom topics keep the owner's bar of 6 while the main topics' bar is 7."""
+    return cfg.get("custom_topic_bar", cfg["topic_bar"])
 
 
 def main_tags(cfg: dict) -> list[str]:
@@ -157,7 +163,7 @@ def qualifies(s: dict, cfg: dict, tags: list[str]) -> bool:
         return False
     if CUSTOM_TAG.match(s["main_topic"]):   # Step 13 fixes: the reader chose it; no cap, no boost rule
         t = max(s["topic_score"] if s.get("topic_score") is not None else final, final)
-        return t >= cfg["topic_bar"]
+        return t >= custom_bar(cfg)
     boost = max(0, (s.get("topic_score") if s.get("topic_score") is not None else final) - final)
     cap = (cfg.get("topic_boost_max") or {}).get(s["main_topic"], boost)
     t = final + min(boost, cap)

@@ -141,12 +141,11 @@ describe("owner rule: in Russian, digest is always сводка", () => {
     const s = { ...story("Big news", ["politics_conflicts"], 8), tr_headline: "Большая новость", tr_description: "Текст." };
     for (const x of [planDigest(u, [s], TOPICS, now, CONFIG).text, planDigest(u, [], TOPICS, now, CONFIG).text,
       welcomeText(u, TOPICS, now, true, "ru"), welcomeText(u, TOPICS, now, false, "ru"), helpText(u, now, "ru"),
-      helpText(null, now, "ru"), helpText({ ...u, paused: 1 }, now, "ru"), settingsText("ru")]) assert.doesNotMatch(x, bad, x);
+      helpText(null, now, "ru"), settingsText("ru")]) assert.doesNotMatch(x, bad, x);
     assert.doesNotMatch(JSON.stringify(JSON.parse(i18nSource().split(" = ")[1].replace(/;\s*$/, "")).dicts.ru), bad);
     assert.equal(t("ru", "app.hero_label"), "Следующая сводка");
-    assert.equal(t("ru", "app.hero_paused_label"), "Сводки");
     assert.equal(t("ru", "app.sec_times"), "Время сводок");
-    assert.match(welcomeText(u, TOPICS, now, true, "ru"), /Я присылаю короткую сводку самых важных новостей/);
+    assert.match(welcomeText(u, TOPICS, now, true, "ru"), /Ваши сводки: /);
   });
 });
 
@@ -336,7 +335,7 @@ describe("language defaults and the language setting", () => {
     await worker.fetch(post("/start", { id: OWNER, first_name: "Rob", language_code: "ru" }), env(binding));
     assert.equal(langOf(sqlite), "ru");
     const [reply, ...setup] = fetchMock.calls;
-    assert.match(reply.body.text, /^Добро пожаловать в Axiom News, Rob! Я присылаю короткую сводку/);
+    assert.match(reply.body.text, /^👋 Добро пожаловать в Axiom News, Rob!\n📰 Короткая сводка/);
     assert.match(reply.body.text, /Нажмите «Настроить», чтобы выбрать темы и время\./);
     assert.equal(reply.body.reply_markup.inline_keyboard[0][0].text, "Настроить");
     const cmd = setup.find((c) => c.url.endsWith("/setMyCommands")).body;
@@ -362,13 +361,13 @@ describe("language defaults and the language setting", () => {
     fetchMock = mockFetch(() => undefined);
     await worker.fetch(post("/start", { id: OWNER, first_name: "Rob", language_code: "ru" }), env(binding));
     assert.equal(langOf(sqlite), "en");
-    assert.match(fetchMock.calls[0].body.text, /^Welcome back, Rob!/);
+    assert.match(fetchMock.calls[0].body.text, /^👋 Welcome back, Rob!/);
     sqlite.prepare("UPDATE users SET lang = 'ru'").run();
     await worker.fetch(post("/start", { id: OWNER, first_name: "Rob", language_code: "en" }), env(binding));
     assert.equal(langOf(sqlite), "ru");
-    assert.match(fetchMock.calls[1].body.text, /^С возвращением, Rob!/);
+    assert.match(fetchMock.calls[1].body.text, /^👋 С возвращением, Rob!/);
     await worker.fetch(post("hello", { id: OWNER, first_name: "Rob", language_code: "en" }), env(binding));
-    assert.match(fetchMock.calls[2].body.text, /^Я присылаю сводки новостей в 09:00, 14:00 и 20:00/);
+    assert.match(fetchMock.calls[2].body.text, /^🕘 Ваши сводки: 09:00, 14:00 и 20:00/);
   });
 
   const nowS = () => Math.floor(Date.now() / 1000);
@@ -407,7 +406,7 @@ describe("language defaults and the language setting", () => {
       const r = await call(binding, "/api/settings", init, { lang: bad });
       assert.equal(r.status, 400);
       assert.equal(r.body.code, "lang_bad");
-      assert.equal(r.body.error, "That language is not available.");
+      assert.equal(r.body.error, "🌍 That language is not available.");
     }
     assert.equal(langOf(sqlite), "ru");
   });
@@ -426,9 +425,9 @@ describe("language defaults and the language setting", () => {
     const { binding, sqlite } = fakeD1();
     addUser(sqlite, { lang: "ru" });
     fetchMock = mockFetch(() => undefined);
-    const r = await call(binding, "/api/settings", await initFor(OWNER, "ru"), { topics: [] });
-    assert.deepEqual([r.status, r.body.code], [400, "keep_topic"]);
-    assert.equal(t("ru", `errors.${r.body.code}`), "Оставьте хотя бы одну тему.");
+    const r = await call(binding, "/api/settings", await initFor(OWNER, "ru"), { digest_times: [] });
+    assert.deepEqual([r.status, r.body.code], [400, "keep_time"]);
+    assert.equal(t("ru", `errors.${r.body.code}`), "🕘 Оставьте хотя бы одно время.");
   });
 });
 

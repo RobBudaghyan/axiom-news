@@ -2,7 +2,8 @@
 "_comment": "Writes tests/fixtures/eligible_cases.json: 400 generated stories (100 on two custom topics, Step 13 fixes) and whether each could reach a\ndigest (the two-score rule for a reader who follows every topic), with the digest settings used.\nStep 15 (off means off): `readers` are five readers with fewer topics on, and each case has\n`eligible_for` (reader name -> bool); a story whose main topic is a main topic the reader has off\nnever qualifies.\nBoth test suites check it: tests/test_translate.py (job/translate.py: the Python rule and its\nSQL) and worker/test/i18n.test.mjs (worker/src/digest.js qualifies()), so the job never\ntranslates a different set of stories than the Worker can pick. Re-run only to change the cases.",
 "cfg": {
 "editorial_bar": 7,
-"topic_bar": 6,
+"topic_bar": 7,
+"custom_topic_bar": 6,
 "topic_needs_boost": true,
 "topic_boost_max": {
 "politics_conflicts": 0,
@@ -312,11 +313,11 @@
 "final_score": 5,
 "topic_score": 7,
 "main_topic": "iran_war",
-"eligible": true,
+"eligible": false,
 "eligible_for": {
 "armenia_only": false,
 "owner_like": false,
-"economy_off": true,
+"economy_off": false,
 "custom_only": false,
 "wars_off": false
 }
@@ -6817,13 +6818,13 @@
 "final_score": 4,
 "topic_score": 10,
 "main_topic": "armenia",
-"eligible": true,
+"eligible": false,
 "eligible_for": {
-"armenia_only": true,
-"owner_like": true,
-"economy_off": true,
+"armenia_only": false,
+"owner_like": false,
+"economy_off": false,
 "custom_only": false,
-"wars_off": true
+"wars_off": false
 }
 },
 {

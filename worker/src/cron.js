@@ -69,17 +69,29 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
   ];
   const got = await db.batch(reads);
   const [runs, lastOk, meta] = got;
-  const [due = [], topics = [], custom = [], reminders = [], announcing = []] = digests ? got.slice(3, 8) : [];
+  let [due = [], topics = [], custom = [], reminders = [], announcing = []] = digests ? got.slice(3, 8) : [];
   const [guardCounts, guardMeta] = guard ? got.slice(digests ? 8 : 3) : [];
   const writes = [];
   const out = { due: due.length, sent: 0, quiet: 0, blocked: 0, failed: 0, stories: 0, cut: 0, alert: false };
 
-  if (due.length) {
-    const mine = new Map();
-    for (const r of custom) {
-      if (!mine.has(r.user_id)) mine.set(r.user_id, []);
-      mine.get(r.user_id).push(r);
+  const mine = new Map();
+  for (const r of custom) {
+    if (!mine.has(r.user_id)) mine.set(r.user_id, []);
+    mine.get(r.user_id).push(r);
+  }
+  // Step 16 (owner): no Pause; a reader with every topic off (main and custom) gets no digest and no
+  // quiet note. Their slot just moves on, so switching a topic back on starts at the next slot.
+  const off = due.filter((u) => allTopicsOff(u, mine.get(u.id)));
+  if (off.length) {
+    due = due.filter((u) => !off.includes(u));
+    out.due = due.length;
+    out.all_off = off.length;
+    for (const u of off) {
+      writes.push({ sql: "UPDATE users SET next_digest_at = ?1 WHERE id = ?2",
+                    params: [nextSlot(now, u.timezone || cfg.default_timezone, parseList(u.digest_times, cfg.default_times)), u.id] });
     }
+  }
+  if (due.length) {
     // each user's switched-on custom topics join their topic list and their section names (Step 13
     // fixes: no boost cap for them; digest.js uses the editor's topic score as it is)
     const plans = due.map((u) => {
@@ -159,4 +171,10 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
   if (used.r || used.w) writes.push(usageStatement(used, now));
   if (writes.length) await db.batch(writes);
   return out;
+}
+
+// Step 16: every main topic off and no custom topic switched on (customRows: the user's switched-on
+// custom follows, as DUE_CUSTOM_SQL reads them).
+export function allTopicsOff(user, customRows = []) {
+  return !parseList(user.topics).length && !(customRows ?? []).some((r) => r.enabled !== 0);
 }

@@ -311,7 +311,7 @@ non-commercial use" (Step 6 report); the owner accepted that risk for custom top
   message if the newest finished run is `error`/`ai_failed`, a run is stuck in `running` for
   30+ minutes, there was no `ok`/`partial` run in 3 hours, or the GitHub dispatch failed. At most
   one alert per 3 hours, and the same failed run is never reported twice (`meta` table).
-- Pause: `paused=1` skips the user. When they resume, the next digest covers at most the last 24 h.
+- Pause: removed in Step 16 (owner). A reader with every topic off (main and custom) gets no digest and no quiet note; the cron only moves their `next_digest_at` to the next slot (`allTopicsOff` in `src/cron.js`).
 
 ## 4a. The Mini App (Steps 4-5)
 
@@ -340,12 +340,12 @@ buttons, success/warning/error on results). There are no sub-screens any more (S
 BackButton and MainButton are not used. The header and background are set
 to the theme's secondary colour, and vertical swipes are disabled so scrolling never closes it.
 
-**Settings tab (everyone, Step 5).** Next digest card ("Today at 14:00", or "Paused"); topics
+**Settings tab (everyone, Step 5).** Next digest card ("Today at 14:00", or since Step 16 "😴 All topics are off"); topics
 (switches with emoji, at least one); **digest times as a grid of 18 hourly buttons** 06:00-23:00
 under Morning / Afternoon / Evening: tap to choose (red), tap again to remove; a 6th time is refused
 ("Up to 5 times a day. Remove one first.") and so is removing the last one ("Keep at least one
 digest time"), with a small shake; the server checks the same rules. **Time zone, read-only**:
-"Yerevan time, From your phone, GMT+4", updated from the phone on every open. Pause. (Stories per
+"Yerevan time, From your phone, GMT+4", updated from the phone on every open. (Pause removed in Step 16.) (Stories per
 digest, the format choice and the time zone picker were removed in Step 5.) Every change is saved at
 once (`POST /api/settings`, one request at a time) and confirmed with a small "Saved" toast; on an
 error the change is undone and the reason shown.
@@ -368,7 +368,7 @@ SQL) gives:
 - feeds: failing feeds (with the reason in plain words and since when) and silent feeds (no new
   item for 48 h), from `meta.feed_health`, which the job writes each run (one row: per feed the
   last success, newest entry date, current error and how many runs in a row);
-- users: total/active/paused/blocked and a list (name, zone, times, last digest);
+- users: total/active/all off (Step 16)/blocked and a list (name, zone, times, last digest);
 - the last 50 errors; D1 rows today against the free limits: the job's exact counts
   (`job_runs.d1_rows_read/_written`, from D1's own per-query meta) plus the Worker's, which the
   binding adds up and every cron tick writes to `meta.d1_worker` (instances that end between
@@ -383,7 +383,7 @@ SQL) gives:
 | Route | What | CPU on Cloudflare (2026-11-14) |
 |---|---|---|
 | `POST /api/open` `{tz}` | create the user if new, save the device zone, return settings | 3-6 ms (Step 4); 5 and 7 ms after the Step 5 deploy |
-| `POST /api/settings` | validate (`src/settings.js`: topics, digest_times, paused only), save, recompute `next_digest_at` | 1-5 ms; Step 5: 2-5 ms, refusals 1-2 ms |
+| `POST /api/settings` | validate (`src/settings.js`: topics (may be empty since Step 16), digest_times, lang), save, recompute `next_digest_at` | 1-5 ms; Step 5: 2-5 ms, refusals 1-2 ms |
 | `GET /api/admin` | owner only: everything above | 0-3 ms; Step 5 (with editor stats): 3 ms |
 | `POST /api/admin/digest`, `/run-job` | owner only: the two buttons | not run against production by me |
 
@@ -484,7 +484,7 @@ the icon centring (28 checks since Step 5).
 - **Digests:** the cron adds each due reader's switched-on custom tags to their topics
   (`withCustomTopics`), so the length cut and "never twice" are the same as for the main topics. The
   rule differs (Step 13 fixes, owner): for a custom main topic (c<id>) the editor's topic score
-  counts as it is against `topic_bar`, with no boost cap and no "above the score" rule
+  counts as it is against `custom_topic_bar` (6; main topics use `topic_bar`, 7 since Step 16), with no boost cap and no "above the score" rule
   (`digest.js` CANDIDATE_SQL/topicScore/qualifies, twin in `job/translate.py`, checked on
   `tests/fixtures/eligible_cases.json`). The editor scores it as "how important for someone who
   chose this topic" (`job/editor.py` READER_BOOST). A custom topic is the most specific section; its
@@ -526,7 +526,7 @@ the icon centring (28 checks since Step 5).
   10 a reader in 24 h, forwarded to the owner with the reader's name and id; Admin lists the
   latest 20. `/help` points to Settings.
 - **Welcome flow** (`worker/src/onboard.js`). /start from a new user: a short welcome in their
-  Telegram language with "Set up". The first Mini App open shows a 3-step setup (topics, times,
+  Telegram language with "Set up". The first Mini App open shows a setup (Step 16: language first, then topics, times,
   done), skippable; Done or Skip calls `POST /api/onboard` once (`users.onboarded_at`, claimed with
   `UPDATE ... WHERE onboarded_at IS NULL RETURNING`), which sends a labelled sample digest of the
   last 24 hours by the normal rules (its stories are marked sent). A user who never opened the app
@@ -545,7 +545,7 @@ the icon centring (28 checks since Step 5).
 
 | Table | Key columns | Notes |
 |---|---|---|
-| `users` | `id` (Telegram user id) PK, `first_name`, `language` (Telegram's code), `lang` (the reader's language, Step 9), `timezone`, `tz_detected` 0/1 (2 = hand-picked before Step 5), `digest_times` JSON (on the hour, 06:00-23:00), `topics` JSON, `paused`, `blocked`, `created_at`, `last_digest_at`, `next_digest_at`; Step 15: `onboarded_at`, `opened_at`, `reminded_at`, `imported`; `max_stories` and `format` are unused since Step 5 (kept so no old code can break on them) | index on `next_digest_at`. `blocked=1` when Telegram returns 403 because the user blocked the bot. `tz_detected`: 0 default, 1 device (§4) |
+| `users` | `id` (Telegram user id) PK, `first_name`, `language` (Telegram's code), `lang` (the reader's language, Step 9), `timezone`, `tz_detected` 0/1 (2 = hand-picked before Step 5), `digest_times` JSON (on the hour, 06:00-23:00), `topics` JSON, `paused` (unused since Step 16), `blocked`, `created_at`, `last_digest_at`, `next_digest_at`; Step 15: `onboarded_at`, `opened_at`, `reminded_at`, `imported`; `max_stories` and `format` are unused since Step 5 (kept so no old code can break on them) | index on `next_digest_at`. `blocked=1` when Telegram returns 403 because the user blocked the bot. `tz_detected`: 0 default, 1 device (§4) |
 | `topics` | `tag` PK, `label_en`, `emoji`, `sort`, `is_default` | synced from `config/topics.yaml` by the job, read by the Worker; other languages' labels are in `config/i18n` (Step 9) |
 | `story_translations` | (`story_id`, `lang`) PK, `ok`, `headline`, `description`, `src` (the English text it was made from), `note` (why a check rejected it), `provider`, `created_at` | Step 9 (§4b); written by the job, read with the digest candidates; pruned with stories |
 | `items` | `id` PK, `url_hash` UNIQUE, `source_key`, `source_name`, `tier`, `url`, `title`, `snippet`, `published_at`, `fetched_at`, `status` (pending/done/dropped/expired), `story_id` | index on `status`; pruned after 7 days |

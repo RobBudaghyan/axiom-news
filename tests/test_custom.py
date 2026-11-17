@@ -321,7 +321,8 @@ class TestCustomRule(unittest.TestCase):
             ("c1", 3, 5, False),         # below the bar
             ("c1", 5, None, False),      # no topic score: the score 5 is below the bar
             ("armenia", 6, 6, False),    # a main topic still needs a boost (Step 8)
-            ("armenia", 4, 8, True),     # ... and keeps its cap of 2: 6, above 4
+            ("armenia", 5, 8, True),     # ... and keeps its cap of 2: 7, above 5 (Step 16: main bar 7)
+            ("armenia", 4, 8, False),    # capped to 6: below the main bar of 7 (Step 16)
             ("armenia", 3, 8, False),    # capped to 5
         ]
         ids = []

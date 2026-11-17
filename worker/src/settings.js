@@ -8,7 +8,7 @@ import { LANGS, effectiveLang, t } from "./i18n.js";
 // users.tz_detected: 0 = never reported (default zone), 1 = set from the device.
 // (2 = "chosen by hand" existed until Step 5; such a zone is replaced by the phone's on next open.)
 export const TZ_DEFAULT = 0, TZ_AUTO = 1, TZ_MANUAL = 2;
-const KEYS = new Set(["topics", "digest_times", "paused", "lang"]);
+const KEYS = new Set(["topics", "digest_times", "lang"]);   // Step 16: no "paused" (owner: no Pause)
 const KEEP_DUE_S = 15 * 60;   // a digest already due (waiting for the next 5-min tick) is kept
 
 // A refused setting: `code` names the message in config/i18n (errors.<code>), so the Mini App can
@@ -61,7 +61,7 @@ export function validZone(tz) {
 
 // patch: what the Mini App sends (any subset). topicTags: the known topic tags.
 // Returns the clean column values to write. Throws SettingsError with a friendly message.
-// extra.custom: how many custom topics the user follows (Step 13): with one, every main topic may be off.
+// Step 16 (owner): every topic may be off (main and custom); such a reader gets nothing.
 export function validatePatch(patch, topicTags, cfg = CONFIG, extra = {}) {
   if (!patch || typeof patch !== "object" || Array.isArray(patch)) throw new SettingsError("nothing");
   const unknown = Object.keys(patch).filter((k) => !KEYS.has(k));
@@ -72,7 +72,6 @@ export function validatePatch(patch, topicTags, cfg = CONFIG, extra = {}) {
     const t = patch.topics;
     if (!Array.isArray(t) || !t.every((x) => typeof x === "string")) throw new SettingsError("topics_list");
     const uniq = [...new Set(t)];
-    if (!uniq.length && !extra.custom) throw new SettingsError("keep_topic");
     const bad = uniq.find((x) => !topicTags.includes(x));
     if (bad) throw new SettingsError("no_topic");
     out.topics = topicTags.filter((x) => uniq.includes(x));   // keep the official order
@@ -88,10 +87,6 @@ export function validatePatch(patch, topicTags, cfg = CONFIG, extra = {}) {
       throw new SettingsError("times_hour", { from: L.earliest, to: L.latest });
     }
     out.digest_times = uniq;
-  }
-  if ("paused" in patch) {
-    if (typeof patch.paused !== "boolean") throw new SettingsError("pause_bool");
-    out.paused = patch.paused ? 1 : 0;
   }
   if ("lang" in patch) {   // Step 9: only a language in the picker (config/languages.json "enabled")
     if (typeof patch.lang !== "string" || !LANGS.enabled.includes(patch.lang)) throw new SettingsError("lang_bad");
@@ -120,7 +115,6 @@ export function publicUser(u, cfg = CONFIG) {
     tz_source: u.tz_detected === TZ_DEFAULT || u.tz_detected == null ? "default" : "device",
     digest_times: parseList(u.digest_times, cfg.default_times),
     topics: parseList(u.topics),
-    paused: !!u.paused,
     next_digest_at: u.next_digest_at ?? null,
     lang: effectiveLang(u),            // Step 9: a language that is not enabled shows as English
   };

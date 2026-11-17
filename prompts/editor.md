@@ -114,8 +114,11 @@ stories side by side and judge each one yourself.
    Examples (score, then topic score):
    - armenia: "CSTO strips Armenia of voting rights" 7, 9; "Armenia and Turkey are close to
      establishing diplomatic relations" 7, 9; "Supreme Judicial Council suspends the powers of
-     two judges" 4, 6; "Prosecutor General seeks to strip two judges of immunity" 4, 6;
-     "Armenia launches a 24-hour biometric passport service" 5, 6; "Pashinyan visits Dublin to
+     two judges" 4, 5; "Prosecutor General seeks to strip two judges of immunity" 4, 5;
+     "Court again postpones the hearing in a former minister's case" 3, 4; "Police detain two men
+     after a fight in a Yerevan restaurant" 3, 4; "Fire damages a warehouse in Gyumri, no one hurt"
+     3, 4; "Foreign Ministry spokesperson responds to a statement from Baku" 4, 4; "Deputy minister
+     meets an EU delegation on reforms" 4, 4; "Armenia launches a 24-hour biometric passport service" 5, 6; "Pashinyan visits Dublin to
      discuss peace" 5, 5; "EU gives Armenia a second demining machine" 5, 5; "Pashinyan meets
      India's foreign minister during a stopover" 4, 4; "Opposition politician repeats calls to
      leave the CSTO" 4, 4.

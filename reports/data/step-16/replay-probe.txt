@@ -1,0 +1,895 @@
+
+##### current / all_six: 110 stories in 7 digests (15, 15, 16, 17, 15, 15, 17), 196 cut for length
+--- 09:00: 15 stories, 3508 characters
+  [6/t7] ukraine_war (main ukraine_war): Zelensky says Ukrainian drone attacks neutralized over 55 percent of Russia oil refining capacity
+  [6/t7] russia (main russia): Estonia prepares cloud infrastructure for government continuity
+  [6/t7] russia (main russia): Russian air defenses intercept dozens of drones targeting Moscow
+  [5/t7] armenia (main armenia): Leaders of three Armenian political parties oppose constitutional amendments
+  [5/t6] russia (main russia): Georgia and Russia prepare for special representatives meeting
+  [5/t6] russia (main russia): South Korea imports record amount of Russian liquefied natural gas
+  [5/t6] russia (main russia): FSB suspects rapper Kievstoner of role in drone attack preparations
+  [5/t6] russia (main russia): Transport restricted in Yaroslavl after drone interceptions
+  [5/t6] russia (main russia): Russian Finance Ministry opposes windfall tax extension for banks
+  [5/t6] russia (main russia): Wealthy Russians reportedly imagine post-Putin oligarchy
+  [5/t6] russia (main russia): Rosstat estimates Russia third quarter GDP grew by 1 percent
+  [5/t6] russia (main russia): Russia and Iran discuss gas supplies via Azerbaijan
+  [5/t6] armenia (main armenia): Armenian government salary increases draw criticism amid pension limits
+  [5/t6] armenia (main armenia): Physical altercation occurs on public television in Armenia
+  [5/t6] armenia (main armenia): Turkish studies professor warns Iran could take harsh action over Syunik
+--- 14:00: 15 stories, 3776 characters
+  [6/t8] armenia (main armenia): Artur Vagharshyan elected deputy chairman of Armenia's Constitutional Court
+  [6/t7] iran_war (main iran_war): Israel strikes weapons shipment on Syrian-Lebanese border
+  [6/t7] russia (main russia): Convicts imprisoned for Boris Nemtsov's murder reportedly released early to fight in Ukraine
+  [6/t7] russia (main russia): European Union adopts new sanctions package targeting 145 individuals and entities linked to Russia
+  [6/t7] armenia (main armenia): Romania to launch Black Sea security talks with Azerbaijan, Armenia and Turkey
+  [5/t7] armenia (main armenia): Turkish Cargo operates first regular cargo flight between Istanbul and Yerevan
+  [5/t6] russia (main russia): Kremlin urges United Russia lawmakers to prepare for end of war
+  [5/t6] armenia (main armenia): Armenian investigative committee concludes domestic violence case
+  [5/t6] russia (main russia): Russian government establishes Kolyma priority development territory
+  [5/t6] russia (main russia): FSB detains agent in Crimea for passing military data to SBU
+  [5/t6] armenia (main armenia): Armenia uncovers illegal mining case in Yeghvard
+  [5/t6] armenia (main armenia): Armenian opposition proposes simplifying EU medicine registration
+  [5/t6] armenia (main armenia): Armenia moves to raise conscription age to 32
+  [5/t6] russia (main russia): Shortage of epilepsy drug Depakine reported in Russia
+  [5/t6] russia (main russia): Bill grants Russian Central Bank access to citizen tax data
+--- 20:00: 16 stories, 3693 characters
+  [7/t8] iran_war (main iran_war): Third oil tanker catches fire after hitting naval mine in Strait of Hormuz
+  [7/t8] ukraine_war (main ukraine_war): Russia reports record-breaking interception of 1,300 Ukrainian drones
+  [6/t8] armenia (main armenia): Armenia expands European military cooperation after losing CSTO voting rights
+  [6/t8] armenia (main armenia): Armenian opposition criticizes government over political persecution
+  [6/t8] armenia (main armenia): Criminal case against infiltrated Azerbaijani soldier sent to court
+  [6/t8] armenia (main armenia): Georgia extradites fugitive wanted in Armenia for murder
+  [6/t7] russia (main russia): Convicted Nemtsov killers reportedly freed from prison
+  [6/t7] russia (main russia): Woman arrested in Moscow for car bombing targeting former Ukrainian official
+  [6/t7] armenia (main armenia): Armenian officials arrested in bribery investigation
+  [6/t7] russia (main russia): Estonia to close Russian border crossings after sabotage attempt
+  [6/t7] russia (main russia): EU approves new Russia sanctions targeting 140 people and entities
+  [6/t7] ukraine_war (main ukraine_war): EU to join upcoming peace talks on Ukraine war
+  [6/t7] armenia (main armenia): Turkey launches regular cargo flights to Armenia
+  [6/t7] armenia (main armenia): Armenia and Turkey begin implementing agreements
+  [6/t7] russia (main russia): Yekaterinburg architect sentenced to 12 years over enlistment office fire
+  [6/t7] russia (main russia): Russia proposes nonaggression pacts with European nations amid peace talks
+--- 09:00: 17 stories, 3784 characters
+  [7/t8] ukraine_war (main ukraine_war): Ukraine strikes Crimea bridge causing partial collapse
+  [6/t8] armenia (main armenia): Azerbaijan to increase defense spending to 8.8 billion manats
+  [6/t7] russia (main russia): Japan scrambles jets after Russian aircraft enter airspace
+  [6/t7] ukraine_war (main ukraine_war): European representatives participate in US-Ukraine peace talks
+  [6/t7] ukraine_war (main ukraine_war): Zelensky says Russia receives dozens of North Korean missiles monthly
+  [6/t7] russia (main russia): Estonia's Kallas proposes collecting data on Russian military for sanctions
+  [6/t7] russia (main russia): Putin decree allows state to seize dead Russians unclaimed cash and gold
+  [6/t7] russia (main russia): Woman detained in Moscow over car bombing
+  [6/t7] armenia (main armenia): Armenian export volumes fall amid Russian restrictions
+  [6/t7] russia (main russia): Convicted killers of Boris Nemtsov reportedly released early
+  [6/t7] russia (main russia): EU imposes new sanctions on Russian oil refineries and banks
+  [5/t7] armenia (main armenia): Armenian parliament discusses new constitution
+  [5/t7] armenia (main armenia): Supreme Judicial Council suspends judge Masis Melkonyan
+  [5/t6] russia (main russia): Russian Foreign Minister Lavrov arrives in the Philippines for summit
+  [5/t6] armenia (main armenia): Azerbaijan and UK foreign ministers discuss Armenia normalization
+  [5/t6] armenia (main armenia): Azerbaijani Foreign Minister discusses peace process with UK Foreign Secretary
+  [5/t6] armenia (main armenia): Armenian officials arrested for bribery
+--- 14:00: 15 stories, 3869 characters
+  [7/t7] politics_conflicts (main politics_conflicts): Mongolian President Khurelsukh resigns amid corruption scandal
+  [6/t7] ukraine_war (main ukraine_war): Ukrainian drone strikes hit Russian industrial zones and petrochemical facilities
+  [6/t7] russia (main russia): Journalist regains consciousness after car bombing in Moscow
+  [6/t7] ukraine_war (main ukraine_war): IMF reports progress in loan talks with Ukraine
+  [6/t7] ukraine_war (main ukraine_war): Russia receives North Korean missiles and erects monument in Kursk
+  [6/t7] ukraine_war (main ukraine_war): Ukraine strikes Russian Baltic Fleet warship Naro-Fominsk
+  [6/t7] armenia (main armenia): Azerbaijani soldier who illegally crossed Armenia border fires shots and threatens family
+  [6/t7] ukraine_war (main ukraine_war): Russian missile strikes target industrial and energy facilities across Ukraine
+  [6/t7] armenia (main armenia): German Foreign Minister visits Baku and Yerevan, criticizing Russian influence
+  [5/t7] armenia (main armenia): Armenian-Russian working group holds first meeting on railway concession
+  [5/t7] armenia (main armenia): Corruption case against Ruzanna Khachatryan sent to Anti-Corruption Court
+  [5/t6] armenia (main armenia): Armenia's Human Rights Defender raises concerns over stray dog attacks
+  [5/t6] russia (main russia): EU expected to approve 22nd sanctions package against Russia in December
+  [5/t6] armenia (main armenia): Yerevan court president authorizes wiretapping operations against judge Masis Melkonyan
+  [5/t6] armenia (main armenia): Man arrested in Syunik region for stealing 13 tons of gold ore
+--- 20:00: 15 stories, 3797 characters
+  [7/t9] armenia (main armenia): Armenia signals readiness to open border crossing with Turkey
+  [7/t8] ukraine_war (main ukraine_war): Russian ballistic missiles strike Kyiv main bridges and infrastructure
+  [7/t8] ukraine_war (main ukraine_war): Casualties from Russian strike on Zaporizhzhia rise to 42
+  [6/t8] armenia (main armenia): Iran aims to transform Norduz border crossing into major trade hub
+  [6/t8] armenia (main armenia): Armenian investigators detail charges against Azerbaijani soldier for border crossing and shooting
+  [7/t7] politics_conflicts (main politics_conflicts): Turkey places pro-opposition Sozcu TV under state management
+  [7/t7] ukraine_war (main ukraine_war): Death toll from Russian strike in Kamyshevakha rises to 72
+  [6/t7] iran_war (main iran_war): Iran downs US MQ-1 reconnaissance drone over Qeshm Island
+  [6/t7] russia (main russia): Deutsche Bank accused of shielding Russian oligarchs from sanctions
+  [6/t7] ukraine_war (main ukraine_war): Russia rejects Ukraine joining NATO following proposed Donbas withdrawal terms
+  [6/t7] iran_war (main iran_war): Iraqi Prime Minister plans crackdown on pro-Iran militias
+  [6/t7] russia (main russia): Slovakia and Hungary secure US extensions to purchase Russian oil
+  [6/t7] iran_war (main iran_war): Qatar warns of Gulf escalation as Iran issues threats against Bahrain
+  [6/t7] armenia (main armenia): European diplomats emphasize Armenian and Azerbaijani independence and European ties
+  [6/t7] russia (main russia): Russia arrests Japanese journalist on espionage charges
+--- now 22:53 (window still open): 17 stories, 3734 characters
+  [7/t8] russia (main russia): Russia demands NATO withdraw from large parts of Eastern Europe
+  [7/t7] ukraine_war (main ukraine_war): UK to provide over 1,000 additional air defense missiles to Ukraine
+  [6/t7] iran_war (main iran_war): Iran’s IRGC says it hit US radar in Bahrain
+  [6/t7] iran_war (main iran_war): US conducts strikes on Iran Qeshm Island
+  [6/t7] iran_war (main iran_war): Hunger strike expands across Iranian prisons as three more face death penalty
+  [5/t7] armenia (main armenia): Armenia and Russia launch practical negotiations on railway concession
+  [5/t7] armenia (main armenia): Armenia permanent population reaches 3.11 million
+  [5/t7] armenia (main armenia): Analyst warns Russia may seek strategic influence over new regional roads
+  [5/t6] russia (main russia): Russian authorities search Lenkom theater in financial probe
+  [5/t6] russia (main russia): Russian military transport plane crashes near Kemerovo
+  [5/t6] russia (main russia): Russian State Duma passes bill to raise military service age for women
+  [5/t6] armenia (main armenia): Armenia Justice Ministry proposes higher compensation for insults and defamation
+  [5/t6] armenia (main armenia): Armenian environmental authorities suspend catalyst recycling plant in Hrazdan
+  [5/t6] economy_markets (main economy_markets): Russian seaborne oil exports reach highest level since July
+  [5/t6] russia (main russia): Russia proposes bill to shield war participants from bankruptcy seizure
+  [5/t6] russia (main russia): Estonian president proposes analysis of border closure with Russia
+  [5/t6] armenia (main armenia): Armenia suspends illegal water extraction at Armavir fish farm
+
+##### current / armenia_only: 95 stories in 7 digests (4, 14, 16, 19, 14, 15, 13), 79 cut for length
+--- 09:00: 4 stories, 950 characters
+  [5/t7] armenia (main armenia): Leaders of three Armenian political parties oppose constitutional amendments
+  [5/t6] armenia (main armenia): Armenian government salary increases draw criticism amid pension limits
+  [5/t6] armenia (main armenia): Physical altercation occurs on public television in Armenia
+  [5/t6] armenia (main armenia): Turkish studies professor warns Iran could take harsh action over Syunik
+--- 14:00: 14 stories, 3372 characters
+  [6/t8] armenia (main armenia): Artur Vagharshyan elected deputy chairman of Armenia's Constitutional Court
+  [6/t7] armenia (main armenia): Romania to launch Black Sea security talks with Azerbaijan, Armenia and Turkey
+  [5/t7] armenia (main armenia): Turkish Cargo operates first regular cargo flight between Istanbul and Yerevan
+  [5/t6] armenia (main armenia): Armenian investigative committee concludes domestic violence case
+  [5/t6] armenia (main armenia): Armenia uncovers illegal mining case in Yeghvard
+  [5/t6] armenia (main armenia): Armenian opposition proposes simplifying EU medicine registration
+  [5/t6] armenia (main armenia): Armenia moves to raise conscription age to 32
+  [5/t6] armenia (main armenia): Armenian and Cambodian prime ministers discuss trade cooperation
+  [5/t6] armenia (main armenia): Armenian-Azerbaijani civil society talks scheduled before year-end
+  [5/t6] armenia (main armenia): Armenian opposition holds parliamentary hearings on democracy
+  [5/t6] armenia (main armenia): Armenian ombudsman representatives note systemic issues at Dzorak center
+  [5/t6] armenia (main armenia): Armenia receives large volumes of gas and goods from Russia
+  [4/t6] armenia (main armenia): Edgar Ghazaryan calls for Prime Minister Nikol Pashinyan's arrest during hearings
+  [4/t6] armenia (main armenia): Armenia's Television and Radio Commission expresses concern over studio brawl footage
+--- 20:00: 16 stories, 3794 characters
+  [6/t8] armenia (main armenia): Armenia expands European military cooperation after losing CSTO voting rights
+  [6/t8] armenia (main armenia): Armenian opposition criticizes government over political persecution
+  [6/t8] armenia (main armenia): Criminal case against infiltrated Azerbaijani soldier sent to court
+  [6/t8] armenia (main armenia): Georgia extradites fugitive wanted in Armenia for murder
+  [6/t7] armenia (main armenia): Armenian officials arrested in bribery investigation
+  [6/t7] armenia (main armenia): Turkey launches regular cargo flights to Armenia
+  [6/t7] armenia (main armenia): Armenia and Turkey begin implementing agreements
+  [5/t7] armenia (main armenia): Former employees of Yerevan brandy factory protest recent layoffs
+  [5/t7] armenia (main armenia): Armenian parliament approves quadrupling fines for traffic violations
+  [5/t7] armenia (main armenia): Sasun Badoyan reports police searched his home and confiscated pension funds
+  [5/t7] armenia (main armenia): Armenia extends Kashatagh housing program deadline to July 2027
+  [5/t7] armenia (main armenia): Armenian parliamentary committee approves stricter penalties for traffic congestion violations
+  [5/t7] armenia (main armenia): Dilijan initiatives in Armenia receive international recognition from World Tourism Forum
+  [5/t7] armenia (main armenia): Armenian citizens without completed military service permitted to work as police or rescuers
+  [5/t7] armenia (main armenia): Armenian opposition figures criticize government over political prosecutions
+  [5/t7] armenia (main armenia): Armenian Minister Zhanna Andreasyan defends removal of military service exemptions
+--- 09:00: 19 stories, 3772 characters
+  [6/t8] armenia (main armenia): Azerbaijan to increase defense spending to 8.8 billion manats
+  [6/t7] armenia (main armenia): Armenian export volumes fall amid Russian restrictions
+  [5/t7] armenia (main armenia): Armenian parliament discusses new constitution
+  [5/t7] armenia (main armenia): Supreme Judicial Council suspends judge Masis Melkonyan
+  [5/t6] armenia (main armenia): Azerbaijan and UK foreign ministers discuss Armenia normalization
+  [5/t6] armenia (main armenia): Azerbaijani Foreign Minister discusses peace process with UK Foreign Secretary
+  [5/t6] armenia (main armenia): Armenian officials arrested for bribery
+  [5/t6] armenia (main armenia): Mirzoyan discusses regional connectivity in Brussels
+  [5/t6] armenia (main armenia): Mirzoyan warns of foreign interference against Armenian sovereignty
+  [5/t6] armenia (main armenia): Armenian and Turkish Foreign Ministers meet in Brussels
+  [5/t6] armenia (main armenia): Armenian students and teachers to train at Russian nuclear institute
+  [5/t6] armenia (main armenia): Armenia and US organizations discuss defense innovation
+  [5/t6] armenia (main armenia): Pashinyan says Armenia's EU path could take 20 years
+  [5/t6] armenia (main armenia): Defense team appeals arrest of Armenian opposition leader Samvel Karapetyan
+  [5/t6] armenia (main armenia): Russian agricultural exports to Armenia increase by 15 percent
+  [4/t6] armenia (main armenia): Illegally held weapons discovered in Armenia's Tavush region
+  [4/t6] armenia (main armenia): Armenia launches media literacy week to improve critical thinking
+  [4/t6] armenia (main armenia): Water level of Lake Sevan drops by 1 centimeter
+  [4/t6] armenia (main armenia): Lusine Bekchyan dismissed as assistant to Armenian NA President
+--- 14:00: 14 stories, 3744 characters
+  [6/t7] armenia (main armenia): Azerbaijani soldier who illegally crossed Armenia border fires shots and threatens family
+  [6/t7] armenia (main armenia): German Foreign Minister visits Baku and Yerevan, criticizing Russian influence
+  [5/t7] armenia (main armenia): Armenian-Russian working group holds first meeting on railway concession
+  [5/t7] armenia (main armenia): Corruption case against Ruzanna Khachatryan sent to Anti-Corruption Court
+  [5/t6] armenia (main armenia): Armenia's Human Rights Defender raises concerns over stray dog attacks
+  [5/t6] armenia (main armenia): Yerevan court president authorizes wiretapping operations against judge Masis Melkonyan
+  [5/t6] armenia (main armenia): Man arrested in Syunik region for stealing 13 tons of gold ore
+  [5/t6] armenia (main armenia): Ararat Mirzoyan meets Romanian Foreign Minister Dan Neculanescu in Bucharest
+  [5/t6] armenia (main armenia): Armenian Foreign Minister meets NATO Special Representative in Brussels
+  [5/t6] armenia (main armenia): Armenian Economy Minister Gevorg Papoyan will travel to Moscow to attend Eurasian Economic Union consultations
+  [5/t6] armenia (main armenia): CSI President to testify at Tom Lantos Commission hearing on Artsakh
+  [5/t6] armenia (main armenia): Armenian Education Minister explores cooperation with Dubna nuclear institute
+  [5/t6] armenia (main armenia): Armenians in New York secure removal of Azerbaijani flag from Manhattan park
+  [5/t6] armenia (main armenia): Edgar Muradyan released from pre-trial detention in Armenia
+--- 20:00: 15 stories, 3700 characters
+  [7/t9] armenia (main armenia): Armenia signals readiness to open border crossing with Turkey
+  [6/t8] armenia (main armenia): Iran aims to transform Norduz border crossing into major trade hub
+  [6/t8] armenia (main armenia): Armenian investigators detail charges against Azerbaijani soldier for border crossing and shooting
+  [6/t7] armenia (main armenia): European diplomats emphasize Armenian and Azerbaijani independence and European ties
+  [6/t7] armenia (main armenia): Armenian parliament speaker discusses border checkpoints and constitutional changes
+  [5/t7] armenia (main armenia): Armenian lawmakers debate prison death of Arsen Gevorgyan
+  [5/t7] armenia (main armenia): Armenia proposes ending amnesties for sexual offenses against children
+  [5/t7] armenia (main armenia): Armenia and Russia hold first round of talks on railway concession
+  [5/t7] armenia (main armenia): Strong Armenia Party vows to oppose constitutional changes
+  [5/t7] armenia (main armenia): Armenian FM highlights export growth driven by EU trade preferences
+  [5/t7] armenia (main armenia): Armenia proposes military service exemption for long-serving police and rescuers
+  [5/t7] armenia (main armenia): Armenian Interior Ministry sets protection of minors as political priority
+  [5/t7] armenia (main armenia): Iran announces readiness to build oil refinery in Armenia
+  [5/t7] armenia (main armenia): Armenian parliament discusses stricter traffic rules and electric scooter regulations
+  [5/t6] armenia (main armenia): Armenian Economy Minister to travel to Moscow for EAEU talks
+--- now 22:53 (window still open): 13 stories, 2519 characters
+  [5/t7] armenia (main armenia): Armenia and Russia launch practical negotiations on railway concession
+  [5/t7] armenia (main armenia): Armenia permanent population reaches 3.11 million
+  [5/t7] armenia (main armenia): Analyst warns Russia may seek strategic influence over new regional roads
+  [5/t6] armenia (main armenia): Armenia Justice Ministry proposes higher compensation for insults and defamation
+  [5/t6] armenia (main armenia): Armenian environmental authorities suspend catalyst recycling plant in Hrazdan
+  [5/t6] armenia (main armenia): Armenia suspends illegal water extraction at Armavir fish farm
+  [5/t6] armenia (main armenia): Bulgarian businessman allegedly bypasses Armenian gambling ad ban
+  [4/t6] armenia (main armenia): Armenian administrative court accepts electoral commission lawsuit against Nikoghosyan
+  [4/t6] armenia (main armenia): Armenia to tighten traffic fines and penalty points in Yerevan
+  [4/t6] armenia (main armenia): Levon Zurabyan suggests Armen Grigoryan executes western-oriented shift
+  [4/t6] armenia (main armenia): Armenian lawyer calls re-arrest of detainee illegal
+  [4/t6] armenia (main armenia): Armenian lawmakers consider legal amendments for mental health cases
+  [4/t6] armenia (main armenia): Andranik Piloyan remains National Hero despite corruption conviction
+
+##### current / owner: 16 stories in 10 digests (0, 0, 0, 0, 0, 5, 0, 3, 7, 1), 0 cut for length
+--- 06:00: 0 stories, 79 characters
+--- 09:00: 0 stories, 78 characters
+--- 12:00: 0 stories, 80 characters
+--- 18:00: 0 stories, 79 characters
+--- 22:00: 0 stories, 78 characters
+--- 06:00: 5 stories, 1158 characters
+  [5/t8] c3 (main c3): Melbourne skyscraper retrofitted with 1,391 solar panels
+  [5/t7] c3 (main c3): Reserve Bank of Australia minutes show majority voted to raise rates
+  [5/t7] c3 (main c3): Australia increases third-year holiday maker visa cap for backpackers
+  [4/t6] c3 (main c3): Police search Melbourne home after theft of Melbourne Cup trophies
+  [3/t6] c3 (main c3): Australian Coalition takes lead in two-party preferred poll
+--- 09:00: 0 stories, 78 characters
+--- 12:00: 3 stories, 808 characters
+  [6/t7] c3 (main c3): Melbourne Cup racehorse body found dumped in Sydney skip bin
+  [5/t7] c3 (main c3): Sydney doctor leaves position amid accusations of antisemitism
+  [5/t6] c3 (main c3): Australian investors granted direct access to Anthropic IPO
+--- 18:00: 7 stories, 1654 characters
+  [6/t7] c5 (main c5): Fed official Musalem signals need for multiple interest rate hikes
+  [5/t7] c4 (main c4): US plans to discuss energy export routes and TRIPP project with Turkmenistan
+  [5/t7] c5 (main c5): European Commission projects robust eurozone economic growth
+  [5/t6] c5 (main c5): Angola central bank cuts key interest rate to 10-year low
+  [5/t6] c5 (main c5): Russian Finance Ministry schedules federal loan bond auctions
+  [5/t6] c3 (main c3): Australian crossbenchers criticize Labor election funding changes
+  [4/t6] c4 (main c4): Armenian parliamentary speaker notes growing optimism over TRIPP project
+--- 22:00: 1 stories, 276 characters
+  [5/t6] economy_markets (main economy_markets): Russian seaborne oil exports reach highest level since July
+
+##### wars_econ0 / all_six: 111 stories in 7 digests (14, 15, 17, 17, 14, 15, 19), 174 cut for length
+--- 09:00: 14 stories, 3175 characters
+  [6/t7] russia (main russia): Estonia prepares cloud infrastructure for government continuity
+  [6/t7] russia (main russia): Russian air defenses intercept dozens of drones targeting Moscow
+  [5/t7] armenia (main armenia): Leaders of three Armenian political parties oppose constitutional amendments
+  [5/t6] russia (main russia): Georgia and Russia prepare for special representatives meeting
+  [5/t6] russia (main russia): South Korea imports record amount of Russian liquefied natural gas
+  [5/t6] russia (main russia): FSB suspects rapper Kievstoner of role in drone attack preparations
+  [5/t6] russia (main russia): Transport restricted in Yaroslavl after drone interceptions
+  [5/t6] russia (main russia): Russian Finance Ministry opposes windfall tax extension for banks
+  [5/t6] russia (main russia): Wealthy Russians reportedly imagine post-Putin oligarchy
+  [5/t6] russia (main russia): Rosstat estimates Russia third quarter GDP grew by 1 percent
+  [5/t6] russia (main russia): Russia and Iran discuss gas supplies via Azerbaijan
+  [5/t6] armenia (main armenia): Armenian government salary increases draw criticism amid pension limits
+  [5/t6] armenia (main armenia): Physical altercation occurs on public television in Armenia
+  [5/t6] armenia (main armenia): Turkish studies professor warns Iran could take harsh action over Syunik
+--- 14:00: 15 stories, 3818 characters
+  [6/t8] armenia (main armenia): Artur Vagharshyan elected deputy chairman of Armenia's Constitutional Court
+  [6/t7] russia (main russia): Convicts imprisoned for Boris Nemtsov's murder reportedly released early to fight in Ukraine
+  [6/t7] russia (main russia): European Union adopts new sanctions package targeting 145 individuals and entities linked to Russia
+  [6/t7] armenia (main armenia): Romania to launch Black Sea security talks with Azerbaijan, Armenia and Turkey
+  [5/t7] armenia (main armenia): Turkish Cargo operates first regular cargo flight between Istanbul and Yerevan
+  [5/t6] russia (main russia): Kremlin urges United Russia lawmakers to prepare for end of war
+  [5/t6] armenia (main armenia): Armenian investigative committee concludes domestic violence case
+  [5/t6] russia (main russia): Russian government establishes Kolyma priority development territory
+  [5/t6] russia (main russia): FSB detains agent in Crimea for passing military data to SBU
+  [5/t6] armenia (main armenia): Armenia uncovers illegal mining case in Yeghvard
+  [5/t6] armenia (main armenia): Armenian opposition proposes simplifying EU medicine registration
+  [5/t6] armenia (main armenia): Armenia moves to raise conscription age to 32
+  [5/t6] armenia (main armenia): Armenian and Cambodian prime ministers discuss trade cooperation
+  [5/t6] russia (main russia): Shortage of epilepsy drug Depakine reported in Russia
+  [5/t6] russia (main russia): Bill grants Russian Central Bank access to citizen tax data
+--- 20:00: 17 stories, 3772 characters
+  [6/t8] armenia (main armenia): Armenia expands European military cooperation after losing CSTO voting rights
+  [6/t8] armenia (main armenia): Armenian opposition criticizes government over political persecution
+  [6/t8] armenia (main armenia): Criminal case against infiltrated Azerbaijani soldier sent to court
+  [6/t8] armenia (main armenia): Georgia extradites fugitive wanted in Armenia for murder
+  [7/t7] iran_war (main iran_war): Third oil tanker catches fire after hitting naval mine in Strait of Hormuz
+  [7/t7] ukraine_war (main ukraine_war): Russia reports record-breaking interception of 1,300 Ukrainian drones
+  [6/t7] russia (main russia): Convicted Nemtsov killers reportedly freed from prison
+  [6/t7] russia (main russia): Woman arrested in Moscow for car bombing targeting former Ukrainian official
+  [6/t7] armenia (main armenia): Armenian officials arrested in bribery investigation
+  [6/t7] russia (main russia): Estonia to close Russian border crossings after sabotage attempt
+  [6/t7] russia (main russia): EU approves new Russia sanctions targeting 140 people and entities
+  [6/t7] armenia (main armenia): Turkey launches regular cargo flights to Armenia
+  [6/t7] armenia (main armenia): Armenia and Turkey begin implementing agreements
+  [6/t7] russia (main russia): Yekaterinburg architect sentenced to 12 years over enlistment office fire
+  [6/t7] russia (main russia): Russia proposes nonaggression pacts with European nations amid peace talks
+  [5/t7] armenia (main armenia): Former employees of Yerevan brandy factory protest recent layoffs
+  [5/t7] armenia (main armenia): Armenian parliament approves quadrupling fines for traffic violations
+--- 09:00: 17 stories, 3726 characters
+  [6/t8] armenia (main armenia): Azerbaijan to increase defense spending to 8.8 billion manats
+  [7/t7] ukraine_war (main ukraine_war): Ukraine strikes Crimea bridge causing partial collapse
+  [6/t7] russia (main russia): Japan scrambles jets after Russian aircraft enter airspace
+  [6/t7] russia (main russia): Estonia's Kallas proposes collecting data on Russian military for sanctions
+  [6/t7] russia (main russia): Putin decree allows state to seize dead Russians unclaimed cash and gold
+  [6/t7] russia (main russia): Woman detained in Moscow over car bombing
+  [6/t7] armenia (main armenia): Armenian export volumes fall amid Russian restrictions
+  [6/t7] russia (main russia): Convicted killers of Boris Nemtsov reportedly released early
+  [6/t7] russia (main russia): EU imposes new sanctions on Russian oil refineries and banks
+  [5/t7] armenia (main armenia): Armenian parliament discusses new constitution
+  [5/t7] armenia (main armenia): Supreme Judicial Council suspends judge Masis Melkonyan
+  [5/t6] russia (main russia): Russian Foreign Minister Lavrov arrives in the Philippines for summit
+  [5/t6] russia (main russia): Five European nations call for stronger action on Russian crypto assets
+  [5/t6] armenia (main armenia): Azerbaijan and UK foreign ministers discuss Armenia normalization
+  [5/t6] armenia (main armenia): Azerbaijani Foreign Minister discusses peace process with UK Foreign Secretary
+  [5/t6] armenia (main armenia): Armenian officials arrested for bribery
+  [5/t6] armenia (main armenia): Mirzoyan discusses regional connectivity in Brussels
+--- 14:00: 14 stories, 3783 characters
+  [7/t7] politics_conflicts (main politics_conflicts): Mongolian President Khurelsukh resigns amid corruption scandal
+  [6/t7] russia (main russia): Journalist regains consciousness after car bombing in Moscow
+  [6/t7] armenia (main armenia): Azerbaijani soldier who illegally crossed Armenia border fires shots and threatens family
+  [6/t7] armenia (main armenia): German Foreign Minister visits Baku and Yerevan, criticizing Russian influence
+  [5/t7] armenia (main armenia): Armenian-Russian working group holds first meeting on railway concession
+  [5/t7] armenia (main armenia): Corruption case against Ruzanna Khachatryan sent to Anti-Corruption Court
+  [5/t6] armenia (main armenia): Armenia's Human Rights Defender raises concerns over stray dog attacks
+  [5/t6] russia (main russia): EU expected to approve 22nd sanctions package against Russia in December
+  [5/t6] armenia (main armenia): Yerevan court president authorizes wiretapping operations against judge Masis Melkonyan
+  [5/t6] armenia (main armenia): Man arrested in Syunik region for stealing 13 tons of gold ore
+  [5/t6] armenia (main armenia): Ararat Mirzoyan meets Romanian Foreign Minister Dan Neculanescu in Bucharest
+  [5/t6] armenia (main armenia): Armenian Foreign Minister meets NATO Special Representative in Brussels
+  [5/t6] armenia (main armenia): Armenian Economy Minister Gevorg Papoyan will travel to Moscow to attend Eurasian Economic Union consultations
+  [5/t6] armenia (main armenia): CSI President to testify at Tom Lantos Commission hearing on Artsakh
+--- 20:00: 15 stories, 3737 characters
+  [7/t9] armenia (main armenia): Armenia signals readiness to open border crossing with Turkey
+  [6/t8] armenia (main armenia): Iran aims to transform Norduz border crossing into major trade hub
+  [6/t8] armenia (main armenia): Armenian investigators detail charges against Azerbaijani soldier for border crossing and shooting
+  [7/t7] ukraine_war (main ukraine_war): Russian ballistic missiles strike Kyiv main bridges and infrastructure
+  [7/t7] ukraine_war (main ukraine_war): Casualties from Russian strike on Zaporizhzhia rise to 42
+  [7/t7] politics_conflicts (main politics_conflicts): Turkey places pro-opposition Sozcu TV under state management
+  [7/t7] ukraine_war (main ukraine_war): Death toll from Russian strike in Kamyshevakha rises to 72
+  [6/t7] russia (main russia): Deutsche Bank accused of shielding Russian oligarchs from sanctions
+  [6/t7] russia (main russia): Slovakia and Hungary secure US extensions to purchase Russian oil
+  [6/t7] armenia (main armenia): European diplomats emphasize Armenian and Azerbaijani independence and European ties
+  [6/t7] armenia (main armenia): Armenian parliament speaker discusses border checkpoints and constitutional changes
+  [6/t7] russia (main russia): Russia arrests Japanese journalist on espionage charges
+  [5/t7] armenia (main armenia): Armenian lawmakers debate prison death of Arsen Gevorgyan
+  [5/t7] armenia (main armenia): Armenia proposes ending amnesties for sexual offenses against children
+  [5/t7] armenia (main armenia): Armenia and Russia hold first round of talks on railway concession
+--- now 22:53 (window still open): 19 stories, 3886 characters
+  [7/t8] russia (main russia): Russia demands NATO withdraw from large parts of Eastern Europe
+  [7/t7] ukraine_war (main ukraine_war): UK to provide over 1,000 additional air defense missiles to Ukraine
+  [5/t7] armenia (main armenia): Armenia and Russia launch practical negotiations on railway concession
+  [5/t7] armenia (main armenia): Armenia permanent population reaches 3.11 million
+  [5/t7] armenia (main armenia): Analyst warns Russia may seek strategic influence over new regional roads
+  [5/t6] russia (main russia): Russian authorities search Lenkom theater in financial probe
+  [5/t6] russia (main russia): Russian military transport plane crashes near Kemerovo
+  [5/t6] russia (main russia): Russian State Duma passes bill to raise military service age for women
+  [5/t6] armenia (main armenia): Armenia Justice Ministry proposes higher compensation for insults and defamation
+  [5/t6] armenia (main armenia): Armenian environmental authorities suspend catalyst recycling plant in Hrazdan
+  [5/t6] russia (main russia): Russia proposes bill to shield war participants from bankruptcy seizure
+  [5/t6] russia (main russia): Estonian president proposes analysis of border closure with Russia
+  [5/t6] armenia (main armenia): Armenia suspends illegal water extraction at Armavir fish farm
+  [5/t6] armenia (main armenia): Bulgarian businessman allegedly bypasses Armenian gambling ad ban
+  [5/t6] russia (main russia): Russia and China expect record trade turnover in 2026
+  [4/t6] armenia (main armenia): Armenian administrative court accepts electoral commission lawsuit against Nikoghosyan
+  [4/t6] armenia (main armenia): Armenia to tighten traffic fines and penalty points in Yerevan
+  [4/t6] armenia (main armenia): Levon Zurabyan suggests Armen Grigoryan executes western-oriented shift
+  [4/t6] armenia (main armenia): Armenian lawyer calls re-arrest of detainee illegal
+
+##### wars_econ0 / armenia_only: 95 stories in 7 digests (4, 14, 16, 19, 14, 15, 13), 79 cut for length
+--- 09:00: 4 stories, 950 characters
+  [5/t7] armenia (main armenia): Leaders of three Armenian political parties oppose constitutional amendments
+  [5/t6] armenia (main armenia): Armenian government salary increases draw criticism amid pension limits
+  [5/t6] armenia (main armenia): Physical altercation occurs on public television in Armenia
+  [5/t6] armenia (main armenia): Turkish studies professor warns Iran could take harsh action over Syunik
+--- 14:00: 14 stories, 3372 characters
+  [6/t8] armenia (main armenia): Artur Vagharshyan elected deputy chairman of Armenia's Constitutional Court
+  [6/t7] armenia (main armenia): Romania to launch Black Sea security talks with Azerbaijan, Armenia and Turkey
+  [5/t7] armenia (main armenia): Turkish Cargo operates first regular cargo flight between Istanbul and Yerevan
+  [5/t6] armenia (main armenia): Armenian investigative committee concludes domestic violence case
+  [5/t6] armenia (main armenia): Armenia uncovers illegal mining case in Yeghvard
+  [5/t6] armenia (main armenia): Armenian opposition proposes simplifying EU medicine registration
+  [5/t6] armenia (main armenia): Armenia moves to raise conscription age to 32
+  [5/t6] armenia (main armenia): Armenian and Cambodian prime ministers discuss trade cooperation
+  [5/t6] armenia (main armenia): Armenian-Azerbaijani civil society talks scheduled before year-end
+  [5/t6] armenia (main armenia): Armenian opposition holds parliamentary hearings on democracy
+  [5/t6] armenia (main armenia): Armenian ombudsman representatives note systemic issues at Dzorak center
+  [5/t6] armenia (main armenia): Armenia receives large volumes of gas and goods from Russia
+  [4/t6] armenia (main armenia): Edgar Ghazaryan calls for Prime Minister Nikol Pashinyan's arrest during hearings
+  [4/t6] armenia (main armenia): Armenia's Television and Radio Commission expresses concern over studio brawl footage
+--- 20:00: 16 stories, 3794 characters
+  [6/t8] armenia (main armenia): Armenia expands European military cooperation after losing CSTO voting rights
+  [6/t8] armenia (main armenia): Armenian opposition criticizes government over political persecution
+  [6/t8] armenia (main armenia): Criminal case against infiltrated Azerbaijani soldier sent to court
+  [6/t8] armenia (main armenia): Georgia extradites fugitive wanted in Armenia for murder
+  [6/t7] armenia (main armenia): Armenian officials arrested in bribery investigation
+  [6/t7] armenia (main armenia): Turkey launches regular cargo flights to Armenia
+  [6/t7] armenia (main armenia): Armenia and Turkey begin implementing agreements
+  [5/t7] armenia (main armenia): Former employees of Yerevan brandy factory protest recent layoffs
+  [5/t7] armenia (main armenia): Armenian parliament approves quadrupling fines for traffic violations
+  [5/t7] armenia (main armenia): Sasun Badoyan reports police searched his home and confiscated pension funds
+  [5/t7] armenia (main armenia): Armenia extends Kashatagh housing program deadline to July 2027
+  [5/t7] armenia (main armenia): Armenian parliamentary committee approves stricter penalties for traffic congestion violations
+  [5/t7] armenia (main armenia): Dilijan initiatives in Armenia receive international recognition from World Tourism Forum
+  [5/t7] armenia (main armenia): Armenian citizens without completed military service permitted to work as police or rescuers
+  [5/t7] armenia (main armenia): Armenian opposition figures criticize government over political prosecutions
+  [5/t7] armenia (main armenia): Armenian Minister Zhanna Andreasyan defends removal of military service exemptions
+--- 09:00: 19 stories, 3772 characters
+  [6/t8] armenia (main armenia): Azerbaijan to increase defense spending to 8.8 billion manats
+  [6/t7] armenia (main armenia): Armenian export volumes fall amid Russian restrictions
+  [5/t7] armenia (main armenia): Armenian parliament discusses new constitution
+  [5/t7] armenia (main armenia): Supreme Judicial Council suspends judge Masis Melkonyan
+  [5/t6] armenia (main armenia): Azerbaijan and UK foreign ministers discuss Armenia normalization
+  [5/t6] armenia (main armenia): Azerbaijani Foreign Minister discusses peace process with UK Foreign Secretary
+  [5/t6] armenia (main armenia): Armenian officials arrested for bribery
+  [5/t6] armenia (main armenia): Mirzoyan discusses regional connectivity in Brussels
+  [5/t6] armenia (main armenia): Mirzoyan warns of foreign interference against Armenian sovereignty
+  [5/t6] armenia (main armenia): Armenian and Turkish Foreign Ministers meet in Brussels
+  [5/t6] armenia (main armenia): Armenian students and teachers to train at Russian nuclear institute
+  [5/t6] armenia (main armenia): Armenia and US organizations discuss defense innovation
+  [5/t6] armenia (main armenia): Pashinyan says Armenia's EU path could take 20 years
+  [5/t6] armenia (main armenia): Defense team appeals arrest of Armenian opposition leader Samvel Karapetyan
+  [5/t6] armenia (main armenia): Russian agricultural exports to Armenia increase by 15 percent
+  [4/t6] armenia (main armenia): Illegally held weapons discovered in Armenia's Tavush region
+  [4/t6] armenia (main armenia): Armenia launches media literacy week to improve critical thinking
+  [4/t6] armenia (main armenia): Water level of Lake Sevan drops by 1 centimeter
+  [4/t6] armenia (main armenia): Lusine Bekchyan dismissed as assistant to Armenian NA President
+--- 14:00: 14 stories, 3744 characters
+  [6/t7] armenia (main armenia): Azerbaijani soldier who illegally crossed Armenia border fires shots and threatens family
+  [6/t7] armenia (main armenia): German Foreign Minister visits Baku and Yerevan, criticizing Russian influence
+  [5/t7] armenia (main armenia): Armenian-Russian working group holds first meeting on railway concession
+  [5/t7] armenia (main armenia): Corruption case against Ruzanna Khachatryan sent to Anti-Corruption Court
+  [5/t6] armenia (main armenia): Armenia's Human Rights Defender raises concerns over stray dog attacks
+  [5/t6] armenia (main armenia): Yerevan court president authorizes wiretapping operations against judge Masis Melkonyan
+  [5/t6] armenia (main armenia): Man arrested in Syunik region for stealing 13 tons of gold ore
+  [5/t6] armenia (main armenia): Ararat Mirzoyan meets Romanian Foreign Minister Dan Neculanescu in Bucharest
+  [5/t6] armenia (main armenia): Armenian Foreign Minister meets NATO Special Representative in Brussels
+  [5/t6] armenia (main armenia): Armenian Economy Minister Gevorg Papoyan will travel to Moscow to attend Eurasian Economic Union consultations
+  [5/t6] armenia (main armenia): CSI President to testify at Tom Lantos Commission hearing on Artsakh
+  [5/t6] armenia (main armenia): Armenian Education Minister explores cooperation with Dubna nuclear institute
+  [5/t6] armenia (main armenia): Armenians in New York secure removal of Azerbaijani flag from Manhattan park
+  [5/t6] armenia (main armenia): Edgar Muradyan released from pre-trial detention in Armenia
+--- 20:00: 15 stories, 3700 characters
+  [7/t9] armenia (main armenia): Armenia signals readiness to open border crossing with Turkey
+  [6/t8] armenia (main armenia): Iran aims to transform Norduz border crossing into major trade hub
+  [6/t8] armenia (main armenia): Armenian investigators detail charges against Azerbaijani soldier for border crossing and shooting
+  [6/t7] armenia (main armenia): European diplomats emphasize Armenian and Azerbaijani independence and European ties
+  [6/t7] armenia (main armenia): Armenian parliament speaker discusses border checkpoints and constitutional changes
+  [5/t7] armenia (main armenia): Armenian lawmakers debate prison death of Arsen Gevorgyan
+  [5/t7] armenia (main armenia): Armenia proposes ending amnesties for sexual offenses against children
+  [5/t7] armenia (main armenia): Armenia and Russia hold first round of talks on railway concession
+  [5/t7] armenia (main armenia): Strong Armenia Party vows to oppose constitutional changes
+  [5/t7] armenia (main armenia): Armenian FM highlights export growth driven by EU trade preferences
+  [5/t7] armenia (main armenia): Armenia proposes military service exemption for long-serving police and rescuers
+  [5/t7] armenia (main armenia): Armenian Interior Ministry sets protection of minors as political priority
+  [5/t7] armenia (main armenia): Iran announces readiness to build oil refinery in Armenia
+  [5/t7] armenia (main armenia): Armenian parliament discusses stricter traffic rules and electric scooter regulations
+  [5/t6] armenia (main armenia): Armenian Economy Minister to travel to Moscow for EAEU talks
+--- now 22:53 (window still open): 13 stories, 2519 characters
+  [5/t7] armenia (main armenia): Armenia and Russia launch practical negotiations on railway concession
+  [5/t7] armenia (main armenia): Armenia permanent population reaches 3.11 million
+  [5/t7] armenia (main armenia): Analyst warns Russia may seek strategic influence over new regional roads
+  [5/t6] armenia (main armenia): Armenia Justice Ministry proposes higher compensation for insults and defamation
+  [5/t6] armenia (main armenia): Armenian environmental authorities suspend catalyst recycling plant in Hrazdan
+  [5/t6] armenia (main armenia): Armenia suspends illegal water extraction at Armavir fish farm
+  [5/t6] armenia (main armenia): Bulgarian businessman allegedly bypasses Armenian gambling ad ban
+  [4/t6] armenia (main armenia): Armenian administrative court accepts electoral commission lawsuit against Nikoghosyan
+  [4/t6] armenia (main armenia): Armenia to tighten traffic fines and penalty points in Yerevan
+  [4/t6] armenia (main armenia): Levon Zurabyan suggests Armen Grigoryan executes western-oriented shift
+  [4/t6] armenia (main armenia): Armenian lawyer calls re-arrest of detainee illegal
+  [4/t6] armenia (main armenia): Armenian lawmakers consider legal amendments for mental health cases
+  [4/t6] armenia (main armenia): Andranik Piloyan remains National Hero despite corruption conviction
+
+##### wars_econ0 / owner: 15 stories in 10 digests (0, 0, 0, 0, 0, 5, 0, 3, 7, 0), 0 cut for length
+--- 06:00: 0 stories, 79 characters
+--- 09:00: 0 stories, 78 characters
+--- 12:00: 0 stories, 80 characters
+--- 18:00: 0 stories, 79 characters
+--- 22:00: 0 stories, 78 characters
+--- 06:00: 5 stories, 1158 characters
+  [5/t8] c3 (main c3): Melbourne skyscraper retrofitted with 1,391 solar panels
+  [5/t7] c3 (main c3): Reserve Bank of Australia minutes show majority voted to raise rates
+  [5/t7] c3 (main c3): Australia increases third-year holiday maker visa cap for backpackers
+  [4/t6] c3 (main c3): Police search Melbourne home after theft of Melbourne Cup trophies
+  [3/t6] c3 (main c3): Australian Coalition takes lead in two-party preferred poll
+--- 09:00: 0 stories, 78 characters
+--- 12:00: 3 stories, 808 characters
+  [6/t7] c3 (main c3): Melbourne Cup racehorse body found dumped in Sydney skip bin
+  [5/t7] c3 (main c3): Sydney doctor leaves position amid accusations of antisemitism
+  [5/t6] c3 (main c3): Australian investors granted direct access to Anthropic IPO
+--- 18:00: 7 stories, 1654 characters
+  [6/t7] c5 (main c5): Fed official Musalem signals need for multiple interest rate hikes
+  [5/t7] c4 (main c4): US plans to discuss energy export routes and TRIPP project with Turkmenistan
+  [5/t7] c5 (main c5): European Commission projects robust eurozone economic growth
+  [5/t6] c5 (main c5): Angola central bank cuts key interest rate to 10-year low
+  [5/t6] c5 (main c5): Russian Finance Ministry schedules federal loan bond auctions
+  [5/t6] c3 (main c3): Australian crossbenchers criticize Labor election funding changes
+  [4/t6] c4 (main c4): Armenian parliamentary speaker notes growing optimism over TRIPP project
+--- 22:00: 0 stories, 78 characters
+
+##### wars_econ0_amru1 / all_six: 108 stories in 7 digests (14, 15, 17, 17, 14, 16, 15), 132 cut for length
+--- 09:00: 14 stories, 3175 characters
+  [6/t7] russia (main russia): Estonia prepares cloud infrastructure for government continuity
+  [6/t7] russia (main russia): Russian air defenses intercept dozens of drones targeting Moscow
+  [5/t6] russia (main russia): Georgia and Russia prepare for special representatives meeting
+  [5/t6] russia (main russia): South Korea imports record amount of Russian liquefied natural gas
+  [5/t6] russia (main russia): FSB suspects rapper Kievstoner of role in drone attack preparations
+  [5/t6] russia (main russia): Transport restricted in Yaroslavl after drone interceptions
+  [5/t6] russia (main russia): Russian Finance Ministry opposes windfall tax extension for banks
+  [5/t6] russia (main russia): Wealthy Russians reportedly imagine post-Putin oligarchy
+  [5/t6] russia (main russia): Rosstat estimates Russia third quarter GDP grew by 1 percent
+  [5/t6] russia (main russia): Russia and Iran discuss gas supplies via Azerbaijan
+  [5/t6] armenia (main armenia): Armenian government salary increases draw criticism amid pension limits
+  [5/t6] armenia (main armenia): Physical altercation occurs on public television in Armenia
+  [5/t6] armenia (main armenia): Leaders of three Armenian political parties oppose constitutional amendments
+  [5/t6] armenia (main armenia): Turkish studies professor warns Iran could take harsh action over Syunik
+--- 14:00: 15 stories, 3818 characters
+  [6/t7] russia (main russia): Convicts imprisoned for Boris Nemtsov's murder reportedly released early to fight in Ukraine
+  [6/t7] russia (main russia): European Union adopts new sanctions package targeting 145 individuals and entities linked to Russia
+  [6/t7] armenia (main armenia): Romania to launch Black Sea security talks with Azerbaijan, Armenia and Turkey
+  [6/t7] armenia (main armenia): Artur Vagharshyan elected deputy chairman of Armenia's Constitutional Court
+  [5/t6] armenia (main armenia): Turkish Cargo operates first regular cargo flight between Istanbul and Yerevan
+  [5/t6] russia (main russia): Kremlin urges United Russia lawmakers to prepare for end of war
+  [5/t6] armenia (main armenia): Armenian investigative committee concludes domestic violence case
+  [5/t6] russia (main russia): Russian government establishes Kolyma priority development territory
+  [5/t6] russia (main russia): FSB detains agent in Crimea for passing military data to SBU
+  [5/t6] armenia (main armenia): Armenia uncovers illegal mining case in Yeghvard
+  [5/t6] armenia (main armenia): Armenian opposition proposes simplifying EU medicine registration
+  [5/t6] armenia (main armenia): Armenia moves to raise conscription age to 32
+  [5/t6] armenia (main armenia): Armenian and Cambodian prime ministers discuss trade cooperation
+  [5/t6] russia (main russia): Shortage of epilepsy drug Depakine reported in Russia
+  [5/t6] russia (main russia): Bill grants Russian Central Bank access to citizen tax data
+--- 20:00: 17 stories, 3857 characters
+  [7/t7] iran_war (main iran_war): Third oil tanker catches fire after hitting naval mine in Strait of Hormuz
+  [7/t7] ukraine_war (main ukraine_war): Russia reports record-breaking interception of 1,300 Ukrainian drones
+  [6/t7] russia (main russia): Convicted Nemtsov killers reportedly freed from prison
+  [6/t7] russia (main russia): Woman arrested in Moscow for car bombing targeting former Ukrainian official
+  [6/t7] armenia (main armenia): Armenian officials arrested in bribery investigation
+  [6/t7] russia (main russia): Estonia to close Russian border crossings after sabotage attempt
+  [6/t7] russia (main russia): EU approves new Russia sanctions targeting 140 people and entities
+  [6/t7] armenia (main armenia): Turkey launches regular cargo flights to Armenia
+  [6/t7] armenia (main armenia): Armenia and Turkey begin implementing agreements
+  [6/t7] armenia (main armenia): Armenia expands European military cooperation after losing CSTO voting rights
+  [6/t7] armenia (main armenia): Armenian opposition criticizes government over political persecution
+  [6/t7] armenia (main armenia): Criminal case against infiltrated Azerbaijani soldier sent to court
+  [6/t7] russia (main russia): Yekaterinburg architect sentenced to 12 years over enlistment office fire
+  [6/t7] armenia (main armenia): Georgia extradites fugitive wanted in Armenia for murder
+  [6/t7] russia (main russia): Russia proposes nonaggression pacts with European nations amid peace talks
+  [5/t6] armenia (main armenia): Armenian deputies and French ambassador discuss peace process
+  [5/t6] russia (main russia): Russian firms to participate in APEC business summit
+--- 09:00: 17 stories, 3751 characters
+  [7/t7] ukraine_war (main ukraine_war): Ukraine strikes Crimea bridge causing partial collapse
+  [6/t7] russia (main russia): Japan scrambles jets after Russian aircraft enter airspace
+  [6/t7] russia (main russia): Estonia's Kallas proposes collecting data on Russian military for sanctions
+  [6/t7] russia (main russia): Putin decree allows state to seize dead Russians unclaimed cash and gold
+  [6/t7] russia (main russia): Woman detained in Moscow over car bombing
+  [6/t7] armenia (main armenia): Armenian export volumes fall amid Russian restrictions
+  [6/t7] russia (main russia): Convicted killers of Boris Nemtsov reportedly released early
+  [6/t7] russia (main russia): EU imposes new sanctions on Russian oil refineries and banks
+  [6/t7] armenia (main armenia): Azerbaijan to increase defense spending to 8.8 billion manats
+  [5/t6] russia (main russia): Russian Foreign Minister Lavrov arrives in the Philippines for summit
+  [5/t6] russia (main russia): Five European nations call for stronger action on Russian crypto assets
+  [5/t6] armenia (main armenia): Azerbaijan and UK foreign ministers discuss Armenia normalization
+  [5/t6] armenia (main armenia): Azerbaijani Foreign Minister discusses peace process with UK Foreign Secretary
+  [5/t6] armenia (main armenia): Armenian officials arrested for bribery
+  [5/t6] armenia (main armenia): Mirzoyan discusses regional connectivity in Brussels
+  [5/t6] armenia (main armenia): Armenian parliament discusses new constitution
+  [5/t6] armenia (main armenia): Mirzoyan warns of foreign interference against Armenian sovereignty
+--- 14:00: 14 stories, 3783 characters
+  [7/t7] politics_conflicts (main politics_conflicts): Mongolian President Khurelsukh resigns amid corruption scandal
+  [6/t7] russia (main russia): Journalist regains consciousness after car bombing in Moscow
+  [6/t7] armenia (main armenia): Azerbaijani soldier who illegally crossed Armenia border fires shots and threatens family
+  [6/t7] armenia (main armenia): German Foreign Minister visits Baku and Yerevan, criticizing Russian influence
+  [5/t6] armenia (main armenia): Armenia's Human Rights Defender raises concerns over stray dog attacks
+  [5/t6] armenia (main armenia): Armenian-Russian working group holds first meeting on railway concession
+  [5/t6] russia (main russia): EU expected to approve 22nd sanctions package against Russia in December
+  [5/t6] armenia (main armenia): Yerevan court president authorizes wiretapping operations against judge Masis Melkonyan
+  [5/t6] armenia (main armenia): Man arrested in Syunik region for stealing 13 tons of gold ore
+  [5/t6] armenia (main armenia): Ararat Mirzoyan meets Romanian Foreign Minister Dan Neculanescu in Bucharest
+  [5/t6] armenia (main armenia): Armenian Foreign Minister meets NATO Special Representative in Brussels
+  [5/t6] armenia (main armenia): Corruption case against Ruzanna Khachatryan sent to Anti-Corruption Court
+  [5/t6] armenia (main armenia): Armenian Economy Minister Gevorg Papoyan will travel to Moscow to attend Eurasian Economic Union consultations
+  [5/t6] armenia (main armenia): CSI President to testify at Tom Lantos Commission hearing on Artsakh
+--- 20:00: 16 stories, 3801 characters
+  [7/t8] armenia (main armenia): Armenia signals readiness to open border crossing with Turkey
+  [7/t7] ukraine_war (main ukraine_war): Russian ballistic missiles strike Kyiv main bridges and infrastructure
+  [7/t7] ukraine_war (main ukraine_war): Casualties from Russian strike on Zaporizhzhia rise to 42
+  [7/t7] politics_conflicts (main politics_conflicts): Turkey places pro-opposition Sozcu TV under state management
+  [7/t7] ukraine_war (main ukraine_war): Death toll from Russian strike in Kamyshevakha rises to 72
+  [6/t7] armenia (main armenia): Iran aims to transform Norduz border crossing into major trade hub
+  [6/t7] russia (main russia): Deutsche Bank accused of shielding Russian oligarchs from sanctions
+  [6/t7] armenia (main armenia): Armenian investigators detail charges against Azerbaijani soldier for border crossing and shooting
+  [6/t7] russia (main russia): Slovakia and Hungary secure US extensions to purchase Russian oil
+  [6/t7] armenia (main armenia): European diplomats emphasize Armenian and Azerbaijani independence and European ties
+  [6/t7] armenia (main armenia): Armenian parliament speaker discusses border checkpoints and constitutional changes
+  [6/t7] russia (main russia): Russia arrests Japanese journalist on espionage charges
+  [5/t6] russia (main russia): Hydra darknet market co-founder sentenced to 10 years in prison
+  [5/t6] armenia (main armenia): Armenian Economy Minister to travel to Moscow for EAEU talks
+  [5/t6] russia (main russia): Russia condemns exclusion of figure skaters from Finnish Grand Prix
+  [5/t6] russia (main russia): FSB prevents drone attacks in southern Russia
+--- now 22:53 (window still open): 15 stories, 3130 characters
+  [7/t8] russia (main russia): Russia demands NATO withdraw from large parts of Eastern Europe
+  [7/t7] ukraine_war (main ukraine_war): UK to provide over 1,000 additional air defense missiles to Ukraine
+  [5/t6] russia (main russia): Russian authorities search Lenkom theater in financial probe
+  [5/t6] russia (main russia): Russian military transport plane crashes near Kemerovo
+  [5/t6] russia (main russia): Russian State Duma passes bill to raise military service age for women
+  [5/t6] armenia (main armenia): Armenia and Russia launch practical negotiations on railway concession
+  [5/t6] armenia (main armenia): Armenia Justice Ministry proposes higher compensation for insults and defamation
+  [5/t6] armenia (main armenia): Armenian environmental authorities suspend catalyst recycling plant in Hrazdan
+  [5/t6] russia (main russia): Russia proposes bill to shield war participants from bankruptcy seizure
+  [5/t6] russia (main russia): Estonian president proposes analysis of border closure with Russia
+  [5/t6] armenia (main armenia): Armenia suspends illegal water extraction at Armavir fish farm
+  [5/t6] armenia (main armenia): Armenia permanent population reaches 3.11 million
+  [5/t6] armenia (main armenia): Analyst warns Russia may seek strategic influence over new regional roads
+  [5/t6] armenia (main armenia): Bulgarian businessman allegedly bypasses Armenian gambling ad ban
+  [5/t6] russia (main russia): Russia and China expect record trade turnover in 2026
+
+##### wars_econ0_amru1 / armenia_only: 84 stories in 7 digests (4, 12, 16, 15, 14, 16, 7), 45 cut for length
+--- 09:00: 4 stories, 950 characters
+  [5/t6] armenia (main armenia): Armenian government salary increases draw criticism amid pension limits
+  [5/t6] armenia (main armenia): Physical altercation occurs on public television in Armenia
+  [5/t6] armenia (main armenia): Leaders of three Armenian political parties oppose constitutional amendments
+  [5/t6] armenia (main armenia): Turkish studies professor warns Iran could take harsh action over Syunik
+--- 14:00: 12 stories, 2963 characters
+  [6/t7] armenia (main armenia): Romania to launch Black Sea security talks with Azerbaijan, Armenia and Turkey
+  [6/t7] armenia (main armenia): Artur Vagharshyan elected deputy chairman of Armenia's Constitutional Court
+  [5/t6] armenia (main armenia): Turkish Cargo operates first regular cargo flight between Istanbul and Yerevan
+  [5/t6] armenia (main armenia): Armenian investigative committee concludes domestic violence case
+  [5/t6] armenia (main armenia): Armenia uncovers illegal mining case in Yeghvard
+  [5/t6] armenia (main armenia): Armenian opposition proposes simplifying EU medicine registration
+  [5/t6] armenia (main armenia): Armenia moves to raise conscription age to 32
+  [5/t6] armenia (main armenia): Armenian and Cambodian prime ministers discuss trade cooperation
+  [5/t6] armenia (main armenia): Armenian-Azerbaijani civil society talks scheduled before year-end
+  [5/t6] armenia (main armenia): Armenian opposition holds parliamentary hearings on democracy
+  [5/t6] armenia (main armenia): Armenian ombudsman representatives note systemic issues at Dzorak center
+  [5/t6] armenia (main armenia): Armenia receives large volumes of gas and goods from Russia
+--- 20:00: 16 stories, 3733 characters
+  [6/t7] armenia (main armenia): Armenian officials arrested in bribery investigation
+  [6/t7] armenia (main armenia): Turkey launches regular cargo flights to Armenia
+  [6/t7] armenia (main armenia): Armenia and Turkey begin implementing agreements
+  [6/t7] armenia (main armenia): Armenia expands European military cooperation after losing CSTO voting rights
+  [6/t7] armenia (main armenia): Armenian opposition criticizes government over political persecution
+  [6/t7] armenia (main armenia): Criminal case against infiltrated Azerbaijani soldier sent to court
+  [6/t7] armenia (main armenia): Georgia extradites fugitive wanted in Armenia for murder
+  [5/t6] armenia (main armenia): Armenian deputies and French ambassador discuss peace process
+  [5/t6] armenia (main armenia): Armenian defense minister and EU ambassador discuss defense cooperation
+  [5/t6] armenia (main armenia): Armenia extends housing certificate deadline for displaced persons from Artsakh
+  [5/t6] armenia (main armenia): Armenia's CEC accredits NGOs to observe local elections
+  [5/t6] armenia (main armenia): Armenian MP raises concerns over opposition prosecutions
+  [5/t6] armenia (main armenia): Former employees of Yerevan brandy factory protest recent layoffs
+  [5/t6] armenia (main armenia): Armenian Investigative Committee Chairman visits Iran
+  [5/t6] armenia (main armenia): EU adds Russian agency linked to Armenia influence operations to sanctions list
+  [5/t6] armenia (main armenia): Lawyer for imprisoned former Karabakh parliament speaker arrested in Azerbaijan
+--- 09:00: 15 stories, 2920 characters
+  [6/t7] armenia (main armenia): Armenian export volumes fall amid Russian restrictions
+  [6/t7] armenia (main armenia): Azerbaijan to increase defense spending to 8.8 billion manats
+  [5/t6] armenia (main armenia): Azerbaijan and UK foreign ministers discuss Armenia normalization
+  [5/t6] armenia (main armenia): Azerbaijani Foreign Minister discusses peace process with UK Foreign Secretary
+  [5/t6] armenia (main armenia): Armenian officials arrested for bribery
+  [5/t6] armenia (main armenia): Mirzoyan discusses regional connectivity in Brussels
+  [5/t6] armenia (main armenia): Armenian parliament discusses new constitution
+  [5/t6] armenia (main armenia): Mirzoyan warns of foreign interference against Armenian sovereignty
+  [5/t6] armenia (main armenia): Supreme Judicial Council suspends judge Masis Melkonyan
+  [5/t6] armenia (main armenia): Armenian and Turkish Foreign Ministers meet in Brussels
+  [5/t6] armenia (main armenia): Armenian students and teachers to train at Russian nuclear institute
+  [5/t6] armenia (main armenia): Armenia and US organizations discuss defense innovation
+  [5/t6] armenia (main armenia): Pashinyan says Armenia's EU path could take 20 years
+  [5/t6] armenia (main armenia): Defense team appeals arrest of Armenian opposition leader Samvel Karapetyan
+  [5/t6] armenia (main armenia): Russian agricultural exports to Armenia increase by 15 percent
+--- 14:00: 14 stories, 3744 characters
+  [6/t7] armenia (main armenia): Azerbaijani soldier who illegally crossed Armenia border fires shots and threatens family
+  [6/t7] armenia (main armenia): German Foreign Minister visits Baku and Yerevan, criticizing Russian influence
+  [5/t6] armenia (main armenia): Armenia's Human Rights Defender raises concerns over stray dog attacks
+  [5/t6] armenia (main armenia): Armenian-Russian working group holds first meeting on railway concession
+  [5/t6] armenia (main armenia): Yerevan court president authorizes wiretapping operations against judge Masis Melkonyan
+  [5/t6] armenia (main armenia): Man arrested in Syunik region for stealing 13 tons of gold ore
+  [5/t6] armenia (main armenia): Ararat Mirzoyan meets Romanian Foreign Minister Dan Neculanescu in Bucharest
+  [5/t6] armenia (main armenia): Armenian Foreign Minister meets NATO Special Representative in Brussels
+  [5/t6] armenia (main armenia): Corruption case against Ruzanna Khachatryan sent to Anti-Corruption Court
+  [5/t6] armenia (main armenia): Armenian Economy Minister Gevorg Papoyan will travel to Moscow to attend Eurasian Economic Union consultations
+  [5/t6] armenia (main armenia): CSI President to testify at Tom Lantos Commission hearing on Artsakh
+  [5/t6] armenia (main armenia): Armenian Education Minister explores cooperation with Dubna nuclear institute
+  [5/t6] armenia (main armenia): Armenians in New York secure removal of Azerbaijani flag from Manhattan park
+  [5/t6] armenia (main armenia): Edgar Muradyan released from pre-trial detention in Armenia
+--- 20:00: 16 stories, 3786 characters
+  [7/t8] armenia (main armenia): Armenia signals readiness to open border crossing with Turkey
+  [6/t7] armenia (main armenia): Iran aims to transform Norduz border crossing into major trade hub
+  [6/t7] armenia (main armenia): Armenian investigators detail charges against Azerbaijani soldier for border crossing and shooting
+  [6/t7] armenia (main armenia): European diplomats emphasize Armenian and Azerbaijani independence and European ties
+  [6/t7] armenia (main armenia): Armenian parliament speaker discusses border checkpoints and constitutional changes
+  [5/t6] armenia (main armenia): Armenian Economy Minister to travel to Moscow for EAEU talks
+  [5/t6] armenia (main armenia): Armenian lawmakers debate prison death of Arsen Gevorgyan
+  [5/t6] armenia (main armenia): Prosecutor's Office reviews statements in Parakar murder case
+  [5/t6] armenia (main armenia): Armenian Foreign Minister meets EU Commissioner Marta Kos
+  [5/t6] armenia (main armenia): Armenia proposes ending amnesties for sexual offenses against children
+  [5/t6] armenia (main armenia): Armenia and Russia hold first round of talks on railway concession
+  [5/t6] armenia (main armenia): Reports describe inhumane conditions at Nubarashen prison
+  [5/t6] armenia (main armenia): Hovhannes Hakobyan to lead Civil Contract list in Masis elections
+  [5/t6] armenia (main armenia): Yerevan considers new traffic restrictions amid congestion discontent
+  [5/t6] armenia (main armenia): Armenian court orders return of 1,054-hectare land plot to state
+  [5/t6] armenia (main armenia): Strong Armenia Party vows to oppose constitutional changes
+--- now 22:53 (window still open): 7 stories, 1358 characters
+  [5/t6] armenia (main armenia): Armenia and Russia launch practical negotiations on railway concession
+  [5/t6] armenia (main armenia): Armenia Justice Ministry proposes higher compensation for insults and defamation
+  [5/t6] armenia (main armenia): Armenian environmental authorities suspend catalyst recycling plant in Hrazdan
+  [5/t6] armenia (main armenia): Armenia suspends illegal water extraction at Armavir fish farm
+  [5/t6] armenia (main armenia): Armenia permanent population reaches 3.11 million
+  [5/t6] armenia (main armenia): Analyst warns Russia may seek strategic influence over new regional roads
+  [5/t6] armenia (main armenia): Bulgarian businessman allegedly bypasses Armenian gambling ad ban
+
+##### wars_econ0_amru1 / owner: 15 stories in 10 digests (0, 0, 0, 0, 0, 5, 0, 3, 7, 0), 0 cut for length
+--- 06:00: 0 stories, 79 characters
+--- 09:00: 0 stories, 78 characters
+--- 12:00: 0 stories, 80 characters
+--- 18:00: 0 stories, 79 characters
+--- 22:00: 0 stories, 78 characters
+--- 06:00: 5 stories, 1158 characters
+  [5/t8] c3 (main c3): Melbourne skyscraper retrofitted with 1,391 solar panels
+  [5/t7] c3 (main c3): Reserve Bank of Australia minutes show majority voted to raise rates
+  [5/t7] c3 (main c3): Australia increases third-year holiday maker visa cap for backpackers
+  [4/t6] c3 (main c3): Police search Melbourne home after theft of Melbourne Cup trophies
+  [3/t6] c3 (main c3): Australian Coalition takes lead in two-party preferred poll
+--- 09:00: 0 stories, 78 characters
+--- 12:00: 3 stories, 808 characters
+  [6/t7] c3 (main c3): Melbourne Cup racehorse body found dumped in Sydney skip bin
+  [5/t7] c3 (main c3): Sydney doctor leaves position amid accusations of antisemitism
+  [5/t6] c3 (main c3): Australian investors granted direct access to Anthropic IPO
+--- 18:00: 7 stories, 1654 characters
+  [6/t7] c5 (main c5): Fed official Musalem signals need for multiple interest rate hikes
+  [5/t7] c4 (main c4): US plans to discuss energy export routes and TRIPP project with Turkmenistan
+  [5/t7] c5 (main c5): European Commission projects robust eurozone economic growth
+  [5/t6] c5 (main c5): Angola central bank cuts key interest rate to 10-year low
+  [5/t6] c5 (main c5): Russian Finance Ministry schedules federal loan bond auctions
+  [5/t6] c3 (main c3): Australian crossbenchers criticize Labor election funding changes
+  [4/t6] c4 (main c4): Armenian parliamentary speaker notes growing optimism over TRIPP project
+--- 22:00: 0 stories, 78 characters
+
+##### topic7 / all_six: 73 stories in 7 digests (4, 6, 16, 13, 11, 15, 8), 23 cut for length
+--- 09:00: 4 stories, 1119 characters
+  [6/t7] ukraine_war (main ukraine_war): Zelensky says Ukrainian drone attacks neutralized over 55 percent of Russia oil refining capacity
+  [6/t7] russia (main russia): Estonia prepares cloud infrastructure for government continuity
+  [6/t7] russia (main russia): Russian air defenses intercept dozens of drones targeting Moscow
+  [5/t7] armenia (main armenia): Leaders of three Armenian political parties oppose constitutional amendments
+--- 14:00: 6 stories, 1740 characters
+  [6/t8] armenia (main armenia): Artur Vagharshyan elected deputy chairman of Armenia's Constitutional Court
+  [6/t7] iran_war (main iran_war): Israel strikes weapons shipment on Syrian-Lebanese border
+  [6/t7] russia (main russia): Convicts imprisoned for Boris Nemtsov's murder reportedly released early to fight in Ukraine
+  [6/t7] russia (main russia): European Union adopts new sanctions package targeting 145 individuals and entities linked to Russia
+  [6/t7] armenia (main armenia): Romania to launch Black Sea security talks with Azerbaijan, Armenia and Turkey
+  [5/t7] armenia (main armenia): Turkish Cargo operates first regular cargo flight between Istanbul and Yerevan
+--- 20:00: 16 stories, 3693 characters
+  [7/t8] iran_war (main iran_war): Third oil tanker catches fire after hitting naval mine in Strait of Hormuz
+  [7/t8] ukraine_war (main ukraine_war): Russia reports record-breaking interception of 1,300 Ukrainian drones
+  [6/t8] armenia (main armenia): Armenia expands European military cooperation after losing CSTO voting rights
+  [6/t8] armenia (main armenia): Armenian opposition criticizes government over political persecution
+  [6/t8] armenia (main armenia): Criminal case against infiltrated Azerbaijani soldier sent to court
+  [6/t8] armenia (main armenia): Georgia extradites fugitive wanted in Armenia for murder
+  [6/t7] russia (main russia): Convicted Nemtsov killers reportedly freed from prison
+  [6/t7] russia (main russia): Woman arrested in Moscow for car bombing targeting former Ukrainian official
+  [6/t7] armenia (main armenia): Armenian officials arrested in bribery investigation
+  [6/t7] russia (main russia): Estonia to close Russian border crossings after sabotage attempt
+  [6/t7] russia (main russia): EU approves new Russia sanctions targeting 140 people and entities
+  [6/t7] ukraine_war (main ukraine_war): EU to join upcoming peace talks on Ukraine war
+  [6/t7] armenia (main armenia): Turkey launches regular cargo flights to Armenia
+  [6/t7] armenia (main armenia): Armenia and Turkey begin implementing agreements
+  [6/t7] russia (main russia): Yekaterinburg architect sentenced to 12 years over enlistment office fire
+  [6/t7] russia (main russia): Russia proposes nonaggression pacts with European nations amid peace talks
+--- 09:00: 13 stories, 2957 characters
+  [7/t8] ukraine_war (main ukraine_war): Ukraine strikes Crimea bridge causing partial collapse
+  [6/t8] armenia (main armenia): Azerbaijan to increase defense spending to 8.8 billion manats
+  [6/t7] russia (main russia): Japan scrambles jets after Russian aircraft enter airspace
+  [6/t7] ukraine_war (main ukraine_war): European representatives participate in US-Ukraine peace talks
+  [6/t7] ukraine_war (main ukraine_war): Zelensky says Russia receives dozens of North Korean missiles monthly
+  [6/t7] russia (main russia): Estonia's Kallas proposes collecting data on Russian military for sanctions
+  [6/t7] russia (main russia): Putin decree allows state to seize dead Russians unclaimed cash and gold
+  [6/t7] russia (main russia): Woman detained in Moscow over car bombing
+  [6/t7] armenia (main armenia): Armenian export volumes fall amid Russian restrictions
+  [6/t7] russia (main russia): Convicted killers of Boris Nemtsov reportedly released early
+  [6/t7] russia (main russia): EU imposes new sanctions on Russian oil refineries and banks
+  [5/t7] armenia (main armenia): Armenian parliament discusses new constitution
+  [5/t7] armenia (main armenia): Supreme Judicial Council suspends judge Masis Melkonyan
+--- 14:00: 11 stories, 2952 characters
+  [7/t7] politics_conflicts (main politics_conflicts): Mongolian President Khurelsukh resigns amid corruption scandal
+  [6/t7] ukraine_war (main ukraine_war): Ukrainian drone strikes hit Russian industrial zones and petrochemical facilities
+  [6/t7] russia (main russia): Journalist regains consciousness after car bombing in Moscow
+  [6/t7] ukraine_war (main ukraine_war): IMF reports progress in loan talks with Ukraine
+  [6/t7] ukraine_war (main ukraine_war): Russia receives North Korean missiles and erects monument in Kursk
+  [6/t7] ukraine_war (main ukraine_war): Ukraine strikes Russian Baltic Fleet warship Naro-Fominsk
+  [6/t7] armenia (main armenia): Azerbaijani soldier who illegally crossed Armenia border fires shots and threatens family
+  [6/t7] ukraine_war (main ukraine_war): Russian missile strikes target industrial and energy facilities across Ukraine
+  [6/t7] armenia (main armenia): German Foreign Minister visits Baku and Yerevan, criticizing Russian influence
+  [5/t7] armenia (main armenia): Armenian-Russian working group holds first meeting on railway concession
+  [5/t7] armenia (main armenia): Corruption case against Ruzanna Khachatryan sent to Anti-Corruption Court
+--- 20:00: 15 stories, 3797 characters
+  [7/t9] armenia (main armenia): Armenia signals readiness to open border crossing with Turkey
+  [7/t8] ukraine_war (main ukraine_war): Russian ballistic missiles strike Kyiv main bridges and infrastructure
+  [7/t8] ukraine_war (main ukraine_war): Casualties from Russian strike on Zaporizhzhia rise to 42
+  [6/t8] armenia (main armenia): Iran aims to transform Norduz border crossing into major trade hub
+  [6/t8] armenia (main armenia): Armenian investigators detail charges against Azerbaijani soldier for border crossing and shooting
+  [7/t7] politics_conflicts (main politics_conflicts): Turkey places pro-opposition Sozcu TV under state management
+  [7/t7] ukraine_war (main ukraine_war): Death toll from Russian strike in Kamyshevakha rises to 72
+  [6/t7] iran_war (main iran_war): Iran downs US MQ-1 reconnaissance drone over Qeshm Island
+  [6/t7] russia (main russia): Deutsche Bank accused of shielding Russian oligarchs from sanctions
+  [6/t7] ukraine_war (main ukraine_war): Russia rejects Ukraine joining NATO following proposed Donbas withdrawal terms
+  [6/t7] iran_war (main iran_war): Iraqi Prime Minister plans crackdown on pro-Iran militias
+  [6/t7] russia (main russia): Slovakia and Hungary secure US extensions to purchase Russian oil
+  [6/t7] iran_war (main iran_war): Qatar warns of Gulf escalation as Iran issues threats against Bahrain
+  [6/t7] armenia (main armenia): European diplomats emphasize Armenian and Azerbaijani independence and European ties
+  [6/t7] russia (main russia): Russia arrests Japanese journalist on espionage charges
+--- now 22:53 (window still open): 8 stories, 1720 characters
+  [7/t8] russia (main russia): Russia demands NATO withdraw from large parts of Eastern Europe
+  [7/t7] ukraine_war (main ukraine_war): UK to provide over 1,000 additional air defense missiles to Ukraine
+  [6/t7] iran_war (main iran_war): Iran’s IRGC says it hit US radar in Bahrain
+  [6/t7] iran_war (main iran_war): US conducts strikes on Iran Qeshm Island
+  [6/t7] iran_war (main iran_war): Hunger strike expands across Iranian prisons as three more face death penalty
+  [5/t7] armenia (main armenia): Armenia and Russia launch practical negotiations on railway concession
+  [5/t7] armenia (main armenia): Armenia permanent population reaches 3.11 million
+  [5/t7] armenia (main armenia): Analyst warns Russia may seek strategic influence over new regional roads
+
+##### topic7 / armenia_only: 45 stories in 7 digests (1, 3, 16, 4, 4, 14, 3), 2 cut for length
+--- 09:00: 1 stories, 272 characters
+  [5/t7] armenia (main armenia): Leaders of three Armenian political parties oppose constitutional amendments
+--- 14:00: 3 stories, 866 characters
+  [6/t8] armenia (main armenia): Artur Vagharshyan elected deputy chairman of Armenia's Constitutional Court
+  [6/t7] armenia (main armenia): Romania to launch Black Sea security talks with Azerbaijan, Armenia and Turkey
+  [5/t7] armenia (main armenia): Turkish Cargo operates first regular cargo flight between Istanbul and Yerevan
+--- 20:00: 16 stories, 3794 characters
+  [6/t8] armenia (main armenia): Armenia expands European military cooperation after losing CSTO voting rights
+  [6/t8] armenia (main armenia): Armenian opposition criticizes government over political persecution
+  [6/t8] armenia (main armenia): Criminal case against infiltrated Azerbaijani soldier sent to court
+  [6/t8] armenia (main armenia): Georgia extradites fugitive wanted in Armenia for murder
+  [6/t7] armenia (main armenia): Armenian officials arrested in bribery investigation
+  [6/t7] armenia (main armenia): Turkey launches regular cargo flights to Armenia
+  [6/t7] armenia (main armenia): Armenia and Turkey begin implementing agreements
+  [5/t7] armenia (main armenia): Former employees of Yerevan brandy factory protest recent layoffs
+  [5/t7] armenia (main armenia): Armenian parliament approves quadrupling fines for traffic violations
+  [5/t7] armenia (main armenia): Sasun Badoyan reports police searched his home and confiscated pension funds
+  [5/t7] armenia (main armenia): Armenia extends Kashatagh housing program deadline to July 2027
+  [5/t7] armenia (main armenia): Armenian parliamentary committee approves stricter penalties for traffic congestion violations
+  [5/t7] armenia (main armenia): Dilijan initiatives in Armenia receive international recognition from World Tourism Forum
+  [5/t7] armenia (main armenia): Armenian citizens without completed military service permitted to work as police or rescuers
+  [5/t7] armenia (main armenia): Armenian opposition figures criticize government over political prosecutions
+  [5/t7] armenia (main armenia): Armenian Minister Zhanna Andreasyan defends removal of military service exemptions
+--- 09:00: 4 stories, 757 characters
+  [6/t8] armenia (main armenia): Azerbaijan to increase defense spending to 8.8 billion manats
+  [6/t7] armenia (main armenia): Armenian export volumes fall amid Russian restrictions
+  [5/t7] armenia (main armenia): Armenian parliament discusses new constitution
+  [5/t7] armenia (main armenia): Supreme Judicial Council suspends judge Masis Melkonyan
+--- 14:00: 4 stories, 1266 characters
+  [6/t7] armenia (main armenia): Azerbaijani soldier who illegally crossed Armenia border fires shots and threatens family
+  [6/t7] armenia (main armenia): German Foreign Minister visits Baku and Yerevan, criticizing Russian influence
+  [5/t7] armenia (main armenia): Armenian-Russian working group holds first meeting on railway concession
+  [5/t7] armenia (main armenia): Corruption case against Ruzanna Khachatryan sent to Anti-Corruption Court
+--- 20:00: 14 stories, 3555 characters
+  [7/t9] armenia (main armenia): Armenia signals readiness to open border crossing with Turkey
+  [6/t8] armenia (main armenia): Iran aims to transform Norduz border crossing into major trade hub
+  [6/t8] armenia (main armenia): Armenian investigators detail charges against Azerbaijani soldier for border crossing and shooting
+  [6/t7] armenia (main armenia): European diplomats emphasize Armenian and Azerbaijani independence and European ties
+  [6/t7] armenia (main armenia): Armenian parliament speaker discusses border checkpoints and constitutional changes
+  [5/t7] armenia (main armenia): Armenian lawmakers debate prison death of Arsen Gevorgyan
+  [5/t7] armenia (main armenia): Armenia proposes ending amnesties for sexual offenses against children
+  [5/t7] armenia (main armenia): Armenia and Russia hold first round of talks on railway concession
+  [5/t7] armenia (main armenia): Strong Armenia Party vows to oppose constitutional changes
+  [5/t7] armenia (main armenia): Armenian FM highlights export growth driven by EU trade preferences
+  [5/t7] armenia (main armenia): Armenia proposes military service exemption for long-serving police and rescuers
+  [5/t7] armenia (main armenia): Armenian Interior Ministry sets protection of minors as political priority
+  [5/t7] armenia (main armenia): Iran announces readiness to build oil refinery in Armenia
+  [5/t7] armenia (main armenia): Armenian parliament discusses stricter traffic rules and electric scooter regulations
+--- now 22:53 (window still open): 3 stories, 524 characters
+  [5/t7] armenia (main armenia): Armenia and Russia launch practical negotiations on railway concession
+  [5/t7] armenia (main armenia): Armenia permanent population reaches 3.11 million
+  [5/t7] armenia (main armenia): Analyst warns Russia may seek strategic influence over new regional roads
+
+##### topic7 / owner: 8 stories in 10 digests (0, 0, 0, 0, 0, 3, 0, 2, 3, 0), 0 cut for length
+--- 06:00: 0 stories, 79 characters
+--- 09:00: 0 stories, 78 characters
+--- 12:00: 0 stories, 80 characters
+--- 18:00: 0 stories, 79 characters
+--- 22:00: 0 stories, 78 characters
+--- 06:00: 3 stories, 752 characters
+  [5/t8] c3 (main c3): Melbourne skyscraper retrofitted with 1,391 solar panels
+  [5/t7] c3 (main c3): Reserve Bank of Australia minutes show majority voted to raise rates
+  [5/t7] c3 (main c3): Australia increases third-year holiday maker visa cap for backpackers
+--- 09:00: 0 stories, 78 characters
+--- 12:00: 2 stories, 574 characters
+  [6/t7] c3 (main c3): Melbourne Cup racehorse body found dumped in Sydney skip bin
+  [5/t7] c3 (main c3): Sydney doctor leaves position amid accusations of antisemitism
+--- 18:00: 3 stories, 705 characters
+  [6/t7] c5 (main c5): Fed official Musalem signals need for multiple interest rate hikes
+  [5/t7] c4 (main c4): US plans to discuss energy export routes and TRIPP project with Turkmenistan
+  [5/t7] c5 (main c5): European Commission projects robust eurozone economic growth
+--- 22:00: 0 stories, 78 characters

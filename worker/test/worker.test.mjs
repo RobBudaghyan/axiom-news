@@ -46,8 +46,8 @@ describe("webhook", () => {
     const reply = fetchMock.calls[0];
     assert.match(reply.url, /\/sendMessage$/);
     assert.equal(reply.body.chat_id, OWNER);
-    assert.match(reply.body.text, /^Welcome to Axiom News, Ruben!/);
-    assert.match(reply.body.text, /Tap Set up to choose your topics and times\. It takes a minute\.$/);
+    assert.match(reply.body.text, /^👋 Welcome to Axiom News, Ruben!/);
+    assert.match(reply.body.text, /Tap Set up to choose topics and times\.\n⏱️ It takes a minute\.$/);
     assert.equal(reply.body.reply_markup.inline_keyboard[0][0].text, "Set up");
     assert.ok(reply.body.reply_markup.inline_keyboard[0][0].web_app.url);
     assert.equal(u.onboarded_at, null);
@@ -64,8 +64,8 @@ describe("webhook", () => {
     const u = sqlite.prepare("SELECT * FROM users WHERE id = ?").get(OWNER);
     assert.equal(u.topics, '["armenia"]');
     assert.equal(u.blocked, 0);
-    assert.match(fetchMock.calls[0].body.text, /^Welcome back, Ruben!/);
-    assert.match(fetchMock.calls[0].body.text, /at 08:00 \(Yerevan time\)/);
+    assert.match(fetchMock.calls[0].body.text, /^👋 Welcome back, Ruben!/);
+    assert.match(fetchMock.calls[0].body.text, /Your digests: 08:00 \(Yerevan time\)/);
   });
 
   test("other messages get a short help reply; unknown users are told to /start", async () => {
@@ -75,7 +75,7 @@ describe("webhook", () => {
     assert.match(fetchMock.calls[0].body.text, /Send \/start/);
     addUser(sqlite, { next_digest_at: yerevan(20) });
     await worker.fetch(post(update("what is this")), env(binding));
-    assert.match(fetchMock.calls[1].body.text, /^I send news digests at 09:00, 14:00 and 20:00/);
+    assert.match(fetchMock.calls[1].body.text, /^🕘 Your digests: 09:00, 14:00 and 20:00/);
   });
 
   test("an error is logged and Telegram still gets 200", async () => {

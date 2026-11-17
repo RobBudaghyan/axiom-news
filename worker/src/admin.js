@@ -36,7 +36,9 @@ export function adminStatements(now) {
     { sql: RUN_STATS_SQL, params: [now - 7 * DAY] },
     { sql: MODELS_SQL, params: [now - DAY, now - 7 * DAY] },
     { sql: "SELECT key, value FROM meta WHERE key IN ('feed_health', 'last_alert_at', 'last_alert_text', 'd1_worker')", params: [] },
-    { sql: "SELECT id, first_name, timezone, digest_times, paused, blocked, last_digest_at, next_digest_at, created_at, lang " +
+    { sql: "SELECT id, first_name, timezone, digest_times, blocked, last_digest_at, next_digest_at, created_at, lang, " +
+           // Step 16: no Pause; "all off" = no main topic and no custom topic switched on
+           "(coalesce(topics, '[]') = '[]' AND NOT EXISTS (SELECT 1 FROM custom_follows f WHERE f.user_id = users.id AND f.enabled = 1)) AS all_off " +
            "FROM users ORDER BY created_at, id LIMIT 200", params: [] },
     { sql: "SELECT at, component, message FROM errors ORDER BY at DESC, id DESC LIMIT 50", params: [] },
     { sql: "SELECT sum(d1_rows_read) AS r, sum(d1_rows_written) AS w, count(*) AS runs FROM job_runs WHERE started_at >= ?1",
@@ -49,7 +51,7 @@ export function adminStatements(now) {
       params: [now - DAY] },
     // Step 9, per reader language over the last 24 h: readers, stories translated (and rejected by
     // the checks), the translation calls and tokens, and digests that went out in English instead.
-    { sql: "SELECT lang, count(*) AS users, sum(paused = 0 AND blocked = 0) AS active FROM users GROUP BY lang", params: [] },
+    { sql: "SELECT lang, count(*) AS users, sum(blocked = 0) AS active FROM users GROUP BY lang", params: [] },
     { sql: "SELECT lang, sum(ok = 1) AS ok, sum(ok = 0) AS rejected FROM story_translations WHERE created_at >= ?1 " +
            "GROUP BY lang", params: [now - DAY] },
     { sql: "SELECT substr(kind, 11) AS lang, count(*) AS calls, sum(ok) AS ok, sum(input_tokens) AS input_tokens, " +
@@ -141,7 +143,7 @@ export function shapeAdmin(rows, now, cfg = CONFIG) {
 
   const list = users.map((u) => ({
     id: u.id, name: u.first_name || "(no name)", timezone: u.timezone, times: parseList(u.digest_times),
-    paused: !!u.paused, blocked: !!u.blocked, last_digest_at: u.last_digest_at ?? null, lang: u.lang ?? "en",
+    all_off: !!u.all_off, blocked: !!u.blocked, last_digest_at: u.last_digest_at ?? null, lang: u.lang ?? "en",
     next_digest_at: u.next_digest_at ?? null,
     ...(() => {   // Step 8: average digest size in the last 24 h (digests with stories)
       const z = sizeOf.get(u.id);
@@ -174,8 +176,8 @@ export function shapeAdmin(rows, now, cfg = CONFIG) {
     feeds: feedReport(jsonOr(meta.feed_health, null), now, cfg),
     users: {
       count: list.length,
-      active: list.filter((u) => !u.paused && !u.blocked).length,
-      paused: list.filter((u) => u.paused).length,
+      active: list.filter((u) => !u.all_off && !u.blocked).length,
+      all_off: list.filter((u) => u.all_off && !u.blocked).length,
       blocked: list.filter((u) => u.blocked).length,
       list,
     },

@@ -1,14 +1,14 @@
 // Step 15: the welcome flow.
 //   - /start from a new user: a short welcome in their Telegram language and a "Set up" button
 //     (bot.js). Users imported from the old bot (users.imported = 1) get no welcome.
-//   - The first Mini App open shows a 3-step setup (topics, times, done), skippable (app.js).
+//   - The first Mini App open shows a setup (Step 16: language, topics, times, done), skippable (app.js).
 //   - Done or skipped: POST /api/onboard marks the user onboarded ONCE and sends a sample digest of
 //     the last 24 hours, following every normal rule (topics, never twice: its stories are marked
 //     sent, the translation hold).
 //   - A user who never opened the Mini App gets exactly one gentle reminder the next day, between
 //     10:00 and 20:00 their time; defaults (Asia/Yerevan, 09/14/20, all main topics) apply meanwhile.
 import { CONFIG, candidateStatement, escapeHtml, localParts, parseList, planDigest } from "./digest.js";
-import { digestWrites, sendDigest } from "./cron.js";
+import { allTopicsOff, digestWrites, sendDigest } from "./cron.js";
 import { asTopicRows, enabledOnly, followedStatement, withCustomTopics } from "./custom.js";
 import { effectiveLang, listJoin, t, zoneName } from "./i18n.js";
 import { errorStatement } from "./db.js";
@@ -30,6 +30,8 @@ export async function sendDigestNow(db, userId, now, cfg, io, opts = {}) {
     { sql: TOPICS_SQL, params: [] }, followedStatement(userId)]);
   const user = rows[0];
   if (!user) return null;
+  // Step 16: every topic off means nothing at all, not even a quiet note
+  if (allTopicsOff(user, enabledOnly(custom))) return { user, plan: null, ids: [], off: true };
   const u = withCustomTopics(user, custom);
   const [cands] = await db.batch([candidateStatement(u, now, cfg)]);
   const lang = effectiveLang(user);
@@ -52,7 +54,7 @@ export async function onboard(db, userId, body, now, cfg, io) {
   if (!claimed.length) return { sample: false };
   try {
     const r = await sendDigestNow(db, userId, now, cfg, io, { labelKey: "digest.sample_label" });
-    return { sample: !!r, stories: r ? r.ids.length : 0, skipped: !!body?.skipped };
+    return { sample: !!r && !r.off, stories: r ? r.ids.length : 0, skipped: !!body?.skipped };
   } catch (e) {
     await db.batch([errorStatement(`sample digest for user ${userId}: ${e.message}`, now)]);
     return { sample: false, error: true };

@@ -84,7 +84,7 @@ describe("invoices", () => {
     fetchMock = telegram();
     await hook(binding, msg({ text: "/support" }));
     const reply = fetchMock.calls[0].body;
-    assert.match(reply.text, /^Axiom News бесплатен/);
+    assert.match(reply.text, /^❤️ Axiom News бесплатен/);
     assert.match(reply.text, /\/terms$/);
     assert.deepEqual(reply.reply_markup.inline_keyboard.map((r) => r.map((b) => b.callback_data)), [["tip:100", "tip:500", "tip:1000"]]);
     assert.deepEqual(reply.reply_markup.inline_keyboard[0].map((b) => b.text), ["100 ⭐", "500 ⭐", "1000 ⭐"]);
@@ -104,7 +104,7 @@ describe("invoices", () => {
       fetchMock.calls.length = 0;
       await tap(data, id);                                     // old or test amounts: refused for everyone
       assert.deepEqual(fetchMock.calls.map(methodOf), ["answerCallbackQuery", "sendMessage"], `${data} ${id}`);
-      assert.match(fetchMock.calls[1].body.text, /^(Такая сумма недоступна|This tip amount is not available)/);
+      assert.match(fetchMock.calls[1].body.text, /^⚠️ (Такая сумма недоступна|This amount is not available)/);
     }
   });
 });
@@ -148,7 +148,7 @@ describe("successful_payment", () => {
       ["id", "user_id", "amount", "charge_id", "at", "refunded_at"]);
     const thanks = fetchMock.calls.filter((c) => methodOf(c) === "sendMessage");
     assert.equal(thanks.length, 1);
-    assert.equal(thanks[0].body.text, "Спасибо за чаевые, 250 ⭐! Они помогают поддерживать работу Axiom. Ваши сводки остаются такими же.");
+    assert.equal(thanks[0].body.text, "❤️ Спасибо за чаевые, 250 ⭐!\n✅ Ваши сводки остаются такими же.");
     // a tip changes nothing else for the user
     assert.deepEqual(sqlite.prepare("SELECT * FROM users WHERE id = ?").get(FRIEND), before);
     await hook(binding, paid(50, "ch_B"));
@@ -197,7 +197,7 @@ describe("refunds and the Admin tab (owner only)", () => {
     assert.equal(r.body.message, "Refunded 500 ⭐.");
     assert.deepEqual(fetchMock.calls.map((c) => [methodOf(c), c.body]), [
       ["refundStarPayment", { user_id: FRIEND, telegram_payment_charge_id: "ch_1" }],
-      ["sendMessage", { chat_id: FRIEND, text: "Your tip of 500 ⭐ was refunded." }],
+      ["sendMessage", { chat_id: FRIEND, text: "↩️ Your tip of 500 ⭐ was refunded." }],
     ]);
     assert.ok(tipRows(sqlite)[0].refunded_at > 0);
     a = (await api(binding, "/api/admin", OWNER)).body.tips;
@@ -236,16 +236,16 @@ describe("/paysupport, /terms, commands and texts", () => {
     addUser(sqlite, { id: FRIEND, lang: "en" });
     fetchMock = telegram();
     await hook(binding, msg({ text: "/paysupport" }));
-    assert.match(fetchMock.calls[0].body.text, /^A problem with a tip\? Send \/paysupport/);
-    assert.match(fetchMock.calls[0].body.text, /Telegram support cannot help/);
+    assert.match(fetchMock.calls[0].body.text, /^💬 A problem with a tip\?\n✍️ Send \/paysupport/);
+    assert.match(fetchMock.calls[0].body.text, /Telegram support can't help/);
     fetchMock.calls.length = 0;
     await hook(binding, msg({ text: "/paysupport I sent 500 by mistake" }));
     assert.deepEqual(fetchMock.calls.map((c) => c.body.chat_id), [OWNER, FRIEND]);
     assert.match(fetchMock.calls[0].body.text, /^Payment support request from Ann \(id 777, @ann\):\nI sent 500 by mistake/);
-    assert.match(fetchMock.calls[1].body.text, /^Thank you, your note was sent/);
+    assert.match(fetchMock.calls[1].body.text, /^✅ Thank you! Your note was sent/);
     fetchMock.calls.length = 0;
     await hook(binding, msg({ text: "/terms" }));
-    assert.match(fetchMock.calls[0].body.text, /^Terms for tips\./);
+    assert.match(fetchMock.calls[0].body.text, /^📄 Terms for tips\n/);
   });
 
   test("the command list has /support, /paysupport and /terms in every language", () => {

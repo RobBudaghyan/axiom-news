@@ -24,7 +24,7 @@ from job.translate import load_digest_config, qualifies  # noqa: E402
 
 def main() -> int:
     cfg = load_digest_config()
-    keep = ("editorial_bar", "topic_bar", "topic_needs_boost", "topic_boost_max", "unedited_offset")
+    keep = ("editorial_bar", "topic_bar", "custom_topic_bar", "topic_needs_boost", "topic_boost_max", "unedited_offset")
     cfg = {**{k: cfg[k] for k in keep}, "main_tags": list(cfg["topic_specificity"])}
     tags = ["politics_conflicts", "economy_markets", "armenia", "russia", "iran_war", "ukraine_war"]
     rnd = random.Random(9)

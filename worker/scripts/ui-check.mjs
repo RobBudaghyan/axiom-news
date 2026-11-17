@@ -83,7 +83,8 @@ const LAYOUT = `const v = document.querySelector('#view');
   return { H, R, heights, radii, offGrid, small, cut, texts, last: v.lastElementChild?.id,
     sideways: document.documentElement.scrollWidth > window.innerWidth };`;
 const layoutOk = (x) => x.heights.length === 1 && x.heights[0] === x.H && x.radii.length === 1 && x.radii[0] === x.R &&
-  !x.offGrid.length && !x.small.length && !x.cut.length && !x.sideways && x.texts.join() === "tz-line" && x.last === "tz-line";
+  !x.offGrid.length && !x.small.length && !x.cut.length && !x.sideways &&
+  x.texts.filter((t) => t !== "topic-hint").join() === "tz-line" && x.last === "tz-line";   // Step 16: the hint is the owner's one exception
 
 await fetch(`${BASE}/__reset`, { method: "POST" });
 const b = await openBrowser();
@@ -97,7 +98,8 @@ try {
 
   // Step 12 rules
   let r = await b.run(LAYOUT);
-  check("no helper texts: the only line of text is the time zone, last on the page", r.texts.join() === "tz-line" && r.last === "tz-line",
+  check("no helper texts: only the hint under Add a topic and the time zone line (last on the page)",
+    r.texts.join() === "topic-hint,tz-line" && r.last === "tz-line",
     `${r.texts.join(",")} / last ${r.last}`);
   check("one size: every row and button 48 px high, every card and button the same corners",
     r.heights.length === 1 && r.heights[0] === 48 && r.radii.length === 1, `${r.heights.join(",")} / ${r.radii.join(",")}`);
@@ -132,9 +134,13 @@ try {
 
   r = await b.run(`${SERVER} for (const t of ['politics_conflicts', 'armenia', 'russia']) { click('[data-value=' + t + ']'); await wait(120); }
     await settled(); const t0 = window.__toasts.length; click('[data-value=economy_markets]'); await wait(300);
-    return { u: await server(), toast: window.__toasts.slice(t0).join(' | '), on: document.querySelector('[data-value=economy_markets]').getAttribute('aria-checked') };`);
-  check("the last topic cannot be switched off (a short error still shows)", r.u.topics.length === 1 && r.on === "true" && /^Keep at least one topic$/.test(r.toast),
-    `${r.u.topics.join(",")} / ${r.toast}`);
+    return { u: await server(), toast: window.__toasts.slice(t0).join(' | '), on: document.querySelector('[data-value=economy_markets]').getAttribute('aria-checked'),
+      hero: text('#hero').trim().replace(/\\s+/g, ' ') };`);
+  check("Step 16: the last topic can be switched off too (no error); the card says 😴 All topics are off",
+    r.u.topics.length === 0 && r.on === "false" && !r.toast && /😴\s*All topics are off\s*Switch one on to get digests\./.test(r.hero), `${r.u.topics.join(",")} / ${r.toast} / ${r.hero}`);
+  r = await b.run(`${SERVER} click('[data-value=economy_markets]'); await settled(); return { u: await server(), hero: text('#hero') };`);
+  check("Step 16: switching one back on shows the next digest again", r.u.topics.join() === "economy_markets" && /Next digest/.test(r.hero),
+    r.hero.trim().replace(/\s+/g, " "));
 
   r = await b.run(`${SERVER} return { all: [...document.querySelectorAll('[data-action=time]')].map((x) => x.dataset.value), on: pressed(), u: await server() };`);
   check("time grid: 18 hourly buttons, 06:00 to 23:00, no half hours", r.all.length === 18 && r.all[0] === "06:00" &&
@@ -161,12 +167,10 @@ try {
   r = await b.run(`${SERVER} const t = window.__toasts.length; for (const x of pressed()) { click('[data-value="' + x + '"]'); await wait(150); }
     await settled(); return { u: await server(), on: pressed(), toast: window.__toasts.slice(t).join(' | ') };`);
   check("at least 1 time: removing the last one is refused", r.u.digest_times.length === 1 && r.on.length === 1 &&
-    /at least one digest time/.test(r.toast), `${r.u.digest_times.join(",")} / ${r.toast}`);
+    /Keep at least one time/.test(r.toast), `${r.u.digest_times.join(",")} / ${r.toast}`);
 
-  r = await b.run(`${SERVER} const t = window.__toasts.length; click('#pause-row'); await settled(); return { u: await server(), hero: text('#hero'), toasts: window.__toasts.slice(t) };`);
-  check("pause saved and shown, no toast", r.u.paused === true && /Paused/.test(r.hero) && !r.toasts.length, r.hero.trim().replace(/\s+/g, " "));
-  r = await b.run(`${SERVER} click('#pause-row'); await settled(); return { u: await server(), hero: text('#hero') };`);
-  check("resume saved, next digest shown", r.u.paused === false && /Next digest/.test(r.hero), r.hero.trim().replace(/\s+/g, " "));
+  r = await b.run(`return { row: !!document.querySelector('#pause-row, [data-action=pause]'), text: /Pause/i.test(document.querySelector('#view').innerText) };`);
+  check("Step 16: no Pause row and no Pause text anywhere in Settings", !r.row && !r.text, JSON.stringify(r));
 
   r = await b.run(`${SERVER} const n = calls(), t = window.__toasts.length; click('[data-action=lang][data-value=ru]'); await settled();
     const out = { u: await server(), title: text('#title'), on: document.querySelector('[data-action=lang][aria-checked=true]')?.dataset.value,
@@ -188,6 +192,11 @@ try {
     r.font === "17px" && r.go === "none" && r.h === 48 && !r.edit, JSON.stringify(r));
   r = await b.run(`click('#my-topics .add-row .sq'); await wait(80); return document.activeElement?.id;`);
   check("My topics: the whole add row is tappable (a tap on the + opens the field)", r === "topic-input", String(r));
+  r = await b.run(`const h = document.querySelector('#my-topics #topic-hint'); const card = document.querySelector('#my-topics .group');
+    return { text: h && h.textContent, after: h && h.previousElementSibling === card, font: h && getComputedStyle(h).fontSize,
+      n: document.querySelectorAll('#topic-hint').length };`);
+  check("Step 16: one small hint line under Add a topic: 'e.g. Formula 1, Japan, AI' (13 px)",
+    r.text === "e.g. Formula 1, Japan, AI" && r.after && r.font === "13px" && r.n === 1, JSON.stringify(r));
   await b.run("document.activeElement.blur();");
   r = await b.run(`${MY} const i = document.querySelector('#topic-input'); i.value = 'Col'; i.dispatchEvent(new Event('input', { bubbles: true }));
     const shown = getComputedStyle(document.querySelector('.add-go')).display, word = text('.add-go');
@@ -235,11 +244,11 @@ try {
   r = await b.run(`${SERVER} ${MY} const t = window.__toasts.length; addT('Armenian news'); await done();
     return { rows: mine(), toasts: window.__toasts.slice(t) };`);
   check("My topics: a main topic is refused with its name", r.rows.length === 2 &&
-    JSON.stringify(r.toasts) === '["Armenia is already a main topic. Switch it on above."]', JSON.stringify(r));
+    JSON.stringify(r.toasts) === '["Armenia is a main topic. Switch it on above."]', JSON.stringify(r));
   r = await b.run(`${SERVER} ${MY} ct('Formula 1').click(); await settled(); addT('AI regulation'); await done();
-    return { rows: mine(), add: !!document.querySelector('#my-topics .add-row'), server: await serverOn() };`);
-  check("My topics: at 3 topics the add row disappears; a switched-off topic still counts",
-    r.rows.length === 3 && !r.add && JSON.stringify(r.server) === '["Colombia:on","Formula 1:off","AI regulation:on"]', JSON.stringify(r));
+    return { rows: mine(), add: !!document.querySelector('#my-topics .add-row'), hint: !!document.querySelector('#topic-hint'), server: await serverOn() };`);
+  check("My topics: at 3 topics the add row (and its hint) disappears; a switched-off topic still counts",
+    r.rows.length === 3 && !r.add && !r.hint && JSON.stringify(r.server) === '["Colombia:on","Formula 1:off","AI regulation:on"]', JSON.stringify(r));
   r = await b.run(`await wait(450); ${LAYOUT}`);   // after the new row's 0.34 s slide-in
   check("My topics: the layout rules hold with three topics (48 px rows, 44 px targets, no helper text)", layoutOk(r), JSON.stringify(r).slice(0, 500));
   r = await b.run(`${SERVER} ${MY} const n = calls(); click('[data-action=edit-topics]'); await wait(300);
@@ -276,39 +285,44 @@ try {
   r = await b.run(`${SERVER} ${MY} ct('AI regulation').click(); await settled(); const n = calls(), t = window.__toasts.length;
     ct('Colombia').click(); await settled();
     return { ui: ct('Colombia').getAttribute('aria-checked'), server: await serverOn(), toasts: window.__toasts.slice(t),
-      haptics: since(n).filter((c) => c.startsWith('haptic')) };`);
-  check("the last topic switched on (all main topics off, one custom on) cannot be switched off",
-    r.ui === "true" && JSON.stringify(r.server) === '["Colombia:on","AI regulation:off"]' && JSON.stringify(r.toasts) === '["Keep at least one topic"]' &&
-    r.haptics.includes("haptic warning"), JSON.stringify(r));
+      haptics: since(n).filter((c) => c.startsWith('haptic')), hero: text('#hero') };`);
+  check("Step 16: the last topic switched on (all main topics off, one custom on) can go off too: no error, 😴 All topics are off",
+    r.ui === "false" && JSON.stringify(r.server) === '["Colombia:off","AI regulation:off"]' && !r.toasts.length &&
+    r.haptics.includes("haptic impact light") && /All topics are off/.test(r.hero), JSON.stringify(r));
   await fetch(`${BASE}/__reset`, { method: "POST" });
   await fetch(`${BASE}/__guard429`, { method: "POST" });
   await b.open(`${BASE}/app/?theme=light&as=friend`);
   r = await b.run(`${SERVER} ${MY} const t = window.__toasts.length; addT('Tennis'); await done();
     return { rows: mine(), toasts: window.__toasts.slice(t), input: document.querySelector('#topic-input').value };`);
   check("My topics: when Gemini refused lately (the AI guard), a new check waits: 'Try again in a few minutes'",
-    r.rows.length === 0 && JSON.stringify(r.toasts) === '["Try again in a few minutes."]' && r.input === "Tennis", JSON.stringify(r));
+    r.rows.length === 0 && JSON.stringify(r.toasts) === '["⏳ Try again in a few minutes."]' && r.input === "Tennis", JSON.stringify(r));
   await fetch(`${BASE}/__reset`, { method: "POST" });
   await b.open(`${BASE}/app/?theme=light&as=friend`);
 
   // Step 15: Help and Send feedback, two rows near the bottom of Settings, each a page with Telegram's back button
   r = await b.run(`const more = document.querySelector('#more'); const next = more.nextElementSibling;
     const rows = [...more.querySelectorAll('.row')].map((x) => [x.dataset.action, x.innerText.trim(), Math.round(x.getBoundingClientRect().height),
-      !!x.querySelector('.sq.solid svg'), !!x.querySelector('.chev')]);
+      !!x.querySelector('.sq.solid svg'), !!x.querySelector('.chev'), getComputedStyle(x.querySelector('.sq.solid')).backgroundColor,
+      getComputedStyle(x.querySelector('.sq.solid')).color]);
     return { rows, next: next && next.id, before: more.previousElementSibling && more.previousElementSibling.id };`);
-  check("Settings: Help and Send feedback rows (48 px, coloured square, chevron) right above the time zone line, under Support",
-    JSON.stringify(r.rows) === JSON.stringify([["open-help", "Help", 48, true, true], ["open-feedback", "Send feedback", 48, true, true]]) &&
+  check("Settings: Help and Send feedback rows (48 px, brand-red square with a white glyph, chevron) right above the time zone line, under Support",
+    JSON.stringify(r.rows) === JSON.stringify([["open-help", "Help", 48, true, true, RED, "rgb(255, 255, 255)"],
+      ["open-feedback", "Send feedback", 48, true, true, RED, "rgb(255, 255, 255)"]]) &&
     r.next === "tz-line" && r.before === "support", JSON.stringify(r));
   r = await b.run(`${SERVER} const n = calls(); click('[data-action=open-help]'); await wait(400);
     const heads = [...document.querySelectorAll('#view .section-head')].map((x) => x.textContent);
     const paras = [...document.querySelectorAll('#view .help-p')].map((x) => x.textContent);
-    const out = { title: text('#title'), heads, paras: paras.length, privacy: paras[7] || '', back: since(n).filter((c) => c.startsWith('back')),
+    const lines = [...document.querySelectorAll('#view .help-p')].map((x) => x.querySelectorAll('.line').length);
+    const oneLine = [...document.querySelectorAll('#view .help-p .line')].every((l) => l.getClientRects().length >= 1);
+    const out = { title: text('#title'), heads, paras: paras.length, privacy: paras[7] || '', lines, oneLine, back: since(n).filter((c) => c.startsWith('back')),
       sideways: document.documentElement.scrollWidth > window.innerWidth, tabs: !!document.querySelector('#tabs') };
     Telegram.WebApp.__back(); await wait(400);
     out.after = { title: text('#title'), settings: !!document.querySelector('#topics'), back: since(n).filter((c) => c.startsWith('back')) };
     return out;`);
   check("Help: its own page (title Help, 8 short sections, the privacy note), Telegram's back button shows and goes back to Settings",
-    r.title === "Help" && r.heads.length === 8 && r.heads[0] === "What Axiom is" && r.heads[7] === "Privacy" && r.paras === 8 &&
-    /Telegram id, your first name and your settings/.test(r.privacy) && !r.sideways && JSON.stringify(r.back) === '["back show"]' &&
+    r.title === "Help" && r.heads.length === 8 && r.heads[0] === "📰 What Axiom is" && r.heads[7] === "🔒 Privacy" && r.paras === 8 &&
+    r.heads.every((h) => /^\p{Extended_Pictographic}/u.test(h)) && r.lines.every((n) => n >= 2 && n <= 4) &&
+    /Telegram id and name/.test(r.privacy) && !r.sideways && JSON.stringify(r.back) === '["back show"]' &&
     r.after.title === "Settings" && r.after.settings && r.after.back.join() === "back show,back hide", JSON.stringify(r));
   r = await b.run(`${SERVER} const n = calls(), t0 = window.__toasts.length; click('[data-action=open-feedback]'); await wait(400);
     const input = document.querySelector('#fb-input'), send = document.querySelector('[data-action=fb-send]');
@@ -322,7 +336,7 @@ try {
     r.before.title === "Send feedback" && r.before.disabled && r.before.font === "17px" && r.before.h === 48 && r.before.w === r.before.page &&
     r.before.max === 1000 && r.enabled, JSON.stringify(r.before));
   check("Send feedback: sent with a success haptic and a short Thank you, back to Settings",
-    r.title === "Settings" && JSON.stringify(r.toasts) === '["Thank you!"]' && r.haptics.includes("haptic success") &&
+    r.title === "Settings" && JSON.stringify(r.toasts) === '["✅ Thank you!"]' && r.haptics.includes("haptic success") &&
     r.back.join() === "back show,back hide", JSON.stringify(r));
   r = await b.run(`const h = { authorization: 'tma ' + Telegram.WebApp.initData, 'content-type': 'application/json' };
     const out = [];
@@ -347,7 +361,7 @@ try {
   check("friend calling the admin API directly gets 403", r === 403, String(r));
   r = await b.run(`const res = await fetch('/api/settings', { method: 'POST', headers: { authorization: 'tma ' + Telegram.WebApp.initData,
     'content-type': 'application/json' }, body: JSON.stringify({ digest_times: ['09:30'] }) }); return [res.status, (await res.json()).error];`);
-  check("the server refuses a half-hour time too", r[0] === 400 && /on the hour/.test(r[1]), r.join(" "));
+  check("the server refuses a half-hour time too", r[0] === 400 && /full hour/.test(r[1]), r.join(" "));
   check("no console errors (friend)", b.consoleErrors().length === 0, JSON.stringify(b.consoleErrors()[0]?.params ?? "").slice(0, 200));
 
   // ------------------------------------------------------------ the owner
@@ -446,7 +460,7 @@ for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
           const rows = [...document.querySelectorAll('#more .row')].map((x) => [x.innerText.trim(), Math.round(x.getBoundingClientRect().height)]);
           return { help, fb, rows };`);
         check(`${width} px, ${ru ? "Russian" : "English"}, ${scheme}: Help and Send feedback in the reader's language, 48 px rows, nothing wider than the screen`,
-          P.help.title === (ru ? "Помощь" : "Help") && P.help.n === 8 && P.help.first === (ru ? "Что такое Axiom" : "What Axiom is") && !P.help.sideways &&
+          P.help.title === (ru ? "Помощь" : "Help") && P.help.n === 8 && P.help.first === (ru ? "📰 Что такое Axiom" : "📰 What Axiom is") && !P.help.sideways &&
           !P.help.out && P.fb.title === (ru ? "Написать отзыв" : "Send feedback") && P.fb.send === (ru ? "Отправить" : "Send") && P.fb.h === 48 &&
           P.fb.r === "12px" && !P.fb.sideways && P.rows.every((x) => x[1] === 48) && P.rows[0][0] === (ru ? "Помощь" : "Help"), JSON.stringify(P));
       }
@@ -459,8 +473,9 @@ for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
   }
 }
 // ------------------------------------------------------------ Step 15: the first open's setup
-// A new reader (as=new, no row yet) sees "Your topics" (1 of 3), "Digest times" (2 of 3), "All set"
-// (3 of 3); Skip or Done ends it once and the server sends the sample digest. Every size, both
+// A new reader (as=new, no row yet) sees (Step 16) "Language" (1 of 4, Telegram's language chosen),
+// "Your topics" (2 of 4), "Digest times" (3 of 4), "All set" (4 of 4); Skip or Done ends it once and
+// the server sends the sample digest. Every size, both
 // languages, both themes: 48 px rows and buttons, the buttons on the six columns, nothing wider.
 const SETUP_LAYOUT = `const v = document.querySelector('#view');
   const box = (e) => e.getBoundingClientRect();
@@ -477,9 +492,22 @@ const SETUP_LAYOUT = `const v = document.querySelector('#view');
   const n = await openBrowser();
   try {
     await n.open(`${BASE}/app/?theme=light&as=new`);
-    let r = await n.run(`${SERVER} ${SETUP_LAYOUT}`);
-    check("setup step 1: 'Your topics', 1 of 3, the six topics on, Skip and Next, no tabs",
-      r.title === "Your topics" && r.head === "1 of 3" && r.nav.join() === "Skip,Next" && !r.tabs && r.heights.join() === "48" && r.navOk &&
+    let r = await n.run(`${SERVER} const a = (() => { ${SETUP_LAYOUT} })();
+      const langs = [...document.querySelectorAll('[data-action=lang]')].map((x) => x.innerText.trim().replace(/\\s+/g, ' ') + ':' + x.getAttribute('aria-checked'));
+      return { ...a, langs };`);
+    check("Step 16 setup step 1: '🌍 Language', 1 of 4, the flag buttons of Settings with Telegram's language chosen, Skip and Next",
+      r.title === "🌍 Language" && r.head === "1 of 4" && r.langs.join() === "🇬🇧 English:true,🇷🇺 Русский:false" && r.nav.join() === "Skip,Next" &&
+      !r.tabs && r.heights.join() === "48" && r.navOk && !r.cut.length && !r.sideways, JSON.stringify(r));
+    r = await n.run(`${SERVER} const k = calls(); click('[data-action=lang][data-value=ru]'); await settled();
+      const a = (() => { ${SETUP_LAYOUT} })(); const u = await server();
+      click('[data-action=lang][data-value=en]'); await settled(); const b = (() => { ${SETUP_LAYOUT} })(); const u2 = await server();
+      return { a, lang: u.lang, b, lang2: u2.lang, haptic: since(k).filter((c) => c.startsWith('haptic')) };`);
+    check("Step 16 setup: a language tap saves at once and the whole flow switches language instantly (and back)",
+      r.lang === "ru" && r.a.title === "🌍 Язык" && r.a.head === "1 из 4" && r.a.nav.join() === "Пропустить,Далее" &&
+      r.lang2 === "en" && r.b.title === "🌍 Language" && r.b.head === "1 of 4" && r.haptic.includes("haptic impact light"), JSON.stringify(r));
+    r = await n.run(`${SERVER} click('[data-action=setup-next]'); await wait(300); ${SETUP_LAYOUT}`);
+    check("setup step 2: '📰 Your topics', 2 of 4, the six topics on, Back and Next, no tabs",
+      r.title === "📰 Your topics" && r.head === "2 of 4" && r.nav.join() === "Back,Next" && !r.tabs && r.heights.join() === "48" && r.navOk &&
       !r.cut.length && !r.sideways, JSON.stringify(r));
     r = await n.run(`${SERVER} const on = [...document.querySelectorAll('[data-action=topic][aria-checked=true]')].length;
       click('[data-value=ukraine_war]'); await settled(); const u = await server();
@@ -490,12 +518,12 @@ const SETUP_LAYOUT = `const v = document.querySelector('#view');
       click('[data-action=setup-next]'); await wait(200); click('[data-action=setup-next]'); await wait(300); const s3 = (() => { ${SETUP_LAYOUT} })();
       const hero = !!document.querySelector('#hero'), sample = text('#view .help-p');
       return { on, saved: u.topics, s2, times, on2, savedTimes: u2.digest_times, back, s3, hero, sample };`);
-    check("setup: a topic tap saves at once; step 2 'Digest times', 2 of 3, 18 hours with 09, 14, 20 on, Back and Next on the grid",
-      r.on === 6 && !r.saved.includes("ukraine_war") && r.s2.title === "Digest times" && r.s2.head === "2 of 3" && r.times === 18 &&
+    check("setup: a topic tap saves at once; step 3 '🕘 Digest times', 3 of 4, 18 hours with 09, 14, 20 on, Back and Next on the grid",
+      r.on === 6 && !r.saved.includes("ukraine_war") && r.s2.title === "🕘 Digest times" && r.s2.head === "3 of 4" && r.times === 18 &&
       r.on2.join() === "09:00,14:00,20:00" && r.s2.nav.join() === "Back,Next" && r.s2.navOk && r.s2.heights.join() === "48" &&
-      r.savedTimes.join() === "09:00,14:00" && r.back === "Your topics", JSON.stringify(r).slice(0, 700));
-    check("setup step 3: 'All set', 3 of 3, the next digest and one line about the sample, one Done button",
-      r.s3.title === "All set" && r.s3.head === "3 of 3" && r.hero && /sample digest of the last 24 hours/.test(r.sample) && r.s3.nav.join() === "Done" &&
+      r.savedTimes.join() === "09:00,14:00" && r.back === "📰 Your topics", JSON.stringify(r).slice(0, 700));
+    check("setup step 4: '✅ All set', 4 of 4, the next digest and two short lines about the sample, one Done button",
+      r.s3.title === "✅ All set" && r.s3.head === "4 of 4" && r.hero && /sample digest is on its way\.It has the top news of the last 24 hours/.test(r.sample) && r.s3.nav.join() === "Done" &&
       r.s3.navOk && !r.s3.sideways, JSON.stringify(r.s3));
     r = await n.run(`${SERVER} const k = calls(); click('[data-action=setup-finish]'); await until(() => text('#title') === 'Settings', 6000); await wait(300);
       const st = await (await fetch('/api/open', { method: 'POST', headers: { authorization: 'tma ' + Telegram.WebApp.initData, 'content-type': 'application/json' }, body: '{}' })).json();
@@ -510,8 +538,8 @@ const SETUP_LAYOUT = `const v = document.querySelector('#view');
     await n.open(`${BASE}/app/?theme=dark&as=new&tg_lang=ru`, "dark");
     r = await n.run(`${SERVER} const a = (() => { ${SETUP_LAYOUT} })(); click('[data-action=setup-skip]'); await until(() => text('#title') === 'Настройки', 6000);
       const u = await server(); return { a, title: text('#title'), lang: u.lang, topics: u.topics.length, times: u.digest_times };`);
-    check("setup in Russian, dark: 'Ваши темы', '1 из 3', Пропустить and Далее; Skip keeps the defaults",
-      r.a.title === "Ваши темы" && r.a.head === "1 из 3" && r.a.nav.join() === "Пропустить,Далее" && r.title === "Настройки" && r.lang === "ru" &&
+    check("setup in Russian, dark: '🌍 Язык' with Русский preselected (Telegram's language), '1 из 4', Пропустить and Далее; Skip keeps the defaults",
+      r.a.title === "🌍 Язык" && r.a.head === "1 из 4" && r.a.nav.join() === "Пропустить,Далее" && r.title === "Настройки" && r.lang === "ru" &&
       r.topics === 6 && r.times.join() === "09:00,14:00,20:00", JSON.stringify(r));
     check("no console errors (setup)", n.consoleErrors().length === 0, JSON.stringify(n.consoleErrors()[0]?.params ?? "").slice(0, 200));
   } catch (e) {
@@ -527,12 +555,12 @@ for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
       for (const scheme of ["light", "dark"]) {
         await fetch(`${BASE}/__reset`, { method: "POST" });
         await w.open(`${BASE}/app/?theme=${scheme}&as=new&tg_lang=${lang}`, scheme);
-        const S = await w.run(`const out = []; for (let i = 0; i < 3; i++) { out.push((() => { ${SETUP_LAYOUT} })());
-          if (i < 2) { click('[data-action=setup-next]'); await wait(250); } } return out;`);
+        const S = await w.run(`const out = []; for (let i = 0; i < 4; i++) { out.push((() => { ${SETUP_LAYOUT} })());
+          if (i < 3) { click('[data-action=setup-next]'); await wait(250); } } return out;`);
         const ru = lang === "ru";
-        check(`${width} px, ${ru ? "Russian" : "English"}, ${scheme}: the three setup steps keep the layout rules`,
+        check(`${width} px, ${ru ? "Russian" : "English"}, ${scheme}: the four setup steps (language first) keep the layout rules`,
           S.every((x) => x.heights.join() === "48" && x.navOk && !x.cut.length && !x.sideways && !x.tabs) &&
-          S.map((x) => x.head).join() === (ru ? "1 из 3,2 из 3,3 из 3" : "1 of 3,2 of 3,3 of 3"), JSON.stringify(S).slice(0, 600));
+          S.map((x) => x.head).join() === (ru ? "1 из 4,2 из 4,3 из 4,4 из 4" : "1 of 4,2 of 4,3 of 4,4 of 4"), JSON.stringify(S).slice(0, 600));
       }
     }
   } catch (e) {

@@ -163,7 +163,7 @@ describe("Step 13: adding a custom topic", () => {
     const { binding, sqlite } = setup();
     fetchMock = ai();
     let r = await add(binding, A, "Armenia");
-    assert.deepEqual(r.body.result, { kind: "main_topic", reason: "Armenia is already a main topic. Switch it on above." });
+    assert.deepEqual(r.body.result, { kind: "main_topic", reason: "Armenia is a main topic. Switch it on above." });
     r = await add(binding, A, "Россия");
     assert.equal(r.body.result.kind, "main_topic");
     assert.equal(aiCalls().length, 0);
@@ -191,7 +191,7 @@ describe("Step 13: adding a custom topic", () => {
       .run(nowS() - 120);
     fetchMock = ai();
     const r = await add(binding, A, "Colombia");
-    assert.deepEqual(r.body.result, { kind: "delayed", reason: "Попробуйте ещё раз через несколько минут." });
+    assert.deepEqual(r.body.result, { kind: "delayed", reason: "⏳ Попробуйте через несколько минут." });
     assert.equal(aiCalls().length, 0);
     assert.equal(sqlite.prepare("SELECT outcome FROM topic_checks").get().outcome, "delayed");
   });
@@ -278,16 +278,17 @@ describe("Step 13: adding a custom topic", () => {
     assert.equal(topicInfoFrom(asTopicRows(rows), "hy").c1.label, "Կոլումբիա");
   });
 
-  test("with a custom topic, every main topic may be switched off; removing the very last topic is refused", async () => {
+  test("Step 16: every main topic may be off, and the very last custom topic may go too", async () => {
     const { binding } = setup();
     fetchMock = ai();
-    assert.throws(() => validatePatch({ topics: [] }, ALL, CONFIG), /at least one/);
-    assert.deepEqual(validatePatch({ topics: [] }, ALL, CONFIG, { custom: 1 }), { topics: [] });
+    assert.deepEqual(validatePatch({ topics: [] }, ALL, CONFIG), { topics: [] });
     await add(binding, A, "Colombia");
     const s = await call(binding, "/api/settings", A, { topics: [] });
     assert.equal(s.status, 200);
     const r = await call(binding, "/api/topics/remove", A, { id: 1 });
-    assert.equal(r.body.code, "keep_topic");
+    assert.equal(r.status, 200);
+    assert.deepEqual(r.body.custom, []);
+    assert.deepEqual(r.body.user.topics, []);
   });
 
   test("the answer is checked in code: dashes, boost cap, editions, emoji, at least two searches", () => {
@@ -383,18 +384,15 @@ describe("Step 13 fixes: the switch, edit-mode delete and the emoji", () => {
     assert.deepEqual(JSON.parse(withCustomTopics({ topics: "[\"politics_conflicts\"]" }, rows(B)).topics), ["politics_conflicts", "c1"]);
   });
 
-  test("the last topic switched on cannot go off; with a main topic on it can; bad input refused", async () => {
+  test("Step 16: the last topic switched on may go off too (all off); bad input refused", async () => {
     const { binding } = setup();
     fetchMock = ai();
     await add(binding, A, "Colombia");
     assert.equal((await call(binding, "/api/settings", A, { topics: [] })).status, 200);
     const r = await sw(binding, A, 1, false);
-    assert.equal(r.status, 400);
-    assert.equal(r.body.code, "keep_topic");
-    await call(binding, "/api/settings", A, { topics: ["politics_conflicts"] });
-    assert.equal((await sw(binding, A, 1, false)).status, 200);
-    const main = await call(binding, "/api/settings", A, { topics: [] });
-    assert.equal(main.body.code, "keep_topic", "a switched-off custom topic does not count as 'on'");
+    assert.equal(r.status, 200);
+    assert.equal(r.body.custom[0].on, false);
+    assert.equal((await sw(binding, A, 1, true)).status, 200);
     assert.equal((await sw(binding, A, 1, "no")).status, 400);
     assert.equal((await sw(binding, A, 0, true)).status, 400);
     assert.equal((await sw(binding, A, 99, true)).status, 200, "a topic not followed: nothing changes");

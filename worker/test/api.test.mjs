@@ -110,7 +110,8 @@ describe("settings validation", () => {
   test("accepts good values and normalises them", () => {
     assert.deepEqual(validatePatch({ topics: ["armenia", "politics_conflicts", "armenia"] }, tags), { topics: ["politics_conflicts", "armenia"] });
     assert.deepEqual(validatePatch({ digest_times: ["20:00", "06:00", "23:00"] }, tags), { digest_times: ["06:00", "20:00", "23:00"] });
-    assert.deepEqual(validatePatch({ paused: true }, tags), { paused: 1 });
+    // Step 16 (owner): every main topic may be off (no "keep one topic" rule any more)
+    assert.deepEqual(validatePatch({ topics: [] }, tags), { topics: [] });
   });
 
   test("allowed times are 06:00 to 23:00 on the hour", () => {
@@ -122,19 +123,18 @@ describe("settings validation", () => {
   });
 
   const bad = [
-    [{ topics: [] }, /at least one topic/],
     [{ topics: ["sports"] }, /does not exist/],
     [{ topics: "politics_conflicts" }, /must be a list/],
-    [{ digest_times: [] }, /at least one digest time/],
-    [{ digest_times: ["05:00"] }, /between 06:00 and 23:00/],
-    [{ digest_times: ["09:30"] }, /on the hour/],
-    [{ digest_times: ["23:30"] }, /on the hour/],
-    [{ digest_times: ["9:00"] }, /on the hour/],
-    [{ digest_times: ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00"] }, /up to 5/],
+    [{ digest_times: [] }, /at least one time/],
+    [{ digest_times: ["05:00"] }, /06:00 to 23:00/],
+    [{ digest_times: ["09:30"] }, /full hour/],
+    [{ digest_times: ["23:30"] }, /full hour/],
+    [{ digest_times: ["9:00"] }, /full hour/],
+    [{ digest_times: ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00"] }, /Up to 5/],
     [{ max_stories: 7 }, /Unknown setting: max_stories/],          // removed in Step 5
     [{ format: "B" }, /Unknown setting: format/],
     [{ timezone: "Europe/Berlin" }, /Unknown setting: timezone/],   // the zone follows the phone
-    [{ paused: "yes" }, /on or off/],
+    [{ paused: true }, /Unknown setting: paused/],                  // Step 16: Pause removed (owner)
     [{ blocked: 0 }, /Unknown setting: blocked/],
     [{ next_digest_at: 1 }, /Unknown setting/],
     [{}, /Nothing to save/],
@@ -156,7 +156,7 @@ describe("settings validation", () => {
     addUser(sqlite, { next_digest_at: yerevan(20) });
     const r = await call(binding, "/api/settings", { init: await initFor(OWNER), body: { digest_times: ["09:30"] } });
     assert.equal(r.status, 400);
-    assert.match(r.body.error, /on the hour, between 06:00 and 23:00/);
+    assert.match(r.body.error, /full hour, 06:00 to 23:00/);
     assert.equal(sqlite.prepare("SELECT digest_times FROM users").get().digest_times, '["09:00","14:00","20:00"]');
   });
 
@@ -262,7 +262,7 @@ describe("admin data and actions", () => {
     const { db, sqlite } = fakeD1();
     const now = nowS();
     addUser(sqlite, { last_digest_at: now - 3600 });
-    addUser(sqlite, { id: FRIEND, first_name: "Ani", paused: 1 });
+    addUser(sqlite, { id: FRIEND, first_name: "Ani", topics: "[]" });   // Step 16: every topic off
     // two digests in the last day (3 + 1 stories, one of them merged away later and copied to its
     // kept story: still 4), one older digest that does not count
     const st = [1, 2, 3, 4, 5, 6].map((i) => addStory(sqlite, `S${i}`, ["politics_conflicts"], 7, now - 7200));
@@ -296,7 +296,7 @@ describe("admin data and actions", () => {
     assert.equal(a.stats["7d"].stories_created, 40);
     assert.deepEqual(a.stats.models[0]["24h"], { calls: 1, ok: 1, input_tokens: 10, output_tokens: 5 });
     assert.equal(a.stats.models[0]["7d"].calls, 2);
-    assert.deepEqual([a.users.count, a.users.active, a.users.paused, a.users.blocked], [3, 1, 1, 1]);
+    assert.deepEqual([a.users.count, a.users.active, a.users.all_off, a.users.blocked], [3, 1, 1, 1]);
     const me = a.users.list.find((u) => u.id === OWNER);
     assert.deepEqual([me.digests_24h, me.avg_stories_24h], [2, 2]);            // (3 + 1) / 2
     assert.deepEqual([a.users.list.find((u) => u.id === FRIEND).digests_24h, a.users.list.find((u) => u.id === FRIEND).avg_stories_24h], [0, null]);
@@ -385,7 +385,7 @@ describe("bot: Open settings button", () => {
     assert.deepEqual(fetchMock.calls[0].body.reply_markup, { inline_keyboard: [[{ text: "Set up", web_app: { url: "https://w.test/app/" } }]] });
     assert.deepEqual(fetchMock.calls[1].body.reply_markup, { inline_keyboard: [[{ text: "Open settings", web_app: { url: "https://w.test/app/" } }]] });
     assert.match(fetchMock.calls[0].body.text, /Tap Set up/);
-    assert.match(fetchMock.calls[1].body.text, /^Choose your topics, language and when your digests arrive/);
+    assert.match(fetchMock.calls[1].body.text, /^⚙️ Choose your topics, times and language/);
     assert.doesNotMatch(fetchMock.calls.map((c) => c.body.text).join(), /[—–]/);
   });
 

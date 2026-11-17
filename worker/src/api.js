@@ -163,13 +163,12 @@ async function removeCustom(db, tg, body, now, cfg, isOwner) {
   if (!user) return fail(404, "reopen_simple");
   if (!custom.some((c) => c.id === id)) return json(200, state(user, topics, isOwner, cfg, custom));   // already gone
   const left = custom.filter((c) => c.id !== id);
-  if (!enabledOnly(left).length && !JSON.parse(user.topics || "[]").length) return fail(400, "keep_topic");
   await db.batch(removeStatements(user.id, id, now));
   return json(200, state(user, topics, isOwner, cfg, left));
 }
 
 // Step 13 fixes: the switch on a custom topic row. Off keeps the topic in the list (its slot still
-// counts toward the 3); the last topic switched on (main or custom) cannot go off.
+// counts toward the 3). Step 16 (owner): every topic may be off (then no digests at all).
 async function switchCustom(db, tg, body, now, cfg, isOwner) {
   const id = Number(body?.id);
   if (!Number.isInteger(id) || id <= 0 || typeof body?.on !== "boolean") return fail(400, "bad_request");
@@ -179,7 +178,6 @@ async function switchCustom(db, tg, body, now, cfg, isOwner) {
   if (!user) return fail(404, "reopen_simple");
   if (!custom.some((c) => c.id === id)) return json(200, state(user, topics, isOwner, cfg, custom));   // removed elsewhere
   const after = custom.map((c) => (c.id === id ? { ...c, enabled: body.on ? 1 : 0 } : c));
-  if (!body.on && !enabledOnly(after).length && !JSON.parse(user.topics || "[]").length) return fail(400, "keep_topic");
   await db.batch([switchStatement(user.id, id, body.on)]);
   return json(200, state(user, topics, isOwner, cfg, after));
 }
@@ -220,6 +218,7 @@ async function announce(db, env, body, now, io) {
 async function digestNow(db, ownerId, now, cfg, io) {
   const r = await sendDigestNow(db, ownerId, now, cfg, io);   // Step 15: shared with the sample digest
   if (!r) return fail(404, "no_user");
+  if (r.off) return json(200, { ok: true, stories: 0, message: "Nothing sent: all your topics are off." });
   const n = r.ids.length;
   return json(200, {
     ok: true, stories: n,

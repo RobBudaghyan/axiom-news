@@ -52,7 +52,7 @@ describe("Step 15: welcome, new vs returning vs imported", () => {
     addUser(sqlite, { id: NEW, first_name: "Nora" });
     fetchMock = telegram();
     await hook(binding, "/start", NEW);
-    assert.match(sends()[0].body.text, /^Welcome back, Nora!/);
+    assert.match(sends()[0].body.text, /^👋 Welcome back, Nora!/);
     assert.equal((await api(binding, "/api/open", NEW, {})).body.setup, false);
   });
 
@@ -61,7 +61,7 @@ describe("Step 15: welcome, new vs returning vs imported", () => {
     addUser(sqlite, { id: NEW, first_name: "Nora", imported: 1, onboarded_at: null, opened_at: null, created_at: 1 });
     fetchMock = telegram();
     await hook(binding, "/start", NEW);
-    assert.match(sends()[0].body.text, /^Welcome back, Nora!/);
+    assert.match(sends()[0].body.text, /^👋 Welcome back, Nora!/);
     assert.notEqual(sends()[0].body.reply_markup.inline_keyboard[0][0].text, "Set up");
     assert.equal(needsSetup(userRow(sqlite, NEW)), false);
     const [due] = await (fakeD1Like(binding)).batch([reminderStatement(yerevan(12, 0, 20))]);
@@ -97,7 +97,7 @@ describe("Step 15: the setup and the sample digest", () => {
     const digest = sends().filter((c) => c.body.chat_id === NEW);
     assert.equal(digest.length, 1);
     const html = digest[0].body.rich_message?.html ?? digest[0].body.text;
-    assert.match(html, /^<p><i>Sample digest: the most important news of the last 24 hours on your topics\.<\/i><\/p>/);
+    assert.match(html, /^<p><i>🧪 Sample digest: the top news of the last 24 hours<\/i><\/p>/);
     assert.match(html, /Armenia and Turkey open the border/);
     assert.doesNotMatch(html, /Old news/);
     assert.equal(sqlite.prepare("SELECT count(*) AS n FROM sent WHERE user_id = ? AND story_id = ?").get(NEW, a).n, 1);
@@ -202,10 +202,10 @@ describe("Step 15: exactly one reminder", () => {
 describe("Step 15: setup texts and the first open", () => {
   test("the setup and welcome texts in Russian, Armenian and French; no dash anywhere", () => {
     assert.deepEqual(["setup_topics", "setup_times", "setup_done", "setup_next", "setup_back", "setup_skip", "setup_finish"].map((k) => t("ru", `app.${k}`)),
-      ["Ваши темы", "Время сводок", "Всё готово", "Далее", "Назад", "Пропустить", "Готово"]);
-    assert.equal(t("ru", "app.setup_step", { n: 2 }), "2 из 3");
+      ["📰 Ваши темы", "🕘 Время сводок", "✅ Всё готово", "Далее", "Назад", "Пропустить", "Готово"]);
+    assert.equal(t("ru", "app.setup_step", { n: 2, of: 4 }), "2 из 4");
     assert.equal(t("ru", "bot.setup_button"), "Настроить");
-    assert.match(t("ru", "digest.sample_label"), /^Пример сводки/);
+    assert.match(t("ru", "digest.sample_label"), /^🧪 Пример сводки/);
     for (const lang of ["en", "ru", "hy", "fr"]) {
       for (const k of ["bot.welcome_setup", "bot.setup_button", "bot.reminder", "digest.sample_label", "app.setup_topics", "app.setup_times",
         "app.setup_done", "app.setup_step", "app.setup_next", "app.setup_back", "app.setup_skip", "app.setup_finish", "app.setup_sample"]) {

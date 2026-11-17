@@ -52,7 +52,6 @@
   // ---------------------------------------------------------------- icons (inline SVG, currentColor)
   const I = {
     clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
-    pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="4" height="14" rx="1.3"/><rect x="13.5" y="5" width="4" height="14" rx="1.3"/></svg>',
     paper: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5 4h11v15a1 1 0 0 0 1 1H6a1 1 0 0 1-1-1V4Z"/><path d="M16 9h3v10a1 1 0 0 1-2 0"/><path d="M8 8h5M8 12h5M8 16h3" stroke-linecap="round"/></svg>',
     send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4 18-7Z"/></svg>',
     play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v4h-4"/></svg>',
@@ -237,12 +236,14 @@
   // ---------------------------------------------------------------- settings
   // Step 12: no helper texts, no "Saved" toast (a light haptic tap instead). One button component
   // (.b) on a 6-column grid: a time spans 1 column, a tip 2, a language 3, so every grid lines up.
-  // Rows (topics, pause) carry a small coloured square and a red switch (the owner's design 1).
+  // Rows (topics) carry a small coloured square and a red switch (the owner's design 1).
+  // Step 16 (owner): no Pause; a reader may switch every topic off, and then gets nothing at all.
+  const allOff = () => !S.st.user.topics.length && !(S.st.custom || []).some((c) => c.on);
   function heroHTML() {
     const u = S.st.user;
-    if (u.paused) {
-      return `<div class="group hero paused" id="hero"><div class="hero-icon">${I.pause}</div><div>
-        <div class="hero-label">${esc(tr("app.hero_paused_label"))}</div><div class="hero-value">${esc(tr("app.hero_paused"))}</div></div></div>`;
+    if (allOff()) {
+      return `<div class="group hero off" id="hero"><div class="hero-icon emo" aria-hidden="true">😴</div><div>
+        <div class="hero-value">${esc(tr("app.all_off"))}</div><div class="hero-label">${esc(tr("app.all_off_hint"))}</div></div></div>`;
     }
     const ts = u.next_digest_at;
     const value = ts ? tr("app.day_at", { day: dayName(ts, u.timezone), time: hm(ts, u.timezone) }) : tr("app.not_scheduled");
@@ -364,7 +365,9 @@
     const head = `<h2 class="section-head has-action"><span>${esc(tr("app.sec_my_topics"))}</span>` +
       (list.length ? `<button class="head-link" data-action="edit-topics" aria-pressed="${editing}">${esc(tr(editing ? "app.done" : "app.edit"))}</button>` : "") +
       "</h2>";
-    return `<section class="section${editing ? " editing" : ""}" id="my-topics">${head}${card(rows + add)}</section>`;
+    // Step 16 (owner exception to "no helper texts"): one small hint line under the add row
+    const hint = add ? `<p class="section-foot hint" id="topic-hint">${esc(tr("app.add_topic_hint"))}</p>` : "";
+    return `<section class="section${editing ? " editing" : ""}" id="my-topics">${head}${card(rows + add)}${hint}</section>`;
   }
   function renderMyTopics(focus = false) {
     const el = $("#my-topics");
@@ -413,22 +416,14 @@
     }
   }
 
-  // Is anything else switched on (a main topic or another custom topic)? The last one cannot go.
-  const otherOn = (id) => S.st.user.topics.length > 0 || (S.st.custom || []).some((c) => c.on && c.id !== id);
-
   function toggleCustom(el) {
     const id = Number(el.dataset.value);
     const c = (S.st.custom || []).find((x) => x.id === id);
     if (!c) return;
     const on = !!c.on;
-    if (on && !otherOn(id)) {
-      haptic("warning");
-      shake(el);
-      toast(tr("app.keep_topic"), "err");
-      return;
-    }
     c.on = !on;
     el.setAttribute("aria-checked", String(!on));
+    updateHero();
     chain = chain.then(async () => {
       try {
         S.st = await api("/api/topics/switch", { id, on: !on });
@@ -447,12 +442,6 @@
     const id = Number(el.dataset.value);
     const list = S.st.custom || [];
     const row = el.closest(".row");
-    if (!otherOn(id)) {
-      haptic("warning");
-      shake(row);
-      toast(tr("app.keep_topic"), "err");
-      return;
-    }
     const before = list;
     S.st.custom = list.filter((c) => c.id !== id);
     haptic("impact", "light");
@@ -461,6 +450,7 @@
     chain = chain.then(async () => {
       try {
         S.st = await api("/api/topics/remove", { id });
+        updateHero();
       } catch (e) {
         S.st.custom = before;
         renderMyTopics();
@@ -476,20 +466,14 @@
     return grid(allowedTimes(S.st.limits).map((t) => `<button class="b t tnum" data-action="time" data-value="${t}" aria-pressed="${u.digest_times.includes(t)}">${t}</button>`).join(""));
   }
 
-  function languagesHTML() {
-    const langs = S.st.languages || [];
-    if (langs.length < 2) return "";
+  const hasLangs = () => (S.st.languages || []).length >= 2;
+  function langGrid() {
     const flags = L10N.flags || {};
-    return sec(tr("app.sec_language"), grid(langs.map((l) => `<button class="b s3" role="radio" aria-checked="${l.code === S.st.user.lang}" data-action="lang" data-value="${esc(l.code)}">` +
-      `${flags[l.code] ? `<span class="emo" aria-hidden="true">${esc(flags[l.code])}</span>` : ""}<span class="lbl" lang="${esc(l.code)}">${esc(l.name)}</span></button>`).join("")),
-      'id="language" role="radiogroup"');
+    return grid((S.st.languages || []).map((l) => `<button class="b s3" role="radio" aria-checked="${l.code === S.st.user.lang}" data-action="lang" data-value="${esc(l.code)}">` +
+      `${flags[l.code] ? `<span class="emo" aria-hidden="true">${esc(flags[l.code])}</span>` : ""}<span class="lbl" lang="${esc(l.code)}">${esc(l.name)}</span></button>`).join(""));
   }
-
-  function pauseHTML() {
-    const p = S.st.user.paused;
-    const label = esc(tr("app.pause"));
-    return sec("", card(`<button class="row has-icon tap" role="switch" aria-checked="${p}" data-action="pause" id="pause-row"><span class="sq solid" aria-hidden="true">${I.pause}</span>` +
-      `<span class="row-main row-title">${label}</span>${switchEl}</button>`));
+  function languagesHTML() {
+    return hasLangs() ? sec(tr("app.sec_language"), langGrid(), 'id="language" role="radiogroup"') : "";
   }
 
   // "Yerevan · GMT+4": the phone's zone, saved on every open (Step 12: one quiet line, no row).
@@ -501,7 +485,6 @@
       ${myTopicsHTML()}
       ${sec(tr("app.sec_times"), timesHTML(), 'id="times"')}
       ${languagesHTML()}
-      ${pauseHTML()}
       ${supportHTML()}
       ${moreHTML()}
       <p class="tzline tnum" id="tz-line">${esc(zoneLine(S.st.user))}</p>`;
@@ -512,25 +495,31 @@
   // Settings itself keeps no helper text; the help text lives on its page.
   const PAGE_TITLES = { help: "app.help", feedback: "app.feedback" };
   const PAGES = { help: () => helpHTML(), feedback: () => feedbackHTML(), setup: () => setupHTML() };
-  const SETUP_TITLES = ["app.setup_topics", "app.setup_times", "app.setup_done"];
-  const pageTitle = () => tr(S.page === "setup" ? SETUP_TITLES[(S.step || 1) - 1] : PAGE_TITLES[S.page]);
+  // Step 16 (owner): a Language step first (only while more than one language is on).
+  const setupSteps = () => (hasLangs() ? ["lang", "topics", "times", "done"] : ["topics", "times", "done"]);
+  const SETUP_TITLES = { lang: "app.setup_lang", topics: "app.setup_topics", times: "app.setup_times", done: "app.setup_done" };
+  const pageTitle = () => tr(S.page === "setup" ? SETUP_TITLES[setupSteps()[Math.min(S.step || 1, setupSteps().length) - 1]] : PAGE_TITLES[S.page]);
 
-  // Step 15: the first open's 3-step setup (topics, times, done), skippable. Every choice saves at
-  // once like in Settings; Done or Skip tells the server, which sends one sample digest.
+  // Step 15: the first open's setup (Step 16: language, topics, times, done), skippable. Every choice
+  // saves at once like in Settings; Done or Skip tells the server, which sends one sample digest.
   function setupHTML() {
-    const step = S.step || 1;
-    const head = tr("app.setup_step", { n: step });
-    if (step === 1) return sec(head, topicsHTML(), 'id="topics"') + setupNav("skip", "next");
-    if (step === 2) return sec(head, timesHTML(), 'id="times"') + setupNav("back", "next");
+    const steps = setupSteps();
+    const step = Math.min(S.step || 1, steps.length);
+    const kind = steps[step - 1];
+    const head = tr("app.setup_step", { n: step, of: steps.length });
+    const first = step === 1 ? "skip" : "back";
+    if (kind === "lang") return sec(head, langGrid(), 'id="language" role="radiogroup"') + setupNav(first, "next");
+    if (kind === "topics") return sec(head, topicsHTML(), 'id="topics"') + setupNav(first, "next");
+    if (kind === "times") return sec(head, timesHTML(), 'id="times"') + setupNav(first, "next");
     return `<section class="section"><h2 class="section-head">${esc(head)}</h2>${heroHTML()}</section>` +
-      sec("", card(`<p class="help-p">${esc(tr("app.setup_sample"))}</p>`)) + setupNav(null, "finish");
+      sec("", card(`<p class="help-p lines">${lines(tr("app.setup_sample"))}</p>`)) + setupNav(null, "finish");
   }
   const setupNav = (left, right) => `<section class="section setup-nav">${grid(
     (left ? `<button class="b s2" data-action="setup-${left}" ${S.busy.setup ? "disabled" : ""}>${esc(tr(`app.setup_${left}`))}</button>` : "") +
     `<button class="b ${left ? "s4" : "s6"} primary" data-action="setup-${right}" ${S.busy.setup ? "disabled" : ""}>` +
     `${S.busy.setup && right === "finish" ? '<span class="spinner small"></span>' : esc(tr(`app.setup_${right}`))}</button>`)}</section>`;
   function setupStep(delta) {
-    S.step = Math.min(3, Math.max(1, (S.step || 1) + delta));
+    S.step = Math.min(setupSteps().length, Math.max(1, (S.step || 1) + delta));
     haptic("select");
     syncTabs();
     renderView(true);
@@ -560,12 +549,14 @@
     `<span class="sq solid ${cls}" aria-hidden="true">${icon}</span><span class="row-main row-title">${esc(label)}</span>` +
     `<span class="chev" aria-hidden="true">${I.chev}</span></button>`;
   function moreHTML() {
-    return sec("", card(navRow("open-help", I.help, "blue", tr("app.help")) + navRow("open-feedback", I.chat, "green", tr("app.feedback"))),
+    return sec("", card(navRow("open-help", I.help, "red", tr("app.help")) + navRow("open-feedback", I.chat, "red", tr("app.feedback"))),
       'id="more"');
   }
-  const HELP = ["what", "stories", "topics", "times", "lang", "pause", "support", "privacy"];
+  // Step 16 (owner): each section is a title with an emoji and 2-4 short lines (one idea a line).
+  const HELP = ["what", "stories", "topics", "times", "lang", "support", "feedback", "privacy"];
+  const lines = (s) => String(s).split("\n").map((l) => `<span class="line">${esc(l)}</span>`).join("");
   function helpHTML() {
-    return HELP.map((k) => sec(tr(`app.help_${k}_h`), card(`<p class="help-p">${esc(tr(`app.help_${k}`))}</p>`), `id="help-${k}"`)).join("");
+    return HELP.map((k) => sec(tr(`app.help_${k}_h`), card(`<p class="help-p lines">${lines(tr(`app.help_${k}`))}</p>`), `id="help-${k}"`)).join("");
   }
   function feedbackHTML() {
     const busy = !!S.busy.fb;
@@ -668,15 +659,10 @@
     const u = S.st.user;
     const tag = el.dataset.value;
     const on = u.topics.includes(tag);
-    if (on && u.topics.length === 1 && !(S.st.custom || []).some((c) => c.on)) {   // Step 13: a custom topic switched on counts too
-      haptic("warning");
-      shake(el);
-      toast(tr("app.keep_topic"), "err");
-      return;
-    }
     const before = [...u.topics];
     u.topics = on ? u.topics.filter((t) => t !== tag) : S.st.topics.map((t) => t.tag).filter((t) => t === tag || u.topics.includes(t));
     el.setAttribute("aria-checked", String(!on));
+    updateHero();
     save({ topics: u.topics }, () => { S.st.user.topics = before; });
   }
 
@@ -701,14 +687,6 @@
     u.digest_times = on ? u.digest_times.filter((x) => x !== t) : [...u.digest_times, t].sort();
     el.setAttribute("aria-pressed", String(!on));
     save({ digest_times: u.digest_times }, () => { S.st.user.digest_times = before; });
-  }
-
-  function togglePause(el) {
-    const u = S.st.user;
-    u.paused = !u.paused;
-    el.setAttribute("aria-checked", String(u.paused));
-    updateHero();
-    save({ paused: u.paused }, () => { S.st.user.paused = !S.st.user.paused; });
   }
 
   // Step 9: a new language applies to the whole page at once; saved instantly like every setting.
@@ -820,10 +798,10 @@
     }
 
     const U = A.users;
-    const tiles = `<div class="stats">${[["Total", U.count], ["Active", U.active], ["Paused", U.paused], ["Blocked", U.blocked]]
+    const tiles = `<div class="stats">${[["Total", U.count], ["Active", U.active], ["All off", U.all_off], ["Blocked", U.blocked]]
       .map(([k, v]) => `<div class="stat"><b>${n(v)}</b><span>${k}</span></div>`).join("")}</div>`;
     const userRows = U.list.map((x) => row({ icon: `<span class="avatar">${esc((x.name || "?").trim().charAt(0).toUpperCase())}</span>`,
-      title: `${esc(x.name)} ${x.blocked ? badge("Blocked", "bad") : x.paused ? badge("Paused", "mute") : ""}`,
+      title: `${esc(x.name)} ${x.blocked ? badge("Blocked", "bad") : x.all_off ? badge("All off", "mute") : ""}`,
       sub: esc(`${(x.lang || "en").toUpperCase()} · ${city(x.timezone)} · ${x.times.join(", ")}` +
         (x.digests_24h ? ` · avg ${x.avg_stories_24h} stories (${x.digests_24h} ${x.digests_24h === 1 ? "digest" : "digests"}, 24 h)` : "")),
       right: `<span class="tnum" style="font-size:15px">${x.last_digest_at ? esc(ago(x.last_digest_at)) : "No digest yet"}</span>` })).join("");
@@ -1060,7 +1038,6 @@
         break;
       case "topic": toggleTopic(el); break;
       case "time": toggleTime(el); break;
-      case "pause": togglePause(el); break;
       case "lang": chooseLanguage(el); break;
       case "tip": payTip(Number(v)); break;
       case "add-topic": ev.preventDefault(); addTopic(); break;
@@ -1117,7 +1094,7 @@
 
   function fatal(title, text, retry) {
     app.removeAttribute("aria-busy");
-    app.innerHTML = `<div class="empty"><div class="empty-icon">${I.paper}</div><h1>${esc(title)}</h1><p>${esc(text)}</p>
+    app.innerHTML = `<div class="empty"><div class="empty-icon">${I.paper}</div><h1>${esc(title)}</h1><p class="lines">${lines(text)}</p>
       ${retry ? `<button class="btn" data-action="retry">${esc(tr("app.try_again"))}</button>` : ""}</div>`;
   }
 

@@ -27,8 +27,8 @@ export function welcomeText(user, topics, now, isNew, lang = effectiveLang(user)
   const name = user.first_name || t(lang, "bot.friend");
   const hello = t(lang, isNew ? "bot.welcome_new" : "bot.welcome_back", { name });
   return `${hello}\n\n` +
-    `${t(lang, "bot.welcome_times", { times: listJoin(lang, parseList(user.digest_times)), zone: zoneText(lang, tz) })} ` +
-    `${t(lang, "bot.welcome_topics", { topics: topicNames(parseList(user.topics), topics, lang) })}\n\n` +
+    `${t(lang, "bot.welcome_times", { times: listJoin(lang, parseList(user.digest_times)), zone: zoneText(lang, tz) })}\n` +
+    `${t(lang, "bot.welcome_topics", { topics: topicNames(parseList(user.topics), topics, lang) })}\n` +
     t(lang, "bot.welcome_next", { when: describeSlot(user.next_digest_at, now, tz, lang), button: t(lang, "bot.button") });
 }
 
@@ -37,7 +37,6 @@ export const welcomeSetupText = (user, lang = effectiveLang(user)) =>
 
 export function helpText(user, now, lang = effectiveLang(user)) {
   if (!user) return t(lang, "bot.help_new");
-  if (user.paused) return t(lang, "bot.help_paused");
   return t(lang, "bot.help", {
     times: listJoin(lang, parseList(user.digest_times)), zone: zoneText(lang, user.timezone),
     when: describeSlot(user.next_digest_at, now, user.timezone, lang),

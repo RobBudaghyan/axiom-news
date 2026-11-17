@@ -36,7 +36,8 @@ const row = async () => (await db.query("SELECT first_name, timezone, tz_detecte
 // (lesson 14), so a made-up name here would overwrite the real one (happened once in Step 5).
 const before = await row();
 const ownerInit = await sign(owner, before?.first_name || "Owner");
-const opened = await api("/api/open", ownerInit, { tz: "Asia/Yerevan" });
+// Step 16: send the zone already stored, so the check never moves the owner to another zone
+const opened = await api("/api/open", ownerInit, { tz: before?.timezone || "Asia/Yerevan" });
 check("open as owner", opened.status === 200 && opened.body.is_owner === true, `${opened.status}, ${opened.ms} ms, is_owner ${opened.body.is_owner}`);
 
 const old = opened.body.user.digest_times;

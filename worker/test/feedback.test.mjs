@@ -103,7 +103,7 @@ describe("Step 15: Send feedback", () => {
 });
 
 describe("Step 15: Help", () => {
-  const KEYS = ["what", "stories", "topics", "times", "lang", "pause", "support", "privacy"];
+  const KEYS = ["what", "stories", "topics", "times", "lang", "support", "feedback", "privacy"];
   test("every help section and the feedback texts exist in every language, short, no dash", () => {
     for (const lang of ["en", "ru", "hy", "fr"]) {
       for (const k of KEYS) {
@@ -117,8 +117,8 @@ describe("Step 15: Help", () => {
       for (const key of ["help", "feedback", "feedback_send", "feedback_thanks", "feedback_placeholder"]) assert.ok(DICTS[lang].app[key], `${lang} ${key}`);
       for (const key of ["feedback_empty", "feedback_long", "feedback_limit"]) assert.ok(DICTS[lang].errors[key], `${lang} ${key}`);
     }
-    assert.match(t("en", "app.help_privacy"), /Telegram id, your first name and your settings.*sent to an AI.*Nothing is sold or shared/);
-    assert.match(t("ru", "app.help_privacy"), /ничего не продаём/);
+    assert.match(t("en", "app.help_privacy"), /Telegram id and name.*settings.*AI checks.*Nothing is sold or shared/s);
+    assert.match(t("ru", "app.help_privacy"), /[Нн]ичего не продаём/);
     assert.ok(!/дайджест/i.test(KEYS.map((k) => t("ru", `app.help_${k}`)).join(" ")), "сводка, never дайджест");
     assert.match(t("ru", "app.help_what"), /сводка/);
   });

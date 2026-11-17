@@ -20,8 +20,8 @@ bot @axiom_news_bot at the end.
   for Armenia and Russia), sees up to 90 new stories per call, and makes a second call on a backlog.
 - **Digests per user** at chosen local times (on the hour, 06:00-23:00, 1 to 5; defaults
   09:00/14:00/20:00), time zone from the phone. **No fixed count (Step 8):** a story is in if its
-  final score is 7+, or its main topic is followed and its topic score is 6+ and above its final
-  score. **Off means off (Step 15, owner):** a story whose main topic is one of the six main topics
+  final score is 7+, or its main topic is followed and its topic score is 7+ (Step 16; 6 before)
+  and above its final score; custom topics keep a topic bar of 6 (`custom_topic_bar`). **Off means off (Step 15, owner):** a story whose main topic is one of the six main topics
   and switched off for the reader never reaches them; otherwise one tag they have on is enough. No maximum, no topic cap: the digest is ONE message of at most 3,900 characters (never
   folded behind "Show more"); if longer, the lowest-ranked stories are cut, keeping each followed
   topic's best story. Building a digest is a database filter with no AI. The same story is never sent
@@ -41,12 +41,13 @@ bot @axiom_news_bot at the end.
   English. In Russian, "digest" is always сводка, and Ukraine always takes на (Step 11, owner):
   the topic is "Война на Украине", translations say "на Украине" (the job rejects "в Украине").
 - **Telegram Mini App settings:** the next digest, topics, digest times (hourly grid), language,
-  pause, Support; the time zone is one quiet line at the bottom ("Yerevan · GMT+4"), from the phone
+  Support (Step 16: no Pause; every topic, main and custom, may be off, and then the reader gets no
+  digest and no quiet note, and the card says "😴 All topics are off"); the time zone is one quiet line at the bottom ("Yerevan · GMT+4"), from the phone
   (Step 5 removed stories per digest, the format choice and the zone picker). **Design (owner,
   Step 12: "design 1", iOS Settings):** iOS grouped colours (light #f2f2f7 with white cards, dark
   #000 with #1c1c1e), every row and button 48 px high with 12 px corners and 8 px gaps, button
   grids on six shared columns, a small coloured square and a red switch on every row, no helper
-  texts, no "Saved" toast (a light haptic tap; errors still show). An Admin tab, visible only to
+  texts (one owner exception since Step 16: "e.g. Formula 1, Japan, AI" under Add a topic), no "Saved" toast (a light haptic tap; errors still show). An Admin tab, visible only to
   the owner, in the same style, shows stats, errors and AI usage, plus a "Send me a digest now"
   button.
 - **AI:** Gemini free tier, falling back to Groq; if both fail, items wait an hour. About 82
@@ -83,12 +84,15 @@ bot @axiom_news_bot at the end.
   checks wait ("try again in a few minutes"). Every Gemini model refusing, or the limit reached:
   translations wait too. Pass 1 and the editor never wait. Admin shows it; the owner gets one
   alert a day.
-- **Help and Feedback (Step 15):** "Help" and "Send feedback" rows at the bottom of Settings, each
-  its own page with Telegram's back button. Help: eight short sections and a privacy note, every
-  language. Feedback: 1,000 characters, 10 a reader a day, forwarded to the owner with name and id,
+- **Help and Feedback (Step 15):** "Help" and "Send feedback" rows at the bottom of Settings (brand-red
+  squares since Step 16), each its own page with Telegram's back button. Help: eight sections, each an
+  emoji title and 2 to 4 short lines (Step 16), every language.
+- **Texts (Step 16, owner):** everything users read is short, kind and written one idea per line,
+  with a fitting emoji (👋 ✅ 🕘 🌍 💬 ❤️ 🔒); tests check line counts and lengths. Feedback: 1,000 characters, 10 a reader a day, forwarded to the owner with name and id,
   listed in Admin. /help points to Settings.
 - **Welcome (Step 15):** /start from a new user: a short welcome with "Set up". The first Mini App
-  open: a 3-step setup (topics, times, done), skippable; then one sample digest of the last 24 h by
+  open: a setup (Step 16: language, topics, times, done; the language preselected from Telegram,
+  a tap switches the whole flow at once), skippable; then one sample digest of the last 24 h by
   the normal rules. One reminder the next day (10:00 to 20:00 their time) for someone who never
   opened the app. Readers imported from the old bot (`import-users.mjs`, `imported = 1`) get none
   of it; they get the announcement.
@@ -217,6 +221,9 @@ bot @axiom_news_bot at the end.
 | 2026-11-17 | Welcome, sample digest and reminder are claimed in D1 before anything is sent (`UPDATE ... RETURNING`) (Step 15) | exactly once even with a double tap or two overlapping cron ticks |
 | 2026-11-17 | Announcements: one AI call for all languages, the owner previews exactly what is sent, a send row per user written before the message (Step 15) | the owner sees every version; a retry never sends twice |
 | 2026-11-17 | Google News shadow leftovers removed (Step 15) | paused since Step 7; `job/gnews.py` kept for custom topics |
+| 2026-11-17 | Pause removed; every topic may be off; an all-off reader gets nothing and their slot just moves on (owner, Step 16) | simpler: switching everything off is the pause. Paused users would have been migrated to all off (there were none) |
+| 2026-11-17 | Topic bar 7 for the six main topics, 6 kept for custom topics (`custom_topic_bar`); editor examples put routine Armenia court steps, meetings and local incidents at 3-5 (advisor, Step 16) | 48 h replay: all six topics 15.7 a digest (196 cut) -> 10.4 (23 cut); Armenia only 13.6 -> 6.4; the owner unchanged. Boost caps alone barely moved it (Armenia only 13.6 -> 12) |
+| 2026-11-17 | Setup starts with a Language step; texts one idea per line with emojis; red Help and Feedback squares; one hint under Add a topic (owner, Step 16) | the owner's phone test |
 | 2026-11-15 | pre_checkout_query is answered from the invoice payload alone (no database read) | Telegram cancels the payment after 10 s; measured a few microseconds |
 | 2026-11-15 | Table `tips`: user, amount, Telegram charge id (UNIQUE), time, refunded time; nothing else | the owner's rule; the charge id is needed for refunds, and UNIQUE makes a repeated update count once |
 | 2026-11-15 | /paysupport forwards the user's note to the owner; /terms states the tip terms; the owner refunds from Admin after a confirm (refundStarPayment) | Telegram's rules for bots that take Stars |
