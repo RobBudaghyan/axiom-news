@@ -33,12 +33,14 @@ def add_user(db, uid, paused=0, blocked=0, lang="en"):
              [uid, f"U{uid}", json.dumps(["politics"]), 1, paused, blocked, lang])
 
 
-def add_topic(db, tid, name, queries=None, boost=2, searched_at=None, orphan_since=None):
+def add_topic(db, tid, name, queries=None, boost=2, searched_at=None, orphan_since=None, keywords="name"):
+    """keywords: "name" = just the topic's name (Step 14), None = not written yet (the job backfills)."""
     queries = queries if queries is not None else [{"q": name, "ed": "en"}, {"q": f"{name} news", "ed": "en_gb"}]
+    kw = json.dumps({"en": [name], "ru": [name]}) if keywords == "name" else None if keywords is None else json.dumps(keywords)
     db.query("INSERT INTO custom_topics (id, tag, names, emoji, definition, queries, boost_max, created_at, searched_at, "
-             "orphan_since) VALUES (?,?,?,?,?,?,?,?,?,?)",
+             "orphan_since, keywords) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
              [tid, f"c{tid}", json.dumps({"en": name, "ru": name, "hy": name, "fr": name}), "📌",
-              f"News about {name}.", json.dumps(queries), boost, 1, searched_at, orphan_since])
+              f"News about {name}.", json.dumps(queries), boost, 1, searched_at, orphan_since, kw])
 
 
 def follow(db, uid, tid, enabled=1):
@@ -236,7 +238,8 @@ class TestAIPasses(unittest.TestCase):
         db = new_db()
         add_user(db, 1)
         add_topic(db, 1, "Colombia")
-        add_topic(db, 2, "Formula 1", [{"q": "Formula 1", "ed": "en"}])
+        add_topic(db, 2, "Formula 1", [{"q": "Formula 1", "ed": "en"}],
+                  keywords={"en": ["Formula 1", "F1", "Grand Prix", "Verstappen"], "ru": ["Формула-1"]})
         follow(db, 1, 1)
         follow(db, 1, 2)
         google = FakeGoogle({"Formula 1": [gi("F1: Verstappen wins Abu Dhabi Grand Prix")],
@@ -379,17 +382,17 @@ class TestLinks(unittest.TestCase):
         follow(db, 1, 1)
         t = int(T0 - H)
         weak = db.query("INSERT INTO stories (summary, topics, importance, best_url, best_source, best_tier, source_count, "
-                        "created_at, updated_at, final_score) VALUES ('w', '[\"c1\"]', 3, 'https://news.google.com/rss/articles/W', "
+                        "created_at, updated_at, final_score) VALUES ('Colombia w', '[\"c1\"]', 3, 'https://news.google.com/rss/articles/W', "
                         "'X', 4, 1, ?, ?, 3) RETURNING id", [t, t])[0]["id"]
         strong = db.query("INSERT INTO stories (summary, topics, importance, best_url, best_source, best_tier, source_count, "
-                          "created_at, updated_at, final_score, topic_score, main_topic, scored_at) VALUES ('s', '[\"c1\"]', 6, "
+                          "created_at, updated_at, final_score, topic_score, main_topic, scored_at) VALUES ('Colombia s', '[\"c1\"]', 6, "
                           "'https://news.google.com/rss/articles/S', 'X', 4, 1, ?, ?, 5, 7, 'c1', ?) RETURNING id",
                           [t, t, t])[0]["id"]
         # a routine story (topic score 5, below the bar of 6) stays out of digests, so it is not resolved
         add_topic(db, 2, "Peru", boost=0)
         follow(db, 1, 2)
         db.query("INSERT INTO stories (summary, topics, importance, best_url, best_source, best_tier, source_count, "
-                 "created_at, updated_at, final_score, topic_score, main_topic, scored_at) VALUES ('p', '[\"c2\"]', 6, "
+                 "created_at, updated_at, final_score, topic_score, main_topic, scored_at) VALUES ('Peru p', '[\"c2\"]', 6, "
                  "'https://news.google.com/rss/articles/P', 'X', 4, 1, ?, ?, 5, 5, 'c2', ?)", [t, t, t])
         seen = []
         j, _ = job_with(db, link_resolver=lambda link: seen.append(link) or "https://outlet.test/a")

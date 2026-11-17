@@ -476,6 +476,20 @@ the icon centring (28 checks since Step 5).
   failure keeps the Google link (`stories.link_state` 1 or 2, one try each). A topic that no
   reader has in their list (on or off) for 7 days is deleted with its searches and stats
   (`orphan_since`).
+- **The keyword rule (Step 14, owner):** every custom topic has 5-15 match keywords in English and
+  Russian (`custom_topics.keywords`, JSON). The Worker's topic check writes them; a topic saved with
+  fewer than 5 gets them from the job (`custom.backfill_keywords`, one AI call, with the topic's
+  latest Google headlines so the model sees today's names). A story keeps a custom tag, and may
+  have it as its main topic, only if one keyword is in its English headline (the first-pass summary
+  while there is none) or description: whole word, any case, a plural s allowed. Otherwise the tag
+  goes, the main topic falls back to the most specific main topic left (or none) and the topic
+  score to the score (no boost). Applied in pass 1 (`run.py apply`), in the editor's writes
+  (`editor.write_statements`) and once a run over the last 26 h (`custom.enforce`, after the
+  editor). The Worker does not check keywords: a digest only sees tags the job kept.
+- **Glossary spellings (Step 14):** the first English form of a `config/glossary.yaml` entry is ours;
+  another form ("Takaiti", the Russian spelling read back into English) in a Google headline, a
+  pass-1 summary or the editor's text becomes the first ("Takaichi") (`custom.spell_names`, after
+  the fact guard).
 - **The switch (Step 13 fixes):** `custom_follows.enabled`. Off keeps the topic in the reader's list
   and its slot (it counts toward the 3); only followers with the switch on make a topic searched and
   get it in digests (`POST /api/topics/switch`). Edit mode in the Mini App removes a follow.

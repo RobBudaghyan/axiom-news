@@ -500,8 +500,8 @@ export function chooseDigestLanguage(picked, want) {
 // One user's whole digest from candidate rows: pick (two-score rule), choose the language (holding
 // untranslated stories), then cut to one unfolded message (measured on the text actually sent, so
 // the room a held story leaves goes to the next translated story), format. No I/O.
-// Returns {text, kind, storyIds, stories, cut, nextAt, lang, fallback, heldIds, button}: kind says how it
-// is sent ("rich" or "html"), button is the label of the "⚙️ Settings" button under it (Step 11).
+// Returns {text, kind, storyIds, stories, cut, nextAt, lang, fallback, heldIds}: kind says how it is
+// sent ("rich" or "html"). Step 14 (owner): no "⚙️ Settings" button under a digest any more.
 export function planDigest(user, candidates, topics, now, cfg = CONFIG, opts = {}) {
   const chosen = chooseDigestLanguage(pickStories(candidates, parseList(user.topics), cfg),
                                       opts.lang ?? effectiveLang(user));
@@ -519,7 +519,7 @@ export function planDigest(user, candidates, topics, now, cfg = CONFIG, opts = {
   }
   const times = parseList(user.digest_times, cfg.default_times);
   return { ...msg, cut: cut.length, nextAt: nextSlot(now, tz, times), lang: chosen.lang, fallback: chosen.fallback,
-           heldIds: chosen.held.map((s) => s.id), button: t(chosen.lang, "digest.settings_button") };
+           heldIds: chosen.held.map((s) => s.id) };
 }
 
 // Step 10: one digest_holds row per held story (the last digest that held it wins).

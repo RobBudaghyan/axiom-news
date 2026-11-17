@@ -1,0 +1,521 @@
+{
+ "colombia_headlines": 35,
+ "pass1_calls": 3,
+ "keyword_calls": 1,
+ "colombia_keywords_written": true,
+ "now": 1794897321,
+ "editor_before": [
+  1,
+  10117,
+  7534
+ ],
+ "editor_after": [
+  1,
+  9693,
+  6247
+ ],
+ "enforced_before_editor": 15,
+ "topics": {
+  "c2": {
+   "name": "Japan",
+   "live": [
+    {
+     "id": 518,
+     "headline": "Trump to meet with Xi and Putin in China for trilateral talks",
+     "score": 8,
+     "topic_score": 8,
+     "main": "politics"
+    },
+    {
+     "id": 3172,
+     "headline": "Japan re-evaluates defense strategy to prioritize wartime production",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3195,
+     "headline": "EU imposes 27.9 percent anti-dumping tariff on Japanese steel",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3220,
+     "headline": "Kumamoto earthquake damage estimated at over one trillion yen",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3227,
+     "headline": "US restricts China's remote access to advanced AI chips",
+     "score": 6,
+     "topic_score": 7,
+     "main": "c2"
+    },
+    {
+     "id": 3231,
+     "headline": "Sanae Takaichi strengthens Japan-Philippines ties",
+     "score": 4,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3238,
+     "headline": "Japan Defense Ministry to adopt new AI policy",
+     "score": 4,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3264,
+     "headline": "China's naval presence near Japan remains normalized",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3317,
+     "headline": "Canadian Prime Minister Carney arrives in China for meetings",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3472,
+     "headline": "Putin and Japanese Prime Minister Takaiti may meet at APEC",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3667,
+     "headline": "Former BOJ Governor Kuroda flags potential rate hikes above neutral",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3737,
+     "headline": "China and Canada expand tariff relief on agriculture and steel",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3767,
+     "headline": "Senior Yakuza member files discrimination lawsuit against highway operators",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3878,
+     "headline": "China and Canada slash tariffs",
+     "score": 6,
+     "topic_score": 6,
+     "main": "c2"
+    }
+   ],
+   "before": [
+    {
+     "id": 518,
+     "headline": "Trump to hold trilateral meeting with Putin and Xi in China",
+     "score": 8,
+     "topic_score": 8,
+     "main": "politics"
+    },
+    {
+     "id": 3317,
+     "headline": "Canada may look to Chinese automakers if US trade talks fail",
+     "score": 6,
+     "topic_score": 7,
+     "main": "c2"
+    },
+    {
+     "id": 3634,
+     "headline": "US air base in Okinawa receives first permanently assigned F-15EX fighters",
+     "score": 6,
+     "topic_score": 7,
+     "main": "c2"
+    },
+    {
+     "id": 3697,
+     "headline": "Japan scrambles jets after Russian aircraft violate airspace",
+     "score": 6,
+     "topic_score": 7,
+     "main": "c2"
+    },
+    {
+     "id": 3878,
+     "headline": "Xi and Canada,s Carney slash tariffs as China courts middle powers",
+     "score": 6,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3172,
+     "headline": "Japan re-evaluates defense strategy to focus on wartime production surge",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3195,
+     "headline": "EU imposes anti-dumping tariff on Japanese cold-rolled steel",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3220,
+     "headline": "Kumamoto earthquake damage estimated to exceed one trillion yen",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3227,
+     "headline": "US further restricts China access to AI chips amid Nvidia scandal",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3231,
+     "headline": "Sanae Takaichi strengthens Japan and Philippines bilateral ties",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3238,
+     "headline": "Japan Defense Ministry to adopt Defense AI Vision policy",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3264,
+     "headline": "China normalizes naval presence near Japan following political spats",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3559,
+     "headline": "Google to provide Japan early frontier AI access for cybersecurity",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3572,
+     "headline": "Shenzhen implements traffic restrictions during APEC summit",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3667,
+     "headline": "Former BOJ chief warns inflation could push rates above neutral",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3717,
+     "headline": "Chinese tech leaders gather in Shenzhen ahead of APEC summit",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3731,
+     "headline": "Japan delays floating-rate bond launch amid waning demand",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3737,
+     "headline": "Japan PM holds brief meeting with Chinese minister during summit",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3760,
+     "headline": "US military sailor arrested in Japan following disturbance incident",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3767,
+     "headline": "Senior Yakuza member files lawsuit against Japanese highway operators",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3900,
+     "headline": "Japan aims for strategic overhaul of security and defense industry",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    }
+   ],
+   "after": [
+    {
+     "id": 3697,
+     "headline": "Japan scrambles jets after Russian aircraft violate airspace",
+     "score": 6,
+     "topic_score": 7,
+     "main": "c2"
+    },
+    {
+     "id": 3634,
+     "headline": "US deploys first F-15EX fighters to Kadena Air Base in Japan",
+     "score": 6,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3172,
+     "headline": "Japan re-evaluates defense strategy and weapons production",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3195,
+     "headline": "EU imposes anti-dumping tariff on Japanese steel",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3559,
+     "headline": "Google to provide Japan early AI access for cybersecurity",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3667,
+     "headline": "Former BOJ chief Kuroda sees risk of rates exceeding neutral rate",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3731,
+     "headline": "Japan said to delay floating-rate bond launch",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3760,
+     "headline": "US military sailor arrested in Japan following disturbance",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    }
+   ]
+  },
+  "c3": {
+   "name": "Australia",
+   "live": [
+    {
+     "id": 3473,
+     "headline": "Australian Coalition takes lead in two-party preferred poll",
+     "score": 3,
+     "topic_score": 6,
+     "main": "c3"
+    },
+    {
+     "id": 3615,
+     "headline": "Melbourne skyscraper retrofitted with 1,391 solar panels",
+     "score": 5,
+     "topic_score": 8,
+     "main": "c3"
+    },
+    {
+     "id": 3627,
+     "headline": "Police search Melbourne home after theft of Melbourne Cup trophies",
+     "score": 4,
+     "topic_score": 6,
+     "main": "c3"
+    },
+    {
+     "id": 3628,
+     "headline": "Reserve Bank of Australia minutes show majority voted to raise rates",
+     "score": 5,
+     "topic_score": 7,
+     "main": "c3"
+    },
+    {
+     "id": 3632,
+     "headline": "Australia increases third-year holiday maker visa cap for backpackers",
+     "score": 5,
+     "topic_score": 7,
+     "main": "c3"
+    },
+    {
+     "id": 3771,
+     "headline": "Australian investors granted direct access to Anthropic IPO",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    }
+   ],
+   "before": [
+    {
+     "id": 3628,
+     "headline": "Reserve Bank of Australia raised interest rates amid upside inflation risks",
+     "score": 6,
+     "topic_score": 7,
+     "main": "c3"
+    },
+    {
+     "id": 3465,
+     "headline": "Australian Climate Change Minister launches new climate agenda",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    },
+    {
+     "id": 3473,
+     "headline": "Australian Coalition takes lead in latest two-party preferred poll",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    },
+    {
+     "id": 3514,
+     "headline": "Inter-Parliamentary Union head calls COP31 opportunity for Turkey and Australia",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    },
+    {
+     "id": 3530,
+     "headline": "Australian Prime Minister confronts Laos PM over methanol poisonings",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    },
+    {
+     "id": 3561,
+     "headline": "Magnitude 6.6 earthquake tremors felt in Darwin, Australia",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    },
+    {
+     "id": 3615,
+     "headline": "Melbourne skyscraper retrofitted with solar panels to become vertical power station",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    },
+    {
+     "id": 3627,
+     "headline": "Police search Melbourne home after stolen Melbourne Cup trophies",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    },
+    {
+     "id": 3632,
+     "headline": "Australia expands third-year holiday maker visa numbers for backpackers",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    }
+   ],
+   "after": [
+    {
+     "id": 3628,
+     "headline": "Reserve Bank of Australia raised interest rates on inflation risks",
+     "score": 6,
+     "topic_score": 7,
+     "main": "c3"
+    },
+    {
+     "id": 3473,
+     "headline": "Australian Coalition takes lead in latest poll",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    },
+    {
+     "id": 3514,
+     "headline": "IPU head calls for stronger Turkey and Australia climate cooperation",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    },
+    {
+     "id": 3530,
+     "headline": "Australian PM confronts Laos leader over teen deaths",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    },
+    {
+     "id": 3561,
+     "headline": "Magnitude 6.6 earthquake tremor felt in Darwin",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    },
+    {
+     "id": 3565,
+     "headline": "Australia and India strengthen maritime cooperation",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    },
+    {
+     "id": 3632,
+     "headline": "Australia increases backpacker visa quota",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    }
+   ]
+  },
+  "c90": {
+   "name": "Colombia",
+   "live": [],
+   "before": [
+    {
+     "id": 3901,
+     "headline": "Colombia tax reform proposes VAT exemption for basic food items",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c90"
+    },
+    {
+     "id": 3902,
+     "headline": "Venezuela and Colombia negotiate energy cooperation and gas exports",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c90"
+    },
+    {
+     "id": 3903,
+     "headline": "Colombia plans US$50bn in infrastructure investments",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c90"
+    }
+   ],
+   "after": []
+  }
+ }
+}

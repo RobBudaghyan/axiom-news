@@ -68,6 +68,13 @@ bot @axiom_news_bot at the end.
   sent for that reader. Digest rule for custom topics (owner): the editor's topic score ("how
   important for someone who chose this topic") counts as it is against the bar of 6, no cap, no
   "above the score" rule. A topic no reader has in their list (on or off) for 7 days is deleted.
+  **Keyword rule (Step 14, owner):** each custom topic has 5-15 match keywords in English and Russian
+  (the topic check writes them; the job fills missing ones with one AI call that sees the topic's
+  latest Google headlines). A story keeps a custom tag, and may sit under that topic, only if a
+  keyword is in its English headline or description (whole word, any case); otherwise it falls
+  back to its best main topic with no boost, or leaves the custom path. Checked in pass 1, in the
+  editor and once a run over the last 26 h. Names: another English spelling of a glossary name
+  ("Takaiti") becomes the glossary's ("Takaichi") in Google headlines, summaries and editor texts.
 - **AI budget guard (Step 13):** calls and 429s per model since midnight Pacific time. A Gemini 429
   in the last hour or 80% of a soft limit (250 a day per model, `config/ai_budget.json`): new topic
   checks wait ("try again in a few minutes"). Every Gemini model refusing, or the limit reached:
@@ -79,8 +86,10 @@ bot @axiom_news_bot at the end.
   English, 24-hour in other languages; "in the last 24 hours" the first time). Each topic in a
   centred, bordered box with its emoji; a divider line between topics. Each story: the editor's
   2-3 emojis, the headline in bold, then " · Outlet" in italics as the link, then the description
-  in a quote box. No numbers. The quiet note is the same greeting line. A "⚙️ Settings" button under
-  every digest and quiet note opens the Mini App. Always one message of at most 3,900 characters
+  in a quote box. No numbers. The quiet note is the same greeting line. No button under digests or
+  quiet notes (Step 14, owner; the chat's menu button and /settings open the Mini App). In Step 14
+  the owner saw four plain newsletter layouts and four topic-heading variants and kept E5f as it is.
+  Always one message of at most 3,900 characters
   (Telegram folds rich messages only after about 8,000), never an em dash. The word-rule emojis of
   `config/line_emoji.json` are only a fallback. The Step 5 format stays in code as `CLASSIC`
   (fold test only).
@@ -179,6 +188,12 @@ bot @axiom_news_bot at the end.
 | 2026-11-17 | Custom topic digest rule: the topic score counts as it is (no cap, no "above the score"), bar 6; the 6 main topics keep Step 8 (owner) | the reader chose the subject; with the cap a race result (global 1) could never reach Formula 1 followers |
 | 2026-11-17 | Editor prompt for reader topics: "how important for someone who chose it", 4/6/8 examples, main topic only when mainly about it; pass 1 gives notable reader-topic items at least 3 | live, a looser version gave Japan 12 stories at 6+ in 13 h, some about China or Canada; this one halves it on the same stories |
 | 2026-11-17 | My topics redesign: emoji square tinted from the emoji itself (canvas, snapped to the iOS hues), switch, iOS Edit/Done with a red minus, slide-in with the switch turning on; no "x", no "Joined" bubble (owner) | "no proper emoji, no on/off switch, it did not look added" |
+| 2026-11-17 | Custom-topic keyword rule in code, not only the prompt (Step 14, owner): 5-15 keywords in en and ru per topic; a story keeps a custom tag only with a keyword in its English headline or description, else falls back to its most specific main topic with topic score = score | live, the editor put "US restricts China's AI chips", "Canadian PM Carney arrives in China" and "China and Canada expand tariff relief" under Japan despite the mainly-about rule; the rule takes all of them off (14 of 62 custom-tagged stories in 24 h) |
+| 2026-11-17 | The rule runs in the job only (pass 1, editor writes, a sweep over 26 h each run), not in the Worker | one place; the Worker sees only tags the job kept, and its CPU is untouched |
+| 2026-11-17 | Keyword backfill shows the AI the topic's latest Google headlines; the Worker stores keywords only if it got 5+ English ones, else NULL for the job to fill | the first live answer for Japan named Kishida and Ishiba, not Takaichi; with headlines it gave Takaichi and Okinawa |
+| 2026-11-17 | Glossary: the first `en` form is ours, the others are replaced in Google headlines, pass-1 summaries and editor texts (after the fact guard); Takaichi/Takaiti and Sanae added in four languages | "Takaiti" came from the editor reading a Russian article (Такаити), not from a Google item |
+| 2026-11-17 | Editor prompt: non-events ("remains", "continues", "unchanged") are 3-4, never 6, for main and reader topics | "China's naval presence near Japan remains normalized" got a topic score of 6 |
+| 2026-11-17 | Digest design E5f kept; the "⚙️ Settings" button under digests and quiet notes removed (owner, Step 14) | the owner rejected four plain layouts and four heading variants; the menu button and /settings still open the Mini App |
 | 2026-11-15 | pre_checkout_query is answered from the invoice payload alone (no database read) | Telegram cancels the payment after 10 s; measured a few microseconds |
 | 2026-11-15 | Table `tips`: user, amount, Telegram charge id (UNIQUE), time, refunded time; nothing else | the owner's rule; the charge id is needed for refunds, and UNIQUE makes a repeated update count once |
 | 2026-11-15 | /paysupport forwards the user's note to the owner; /terms states the tip terms; the owner refunds from Admin after a confirm (refundStarPayment) | Telegram's rules for bots that take Stars |
@@ -250,10 +265,19 @@ bot @axiom_news_bot at the end.
   switch, the custom-topic digest rule and a tighter editor prompt; Worker `c1f8c148`. Live: Japan
   and Australia searched hourly, about 3 to 6 stories a day each reach the owner. Waiting for the
   owner's check on his phone (message and a labelled preview digest sent 2026-11-17). Details in `reports/step-13-custom-topics.md`.
+- **Step 14 done (2026-11-17): custom-topic relevance and the digest button.** A keyword rule in code
+  keeps off-topic stories out of custom sections (the five non-Japan stories of the owner's
+  06:00 and 09:00 Japan sections are excluded); non-events at 3-4; glossary spellings (Takaichi). Digest
+  design unchanged after two rounds of previews; the Settings button under digests removed.
+  Python 172 tests, Worker 225; 24 of 24 rules broken on purpose caught. Details in
+  `reports/step-14-relevance-and-design.md`.
 - Two users: the owner and one more (Russian).
 
 ## Next step
-Watch the custom topics for a few days (Admin: Custom topics, AI budget; owner's choice on 2026-11-17, no code check yet): how many custom stories reach a digest, off-topic stories under a custom section ("China and Canada slash tariffs" under Japan), and Google's 429s. If off-topic stories keep coming, the next fix is a code check (or a per-digest limit or a bar of 7 for custom sections, owner to choose). Then switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, which also sets
+Watch the custom topics for a few days with the keyword rule (Step 14): stories under each custom
+section (Admin: Custom topics), real stories the rule drops because no keyword fits (seen for
+Australia: Chalmers, New South Wales), and Google's 429s. Keywords are written once and never
+refreshed, so a new leader is missed until someone resets the topic's keywords. Then switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, which also sets
 the Russian command list, then invite the first users). Watch the first real Russian reader's
 digests: the first hourly run after they choose Russian translates about 70 stories in one call;
 Admin's "Languages" section shows calls, tokens, stories held for translation and full English
@@ -308,6 +332,11 @@ fold on an iPhone if any user has one.
 - **Tips (Step 10):** the per-chat command list of a reader who picked Russian before Step 10 keeps
   the old two commands until they change language again (none exist yet). Telegram may ask the bot
   to handle disputes; Stars received can be withdrawn only through Telegram's own rules (not set up).
+- **Keyword rule (Step 14):** keywords come from the AI once and are not refreshed. They can be dated
+  (the first Japan answer had Kishida and Ishiba; the backfill now shows recent headlines) and
+  incomplete: 4 real Australian stories of 24 h (all scored 2-4, none in a digest) were dropped for
+  lack of a keyword. Resetting a topic's `keywords` to NULL makes the next run ask again (one call).
+  There is no Admin editor for keywords yet.
 - **Custom topics (Step 13):** Google answers 429 to about one search a run from GitHub since there
   are 2 topics (10 searches); the searches not yet started then wait an hour. Both topics still fill
   their cap of 8 most runs; with more topics, try fewer parallel requests (`search_workers` 8). If

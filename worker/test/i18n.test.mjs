@@ -206,10 +206,10 @@ describe("Russian grammar", () => {
     const first = (text) => text.split("</p>")[0] + "</p>";
     const hy = planDigest(user("hy"), [s, { ...s, id: nextId++ }], TOPICS, yerevan(20, 5), CONFIG, { lang: "hy" });
     assert.equal(first(hy.text), "<p><b>Բարի երեկո, Rob</b> · 14:00-ից ի վեր 2 նորություն</p>");
-    assert.equal(hy.button, "⚙️ Կարգավորումներ");
+    assert.equal(hy.button, undefined);
     const fr = planDigest(user("fr"), [s], TOPICS, yerevan(9, 5), CONFIG, { lang: "fr" });
     assert.equal(first(fr.text), "<p><b>Bonjour, Rob</b> · 1 actualité depuis 14:00</p>");
-    assert.equal(fr.button, "⚙️ Réglages");
+    assert.equal(fr.button, undefined);
   });
 });
 
@@ -229,7 +229,7 @@ describe("never a mixed-language digest", () => {
     assert.match(plan.text, /<th align="center">🇦🇲 Армения<\/th><\/tr><\/table><p>🇦🇲🇹🇷 <b>Армения и Турция договорились открыть границу<\/b>/);
     assert.match(plan.text, /<th align="center">🇺🇦 Война на Украине<\/th>/);
     assert.match(plan.text, />Alpha Times<\/a>/);
-    assert.equal(plan.button, "⚙️ Настройки");
+    assert.equal(plan.button, undefined);
     assert.doesNotMatch(plan.text, /Armenia and Turkey|Good evening|stories/);
   });
 
@@ -250,7 +250,7 @@ describe("never a mixed-language digest", () => {
     assert.deepEqual(plan.fallback, { lang: "ru", missing: 2, of: 2 });
     assert.match(plan.text, /^<p><b>Good evening, Rob<\/b> · 2 stories since 2 PM<\/p>/);
     assert.match(plan.text, /<th align="center">🇦🇲 Armenia<\/th>/);
-    assert.equal(plan.button, "⚙️ Settings");
+    assert.equal(plan.button, undefined);
     assert.doesNotMatch(plan.text, /[А-Яа-яЁё]/);   // not one Russian letter
   });
 

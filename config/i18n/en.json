@@ -13,8 +13,7 @@
     "quiet": "{hello}. Quiet period: nothing important on your topics {since}.",
     "stories": {"one": "story", "other": "stories"},
     "count_line": "{count} {stories} {since}",
-    "quiet_line": "Quiet period: nothing important on your topics {since}.",
-    "settings_button": "⚙️ Settings"
+    "quiet_line": "Quiet period: nothing important on your topics {since}."
   },
   "topics": {
     "politics": "Politics",

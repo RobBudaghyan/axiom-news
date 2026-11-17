@@ -110,10 +110,9 @@ describe("digest cron", () => {
       // no editor text: the summary and the dictionary emoji (the first actor named)
       '<table bordered><tr><th align="center">🇮🇷 Iran War</th></tr></table>' +
       '<p>🇮🇷 <b>Iran fires missiles at a tanker in the Gulf</b> <i>· <a href="https://a.test/x">Alpha Times</a></i></p>');
-    // Step 11: a rich message with the "⚙️ Settings" button that opens the Mini App
+    // Step 11: a rich message; Step 14 (owner): no Settings button under it
     assert.equal(outbox[0].extra.kind, "rich");
-    assert.deepEqual(outbox[0].extra.reply_markup,
-      { inline_keyboard: [[{ text: "⚙️ Settings", web_app: { url: "https://w.test/app/" } }]] });
+    assert.equal(outbox[0].extra.reply_markup, undefined);
     assert.equal(sqlite.prepare("SELECT COUNT(*) AS n FROM sent").get().n, 2);
     const u = sqlite.prepare("SELECT * FROM users").get();
     assert.equal(u.last_digest_at, yerevan(14));   // the slot, so the next header says "Since 14:00"
@@ -129,7 +128,7 @@ describe("digest cron", () => {
     await runTick(db, io, now + 300);
     assert.equal(outbox[1].text, "<p><b>Good afternoon, Owner</b> · Quiet period: nothing important on your topics since 2 PM.</p>");
     assert.equal(outbox[1].extra.kind, "rich");
-    assert.equal(outbox[1].extra.reply_markup.inline_keyboard[0][0].text, "⚙️ Settings");   // the quiet note has it too
+    assert.equal(outbox[1].extra.reply_markup, undefined);   // the quiet note has none either
   });
 
   test("a digest is ONE message: too long, the weaker story is cut and stays unsent (Step 8)", async () => {
@@ -195,12 +194,12 @@ describe("digest cron", () => {
     fetchMock = mockFetch((url) => (url.includes("api.github.com") ? { status: 204 } : undefined));
     await worker.scheduled({ cron: "*/5 * * * *", scheduledTime: now * 1000 }, env(binding));
     assert.equal(fetchMock.calls.length, 1);
-    // Step 11: a rich message (sendRichMessage) with the Settings button, no automatic links
+    // Step 11: a rich message (sendRichMessage), no automatic links; Step 14: no button
     assert.match(fetchMock.calls[0].url, /\/sendRichMessage$/);
     assert.match(fetchMock.calls[0].body.rich_message.html, /^<p><b>Good /);
     assert.equal(fetchMock.calls[0].body.rich_message.skip_entity_detection, true);
     assert.equal(fetchMock.calls[0].body.text, undefined);
-    assert.deepEqual(fetchMock.calls[0].body.reply_markup.inline_keyboard[0][0].web_app, { url: env(binding).APP_URL });
+    assert.equal(fetchMock.calls[0].body.reply_markup, undefined);
     await worker.scheduled({ cron: HOURLY_CRON, scheduledTime: now * 1000 }, env(binding));
     const gh = fetchMock.calls[1];
     assert.equal(gh.url, "https://api.github.com/repos/owner/axiom-news/actions/workflows/hourly.yml/dispatches");

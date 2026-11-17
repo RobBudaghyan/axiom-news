@@ -9,6 +9,9 @@
 // exempt), the block list, an exact match with an existing topic (joined with no AI call) or with a
 // main topic (refused), and the AI budget guard (src/guard.js: level 1 or more = "try again in a few
 // minutes"). Every AI call is logged in ai_calls (kind topic_check) so the guard and Admin count it.
+// Step 14: the same call writes 5-15 match keywords in English and Russian (custom_topics.keywords).
+// The hourly job keeps a story on the topic only if one of them is in its English headline or
+// description (job/custom.py KeywordRule); a topic saved with too few is filled by the job later.
 import TOPICS_CFG from "../../config/custom_topics.json" with { type: "json" };
 import { DICTS, FORBIDDEN, LANGS, t, topicLabel } from "./i18n.js";
 import { BUDGET, countStatement, guardState } from "./guard.js";
@@ -130,7 +133,44 @@ ${others}
    - boost_max: 0, 1 or 2: how much more an event matters to followers of this topic than to a general
      world-news reader. 2 for a country, region or a niche field that general news rarely covers; 1 for
      a field or story general news already covers well; 0 for a very broad topic.
+   - ${KEYWORDS_INSTRUCTION}
 Return JSON only, matching the schema.`;
+}
+
+// Step 14: the same words as job/custom.py KEYWORDS_INSTRUCTION (the job's backfill asks it too).
+export const KEYWORDS_INSTRUCTION = `keywords: 5 to 15 match keywords in English (en) and 5 to 15 in Russian (ru): words or
+     short names that a news headline about this topic almost always contains, so that code can
+     check a story is really about it: the name and its adjective, the capital, main cities and
+     regions, the people in office now (leader, key ministers) and other key people, the main
+     institutions and the currency (Japan: Japan, Japanese, Tokyo, Okinawa, Takaichi, BOJ, Yen;
+     Япония, японский, Токио). Each 1 to 3 words. No word that is common in other news (not Asia,
+     Pacific, China, government, minister).`;
+
+export const KEYWORD_LANGS = ["en", "ru"];
+export const MIN_KEYWORDS = 5, MAX_KEYWORDS = 15;
+const KEYWORD_OK = /^[\p{L}\p{N}_][\p{L}\p{N}_ .'’&-]*$/u;
+
+// {en: [...], ru: [...]}: the topic's own name first, then the AI's words; one line each, 1-40
+// characters of letters, digits, spaces and . ' & -, with a letter; no repeats (any case); at most
+// 15 a language. The same rules as clean_keywords in job/custom.py (tests/fixtures/keyword_cases.json).
+export function cleanKeywords(raw, names = {}) {
+  const src = raw && typeof raw === "object" ? raw : {};
+  const out = {};
+  for (const lang of KEYWORD_LANGS) {
+    const given = Array.isArray(src[lang]) ? src[lang] : [];
+    const seen = new Set(), words = [];
+    for (const x of [names[lang], ...given]) {
+      const w = (typeof x === "string" || typeof x === "number" ? String(x) : "").split(/\s+/).filter(Boolean).join(" ")
+        .replace(/^[ .-]+|[ .-]+$/g, "");
+      if (!w || w.length > 40 || !KEYWORD_OK.test(w) || !/\p{L}/u.test(w)) continue;
+      if (seen.has(w.toLowerCase())) continue;
+      seen.add(w.toLowerCase());
+      words.push(w);
+      if (words.length === MAX_KEYWORDS) break;
+    }
+    out[lang] = words;
+  }
+  return out;
 }
 
 export const CHECK_SCHEMA = {
@@ -146,8 +186,10 @@ export const CHECK_SCHEMA = {
     definition: { type: "string" },
     queries: { type: "array", items: { type: "object", properties: { q: { type: "string" }, ed: { type: "string" } }, required: ["q", "ed"] } },
     boost_max: { type: "integer" },
+    keywords: { type: "object", properties: { en: { type: "array", items: { type: "string" } }, ru: { type: "array", items: { type: "string" } } },
+                required: ["en", "ru"] },
   },
-  required: ["verdict", "reason_code", "reason", "same_as", "names", "emoji", "definition", "queries", "boost_max"],
+  required: ["verdict", "reason_code", "reason", "same_as", "names", "emoji", "definition", "queries", "boost_max", "keywords"],
 };
 
 // One line, no dashes (owner rule), cut at a word.
@@ -164,7 +206,8 @@ export function cleanEmoji(s) {
 }
 
 // The answer, checked in code. Returns {verdict, reasonCode, reason, sameAs, names, emoji,
-// definition, queries, boostMax} or null if it is unusable.
+// definition, queries, boostMax, keywords} or null if it is unusable. keywords is null when the AI
+// gave fewer than MIN_KEYWORDS usable English ones besides the name (the job's backfill asks again).
 export function validateAnswer(data, lang, cfg = TOPICS_CFG) {
   if (!data || typeof data !== "object") return null;
   const verdict = data.verdict === "accept" ? "accept" : data.verdict === "reject" ? "reject" : null;
@@ -193,10 +236,12 @@ export function validateAnswer(data, lang, cfg = TOPICS_CFG) {
     queries.push({ q: names.en, ed: "en" });   // at least two searches
   }
   const boost = Math.round(Number(data.boost_max));
+  const kw = cleanKeywords(data.keywords, names);
   return {
     verdict, reasonCode, reason, sameAs: String(data.same_as ?? "").trim(), names,
     emoji: cleanEmoji(data.emoji), definition: cleanText(data.definition, MAX_DEFINITION) || `News about ${names.en}.`,
     queries, boostMax: Number.isFinite(boost) ? Math.max(0, Math.min(2, boost)) : 0,
+    keywords: kw.en.length >= MIN_KEYWORDS ? kw : null,
   };
 }
 
@@ -407,10 +452,10 @@ export async function addTopic(ctx, body) {
   const aliases = [...new Set([norm].filter((x) => !Object.values(a.names).map(normName).includes(x)))];
   await db.batch([
     ...logs,
-    { sql: "INSERT INTO custom_topics (names, emoji, definition, queries, boost_max, aliases, created_by, created_at) " +
-           "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+    { sql: "INSERT INTO custom_topics (names, emoji, definition, queries, boost_max, aliases, created_by, created_at, keywords) " +
+           "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
       params: [JSON.stringify(a.names), a.emoji, a.definition, JSON.stringify(a.queries), a.boostMax,
-               JSON.stringify(aliases), user.id, now] },
+               JSON.stringify(aliases), user.id, now, a.keywords ? JSON.stringify(a.keywords) : null] },
     { sql: "UPDATE custom_topics SET tag = 'c' || id WHERE id = last_insert_rowid()", params: [] },
     { sql: "INSERT INTO custom_follows (user_id, topic_id, at) VALUES (?1, last_insert_rowid(), ?2)", params: [user.id, now] },
     { sql: "INSERT INTO topic_checks (user_id, at, input, outcome, topic_id, reason, ai) " +

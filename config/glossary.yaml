@@ -5,6 +5,8 @@
 #   check: a stem the translation must contain (Russian and Armenian decline names: Пашинян,
 #          Пашиняна, Пашиняну all contain "Пашинян"). Defaults to the form itself.
 # A translation that has the English name but not the stem is dropped and redone next hour.
+# Step 14: the FIRST en form is our spelling. A Google headline (headline only) with one of the other
+# forms gets the first one before it is stored (job/custom.py fix_names): "Takaiti" -> "Takaichi".
 names:
   - {en: [Pashinyan, Pashinian], ru: Пашинян, hy: Փաշինյան, fr: Pachinian}
   - {en: [Aliyev, Aliev], ru: Алиев, hy: Ալիև, fr: Aliev}
@@ -41,3 +43,6 @@ names:
   - {en: [Zaporizhzhia], ru: Запорожье, ru_check: Запорож, hy: Զապորոժիե, hy_check: Զապորոժ, fr: Zaporijjia}
   - {en: [Kyiv], ru: Киев, hy: Կիև, fr: Kyiv}
   - {en: [CSTO], ru: ОДКБ, hy: ՀԱՊԿ, fr: OTSC}
+  # Sanae Takaichi, Japan's prime minister (Step 14). Takaiti is the Russian spelling read back into English.
+  - {en: [Takaichi, Takaiti], ru: Такаити, hy: Տակաիչի, fr: Takaichi}
+  - {en: [Sanae], ru: Санаэ, hy: Սանաե, fr: Sanae}

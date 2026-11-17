@@ -63,7 +63,10 @@ stories side by side and judge each one yourself.
    3-4  incremental: statements, warnings and criticism with no decision ("Rubio says Iran must
         permanently lose its nuclear capability"); daily military claims ("N drones shot down
         overnight"); follow-ups ("an injured woman has a third surgery"); analysis, commentary,
-        memoirs, speculation, polls and interviews
+        memoirs, speculation, polls and interviews; NON-EVENTS, where nothing new happened: a
+        situation that "remains", "continues", "persists" or is "unchanged" ("China's naval
+        presence near Japan remains normalized", "tensions continue", "the rate stays at 5%", "talks
+        are still stalled") is 3 or 4, never 6, however serious the subject
    1-2  not news for these readers, however widely reported: company and market news, IT
         outages, flight disruptions and air traffic control failures, celebrity, sport, culture,
         coins and ceremonies

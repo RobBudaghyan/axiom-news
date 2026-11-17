@@ -11,11 +11,13 @@
 
 const KNOWN = [
   { re: /colomb|колумб/i, names: { en: "Colombia", ru: "Колумбия", hy: "Կոլումբիա", fr: "Colombie" }, emoji: "🇨🇴",
-    queries: [{ q: "Colombia", ed: "en" }, { q: "Colombia Petro", ed: "es_co" }, { q: "Bogotá", ed: "es_co" }], boost: 2 },
+    queries: [{ q: "Colombia", ed: "en" }, { q: "Colombia Petro", ed: "es_co" }, { q: "Bogotá", ed: "es_co" }], boost: 2,
+    keywords: { en: ["Colombian", "Bogota", "Bogotá", "Petro", "Medellin", "FARC", "Colombian peso"], ru: ["колумбийский", "Богота", "Петро"] } },
   { re: /formula 1|formula one|\bf1\b|формул/i, names: { en: "Formula 1", ru: "Формула-1", hy: "Ֆորմուլա 1", fr: "Formule 1" },
     emoji: "🏎️", queries: [{ q: "Formula 1", ed: "en" }, { q: "F1 Grand Prix", ed: "en_gb" }], boost: 2 },
   { re: /japan|япони/i, names: { en: "Japan", ru: "Япония", hy: "Ճապոնիա", fr: "Japon" }, emoji: "🇯🇵",
-    queries: [{ q: "Japan news", ed: "en" }, { q: "日本 ニュース", ed: "ja" }], boost: 2 },
+    queries: [{ q: "Japan news", ed: "en" }, { q: "日本 ニュース", ed: "ja" }], boost: 2,
+    keywords: { en: ["Japanese", "Tokyo", "Takaichi", "BOJ", "Bank of Japan", "Yen", "Osaka"], ru: ["японский", "Токио"] } },
   { re: /ai regulation|регулирован/i, names: { en: "AI regulation", ru: "Регулирование ИИ", hy: "ԱԲ կարգավորում", fr: "Régulation de l'IA" },
     emoji: "🤖", queries: [{ q: "AI regulation", ed: "en" }, { q: "AI Act", ed: "en_gb" }], boost: 1 },
 ];
@@ -25,7 +27,8 @@ export function topicAnswer(prompt) {
   const lang = /The reader's language: (\w+)/.exec(prompt)?.[1] ?? "English";
   const ru = lang === "Russian";
   const readers = [...prompt.matchAll(/^ {3}- (c\d+): (.+)$/gm)].map((m) => ({ tag: m[1], name: m[2] }));
-  const empty = { names: { en: "", ru: "", hy: "", fr: "" }, emoji: "", definition: "", queries: [], boost_max: 0 };
+  const empty = { names: { en: "", ru: "", hy: "", fr: "" }, emoji: "", definition: "", queries: [], boost_max: 0,
+                  keywords: { en: [], ru: [] } };
   const k = KNOWN.find((x) => x.re.test(input));
   if (!k && (/^(asdf|qwer|xxx|zzz|jkl)/i.test(input) || !/[aeiouyаеиоуыэюя]/i.test(input))) {
     return { verdict: "reject", reason_code: "nonsense", same_as: "", ...empty,
@@ -44,6 +47,8 @@ export function topicAnswer(prompt) {
     verdict: "accept", reason_code: "ok", reason: ru ? "Хорошая тема." : "A good news topic.", same_as: same ? same.tag : "",
     names, emoji: k ? k.emoji : "📰", definition: `News about ${names.en}.`,
     queries: k ? k.queries : [{ q: input, ed: "en" }, { q: `${input} news`, ed: "en" }], boost_max: k ? k.boost : 1,
+    // Step 14: a known topic gets keywords; an unknown one too few (the job's backfill fills it)
+    keywords: k?.keywords ?? { en: [input], ru: [] },
   };
 }
 

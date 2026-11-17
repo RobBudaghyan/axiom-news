@@ -5,7 +5,6 @@
 import { CONFIG, afterSendStatements, candidateStatement, holdStatements, nextSlot, parseList, planDigest } from "./digest.js";
 import { HEALTH_STATEMENTS, assessHealth } from "./health.js";
 import { errorStatement, takeUsage, usageStatement } from "./db.js";
-import { settingsButton } from "./telegram.js";
 import { asTopicRows, guardAlert, withCustomTopics } from "./custom.js";
 import { countStatement } from "./guard.js";
 
@@ -39,10 +38,11 @@ export function digestWrites(user, plan, sentIds, now) {
   ];
 }
 
-// How a digest is sent (Step 11): its kind ("rich" or "html") and the "⚙️ Settings" button under it,
-// which opens the Mini App (when the app's address is known), on every digest and quiet note.
-export function digestExtra(plan, appUrl) {
-  return { kind: plan.kind ?? "html", ...(appUrl ? settingsButton(appUrl, plan.button) : {}) };
+// How a digest is sent (Step 11): its kind ("rich" or "html"). Step 14 (owner): no button under
+// digests and quiet notes any more; the chat's menu button and /settings still open the Mini App.
+// appUrl is unused now (kept so callers need not change).
+export function digestExtra(plan, appUrl) {   // eslint-disable-line no-unused-vars
+  return { kind: plan.kind ?? "html" };
 }
 
 // Sends a digest: always ONE message since Step 8 (planDigest cuts it to fit). A failure is

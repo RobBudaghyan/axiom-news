@@ -153,7 +153,8 @@ if (dry) {
 const me = await tgCall(env.TELEGRAM_BOT_TOKEN, "getMe", {});
 if (me.username !== TEST_BOT) throw new Error(`refusing: the bot in .env is @${me.username}, not the TEST bot`);
 for (const m of out) {
-  const markup = settingsButton(APP_URL, t(m.lang, "digest.settings_button")).reply_markup;
+  // the button the digests had when these previews were sent (removed in Step 14, owner)
+  const markup = settingsButton(APP_URL, m.lang === "ru" ? "⚙️ Настройки" : "⚙️ Settings").reply_markup;
   try {
     if (m.plan.kind === "rich") {
       const r = await tgCall(env.TELEGRAM_BOT_TOKEN, "sendRichMessage", { chat_id: owner,

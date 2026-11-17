@@ -242,7 +242,7 @@ async function main() {
   console.log(`\n[${plan.stories.length} stories from ${cands.length} candidates, ${plan.cut} cut for length, ` +
     `${plan.kind} message, length ${visibleLength(plan.text)} of ${cfg.message_char_limit} (as Telegram counts)]`);
   if ((process.argv.includes("--send") || previewing) && !process.argv.includes("--dry")) {
-    // the same message the Worker sends (Step 11: a rich message with the Settings button)
+    // the same message the Worker sends (Step 11: a rich message; Step 14: no button under it)
     const appUrl = /^APP_URL\s*=\s*"([^"]+)"/m.exec(readFileSync(`${ROOT}worker/wrangler.toml`, "utf8"))?.[1];
     const result = await sendDigestMessage(env.TELEGRAM_BOT_TOKEN, owner, plan.text, digestExtra(plan, appUrl));
     console.log(`[sent: Telegram message_id ${result.message_id}]`);

@@ -1,0 +1,412 @@
+{
+ "colombia_headlines": 67,
+ "pass1_calls": 3,
+ "keyword_calls": 1,
+ "colombia_keywords_written": true,
+ "now": 1794897435,
+ "editor_before": [
+  1,
+  9946,
+  6338
+ ],
+ "editor_after": [
+  1,
+  9522,
+  5975
+ ],
+ "enforced_before_editor": 15,
+ "topics": {
+  "c2": {
+   "name": "Japan",
+   "live": [
+    {
+     "id": 518,
+     "headline": "Trump to meet with Xi and Putin in China for trilateral talks",
+     "score": 8,
+     "topic_score": 8,
+     "main": "politics"
+    },
+    {
+     "id": 3172,
+     "headline": "Japan re-evaluates defense strategy to prioritize wartime production",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3195,
+     "headline": "EU imposes 27.9 percent anti-dumping tariff on Japanese steel",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3220,
+     "headline": "Kumamoto earthquake damage estimated at over one trillion yen",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3227,
+     "headline": "US restricts China's remote access to advanced AI chips",
+     "score": 6,
+     "topic_score": 7,
+     "main": "c2"
+    },
+    {
+     "id": 3231,
+     "headline": "Sanae Takaichi strengthens Japan-Philippines ties",
+     "score": 4,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3238,
+     "headline": "Japan Defense Ministry to adopt new AI policy",
+     "score": 4,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3264,
+     "headline": "China's naval presence near Japan remains normalized",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3317,
+     "headline": "Canadian Prime Minister Carney arrives in China for meetings",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3472,
+     "headline": "Putin and Japanese Prime Minister Takaiti may meet at APEC",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3667,
+     "headline": "Former BOJ Governor Kuroda flags potential rate hikes above neutral",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3737,
+     "headline": "China and Canada expand tariff relief on agriculture and steel",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3767,
+     "headline": "Senior Yakuza member files discrimination lawsuit against highway operators",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3878,
+     "headline": "China and Canada slash tariffs",
+     "score": 6,
+     "topic_score": 6,
+     "main": "c2"
+    }
+   ],
+   "before": [
+    {
+     "id": 518,
+     "headline": "Trump to hold trilateral meeting with Putin and Xi in China",
+     "score": 8,
+     "topic_score": 8,
+     "main": "politics"
+    },
+    {
+     "id": 3697,
+     "headline": "Japan scrambles fighter jets after suspected Russian airspace violation",
+     "score": 6,
+     "topic_score": 7,
+     "main": "c2"
+    },
+    {
+     "id": 3172,
+     "headline": "Japan re-evaluates defense strategy for wartime production",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3195,
+     "headline": "EU imposes anti-dumping tariff on Japanese steel",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3227,
+     "headline": "US further restricts China access to AI chips",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3317,
+     "headline": "Canada may look to Chinese automakers if US talks fail",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3634,
+     "headline": "Kadena Air Base receives first F-15EX fighter jets",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3878,
+     "headline": "Xi and Canadian Prime Minister Carney slash tariffs",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c2"
+    }
+   ],
+   "after": [
+    {
+     "id": 3634,
+     "headline": "Kadena Air Base receives first F-15EX fighter jets",
+     "score": 6,
+     "topic_score": 6,
+     "main": "c2"
+    },
+    {
+     "id": 3697,
+     "headline": "Japan scrambles jets after Russian aircraft violate airspace",
+     "score": 6,
+     "topic_score": 6,
+     "main": "c2"
+    }
+   ],
+   "all_before": [
+    "4/4 Commentary examined China's strategy for home-court diplomacy at the upcoming Shenzhen APEC gathering.",
+    "4/4 Japan football player discusses performance shift against Brazil",
+    "4/4 Japan updates cover tokenized bonds and sports news",
+    "4/4 Named racehorse of Japanese YouTuber wins G1 race",
+    "4/4 Seattle Mariners express interest in Asian talent market",
+    "4/5 Chinese tech leaders gather in Shenzhen amid US chip curbs",
+    "4/5 Diplomatic tensions drive cuts in China-Japan capacity",
+    "4/5 Experts say China has normalized naval presence near Japan",
+    "4/5 Former Bank of Japan Governor warns on interest rates",
+    "4/5 Google to provide Japan early AI access for cybersecurity",
+    "4/5 Japan Defense Ministry to adopt Defense AI Vision",
+    "4/5 Japan Princess Aiko to visit Singapore",
+    "4/5 Japan U-17 football team arrives in Qatar for World Cup",
+    "4/5 Japan aims for security system and defense overhaul",
+    "4/5 Japan said to delay floating-rate government bond launch",
+    "4/5 Kumamoto earthquake damage estimated over one trillion yen",
+    "4/5 Takaichi strengthens ties during meeting with Philippines leader",
+    "4/5 Traffic restrictions implemented in Shenzhen for APEC summit",
+    "4/5 US military sailor arrested in Japan following disturbance",
+    "4/5 Yakuza member files lawsuit against Japanese highway operators",
+    "5/6 Canada may look to Chinese automakers if US talks fail",
+    "5/6 EU imposes anti-dumping tariff on Japanese steel",
+    "5/6 Japan re-evaluates defense strategy for wartime production",
+    "5/6 Kadena Air Base receives first F-15EX fighter jets",
+    "5/6 US further restricts China access to AI chips",
+    "5/6 Xi and Canadian Prime Minister Carney slash tariffs",
+    "6/7 Japan scrambles fighter jets after suspected Russian airspace violation"
+   ],
+   "all_after": [
+    "4/4 China has normalized naval presence near Japan",
+    "4/4 Diplomatic tensions drive China-Japan capacity cuts",
+    "4/4 Japan Defense Ministry to adopt Defense AI Vision policy",
+    "4/4 Japan Princess Aiko to visit Singapore",
+    "4/4 Japan aims for strategic overhaul of security system",
+    "4/4 Japan national football team performance analyzed",
+    "4/4 Kumamoto earthquake damage estimated at over one trillion yen",
+    "4/4 Sanae Takaichi strengthens ties with Philippines",
+    "4/4 Seattle Mariners express desire to return to Asian talent market",
+    "4/4 Various developments in Japan reported",
+    "4/4 YouTuber named racehorse secures first G1 victory",
+    "5/5 EU imposes anti-dumping tariff on Japanese steel",
+    "5/5 Former BOJ chief sees chance of rate rising above neutral",
+    "5/5 Google to provide Japan early access to AI cybersecurity tech",
+    "5/5 Japan U-17 national team arrives in Qatar for World Cup",
+    "5/5 Japan re-evaluating defense strategy for wartime production",
+    "5/5 Japan said to delay floating-rate bond launch",
+    "5/5 US military sailor arrested in Japan",
+    "6/6 Japan scrambles jets after Russian aircraft violate airspace",
+    "6/6 Kadena Air Base receives first F-15EX fighter jets"
+   ]
+  },
+  "c3": {
+   "name": "Australia",
+   "live": [
+    {
+     "id": 3473,
+     "headline": "Australian Coalition takes lead in two-party preferred poll",
+     "score": 3,
+     "topic_score": 6,
+     "main": "c3"
+    },
+    {
+     "id": 3615,
+     "headline": "Melbourne skyscraper retrofitted with 1,391 solar panels",
+     "score": 5,
+     "topic_score": 8,
+     "main": "c3"
+    },
+    {
+     "id": 3627,
+     "headline": "Police search Melbourne home after theft of Melbourne Cup trophies",
+     "score": 4,
+     "topic_score": 6,
+     "main": "c3"
+    },
+    {
+     "id": 3628,
+     "headline": "Reserve Bank of Australia minutes show majority voted to raise rates",
+     "score": 5,
+     "topic_score": 7,
+     "main": "c3"
+    },
+    {
+     "id": 3632,
+     "headline": "Australia increases third-year holiday maker visa cap for backpackers",
+     "score": 5,
+     "topic_score": 7,
+     "main": "c3"
+    },
+    {
+     "id": 3771,
+     "headline": "Australian investors granted direct access to Anthropic IPO",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    }
+   ],
+   "before": [
+    {
+     "id": 3530,
+     "headline": "Albanese confronts Laos Prime Minister over methanol deaths",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    },
+    {
+     "id": 3628,
+     "headline": "Reserve Bank of Australia minutes show rate hike vote",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c3"
+    }
+   ],
+   "after": [
+    {
+     "id": 3628,
+     "headline": "Reserve Bank of Australia raised rates on inflation risks",
+     "score": 6,
+     "topic_score": 6,
+     "main": "c3"
+    }
+   ],
+   "all_before": [
+    "4/4 'Strike fine balances': Chalmers' savings promise explained",
+    "4/4 Australian first-home buyers express disappointment over policy",
+    "4/4 Australian reports highlight AI fraud risks and conservation",
+    "4/4 Australian share market closes lower",
+    "4/4 Economists warn of ongoing interest rate pain in Australia",
+    "4/4 Fire danger period declared for parts of Western Australia",
+    "4/4 Former Liberal MP Fiona Martin eyes political comeback in Bennelong",
+    "4/4 Gas reservation bill stalled over state exemption row",
+    "4/4 Inquest hears details on New South Wales home birth case",
+    "4/4 JD.com considers Australian acquisition",
+    "4/4 Mongolian band The HU announce Australian tour",
+    "4/4 NVRO secures Australian metals hub facility",
+    "4/4 Nanoleaf launches smart air circulator fan in Australia",
+    "4/4 No, protecting Australia’s maritime trade isn’t like the movie Greyhound",
+    "4/4 Police search Melbourne home after Melbourne Cup trophies stolen",
+    "4/4 Red crab migration begins on Australia Christmas Island",
+    "4/4 XPeng expands electric vehicle presence in Australia",
+    "4/5 Australia and India strengthen maritime cooperation",
+    "4/5 Australia expands visa cap for regional backpackers",
+    "4/5 Australian Climate Minister launches new agenda",
+    "4/5 Australian Coalition takes lead in new poll",
+    "4/5 Australian investors granted access to Anthropic IPO",
+    "4/5 Inter-Parliamentary Union head highlights Turkey Australia ties",
+    "4/5 Magnitude 6.6 earthquake tremors felt in Darwin",
+    "4/5 Melbourne skyscraper retrofitted with solar panels",
+    "5/6 Albanese confronts Laos Prime Minister over methanol deaths",
+    "5/6 Reserve Bank of Australia minutes show rate hike vote"
+   ],
+   "all_after": [
+    "4/4 Australian Climate Change Minister launches agenda",
+    "4/4 Australian Coalition takes lead in poll",
+    "4/4 Australian first-home buyers disappointed after rules scrapped",
+    "4/4 Australian share market closes lower",
+    "4/4 Developments in Australia include AI fraud and bilby conservation",
+    "4/4 Economist warns of Australian interest rate pain",
+    "4/4 Fire danger period declared for South West Australia",
+    "4/4 JD.com considers Australian acquisition",
+    "4/4 Mongolian band The HU announce Australian tour",
+    "4/4 NVRO secures Australian metals hub facility",
+    "4/4 Nanoleaf launches Smart Air Circulator Fan in Australia",
+    "4/4 Protecting Australia maritime trade discussed",
+    "4/4 Red crabs start annual migration on Christmas Island",
+    "4/4 XPeng enters Australian electric vehicle market",
+    "5/5 Australia and India strengthen maritime cooperation",
+    "5/5 Australia increases backpacker visa duration cap",
+    "5/5 Australian PM confronts Laos PM over methanol deaths",
+    "5/5 Australian investors able to participate in Anthropic IPO",
+    "5/5 IPU head calls for stronger Turkey-Australia cooperation",
+    "5/5 Magnitude 6.6 earthquake tremor felt in Darwin",
+    "5/5 Melbourne skyscraper retrofitted with solar panels",
+    "5/5 Police search Melbourne home after Melbourne Cup trophies stolen",
+    "6/6 Reserve Bank of Australia raised rates on inflation risks"
+   ]
+  },
+  "c90": {
+   "name": "Colombia",
+   "live": [],
+   "before": [
+    {
+     "id": 3908,
+     "headline": "Colombia announces billions in investments in New York",
+     "score": 5,
+     "topic_score": 6,
+     "main": "c90"
+    }
+   ],
+   "after": [],
+   "all_before": [
+    "4/4 Colombia and Singapore sign carbon markets memorandum",
+    "4/4 Colombia and United States conduct joint military exercise",
+    "4/4 Colombia projected to have high minimum wage in 2027",
+    "4/4 Colombia promises spending cuts and fiscal discipline",
+    "4/4 Colombia ranks high in government confidence",
+    "4/4 Fecode announces new school strikes in Colombia",
+    "4/4 ICBF represents Colombia at violence prevention conference",
+    "4/5 World Bank ratifies support for Colombia",
+    "5/5 Colombia and US strike finances of Clan del Golfo",
+    "5/6 Colombia announces billions in investments in New York"
+   ],
+   "all_after": [
+    "4/4 Colombia and Singapore signed a memorandum of understanding to promote carbon markets.",
+    "4/4 Colombia and US conduct joint military exercise",
+    "4/4 Colombia projected to have high minimum wage in 2027",
+    "4/4 Colombia promises spending cuts and fiscal discipline",
+    "4/4 Colombia ranks high in government confidence",
+    "4/4 Fecode announces new strike dates in Colombia",
+    "4/4 ICBF represents Colombia at violence prevention conference",
+    "5/5 Colombia and US strike finances of Clan del Golfo",
+    "5/5 Colombia announces major investments during Milagro Week",
+    "5/5 World Bank ratifies support for Colombia"
+   ]
+  }
+ }
+}

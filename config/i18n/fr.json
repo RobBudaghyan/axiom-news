@@ -13,8 +13,7 @@
     "quiet": "{hello}. Période calme : rien d'important sur vos sujets {since}.",
     "stories": {"one": "actualité", "other": "actualités"},
     "count_line": "{count} {stories} {since}",
-    "quiet_line": "Période calme : rien d'important sur vos sujets {since}.",
-    "settings_button": "⚙️ Réglages"
+    "quiet_line": "Période calme : rien d'important sur vos sujets {since}."
   },
   "topics": {
     "politics": "Politique",

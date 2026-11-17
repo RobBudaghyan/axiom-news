@@ -15,7 +15,15 @@ one once with AI and stores it in `custom_topics` with 2-5 Google News searches
   Stories from our own RSS feeds count too: pass 1 tags them with a custom topic when they match;
 - `resolve_links`: a story that could reach a digest and still links to news.google.com gets the
   outlet's own article URL (two requests, gnews.resolve); if that fails the Google link stays;
-- `cleanup`: a topic with no follower for `orphan_days` is deleted with its searches and stats.
+- `cleanup`: a topic with no follower for `orphan_days` is deleted with its searches and stats;
+- Step 14, the keyword rule (`KeywordRule`): every custom topic has 5-15 match keywords in English
+  and Russian (written by the Worker's topic check, or by `backfill_keywords`, one AI call a topic).
+  A story keeps a custom tag (and may have it as its main topic) only if one of them is in its
+  English headline or description, as a whole word, any case. Otherwise the tag goes and the main
+  topic falls back to the story's best main topic, with no boost. Applied where tags are written
+  (pass 1 in job/run.py, the editor in job/editor.py) and once a run over the pool (`enforce`);
+- Step 14, `spell_names`: a Google headline, a pass-1 summary or an editor text that spells a
+  glossary name another way (config/glossary.yaml, "Takaiti") gets the glossary spelling ("Takaichi").
 
 Nothing here can fail the run: Job wraps every call (job/run.py) and logs the error.
 """
@@ -23,6 +31,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import time
 from concurrent.futures import ThreadPoolExecutor, wait
 from dataclasses import dataclass, field
@@ -42,7 +51,7 @@ COMPARE_H = 24
 LIVE_SCAN = 8000
 
 ACTIVE_SQL = """
-SELECT t.id, t.tag, t.names, t.emoji, t.definition, t.queries, t.boost_max, t.searched_at,
+SELECT t.id, t.tag, t.names, t.emoji, t.definition, t.queries, t.boost_max, t.searched_at, t.keywords,
        (SELECT count(*) FROM custom_follows f JOIN users u ON u.id = f.user_id
         WHERE f.topic_id = t.id AND f.enabled = 1 AND u.paused = 0 AND u.blocked = 0) AS active
 FROM custom_topics t WHERE t.tag IS NOT NULL ORDER BY t.id"""
@@ -78,6 +87,7 @@ class CustomTopic:
     boost_max: int
     searched_at: int | None
     active: int
+    keywords: dict = field(default_factory=dict)    # Step 14: {en: [...], ru: [...]}, {} if not written yet
 
     @property
     def name(self) -> str:
@@ -86,7 +96,8 @@ class CustomTopic:
     def as_topic(self) -> dict:
         """The shape of a config/topics.yaml entry, plus `custom` (the AI passes treat both alike)."""
         return {"tag": self.tag, "label": {"en": self.name}, "emoji": self.emoji or "",
-                "definition": self.definition or self.name, "custom": True, "boost_max": self.boost_max}
+                "definition": self.definition or self.name, "custom": True, "boost_max": self.boost_max,
+                "names": self.names, "keywords": self.keywords}
 
 
 def load_active(db) -> list[CustomTopic]:
@@ -96,7 +107,8 @@ def load_active(db) -> list[CustomTopic]:
             continue
         out.append(CustomTopic(int(r["id"]), r["tag"], _json(r["names"], {}), r["emoji"] or "",
                                r["definition"] or "", _json(r["queries"], []),
-                               max(0, min(2, int(r["boost_max"] or 0))), r["searched_at"], int(r["active"])))
+                               max(0, min(2, int(r["boost_max"] or 0))), r["searched_at"], int(r["active"]),
+                               _json(r.get("keywords"), {})))
     return out
 
 
@@ -237,6 +249,7 @@ class Searcher:
                        key=lambda x: (-(x[1].published_at or now), x[1].guid))
         rows, kept = [], {tag: 0 for tag in searched}
         for h, it, tag in fresh:
+            it.title = spell_names(it.title)     # Step 14: "Takaiti" -> "Takaichi"
             sim, _ = index.best(it.title)
             if sim >= threshold:
                 stats.dup_dropped += 1
@@ -346,3 +359,247 @@ def cleanup(db, now: int, cfg: dict | None = None) -> int:
         ("DELETE FROM custom_topic_days WHERE day < ?", [utc_day(now - 30 * 86400)]),
     ])
     return len(results[3])
+
+
+# ---------------------------------------------------------------- Step 14: glossary spellings
+
+def name_fixer(glossary: list[dict] | None = None) -> list[tuple[re.Pattern, str]]:
+    """(pattern, spelling) for every other English spelling of a glossary name: the first `en`
+    form is the one we use ("Takaichi"), the others are found as whole words ("Takaiti")."""
+    if glossary is None:
+        from job.translate import load_glossary   # not at the top: translate imports the editor, which imports this
+        glossary = load_glossary()
+    out = []
+    for g in glossary:
+        forms = [str(x) for x in g.get("en") or []]
+        for other in forms[1:]:
+            out.append((re.compile(rf"(?<!\w){re.escape(other)}(?!\w)"), forms[0]))
+    return out
+
+
+def fix_names(title: str, fixer: list[tuple[re.Pattern, str]]) -> str:
+    for pattern, spelling in fixer:
+        title = pattern.sub(spelling, title)
+    return title
+
+
+_FIXER: list | None = None
+
+
+def spell_names(text: str | None) -> str | None:
+    """fix_names with config/glossary.yaml (read once). Used on Google headlines, pass 1's summary
+    and the editor's headline and description: "Takaiti" came from the editor reading a Russian
+    article (премьер Японии Такаити)."""
+    global _FIXER
+    if not text:
+        return text
+    if _FIXER is None:
+        _FIXER = name_fixer()
+    return fix_names(text, _FIXER)
+
+
+# ---------------------------------------------------------------- Step 14: the keyword rule
+
+KEYWORD_LANGS = ("en", "ru")
+MIN_KEYWORDS, MAX_KEYWORDS, MAX_KEYWORD_CHARS = 5, 15, 40
+KEYWORD_OK = re.compile(r"^\w[\w .'’&-]*$")
+CUSTOM_TAG = re.compile(r"^c\d+$")
+DIGEST = ROOT / "config" / "digest.json"
+
+
+def is_custom(tag) -> bool:
+    return isinstance(tag, str) and bool(CUSTOM_TAG.match(tag))
+
+
+def clean_keywords(raw, names: dict | None = None) -> dict:
+    """{en: [...], ru: [...]}: the topic's own name first, then the AI's words; one line each, 1-40
+    characters of letters, digits, spaces and . ' & -, with a letter; no repeats (any case); at most
+    15 a language. The same rules as cleanKeywords in worker/src/custom.js."""
+    raw = raw if isinstance(raw, dict) else {}
+    names = names or {}
+    out = {}
+    for lang in KEYWORD_LANGS:
+        given = raw.get(lang) if isinstance(raw.get(lang), list) else []
+        seen, words = set(), []
+        for w in [names.get(lang), *given]:
+            w = " ".join(str(w or "").split()).strip(" .-")
+            if not w or len(w) > MAX_KEYWORD_CHARS or not KEYWORD_OK.match(w) or not re.search(r"[^\W\d_]", w):
+                continue
+            if w.lower() in seen:
+                continue
+            seen.add(w.lower())
+            words.append(w)
+            if len(words) == MAX_KEYWORDS:
+                break
+        out[lang] = words
+    return out
+
+
+def keyword_regex(words: list[str]) -> re.Pattern | None:
+    """Any of the words as a whole word, any case; a plural s or es is allowed ("Australians")."""
+    parts = sorted({r"\s+".join(re.escape(x) for x in w.split()) for w in words if w.strip()}, key=len, reverse=True)
+    if not parts:
+        return None
+    return re.compile(rf"(?<!\w)(?:{'|'.join(parts)})(?:e?s)?(?!\w)", re.I)
+
+
+def story_text(headline, description, summary=None) -> str:
+    """The English text the rule reads: the headline (the first-pass summary while there is none)
+    and the description."""
+    return f"{headline or summary or ''}\n{description or ''}"
+
+
+class KeywordRule:
+    """topics: the AI passes' topic dicts (custom ones carry `keywords` and `names`). A custom
+    topic with no keywords yet uses its names (English and Russian) until the backfill writes them."""
+
+    def __init__(self, topics: list[dict], specificity: list[str] | None = None):
+        self.patterns: dict[str, re.Pattern | None] = {}
+        for t in topics:
+            if not t.get("custom"):
+                continue
+            kw = t.get("keywords") or {}
+            words = [w for lang in KEYWORD_LANGS for w in (kw.get(lang) or [])]
+            if not words:
+                names = t.get("names") or {"en": (t.get("label") or {}).get("en")}
+                words = [w for lang in KEYWORD_LANGS for w in clean_keywords({}, names)[lang]]
+            self.patterns[t["tag"]] = keyword_regex(words)
+        if specificity is None:
+            specificity = json.loads(DIGEST.read_text(encoding="utf-8"))["topic_specificity"]
+        self.specificity = specificity
+
+    def __bool__(self) -> bool:
+        return bool(self.patterns)
+
+    def allows(self, tag: str, text: str) -> bool:
+        """A main topic always; a custom topic only with one of its keywords in the text. A custom
+        tag the rule does not know (no active reader follows it) is left alone."""
+        if not is_custom(tag) or tag not in self.patterns:
+            return True
+        p = self.patterns[tag]
+        return bool(p and p.search(text or ""))
+
+    def tags(self, tags: list[str], text: str) -> list[str]:
+        return [t for t in tags if self.allows(t, text)]
+
+    def fallback(self, kept: list[str]) -> str | None:
+        """The best main topic among the tags left: the most specific of the six, else a custom
+        tag that passed, else none (the story leaves the custom path)."""
+        rank = {t: i for i, t in enumerate(self.specificity)}
+        mains = sorted((t for t in kept if not is_custom(t)), key=lambda t: rank.get(t, len(rank)))
+        return (mains or [t for t in kept if is_custom(t)] or [None])[0]
+
+    def apply(self, tags: list[str], main: str | None, text: str) -> tuple[list[str], str | None, bool]:
+        """(tags kept, main topic, whether the main topic was replaced)."""
+        kept = self.tags(tags, text)
+        if main is None or main in kept or not is_custom(main):
+            return kept, main, False
+        return kept, self.fallback(kept), True
+
+
+ENFORCE_SQL = ("SELECT id, topics, main_topic, final_score, topic_score, headline, summary, description FROM stories "
+               "WHERE max(updated_at, coalesce(scored_at, 0)) >= ? AND merged_into IS NULL AND topics GLOB '*\"c[0-9]*'")
+
+
+def enforce(db, rule: KeywordRule, now: int, hours: int = 26) -> list[dict]:
+    """Once a run: every story of the digest window that carries a custom tag is checked again
+    (stories written before the rule, or before their topic had keywords). Returns the changed
+    stories: {id, headline, removed, main_from, main_to}."""
+    if not rule:
+        return []
+    changed, stmts = [], []
+    for r in db.query(ENFORCE_SQL, [now - hours * 3600]):
+        tags = _json(r["topics"], [])
+        kept, main, moved = rule.apply(tags, r["main_topic"], story_text(r["headline"], r["description"], r["summary"]))
+        if kept == tags and not moved:
+            continue
+        ts = r["final_score"] if moved else r["topic_score"]   # the topic score was for the custom topic
+        stmts.append(("UPDATE stories SET topics = ?, main_topic = ?, topic_score = ? WHERE id = ?",
+                      [json.dumps(kept), main, ts, r["id"]]))
+        changed.append({"id": r["id"], "headline": r["headline"] or r["summary"],
+                        "removed": [t for t in tags if t not in kept], "main_from": r["main_topic"], "main_to": main})
+    if stmts:
+        db.batch(stmts)
+    return changed
+
+
+# ---------------------------------------------------------------- Step 14: keyword backfill
+
+# The same instruction as the Worker's topic check (worker/src/custom.js checkPrompt, item 4).
+KEYWORDS_INSTRUCTION = """keywords: 5 to 15 match keywords in English (en) and 5 to 15 in Russian (ru): words or
+     short names that a news headline about this topic almost always contains, so that code can
+     check a story is really about it: the name and its adjective, the capital, main cities and
+     regions, the people in office now (leader, key ministers) and other key people, the main
+     institutions and the currency (Japan: Japan, Japanese, Tokyo, Okinawa, Takaichi, BOJ, Yen;
+     Япония, японский, Токио). Each 1 to 3 words. No word that is common in other news (not Asia,
+     Pacific, China, government, minister)."""
+
+KEYWORDS_PROMPT = """You help a small news digest sort stories into a topic that its readers chose.
+Topic: {name} ({names}). What it covers: {definition}
+Your knowledge may be out of date: the people in office may have changed. Use the recent headlines
+below for the current names; they are real search results for this topic, some of them off-topic.
+{headlines}
+Give:
+   - {instruction}
+Return JSON only, matching the schema."""
+
+KEYWORDS_SCHEMA = {
+    "type": "object",
+    "properties": {"keywords": {"type": "object", "properties": {
+        "en": {"type": "array", "items": {"type": "string"}},
+        "ru": {"type": "array", "items": {"type": "string"}}}, "required": ["en", "ru"]}},
+    "required": ["keywords"],
+}
+
+
+def keywords_prompt(names: dict, definition: str, headlines: list[str] | None = None) -> str:
+    lines = "\n".join(f"   - {h}" for h in (headlines or [])) or "   (none yet)"
+    return KEYWORDS_PROMPT.format(name=names.get("en") or "", names=", ".join(v for v in names.values() if v),
+                                  definition=definition or "", headlines=f"RECENT HEADLINES:\n{lines}",
+                                  instruction=KEYWORDS_INSTRUCTION)
+
+
+HEADLINES_SQL = ("SELECT title FROM items WHERE hint_topic = ? AND fetched_at >= ? AND title IS NOT NULL "
+                 "ORDER BY id DESC LIMIT ?")
+
+
+def _answer(text: str) -> dict:
+    text = text.strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```[a-zA-Z]*\s*", "", text)
+        text = re.sub(r"\s*```$", "", text)
+    return json.loads(text)
+
+
+def backfill_keywords(db, plans, *, limit: int = 5, on_call: Callable | None = None, now: int | None = None,
+                      headlines: int = 30) -> list[str]:
+    """Topics with no keywords yet (made before Step 14, or the check gave too few): one AI call
+    each, the providers in order until one answers, with the topic's latest Google headlines (the
+    last 2 days) so the model sees today's names. A topic whose every call fails waits for the next
+    run. Returns the tags filled."""
+    now = int(time.time()) if now is None else now
+    on_call = on_call or (lambda *a, **k: None)
+    rows = db.query("SELECT id, tag, names, definition FROM custom_topics WHERE tag IS NOT NULL AND keywords IS NULL "
+                    "ORDER BY id LIMIT ?", [limit])
+    done = []
+    for r in rows:
+        names = _json(r["names"], {})
+        recent = [h["title"] for h in db.query(HEADLINES_SQL, [r["tag"], now - 2 * 86400, headlines])]
+        prompt = keywords_prompt(names, r["definition"], recent)
+        for plan in plans:
+            p = plan.provider
+            res = None
+            try:
+                res = p.generate(prompt, KEYWORDS_SCHEMA)
+                kw = clean_keywords((_answer(res.text) or {}).get("keywords"), names)
+                if len(kw["en"]) < 2:
+                    raise ValueError("no usable keywords")
+            except Exception as exc:
+                on_call(p, False, 1, res, f"{p.name}: keywords: {type(exc).__name__}: {exc}"[:300], kind="topic_keywords")
+                continue
+            on_call(p, True, 1, res, None, kind="topic_keywords")
+            db.query("UPDATE custom_topics SET keywords = ? WHERE id = ? AND keywords IS NULL",
+                     [json.dumps(kw, ensure_ascii=False), r["id"]])
+            done.append(r["tag"])
+            break
+    return done

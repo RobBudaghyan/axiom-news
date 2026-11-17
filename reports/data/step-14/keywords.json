@@ -1,0 +1,826 @@
+{
+ "at": 1794897247,
+ "topics": {
+  "c2": {
+   "name": "Japan",
+   "keywords": {
+    "en": [
+     "Japan",
+     "Japanese",
+     "Tokyo",
+     "Yen",
+     "Okinawa",
+     "Osaka",
+     "Kishida",
+     "Takaichi",
+     "Hokkaido",
+     "Kyoto"
+    ],
+    "ru": [
+     "Япония",
+     "японский",
+     "Токио",
+     "иена",
+     "Окинава",
+     "Осака",
+     "Кисида",
+     "Хоккайдо",
+     "Киото"
+    ]
+   }
+  },
+  "c3": {
+   "name": "Australia",
+   "keywords": {
+    "en": [
+     "Australia",
+     "Australian",
+     "Canberra",
+     "Sydney",
+     "Melbourne",
+     "Albanese",
+     "Reserve Bank of Australia",
+     "AUD",
+     "NSW",
+     "Aussie"
+    ],
+    "ru": [
+     "Австралия",
+     "австралийский",
+     "Канберра",
+     "Сидней",
+     "Мельбурн",
+     "Албаниз",
+     "австралийский доллар",
+     "Новый Южный Уэльс"
+    ]
+   }
+  }
+ },
+ "stories": 62,
+ "excluded": [
+  {
+   "id": 518,
+   "headline": "Trump to meet with Xi and Putin in China for trilateral talks",
+   "score": 8,
+   "topic_score": 8,
+   "main": "politics",
+   "tags": [
+    "politics",
+    "wars_conflicts",
+    "russia",
+    "iran_war",
+    "ukraine_war",
+    "c2"
+   ],
+   "passed_before": true,
+   "removed": [
+    "c2"
+   ],
+   "new_main": "politics"
+  },
+  {
+   "id": 3227,
+   "headline": "US restricts China's remote access to advanced AI chips",
+   "score": 6,
+   "topic_score": 7,
+   "main": "c2",
+   "tags": [
+    "politics",
+    "c2"
+   ],
+   "passed_before": true,
+   "removed": [
+    "c2"
+   ],
+   "new_main": "politics"
+  },
+  {
+   "id": 3317,
+   "headline": "Canadian Prime Minister Carney arrives in China for meetings",
+   "score": 5,
+   "topic_score": 6,
+   "main": "c2",
+   "tags": [
+    "politics",
+    "c2"
+   ],
+   "passed_before": true,
+   "removed": [
+    "c2"
+   ],
+   "new_main": "politics"
+  },
+  {
+   "id": 3563,
+   "headline": "Kamakura is seeking a Chinese-speaking influencer to teach tourist manners.",
+   "score": null,
+   "topic_score": null,
+   "main": null,
+   "tags": [
+    "c2"
+   ],
+   "passed_before": false,
+   "removed": [
+    "c2"
+   ],
+   "new_main": null
+  },
+  {
+   "id": 3566,
+   "headline": "China highlights home-court diplomacy strategy for Shenzhen APEC",
+   "score": 4,
+   "topic_score": 5,
+   "main": "c2",
+   "tags": [
+    "politics",
+    "c2"
+   ],
+   "passed_before": false,
+   "removed": [
+    "c2"
+   ],
+   "new_main": "politics"
+  },
+  {
+   "id": 3569,
+   "headline": "Nippon Ham manager Tsuyoshi Shinjo shared his recommended method for cooking rice.",
+   "score": null,
+   "topic_score": null,
+   "main": null,
+   "tags": [
+    "c2"
+   ],
+   "passed_before": false,
+   "removed": [
+    "c2"
+   ],
+   "new_main": null
+  },
+  {
+   "id": 3572,
+   "headline": "Shenzhen implements traffic restrictions during APEC summit",
+   "score": 3,
+   "topic_score": 5,
+   "main": "c2",
+   "tags": [
+    "c2"
+   ],
+   "passed_before": false,
+   "removed": [
+    "c2"
+   ],
+   "new_main": null
+  },
+  {
+   "id": 3635,
+   "headline": "Gas reservation bill stalled over state exemption row",
+   "score": 2,
+   "topic_score": 4,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false,
+   "removed": [
+    "c3"
+   ],
+   "new_main": null
+  },
+  {
+   "id": 3646,
+   "headline": "Treasurer Chalmers savings promise explained",
+   "score": 2,
+   "topic_score": 4,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false,
+   "removed": [
+    "c3"
+   ],
+   "new_main": null
+  },
+  {
+   "id": 3649,
+   "headline": "Former Liberal MP Fiona Martin eyes political comeback in Bennelong",
+   "score": 2,
+   "topic_score": 4,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false,
+   "removed": [
+    "c3"
+   ],
+   "new_main": null
+  },
+  {
+   "id": 3717,
+   "headline": "Chinese business and technology leaders gather in Shenzhen ahead of APEC summit",
+   "score": 4,
+   "topic_score": 5,
+   "main": "c2",
+   "tags": [
+    "politics",
+    "c2"
+   ],
+   "passed_before": false,
+   "removed": [
+    "c2"
+   ],
+   "new_main": "politics"
+  },
+  {
+   "id": 3737,
+   "headline": "China and Canada expand tariff relief on agriculture and steel",
+   "score": 5,
+   "topic_score": 6,
+   "main": "c2",
+   "tags": [
+    "politics",
+    "c2"
+   ],
+   "passed_before": true,
+   "removed": [
+    "c2"
+   ],
+   "new_main": "politics"
+  },
+  {
+   "id": 3850,
+   "headline": "Inquest hears New South Wales mother did not know she carried twins",
+   "score": 4,
+   "topic_score": 5,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false,
+   "removed": [
+    "c3"
+   ],
+   "new_main": null
+  },
+  {
+   "id": 3878,
+   "headline": "China and Canada slash tariffs",
+   "score": 6,
+   "topic_score": 6,
+   "main": "c2",
+   "tags": [
+    "politics",
+    "c2"
+   ],
+   "passed_before": true,
+   "removed": [
+    "c2"
+   ],
+   "new_main": "politics"
+  }
+ ],
+ "kept": [
+  {
+   "id": 3172,
+   "headline": "Japan re-evaluates defense strategy to prioritize wartime production",
+   "score": 5,
+   "topic_score": 6,
+   "main": "c2",
+   "tags": [
+    "wars_conflicts",
+    "c2"
+   ],
+   "passed_before": true
+  },
+  {
+   "id": 3194,
+   "headline": "Diplomatic tensions drive cuts in China-Japan trade capacity",
+   "score": 4,
+   "topic_score": 4,
+   "main": "c2",
+   "tags": [
+    "c2"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3195,
+   "headline": "EU imposes 27.9 percent anti-dumping tariff on Japanese steel",
+   "score": 5,
+   "topic_score": 6,
+   "main": "c2",
+   "tags": [
+    "politics",
+    "c2"
+   ],
+   "passed_before": true
+  },
+  {
+   "id": 3220,
+   "headline": "Kumamoto earthquake damage estimated at over one trillion yen",
+   "score": 5,
+   "topic_score": 6,
+   "main": "c2",
+   "tags": [
+    "c2"
+   ],
+   "passed_before": true
+  },
+  {
+   "id": 3231,
+   "headline": "Sanae Takaichi strengthens Japan-Philippines ties",
+   "score": 4,
+   "topic_score": 6,
+   "main": "c2",
+   "tags": [
+    "c2"
+   ],
+   "passed_before": true
+  },
+  {
+   "id": 3237,
+   "headline": "Japan U-17 national team arrives in Qatar for World Cup",
+   "score": 2,
+   "topic_score": 5,
+   "main": "c2",
+   "tags": [
+    "c2"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3238,
+   "headline": "Japan Defense Ministry to adopt new AI policy",
+   "score": 4,
+   "topic_score": 6,
+   "main": "c2",
+   "tags": [
+    "c2"
+   ],
+   "passed_before": true
+  },
+  {
+   "id": 3264,
+   "headline": "China's naval presence near Japan remains normalized",
+   "score": 5,
+   "topic_score": 6,
+   "main": "c2",
+   "tags": [
+    "politics",
+    "c2"
+   ],
+   "passed_before": true
+  },
+  {
+   "id": 3465,
+   "headline": "Australian Climate Change Minister launches new climate agenda",
+   "score": 3,
+   "topic_score": 4,
+   "main": "c3",
+   "tags": [
+    "politics",
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3472,
+   "headline": "Putin and Japanese Prime Minister Takaiti may meet at APEC",
+   "score": 5,
+   "topic_score": 6,
+   "main": "c2",
+   "tags": [
+    "politics",
+    "russia",
+    "c2"
+   ],
+   "passed_before": true
+  },
+  {
+   "id": 3473,
+   "headline": "Australian Coalition takes lead in two-party preferred poll",
+   "score": 3,
+   "topic_score": 6,
+   "main": "c3",
+   "tags": [
+    "politics",
+    "c3"
+   ],
+   "passed_before": true
+  },
+  {
+   "id": 3482,
+   "headline": "Japan Life holds corporate networking event in Kyoto to explore new business collaborations",
+   "score": null,
+   "topic_score": null,
+   "main": null,
+   "tags": [
+    "c2"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3509,
+   "headline": "Australian first-home buyers express disappointment over scrapped rules",
+   "score": 2,
+   "topic_score": 4,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3512,
+   "headline": "Japan national football team showed performance shift against Brazil",
+   "score": 2,
+   "topic_score": 4,
+   "main": "c2",
+   "tags": [
+    "c2"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3513,
+   "headline": "JD.com considers Australian acquisition following MediaMarkt purchase",
+   "score": 2,
+   "topic_score": 4,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3514,
+   "headline": "Inter-Parliamentary Union head highlights COP31 for Turkey-Australia ties",
+   "score": 2,
+   "topic_score": 4,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3520,
+   "headline": "Japan updates cover tokenized bonds, football, and social topics",
+   "score": 2,
+   "topic_score": 4,
+   "main": "c2",
+   "tags": [
+    "c2"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3521,
+   "headline": "Australian developments include AI fraud risks and bilby conservation",
+   "score": 2,
+   "topic_score": 4,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3530,
+   "headline": "Albanese confronts Laos PM over methanol poisonings",
+   "score": 4,
+   "topic_score": 4,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3559,
+   "headline": "Google to provide Japan with early access to frontier AI technology",
+   "score": 2,
+   "topic_score": 5,
+   "main": "c2",
+   "tags": [
+    "c2"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3561,
+   "headline": "Magnitude 6.6 earthquake tremors felt in Darwin",
+   "score": 3,
+   "topic_score": 5,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3564,
+   "headline": "Analysis reviewed the best performing Australian rugby league stars for the 2026 season.",
+   "score": null,
+   "topic_score": null,
+   "main": null,
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3565,
+   "headline": "Australia and India strengthen maritime cooperation in Chennai",
+   "score": 2,
+   "topic_score": 4,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3567,
+   "headline": "Japanese YouTuber's named racehorse secures first G1 victory",
+   "score": 2,
+   "topic_score": 5,
+   "main": "c2",
+   "tags": [
+    "c2"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3571,
+   "headline": "Harley-Davidson's 'RMCR Café Racer Concept' made its Japan debut at the Yokohama Hot Rod Show.",
+   "score": null,
+   "topic_score": null,
+   "main": null,
+   "tags": [
+    "c2"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3578,
+   "headline": "Seattle Mariners express desire to return to Asian talent market",
+   "score": 2,
+   "topic_score": 4,
+   "main": "c2",
+   "tags": [
+    "c2"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3580,
+   "headline": "Fire danger period declared for additional areas of South West Australia",
+   "score": 2,
+   "topic_score": 5,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3581,
+   "headline": "NVRO secures Australian metals hub facility",
+   "score": 2,
+   "topic_score": 4,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3583,
+   "headline": "Japan's Princess Aiko to visit Singapore",
+   "score": 2,
+   "topic_score": 5,
+   "main": "c2",
+   "tags": [
+    "c2"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3586,
+   "headline": "Nanoleaf launches Smart Air Circulator Fan in Australia",
+   "score": 2,
+   "topic_score": 4,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3587,
+   "headline": "XPeng goes all-in on Australian electric vehicle market",
+   "score": 2,
+   "topic_score": 5,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3588,
+   "headline": "The HU announce 2027 Australian and New Zealand tour",
+   "score": 2,
+   "topic_score": 4,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3615,
+   "headline": "Melbourne skyscraper retrofitted with 1,391 solar panels",
+   "score": 5,
+   "topic_score": 8,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": true
+  },
+  {
+   "id": 3627,
+   "headline": "Police search Melbourne home after theft of Melbourne Cup trophies",
+   "score": 4,
+   "topic_score": 6,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": true
+  },
+  {
+   "id": 3628,
+   "headline": "Reserve Bank of Australia minutes show majority voted to raise rates",
+   "score": 5,
+   "topic_score": 7,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": true
+  },
+  {
+   "id": 3632,
+   "headline": "Australia increases third-year holiday maker visa cap for backpackers",
+   "score": 5,
+   "topic_score": 7,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": true
+  },
+  {
+   "id": 3634,
+   "headline": "Kadena Air Base receives first permanently assigned F-15EX jets",
+   "score": 5,
+   "topic_score": 5,
+   "main": "wars_conflicts",
+   "tags": [
+    "wars_conflicts",
+    "c2"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3647,
+   "headline": "Protecting Australia maritime trade differs from movie depiction",
+   "score": 2,
+   "topic_score": 4,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3648,
+   "headline": "Economist warns of worsening Australian interest rate pain",
+   "score": 2,
+   "topic_score": 4,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3667,
+   "headline": "Former BOJ Governor Kuroda flags potential rate hikes above neutral",
+   "score": 5,
+   "topic_score": 6,
+   "main": "c2",
+   "tags": [
+    "c2"
+   ],
+   "passed_before": true
+  },
+  {
+   "id": 3697,
+   "headline": "Japan scrambles jets after Russian aircraft violate airspace",
+   "score": 6,
+   "topic_score": 7,
+   "main": "russia",
+   "tags": [
+    "politics",
+    "wars_conflicts",
+    "russia",
+    "c2"
+   ],
+   "passed_before": true
+  },
+  {
+   "id": 3731,
+   "headline": "Japan delays floating-rate bond launch amid weak demand",
+   "score": 4,
+   "topic_score": 5,
+   "main": "c2",
+   "tags": [
+    "politics",
+    "c2"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3760,
+   "headline": "US military sailor arrested in Japan following disturbance",
+   "score": 3,
+   "topic_score": 4,
+   "main": "c2",
+   "tags": [
+    "c2"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3767,
+   "headline": "Senior Yakuza member files discrimination lawsuit against highway operators",
+   "score": 5,
+   "topic_score": 6,
+   "main": "c2",
+   "tags": [
+    "c2"
+   ],
+   "passed_before": true
+  },
+  {
+   "id": 3771,
+   "headline": "Australian investors granted direct access to Anthropic IPO",
+   "score": 5,
+   "topic_score": 6,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": true
+  },
+  {
+   "id": 3839,
+   "headline": "Red crab migration begins on Australia Christmas Island",
+   "score": 4,
+   "topic_score": 5,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3899,
+   "headline": "Australian share market closes lower",
+   "score": 4,
+   "topic_score": 4,
+   "main": "c3",
+   "tags": [
+    "c3"
+   ],
+   "passed_before": false
+  },
+  {
+   "id": 3900,
+   "headline": "Japan aims for security overhaul and defense industry boost",
+   "score": 5,
+   "topic_score": 5,
+   "main": "c2",
+   "tags": [
+    "c2"
+   ],
+   "passed_before": false
+  }
+ ]
+}

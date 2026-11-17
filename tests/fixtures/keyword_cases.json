@@ -1,0 +1,14195 @@
+[
+{
+"raw": {
+"en": "not a list",
+"ru": null
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan"
+],
+"ru": [
+"Japan"
+]
+}
+},
+{
+"raw": {
+"en": [],
+"ru": [
+"JAPAN",
+" Tokyo ",
+"Банк Японии",
+"",
+"Japan",
+"JAPAN",
+"-",
+"Yen",
+"ok_word",
+"42nd",
+"42nd",
+"Токио",
+"O'Brien",
+" .Lead. ",
+"Банк Японии",
+" Tokyo ",
+"ok_word",
+"...",
+"Seoul\nKorea",
+" .Lead. "
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [],
+"ru": [
+"Япония",
+"JAPAN",
+"Tokyo",
+"Банк Японии",
+"Yen",
+"ok_word",
+"42nd",
+"Токио",
+"O'Brien",
+"Lead",
+"Seoul Korea"
+]
+}
+},
+{
+"raw": {
+"en": [
+"...",
+"...",
+"7",
+"B.O.J.",
+"ok_word",
+" Tokyo ",
+"#tag",
+"ok_word",
+"Kyōto",
+"Япония",
+"Seoul\nKorea",
+"Yen",
+"-",
+"O'Brien",
+"Банк Японии",
+"Yen",
+"Kyōto",
+"Ճապոնիա"
+],
+"ru": [
+"Япония",
+"-",
+" Tokyo ",
+" Tokyo ",
+"日本",
+"JAPAN",
+"-",
+"-",
+" Tokyo "
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"B.O.J",
+"ok_word",
+"Tokyo",
+"Kyōto",
+"Япония",
+"Seoul Korea",
+"Yen",
+"O'Brien",
+"Банк Японии",
+"Ճապոնիա"
+],
+"ru": [
+"Japan",
+"Япония",
+"Tokyo",
+"日本"
+]
+}
+},
+{
+"raw": {
+"en": [
+" Tokyo ",
+"Seoul\nKorea",
+"Япония",
+"Токио",
+"JAPAN",
+"Toyota & Honda",
+"Kyōto",
+"Seoul\nKorea",
+"B.O.J.",
+"японский",
+"42nd",
+"O'Brien",
+"—"
+],
+"ru": [
+"O'Brien",
+"Toyota & Honda",
+"Toyota & Honda",
+"Банк Японии",
+"日本",
+" Tokyo ",
+"-",
+"Kyōto",
+"42nd",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"O'Brien",
+"ok_word",
+"Банк Японии",
+"Kyōto",
+"JAPAN"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Tokyo",
+"Seoul Korea",
+"Япония",
+"Токио",
+"Toyota & Honda",
+"Kyōto",
+"B.O.J",
+"японский",
+"42nd",
+"O'Brien"
+],
+"ru": [
+"Япония",
+"O'Brien",
+"Toyota & Honda",
+"Банк Японии",
+"日本",
+"Tokyo",
+"Kyōto",
+"42nd",
+"ok_word",
+"JAPAN"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Токио",
+"O'Brien",
+"Japan",
+"日本",
+"AI-chips",
+"42nd",
+"Toyota & Honda",
+"Japan"
+],
+"ru": [
+"AI-chips",
+"Токио",
+"7",
+"Kyōto",
+"-",
+"7",
+"—",
+"Япония",
+"Yen",
+"japan",
+"..."
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"Токио",
+"O'Brien",
+"Japan",
+"日本",
+"AI-chips",
+"42nd",
+"Toyota & Honda"
+],
+"ru": [
+"AI-chips",
+"Токио",
+"Kyōto",
+"Япония",
+"Yen",
+"japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"42nd",
+" Tokyo ",
+"japan"
+],
+"ru": [
+"—",
+"Japan",
+"Japan",
+"Токио",
+"Япония",
+"—"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"42nd",
+"Tokyo",
+"japan"
+],
+"ru": [
+"Japan",
+"Токио",
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"japan",
+"Bank  of Japan",
+"a/b"
+],
+"ru": [
+"Japan",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"-",
+"ok_word",
+"Япония",
+"-"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"japan",
+"Bank of Japan"
+],
+"ru": [
+"Japan",
+"ok_word",
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Банк Японии",
+"Seoul\nKorea",
+"",
+"—",
+"#tag",
+"a/b"
+],
+"ru": [
+"japan",
+"японский",
+"Банк Японии",
+"#tag",
+"Ճապոնիա",
+"a/b",
+"B.O.J.",
+"Япония",
+"...",
+"日本",
+"Yen"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"Банк Японии",
+"Seoul Korea"
+],
+"ru": [
+"Япония",
+"japan",
+"японский",
+"Банк Японии",
+"Ճապոնիա",
+"B.O.J",
+"日本",
+"Yen"
+]
+}
+},
+{
+"raw": {
+"en": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"42nd",
+"японский",
+"японский",
+"a/b",
+"",
+"Kyōto",
+"Банк Японии",
+"japan",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"...",
+"Toyota & Honda"
+],
+"ru": [
+"a/b",
+"",
+"JAPAN",
+"-",
+"Ճապոնիա",
+" Tokyo ",
+"Bank  of Japan",
+"Yen",
+"japan",
+"AI-chips",
+"Bank  of Japan",
+"Yen",
+"-",
+"Kyōto",
+"O'Brien"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"42nd",
+"японский",
+"Kyōto",
+"Банк Японии",
+"japan",
+"Toyota & Honda"
+],
+"ru": [
+"JAPAN",
+"Ճապոնիա",
+"Tokyo",
+"Bank of Japan",
+"Yen",
+"AI-chips",
+"Kyōto",
+"O'Brien"
+]
+}
+},
+{
+"raw": {
+"en": [
+"japan",
+"Ճապոնիա",
+" Tokyo ",
+"-",
+"AI-chips",
+"7",
+"японский",
+"Toyota & Honda",
+"Toyota & Honda",
+"Bank  of Japan",
+"O'Brien",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+],
+"ru": [
+"Bank  of Japan",
+"Ճապոնիա"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"japan",
+"Ճապոնիա",
+"Tokyo",
+"AI-chips",
+"японский",
+"Toyota & Honda",
+"Bank of Japan",
+"O'Brien"
+],
+"ru": [
+"Japan",
+"Bank of Japan",
+"Ճապոնիա"
+]
+}
+},
+{
+"raw": {
+"en": [],
+"ru": [
+"...",
+"ok_word",
+"Seoul\nKorea",
+"日本",
+"7",
+"Банк Японии",
+"Seoul\nKorea"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia"
+],
+"ru": [
+"Япония",
+"ok_word",
+"Seoul Korea",
+"日本",
+"Банк Японии"
+]
+}
+},
+{
+"raw": {
+"en": [
+"O'Brien",
+"-",
+"Kyōto",
+"",
+"JAPAN",
+"ok_word",
+"7",
+"japan",
+"Seoul\nKorea",
+"...",
+"...",
+"японский",
+"日本"
+],
+"ru": [
+"ok_word",
+"JAPAN",
+"Toyota & Honda"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"O'Brien",
+"Kyōto",
+"ok_word",
+"Seoul Korea",
+"японский",
+"日本"
+],
+"ru": [
+"Japan",
+"ok_word",
+"Toyota & Honda"
+]
+}
+},
+{
+"raw": {
+"en": [
+"B.O.J.",
+"JAPAN",
+"Japan",
+"Ճապոնիա",
+"Seoul\nKorea",
+"—",
+"japan",
+"Bank  of Japan",
+"42nd",
+" .Lead. ",
+"Токио",
+"Bank  of Japan",
+"Japan",
+" .Lead. ",
+"O'Brien",
+"O'Brien",
+"Ճապոնիա",
+"ok_word",
+"Kyōto",
+"AI-chips"
+],
+"ru": [
+"Japan",
+"—",
+"JAPAN",
+"-",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"—",
+"Seoul\nKorea",
+"Токио",
+"...",
+"Япония",
+"Japan",
+"японский",
+"Ճապոնիա",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"#tag",
+"Japan"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"B.O.J",
+"Ճապոնիա",
+"Seoul Korea",
+"Bank of Japan",
+"42nd",
+"Lead",
+"Токио",
+"O'Brien",
+"ok_word",
+"Kyōto",
+"AI-chips"
+],
+"ru": [
+"Япония",
+"Japan",
+"Seoul Korea",
+"Токио",
+"японский",
+"Ճապոնիա"
+]
+}
+},
+{
+"raw": {
+"en": [
+"42nd",
+"42nd",
+"O'Brien"
+],
+"ru": [
+"7",
+"#tag",
+"",
+"Japan",
+"-",
+"Bank  of Japan",
+"—",
+"Токио",
+"Ճապոնիա"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"42nd",
+"O'Brien"
+],
+"ru": [
+"Япония",
+"Japan",
+"Bank of Japan",
+"Токио",
+"Ճապոնիա"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Токио",
+"日本",
+" .Lead. ",
+"O'Brien",
+"Japan",
+" .Lead. ",
+"...",
+"JAPAN",
+"O'Brien",
+"",
+"Токио",
+"42nd",
+"Ճապոնիա",
+"Банк Японии",
+"Toyota & Honda",
+"-"
+],
+"ru": [
+"Yen",
+"Ճապոնիա",
+"Japan",
+"42nd",
+"ok_word",
+"AI-chips",
+"Kyōto",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"42nd",
+"日本",
+"Япония",
+" Tokyo ",
+"a/b"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Токио",
+"日本",
+"Lead",
+"O'Brien",
+"Japan",
+"42nd",
+"Ճապոնիա",
+"Банк Японии",
+"Toyota & Honda"
+],
+"ru": [
+"Япония",
+"Yen",
+"Ճապոնիա",
+"Japan",
+"42nd",
+"ok_word",
+"AI-chips",
+"Kyōto",
+"日本",
+"Tokyo"
+]
+}
+},
+{
+"raw": {
+"en": [
+"-",
+"ok_word",
+"ok_word",
+"JAPAN",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Ճապոնիա"
+],
+"ru": [
+"O'Brien",
+"ok_word"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"ok_word",
+"JAPAN",
+"Ճապոնիա"
+],
+"ru": [
+"Япония",
+"O'Brien",
+"ok_word"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Seoul\nKorea",
+"Ճապոնիա",
+"Seoul\nKorea",
+"Банк Японии",
+"...",
+"—"
+],
+"ru": [
+"O'Brien",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+" .Lead. ",
+"#tag",
+"JAPAN",
+"...",
+"JAPAN",
+"AI-chips",
+"AI-chips",
+"B.O.J.",
+"AI-chips",
+"7",
+"O'Brien"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Seoul Korea",
+"Ճապոնիա",
+"Банк Японии"
+],
+"ru": [
+"Япония",
+"O'Brien",
+"Lead",
+"JAPAN",
+"AI-chips",
+"B.O.J"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Банк Японии",
+"7",
+"Kyōto"
+],
+"ru": [
+"a/b",
+"Seoul\nKorea",
+"7",
+"",
+"Kyōto",
+"японский"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"Банк Японии",
+"Kyōto"
+],
+"ru": [
+"Seoul Korea",
+"Kyōto",
+"японский"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Банк Японии",
+"...",
+"O'Brien",
+"Bank  of Japan",
+" .Lead. "
+],
+"ru": [
+"Kyōto",
+" .Lead. ",
+"—",
+"японский",
+"japan",
+"Bank  of Japan",
+"japan",
+"Япония"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Банк Японии",
+"O'Brien",
+"Bank of Japan",
+"Lead"
+],
+"ru": [
+"Япония",
+"Kyōto",
+"Lead",
+"японский",
+"japan",
+"Bank of Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto",
+"7",
+"...",
+"—",
+"7",
+"Seoul\nKorea",
+"#tag",
+"B.O.J.",
+"Bank  of Japan"
+],
+"ru": []
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"Kyōto",
+"Seoul Korea",
+"B.O.J",
+"Bank of Japan"
+],
+"ru": [
+"Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Bank  of Japan",
+" .Lead. "
+],
+"ru": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+" .Lead. ",
+"ok_word",
+"—",
+"ok_word",
+"42nd",
+"Токио",
+"Kyōto",
+"日本",
+"Банк Японии",
+"Ճապոնիա",
+"7",
+"B.O.J.",
+"7",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"ok_word",
+"ok_word",
+"японский"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"Bank of Japan",
+"Lead"
+],
+"ru": [
+"Japan",
+"Lead",
+"ok_word",
+"42nd",
+"Токио",
+"Kyōto",
+"日本",
+"Банк Японии",
+"Ճապոնիա",
+"B.O.J",
+"японский"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Toyota & Honda",
+" Tokyo ",
+"Japan",
+"japan",
+"—",
+"ok_word",
+" .Lead. ",
+"-",
+"B.O.J.",
+"—",
+"Yen",
+"Ճապոնիա",
+"Ճապոնիա",
+"Yen",
+" Tokyo ",
+"Япония"
+],
+"ru": [
+"42nd",
+"—",
+"Банк Японии",
+"O'Brien",
+" Tokyo ",
+"42nd",
+"a/b"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"Toyota & Honda",
+"Tokyo",
+"Japan",
+"ok_word",
+"Lead",
+"B.O.J",
+"Yen",
+"Ճապոնիա",
+"Япония"
+],
+"ru": [
+"42nd",
+"Банк Японии",
+"O'Brien",
+"Tokyo"
+]
+}
+},
+{
+"raw": {
+"en": [
+"a/b",
+"Ճապոնիա",
+"JAPAN",
+"AI-chips",
+"日本",
+"японский",
+"日本",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"japan",
+"Токио",
+"японский",
+"Yen",
+"японский",
+"японский",
+"a/b",
+"Токио",
+"42nd",
+"Yen",
+"японский"
+],
+"ru": [
+"Bank  of Japan",
+"7"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"Ճապոնիա",
+"AI-chips",
+"日本",
+"японский",
+"Токио",
+"Yen",
+"42nd"
+],
+"ru": [
+"Bank of Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"a/b",
+"#tag"
+],
+"ru": [
+"ok_word",
+"японский"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1"
+],
+"ru": [
+"Япония",
+"ok_word",
+"японский"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Bank  of Japan",
+"Kyōto",
+"японский"
+],
+"ru": [
+"",
+"42nd",
+"Япония",
+"JAPAN",
+"...",
+"Seoul\nKorea",
+" .Lead. ",
+" .Lead. ",
+"7",
+" Tokyo ",
+" .Lead. ",
+"Япония",
+"",
+"ok_word",
+"-"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"Bank of Japan",
+"Kyōto",
+"японский"
+],
+"ru": [
+"Япония",
+"42nd",
+"JAPAN",
+"Seoul Korea",
+"Lead",
+"Tokyo",
+"ok_word"
+]
+}
+},
+{
+"raw": {
+"en": "not a list",
+"ru": null
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia"
+],
+"ru": []
+}
+},
+{
+"raw": {
+"en": [
+"B.O.J."
+],
+"ru": [
+"Toyota & Honda",
+"..."
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"B.O.J"
+],
+"ru": [
+"Toyota & Honda"
+]
+}
+},
+{
+"raw": {
+"en": [
+"японский",
+" .Lead. ",
+" .Lead. ",
+"AI-chips",
+" .Lead. ",
+"Toyota & Honda"
+],
+"ru": [
+"a/b",
+"японский",
+"японский",
+"a/b"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"японский",
+"Lead",
+"AI-chips",
+"Toyota & Honda"
+],
+"ru": [
+"японский"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Ճապոնիա",
+"—",
+"Yen",
+"B.O.J.",
+"AI-chips",
+"...",
+" Tokyo "
+],
+"ru": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Япония",
+"...",
+"japan",
+"Yen",
+"Bank  of Japan",
+"Yen",
+"42nd"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"Ճապոնիա",
+"Yen",
+"B.O.J",
+"AI-chips",
+"Tokyo"
+],
+"ru": [
+"Япония",
+"japan",
+"Yen",
+"Bank of Japan",
+"42nd"
+]
+}
+},
+{
+"raw": {
+"en": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Japan",
+"Yen",
+"#tag",
+"Seoul\nKorea",
+"Seoul\nKorea",
+"a/b"
+],
+"ru": [
+"japan",
+" .Lead. ",
+"-",
+"японский",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"",
+"Bank  of Japan",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Yen",
+"Seoul Korea"
+],
+"ru": [
+"Япония",
+"japan",
+"Lead",
+"японский",
+"Bank of Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Japan",
+"японский",
+"ok_word",
+"日本",
+"Toyota & Honda"
+],
+"ru": [
+"Япония",
+"-",
+"Kyōto",
+"O'Brien",
+"a/b",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"#tag",
+"japan",
+"Kyōto",
+" .Lead. ",
+"Bank  of Japan",
+"O'Brien",
+"Yen",
+"AI-chips",
+"#tag",
+"...",
+"-",
+"Yen",
+"Япония",
+"Токио"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"японский",
+"ok_word",
+"日本",
+"Toyota & Honda"
+],
+"ru": [
+"Япония",
+"Kyōto",
+"O'Brien",
+"japan",
+"Lead",
+"Bank of Japan",
+"Yen",
+"AI-chips",
+"Токио"
+]
+}
+},
+{
+"raw": {
+"en": [
+"...",
+"42nd",
+"Japan",
+"Kyōto",
+"японский",
+"",
+"Toyota & Honda",
+"",
+"—",
+"японский",
+"",
+"日本",
+"японский",
+"JAPAN",
+"Ճապոնիա"
+],
+"ru": [
+"Japan",
+"",
+"JAPAN",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"B.O.J.",
+"Yen",
+"O'Brien",
+"-",
+"O'Brien",
+"Kyōto",
+"AI-chips",
+"42nd",
+"a/b",
+"42nd",
+"Japan",
+"42nd",
+"Токио",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"ok_word",
+"AI-chips"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"42nd",
+"Japan",
+"Kyōto",
+"японский",
+"Toyota & Honda",
+"日本",
+"Ճապոնիա"
+],
+"ru": [
+"Япония",
+"Japan",
+"B.O.J",
+"Yen",
+"O'Brien",
+"Kyōto",
+"AI-chips",
+"42nd",
+"Токио",
+"ok_word"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Япония",
+"Банк Японии"
+],
+"ru": [
+"Yen",
+"a/b",
+"Seoul\nKorea",
+"#tag",
+"Япония",
+"Kyōto",
+"Ճապոնիա",
+" .Lead. ",
+"Toyota & Honda",
+"AI-chips",
+"Ճապոնիա",
+"O'Brien",
+"",
+"7",
+"42nd",
+"ok_word",
+"Токио",
+"Kyōto"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"Япония",
+"Банк Японии"
+],
+"ru": [
+"Yen",
+"Seoul Korea",
+"Япония",
+"Kyōto",
+"Ճապոնիա",
+"Lead",
+"Toyota & Honda",
+"AI-chips",
+"O'Brien",
+"42nd",
+"ok_word",
+"Токио"
+]
+}
+},
+{
+"raw": {
+"en": [
+"7",
+"B.O.J.",
+"Japan",
+"Bank  of Japan",
+"#tag",
+"—",
+" Tokyo ",
+"Kyōto"
+],
+"ru": [
+"Kyōto",
+"Seoul\nKorea",
+"japan",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Kyōto",
+"Japan",
+"japan",
+"Bank  of Japan",
+"Toyota & Honda",
+"...",
+"a/b",
+"ok_word",
+"B.O.J.",
+"Банк Японии",
+"Yen",
+"ok_word",
+"AI-chips",
+"B.O.J.",
+"42nd",
+"japan"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"B.O.J",
+"Japan",
+"Bank of Japan",
+"Tokyo",
+"Kyōto"
+],
+"ru": [
+"Kyōto",
+"Seoul Korea",
+"japan",
+"Bank of Japan",
+"Toyota & Honda",
+"ok_word",
+"B.O.J",
+"Банк Японии",
+"Yen",
+"AI-chips",
+"42nd"
+]
+}
+},
+{
+"raw": {
+"en": [
+"日本",
+"japan",
+"",
+""
+],
+"ru": [
+"Япония",
+"Yen"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"日本",
+"japan"
+],
+"ru": [
+"Япония",
+"Yen"
+]
+}
+},
+{
+"raw": {
+"en": [
+"японский",
+"a/b"
+],
+"ru": []
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"японский"
+],
+"ru": [
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Bank  of Japan",
+" .Lead. ",
+"japan",
+"",
+"",
+"Токио",
+"Банк Японии",
+"Ճապոնիա",
+"Toyota & Honda",
+"Банк Японии",
+"Toyota & Honda",
+"日本",
+"Банк Японии"
+],
+"ru": []
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"Bank of Japan",
+"Lead",
+"japan",
+"Токио",
+"Банк Японии",
+"Ճապոնիա",
+"Toyota & Honda",
+"日本"
+],
+"ru": [
+"Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Japan"
+],
+"ru": [
+"AI-chips",
+"Toyota & Honda",
+"Yen"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"Japan"
+],
+"ru": [
+"Япония",
+"AI-chips",
+"Toyota & Honda",
+"Yen"
+]
+}
+},
+{
+"raw": {
+"en": [
+" Tokyo ",
+"—",
+"",
+"Japan"
+],
+"ru": [
+"японский"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"Tokyo"
+],
+"ru": [
+"Japan",
+"японский"
+]
+}
+},
+{
+"raw": {
+"en": [
+"B.O.J.",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"—",
+"-",
+"日本",
+"Kyōto",
+"Toyota & Honda",
+"Yen",
+" .Lead. ",
+"Kyōto"
+],
+"ru": [
+"Япония",
+"B.O.J.",
+"Ճապոնիա",
+"Банк Японии",
+"Kyōto",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"B.O.J",
+"日本",
+"Kyōto",
+"Toyota & Honda",
+"Yen",
+"Lead"
+],
+"ru": [
+"Япония",
+"B.O.J",
+"Ճապոնիա",
+"Банк Японии",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"japan",
+"JAPAN",
+"Seoul\nKorea",
+"42nd",
+""
+],
+"ru": [
+"B.O.J.",
+"B.O.J.",
+"Ճապոնիա",
+"Токио",
+"Япония",
+"Toyota & Honda",
+"",
+"...",
+" .Lead. ",
+"—",
+"Toyota & Honda",
+"a/b",
+"японский",
+"",
+"Japan"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"japan",
+"Seoul Korea",
+"42nd"
+],
+"ru": [
+"B.O.J",
+"Ճապոնիա",
+"Токио",
+"Япония",
+"Toyota & Honda",
+"Lead",
+"японский",
+"Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"японский"
+],
+"ru": [
+"Ճապոնիա",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Japan",
+"японский",
+"Japan",
+"japan",
+"",
+"JAPAN",
+"Япония",
+"a/b",
+"Ճապոնիա",
+"B.O.J.",
+"a/b",
+"",
+"Банк Японии",
+"Kyōto"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"японский"
+],
+"ru": [
+"Ճապոնիա",
+"Japan",
+"японский",
+"Япония",
+"B.O.J",
+"Банк Японии",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Токио",
+"Bank  of Japan",
+"",
+"42nd",
+"Yen",
+" Tokyo ",
+"Bank  of Japan",
+"Ճապոնիա",
+"японский",
+" .Lead. ",
+"42nd",
+"42nd"
+],
+"ru": [
+"—",
+" Tokyo ",
+"ok_word",
+" .Lead. ",
+"AI-chips",
+"7"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"Токио",
+"Bank of Japan",
+"42nd",
+"Yen",
+"Tokyo",
+"Ճապոնիա",
+"японский",
+"Lead"
+],
+"ru": [
+"Japan",
+"Tokyo",
+"ok_word",
+"Lead",
+"AI-chips"
+]
+}
+},
+{
+"raw": {
+"en": [
+"...",
+"Япония",
+" .Lead. ",
+"-",
+"Seoul\nKorea",
+"японский",
+"—",
+"O'Brien",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+],
+"ru": [
+"#tag"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"Япония",
+"Lead",
+"Seoul Korea",
+"японский",
+"O'Brien"
+],
+"ru": [
+"Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+" .Lead. ",
+" Tokyo ",
+"42nd",
+"42nd",
+"",
+" Tokyo ",
+"",
+"JAPAN",
+"—",
+"...",
+"#tag",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+],
+"ru": [
+"ok_word",
+"日本",
+"Yen",
+"日本",
+" Tokyo ",
+"",
+"Kyōto",
+"AI-chips",
+"O'Brien"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"Lead",
+"Tokyo",
+"42nd",
+"JAPAN"
+],
+"ru": [
+"Япония",
+"ok_word",
+"日本",
+"Yen",
+"Tokyo",
+"Kyōto",
+"AI-chips",
+"O'Brien"
+]
+}
+},
+{
+"raw": {
+"en": [
+"—",
+"японский",
+"—",
+"японский",
+"Bank  of Japan",
+"",
+"японский",
+"日本",
+"AI-chips",
+"—",
+"-",
+"Seoul\nKorea",
+"Kyōto",
+"JAPAN",
+" Tokyo ",
+"O'Brien",
+"Kyōto"
+],
+"ru": [
+"Japan",
+"—",
+"...",
+"42nd",
+"-",
+"ok_word",
+"",
+"AI-chips"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"японский",
+"Bank of Japan",
+"日本",
+"AI-chips",
+"Seoul Korea",
+"Kyōto",
+"Tokyo",
+"O'Brien"
+],
+"ru": [
+"Japan",
+"42nd",
+"ok_word",
+"AI-chips"
+]
+}
+},
+{
+"raw": {
+"en": [
+"-",
+"Банк Японии"
+],
+"ru": [
+" .Lead. ",
+"Япония",
+"ok_word",
+"B.O.J.",
+"Yen",
+"a/b",
+"Kyōto",
+"Банк Японии",
+"ok_word",
+"Yen",
+"AI-chips",
+"Seoul\nKorea",
+"Ճապոնիա",
+"японский",
+"42nd",
+"-",
+"42nd",
+"Toyota & Honda",
+""
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"Банк Японии"
+],
+"ru": [
+"Япония",
+"Lead",
+"ok_word",
+"B.O.J",
+"Yen",
+"Kyōto",
+"Банк Японии",
+"AI-chips",
+"Seoul Korea",
+"Ճապոնիա",
+"японский",
+"42nd",
+"Toyota & Honda"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Япония",
+"Kyōto",
+"",
+" Tokyo ",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Toyota & Honda",
+"B.O.J.",
+" .Lead. ",
+"42nd",
+"O'Brien",
+"Japan",
+"Токио",
+"#tag",
+"Ճապոնիա",
+"#tag",
+"ok_word",
+"Seoul\nKorea"
+],
+"ru": [
+"ok_word",
+"Ճապոնիա",
+"a/b",
+"7",
+"Банк Японии",
+"AI-chips",
+"—",
+"Kyōto"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Япония",
+"Kyōto",
+"Tokyo",
+"Toyota & Honda",
+"B.O.J",
+"Lead",
+"42nd",
+"O'Brien",
+"Токио",
+"Ճապոնիա",
+"ok_word",
+"Seoul Korea"
+],
+"ru": [
+"Япония",
+"ok_word",
+"Ճապոնիա",
+"Банк Японии",
+"AI-chips",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"-",
+"-",
+"O'Brien",
+"日本",
+"Ճապոնիա",
+"42nd",
+"B.O.J.",
+"—",
+"#tag",
+"a/b",
+"Yen",
+"O'Brien"
+],
+"ru": [
+"#tag",
+"42nd",
+"Seoul\nKorea",
+"японский",
+"Токио",
+"O'Brien",
+"-",
+"B.O.J.",
+" .Lead. ",
+"japan",
+" .Lead. ",
+"Kyōto",
+"—"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"O'Brien",
+"日本",
+"Ճապոնիա",
+"42nd",
+"B.O.J",
+"Yen"
+],
+"ru": [
+"Japan",
+"42nd",
+"Seoul Korea",
+"японский",
+"Токио",
+"O'Brien",
+"B.O.J",
+"Lead",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"japan",
+"a/b",
+"Japan",
+"#tag",
+"B.O.J.",
+"Токио",
+"日本",
+"ok_word",
+"ok_word",
+" Tokyo ",
+"Токио",
+"Bank  of Japan",
+"日本",
+" Tokyo ",
+"японский"
+],
+"ru": [
+"Kyōto",
+"AI-chips",
+"Yen",
+"Токио",
+"B.O.J.",
+"AI-chips",
+"ok_word"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"japan",
+"B.O.J",
+"Токио",
+"日本",
+"ok_word",
+"Tokyo",
+"Bank of Japan",
+"японский"
+],
+"ru": [
+"Япония",
+"Kyōto",
+"AI-chips",
+"Yen",
+"Токио",
+"B.O.J",
+"ok_word"
+]
+}
+},
+{
+"raw": {
+"en": "not a list",
+"ru": null
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia"
+],
+"ru": [
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+" .Lead. ",
+"7",
+"-",
+"Kyōto"
+],
+"ru": [
+"Япония",
+"a/b",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Toyota & Honda",
+"ok_word",
+"—",
+"a/b",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Lead",
+"Kyōto"
+],
+"ru": [
+"Япония",
+"Toyota & Honda",
+"ok_word"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Япония",
+"Seoul\nKorea",
+"Япония",
+"JAPAN",
+"japan",
+"Yen",
+"O'Brien",
+"42nd",
+"ok_word",
+"Токио",
+"—",
+"JAPAN",
+"Банк Японии",
+"Japan",
+"AI-chips",
+"японский"
+],
+"ru": []
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"Япония",
+"Seoul Korea",
+"JAPAN",
+"Yen",
+"O'Brien",
+"42nd",
+"ok_word",
+"Токио",
+"Банк Японии",
+"AI-chips",
+"японский"
+],
+"ru": []
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto",
+"ok_word",
+"#tag",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Yen",
+"JAPAN",
+"7",
+"Toyota & Honda",
+" .Lead. ",
+"Япония",
+"Seoul\nKorea",
+"Japan",
+"Bank  of Japan",
+"",
+"AI-chips",
+"42nd",
+"—",
+"Токио",
+"—",
+"Ճապոնիա"
+],
+"ru": [
+"a/b",
+"ok_word",
+"japan",
+"Japan",
+"japan",
+"42nd",
+"japan",
+"japan",
+"O'Brien",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"japan",
+"японский",
+"Bank  of Japan"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"Kyōto",
+"ok_word",
+"Yen",
+"JAPAN",
+"Toyota & Honda",
+"Lead",
+"Япония",
+"Seoul Korea",
+"Bank of Japan",
+"AI-chips",
+"42nd",
+"Токио",
+"Ճապոնիա"
+],
+"ru": [
+"ok_word",
+"japan",
+"42nd",
+"O'Brien",
+"японский",
+"Bank of Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"O'Brien",
+"Bank  of Japan",
+"-",
+" Tokyo ",
+"Bank  of Japan",
+"Seoul\nKorea",
+"-",
+"японский"
+],
+"ru": [
+"",
+"Ճապոնիա",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"O'Brien",
+"Bank of Japan",
+"Tokyo",
+"Seoul Korea",
+"японский"
+],
+"ru": [
+"Japan",
+"Ճապոնիա"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Банк Японии",
+"Toyota & Honda",
+"ok_word",
+"a/b",
+"42nd"
+],
+"ru": [
+"a/b",
+"O'Brien",
+"Japan",
+"—",
+"Япония",
+" .Lead. ",
+"#tag",
+"Токио",
+"Toyota & Honda",
+"Seoul\nKorea",
+" Tokyo ",
+"Токио",
+"японский",
+"Ճապոնիա",
+" .Lead. ",
+"—",
+"JAPAN"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Банк Японии",
+"Toyota & Honda",
+"ok_word",
+"42nd"
+],
+"ru": [
+"Япония",
+"O'Brien",
+"Japan",
+"Lead",
+"Токио",
+"Toyota & Honda",
+"Seoul Korea",
+"Tokyo",
+"японский",
+"Ճապոնիա"
+]
+}
+},
+{
+"raw": {
+"en": [
+"",
+"AI-chips",
+"#tag",
+"Банк Японии",
+"japan",
+"O'Brien",
+" Tokyo ",
+"日本",
+"#tag",
+"Toyota & Honda",
+"日本",
+"JAPAN",
+"японский",
+"Bank  of Japan",
+"Токио",
+"Bank  of Japan",
+" .Lead. ",
+"a/b",
+"Toyota & Honda"
+],
+"ru": [
+"Токио",
+"日本"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"AI-chips",
+"Банк Японии",
+"O'Brien",
+"Tokyo",
+"日本",
+"Toyota & Honda",
+"японский",
+"Bank of Japan",
+"Токио",
+"Lead"
+],
+"ru": [
+"Япония",
+"Токио",
+"日本"
+]
+}
+},
+{
+"raw": {
+"en": [
+"7",
+"японский",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Bank  of Japan",
+"...",
+"JAPAN"
+],
+"ru": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"AI-chips",
+"Yen",
+"Токио",
+"B.O.J.",
+"",
+"—"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"японский",
+"Bank of Japan"
+],
+"ru": [
+"Япония",
+"AI-chips",
+"Yen",
+"Токио",
+"B.O.J"
+]
+}
+},
+{
+"raw": {
+"en": [
+"B.O.J.",
+"japan",
+"japan",
+"AI-chips",
+"42nd",
+" Tokyo ",
+"42nd",
+"日本",
+" .Lead. ",
+"-",
+"#tag",
+"O'Brien",
+" Tokyo ",
+"Ճապոնիա",
+"42nd",
+"Kyōto",
+"O'Brien",
+""
+],
+"ru": []
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"B.O.J",
+"japan",
+"AI-chips",
+"42nd",
+"Tokyo",
+"日本",
+"Lead",
+"O'Brien",
+"Ճապոնիա",
+"Kyōto"
+],
+"ru": [
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"日本",
+"日本",
+"japan",
+"#tag",
+"日本",
+"Bank  of Japan",
+"7",
+"",
+"Japan",
+"Toyota & Honda",
+"Yen",
+"Япония",
+"42nd",
+"Japan",
+"Япония",
+"a/b"
+],
+"ru": [
+"Bank  of Japan",
+"japan",
+"japan",
+"Yen",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+" Tokyo ",
+" Tokyo ",
+"a/b"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"日本",
+"japan",
+"Bank of Japan",
+"Toyota & Honda",
+"Yen",
+"Япония",
+"42nd"
+],
+"ru": [
+"Япония",
+"Bank of Japan",
+"japan",
+"Yen",
+"Tokyo"
+]
+}
+},
+{
+"raw": {
+"en": [
+" Tokyo ",
+"-",
+"...",
+"O'Brien",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"",
+"Банк Японии",
+"...",
+"#tag",
+"Yen"
+],
+"ru": [
+"a/b",
+"O'Brien",
+"JAPAN",
+"O'Brien",
+"Kyōto",
+"...",
+"日本",
+" Tokyo ",
+"JAPAN",
+"#tag",
+"",
+" Tokyo ",
+"Japan",
+" Tokyo ",
+"японский",
+"Japan",
+"Japan",
+"ok_word"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"Tokyo",
+"O'Brien",
+"Банк Японии",
+"Yen"
+],
+"ru": [
+"Япония",
+"O'Brien",
+"JAPAN",
+"Kyōto",
+"日本",
+"Tokyo",
+"японский",
+"ok_word"
+]
+}
+},
+{
+"raw": {
+"en": [
+"42nd",
+"Токио",
+"B.O.J.",
+"Kyōto",
+"AI-chips",
+"Банк Японии",
+"ok_word",
+"Japan",
+"Ճապոնիա",
+"42nd",
+"#tag",
+"B.O.J.",
+"42nd",
+" .Lead. ",
+"a/b"
+],
+"ru": [
+"-",
+"Seoul\nKorea",
+"B.O.J.",
+"O'Brien",
+"日本",
+"Toyota & Honda",
+"7"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"42nd",
+"Токио",
+"B.O.J",
+"Kyōto",
+"AI-chips",
+"Банк Японии",
+"ok_word",
+"Ճապոնիա",
+"Lead"
+],
+"ru": [
+"Япония",
+"Seoul Korea",
+"B.O.J",
+"O'Brien",
+"日本",
+"Toyota & Honda"
+]
+}
+},
+{
+"raw": {
+"en": [
+" Tokyo ",
+"Ճապոնիա",
+"Kyōto",
+"日本",
+" .Lead. ",
+" Tokyo ",
+"#tag",
+"日本",
+"Япония",
+"",
+"японский",
+"japan",
+"Токио",
+"ok_word",
+"Yen",
+"Toyota & Honda",
+"Япония",
+"японский",
+"7"
+],
+"ru": [
+"",
+"42nd",
+"Токио",
+"Yen",
+"японский",
+"ok_word",
+"Ճապոնիա",
+"японский",
+"",
+"O'Brien",
+"ok_word",
+"Japan",
+"—",
+"#tag",
+"Токио",
+"japan"
+]
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Tokyo",
+"Ճապոնիա",
+"Kyōto",
+"日本",
+"Lead",
+"Япония",
+"японский",
+"japan",
+"Токио",
+"ok_word",
+"Yen",
+"Toyota & Honda"
+],
+"ru": [
+"Japan",
+"42nd",
+"Токио",
+"Yen",
+"японский",
+"ok_word",
+"Ճապոնիա",
+"O'Brien"
+]
+}
+},
+{
+"raw": {
+"en": [
+"42nd",
+"Seoul\nKorea",
+"японский",
+" Tokyo ",
+"JAPAN",
+"B.O.J.",
+"Ճապոնիա",
+"японский",
+"AI-chips",
+"—",
+"JAPAN"
+],
+"ru": [
+"AI-chips",
+"Kyōto",
+"日本",
+"Ճապոնիա",
+"...",
+"JAPAN",
+"Japan",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Seoul\nKorea",
+"Seoul\nKorea",
+"",
+"a/b",
+"B.O.J.",
+"O'Brien",
+"7",
+"ok_word"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"42nd",
+"Seoul Korea",
+"японский",
+"Tokyo",
+"B.O.J",
+"Ճապոնիա",
+"AI-chips"
+],
+"ru": [
+"Japan",
+"AI-chips",
+"Kyōto",
+"日本",
+"Ճապոնիա",
+"Seoul Korea",
+"B.O.J",
+"O'Brien",
+"ok_word"
+]
+}
+},
+{
+"raw": {
+"en": [
+"japan",
+"ok_word",
+"42nd",
+"Япония",
+"a/b",
+"Bank  of Japan",
+"Токио",
+"AI-chips",
+"Bank  of Japan",
+"ok_word",
+"Seoul\nKorea",
+"Seoul\nKorea",
+"B.O.J.",
+"—"
+],
+"ru": [
+"Kyōto",
+"a/b",
+"Bank  of Japan",
+"Toyota & Honda",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Seoul\nKorea",
+"JAPAN",
+"B.O.J.",
+"#tag",
+"#tag",
+"Seoul\nKorea",
+"Kyōto",
+"Seoul\nKorea",
+"Ճապոնիա",
+"AI-chips",
+"#tag",
+"Kyōto",
+"42nd",
+"-"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"japan",
+"ok_word",
+"42nd",
+"Япония",
+"Bank of Japan",
+"Токио",
+"AI-chips",
+"Seoul Korea",
+"B.O.J"
+],
+"ru": [
+"Япония",
+"Kyōto",
+"Bank of Japan",
+"Toyota & Honda",
+"Seoul Korea",
+"JAPAN",
+"B.O.J",
+"Ճապոնիա",
+"AI-chips",
+"42nd"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Bank  of Japan",
+"42nd",
+"Kyōto",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"7",
+"Токио",
+"42nd",
+"...",
+"...",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Токио",
+"Bank  of Japan",
+" Tokyo ",
+"a/b",
+" .Lead. ",
+"Yen",
+"#tag"
+],
+"ru": [
+"42nd",
+"a/b",
+"Токио",
+"Ճապոնիա",
+"O'Brien",
+"B.O.J.",
+"日本",
+" Tokyo ",
+"B.O.J.",
+"Bank  of Japan",
+"JAPAN",
+"—",
+"#tag",
+"Токио",
+"Банк Японии",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+" .Lead. "
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"Bank of Japan",
+"42nd",
+"Kyōto",
+"Токио",
+"Tokyo",
+"Lead",
+"Yen"
+],
+"ru": [
+"42nd",
+"Токио",
+"Ճապոնիա",
+"O'Brien",
+"B.O.J",
+"日本",
+"Tokyo",
+"Bank of Japan",
+"JAPAN",
+"Банк Японии",
+"Lead"
+]
+}
+},
+{
+"raw": {
+"en": [
+"—",
+"japan",
+"#tag",
+"Токио",
+"AI-chips",
+"Yen",
+"B.O.J.",
+"O'Brien",
+"a/b",
+"a/b",
+"ok_word",
+"Bank  of Japan",
+"Toyota & Honda"
+],
+"ru": [
+"Seoul\nKorea",
+"Япония",
+"Банк Японии",
+"Ճապոնիա",
+"Bank  of Japan",
+"Seoul\nKorea",
+"AI-chips"
+]
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"japan",
+"Токио",
+"AI-chips",
+"Yen",
+"B.O.J",
+"O'Brien",
+"ok_word",
+"Bank of Japan",
+"Toyota & Honda"
+],
+"ru": [
+"Japan",
+"Seoul Korea",
+"Япония",
+"Банк Японии",
+"Ճապոնիա",
+"Bank of Japan",
+"AI-chips"
+]
+}
+},
+{
+"raw": {
+"en": [
+"B.O.J.",
+"a/b",
+"日本",
+"-",
+"日本",
+"...",
+" Tokyo ",
+"Yen",
+"42nd",
+"Bank  of Japan",
+" Tokyo ",
+"-",
+"7",
+"Токио",
+"42nd"
+],
+"ru": [
+"B.O.J.",
+"Банк Японии"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"B.O.J",
+"日本",
+"Tokyo",
+"Yen",
+"42nd",
+"Bank of Japan",
+"Токио"
+],
+"ru": [
+"B.O.J",
+"Банк Японии"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Seoul\nKorea",
+"Ճապոնիա",
+"—",
+"AI-chips",
+" Tokyo ",
+"日本",
+" Tokyo ",
+"japan",
+"日本",
+" .Lead. ",
+"-",
+"Bank  of Japan",
+"японский",
+""
+],
+"ru": [
+"Japan",
+"AI-chips",
+"—",
+"JAPAN",
+"Kyōto",
+"O'Brien"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"Seoul Korea",
+"Ճապոնիա",
+"AI-chips",
+"Tokyo",
+"日本",
+"japan",
+"Lead",
+"Bank of Japan",
+"японский"
+],
+"ru": [
+"Japan",
+"AI-chips",
+"Kyōto",
+"O'Brien"
+]
+}
+},
+{
+"raw": {
+"en": [
+"японский",
+"Yen",
+"Japan",
+"Seoul\nKorea",
+"a/b",
+"Банк Японии",
+"Yen",
+"Банк Японии",
+"JAPAN",
+"-",
+"Bank  of Japan",
+"",
+"#tag",
+"ok_word",
+"japan",
+"ok_word"
+],
+"ru": [
+"JAPAN"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"японский",
+"Yen",
+"Japan",
+"Seoul Korea",
+"Банк Японии",
+"Bank of Japan",
+"ok_word"
+],
+"ru": [
+"JAPAN"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Ճապոնիա",
+"Seoul\nKorea",
+"—",
+"42nd",
+"Япония",
+"Ճապոնիա"
+],
+"ru": [
+"ok_word",
+"Япония",
+"B.O.J.",
+"Bank  of Japan",
+" Tokyo ",
+"a/b"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"Ճապոնիա",
+"Seoul Korea",
+"42nd",
+"Япония"
+],
+"ru": [
+"ok_word",
+"Япония",
+"B.O.J",
+"Bank of Japan",
+"Tokyo"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Япония",
+"Yen",
+"Seoul\nKorea",
+"Ճապոնիա",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"—",
+"B.O.J.",
+"-"
+],
+"ru": [
+"42nd",
+"-",
+"-",
+"42nd",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Япония"
+]
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Япония",
+"Yen",
+"Seoul Korea",
+"Ճապոնիա",
+"B.O.J"
+],
+"ru": [
+"Japan",
+"42nd",
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"—",
+"Ճապոնիա",
+"-",
+"Ճապոնիա",
+"-",
+"AI-chips",
+"Токио",
+" .Lead. ",
+" Tokyo ",
+" .Lead. ",
+"..."
+],
+"ru": [
+"Банк Японии",
+"-",
+"B.O.J.",
+"Токио",
+"日本",
+"a/b",
+"Банк Японии",
+"#tag",
+"-",
+"#tag",
+"Bank  of Japan",
+"Kyōto",
+"a/b",
+"a/b",
+"a/b",
+"#tag"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Ճապոնիա",
+"AI-chips",
+"Токио",
+"Lead",
+"Tokyo"
+],
+"ru": [
+"Япония",
+"Банк Японии",
+"B.O.J",
+"Токио",
+"日本",
+"Bank of Japan",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Yen",
+"B.O.J.",
+"japan",
+"O'Brien",
+"",
+" .Lead. ",
+"-",
+"42nd",
+"7",
+" Tokyo ",
+"ok_word",
+"—",
+"Япония",
+"Япония"
+],
+"ru": [
+"японский"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"Yen",
+"B.O.J",
+"japan",
+"O'Brien",
+"Lead",
+"42nd",
+"Tokyo",
+"ok_word",
+"Япония"
+],
+"ru": [
+"Japan",
+"японский"
+]
+}
+},
+{
+"raw": {
+"en": [
+"AI-chips",
+" .Lead. ",
+"Ճապոնիա"
+],
+"ru": [
+"7",
+"O'Brien",
+"ok_word",
+"-",
+"Seoul\nKorea",
+"Банк Японии",
+"японский",
+" Tokyo ",
+"AI-chips",
+"#tag",
+"Seoul\nKorea",
+"Ճապոնիա",
+"Japan",
+"7",
+"Yen",
+"Japan",
+"Bank  of Japan",
+""
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"AI-chips",
+"Lead",
+"Ճապոնիա"
+],
+"ru": [
+"Japan",
+"O'Brien",
+"ok_word",
+"Seoul Korea",
+"Банк Японии",
+"японский",
+"Tokyo",
+"AI-chips",
+"Ճապոնիա",
+"Yen",
+"Bank of Japan"
+]
+}
+},
+{
+"raw": {
+"en": "not a list",
+"ru": null
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [],
+"ru": [
+"Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"...",
+"Seoul\nKorea",
+"日本",
+"japan",
+"",
+"Seoul\nKorea",
+"O'Brien",
+"O'Brien",
+"...",
+"日本",
+" .Lead. ",
+"AI-chips",
+"O'Brien",
+"Токио",
+"a/b",
+"Ճապոնիա",
+"Kyōto",
+"Japan",
+"Банк Японии",
+"Yen"
+],
+"ru": [
+"7",
+"JAPAN",
+"Toyota & Honda",
+"#tag",
+"Seoul\nKorea",
+"—",
+"AI-chips",
+"japan",
+"AI-chips"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"Seoul Korea",
+"日本",
+"japan",
+"O'Brien",
+"Lead",
+"AI-chips",
+"Токио",
+"Ճապոնիա",
+"Kyōto",
+"Банк Японии",
+"Yen"
+],
+"ru": [
+"Япония",
+"JAPAN",
+"Toyota & Honda",
+"Seoul Korea",
+"AI-chips"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto",
+"a/b",
+"日本",
+"#tag",
+"Yen",
+"Япония",
+"-",
+"AI-chips"
+],
+"ru": [
+"japan",
+"Япония"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"Kyōto",
+"日本",
+"Yen",
+"Япония",
+"AI-chips"
+],
+"ru": [
+"japan",
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"O'Brien",
+"японский",
+"Ճապոնիա",
+"7",
+"Toyota & Honda",
+"Yen",
+"japan",
+"Kyōto",
+"ok_word"
+],
+"ru": [
+"7",
+"#tag",
+"—",
+"-",
+"42nd",
+"B.O.J.",
+"японский"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"O'Brien",
+"японский",
+"Ճապոնիա",
+"Toyota & Honda",
+"Yen",
+"japan",
+"Kyōto",
+"ok_word"
+],
+"ru": [
+"Япония",
+"42nd",
+"B.O.J",
+"японский"
+]
+}
+},
+{
+"raw": {
+"en": [
+"",
+"日本"
+],
+"ru": [
+"японский",
+"7",
+"日本",
+"Yen",
+" Tokyo ",
+" .Lead. ",
+"japan",
+"Seoul\nKorea",
+"—",
+"",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Ճապոնիա",
+"Япония",
+"Ճապոնիա",
+"Банк Японии",
+"O'Brien",
+"B.O.J.",
+"японский"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"日本"
+],
+"ru": [
+"Japan",
+"японский",
+"日本",
+"Yen",
+"Tokyo",
+"Lead",
+"Seoul Korea",
+"Ճապոնիա",
+"Япония",
+"Банк Японии",
+"O'Brien",
+"B.O.J"
+]
+}
+},
+{
+"raw": {
+"en": [
+" Tokyo ",
+"japan",
+"Kyōto",
+"Yen",
+"японский",
+" Tokyo ",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"B.O.J.",
+"Ճապոնիա",
+"Japan",
+"Japan",
+"B.O.J.",
+"Kyōto",
+"Bank  of Japan",
+"JAPAN",
+"японский"
+],
+"ru": []
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"Tokyo",
+"japan",
+"Kyōto",
+"Yen",
+"японский",
+"B.O.J",
+"Ճապոնիա",
+"Bank of Japan"
+],
+"ru": [
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Токио",
+"a/b",
+"japan",
+"Japan"
+],
+"ru": [
+"日本",
+"Seoul\nKorea",
+" .Lead. ",
+"Seoul\nKorea",
+"Yen",
+"Япония"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"Токио",
+"japan"
+],
+"ru": [
+"Japan",
+"日本",
+"Seoul Korea",
+"Lead",
+"Yen",
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Токио"
+],
+"ru": [
+"japan",
+"JAPAN"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"Токио"
+],
+"ru": [
+"Япония",
+"japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Seoul\nKorea",
+"日本",
+"Ճապոնիա",
+"-"
+],
+"ru": []
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"Seoul Korea",
+"日本",
+"Ճապոնիա"
+],
+"ru": [
+"Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"—",
+" Tokyo "
+],
+"ru": [
+"42nd",
+"Kyōto",
+" .Lead. ",
+"Bank  of Japan",
+"Japan",
+"-",
+"O'Brien",
+"O'Brien",
+"Seoul\nKorea",
+"7",
+" .Lead. "
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"Tokyo"
+],
+"ru": [
+"42nd",
+"Kyōto",
+"Lead",
+"Bank of Japan",
+"Japan",
+"O'Brien",
+"Seoul Korea"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Japan",
+"a/b",
+"42nd",
+"Япония",
+"JAPAN",
+"Toyota & Honda",
+"Япония",
+"Yen",
+"-",
+"Токио",
+"AI-chips",
+"",
+"7",
+"日本"
+],
+"ru": [
+"Seoul\nKorea",
+"a/b",
+"japan",
+" .Lead. ",
+"—",
+"Ճապոնիա",
+"42nd",
+"Япония",
+"ok_word",
+"Токио",
+"—",
+"Seoul\nKorea",
+"Япония",
+"a/b",
+"#tag",
+"Токио",
+"Japan",
+"Japan",
+"Ճապոնիա",
+"Japan"
+]
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"42nd",
+"Япония",
+"Toyota & Honda",
+"Yen",
+"Токио",
+"AI-chips",
+"日本"
+],
+"ru": [
+"Japan",
+"Seoul Korea",
+"Lead",
+"Ճապոնիա",
+"42nd",
+"Япония",
+"ok_word",
+"Токио"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto",
+"Bank  of Japan",
+"Япония",
+"",
+"Kyōto",
+"Bank  of Japan",
+"Ճապոնիա",
+"#tag",
+"日本"
+],
+"ru": [
+"B.O.J.",
+"O'Brien",
+"日本",
+"japan"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Kyōto",
+"Bank of Japan",
+"Япония",
+"Ճապոնիա",
+"日本"
+],
+"ru": [
+"Япония",
+"B.O.J",
+"O'Brien",
+"日本",
+"japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"-",
+"",
+"японский",
+"...",
+"-"
+],
+"ru": [
+"7",
+"7",
+"ok_word",
+"42nd",
+"Токио",
+"B.O.J."
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"японский"
+],
+"ru": [
+"ok_word",
+"42nd",
+"Токио",
+"B.O.J"
+]
+}
+},
+{
+"raw": {
+"en": [
+"7"
+],
+"ru": [
+" .Lead. ",
+"a/b",
+"-",
+"#tag",
+"Yen",
+"AI-chips",
+"Yen",
+"Kyōto",
+"42nd",
+"O'Brien"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan"
+],
+"ru": [
+"Japan",
+"Lead",
+"Yen",
+"AI-chips",
+"Kyōto",
+"42nd",
+"O'Brien"
+]
+}
+},
+{
+"raw": {
+"en": [
+"...",
+"-",
+"7",
+"японский",
+"Bank  of Japan",
+"...",
+"-",
+"Токио",
+"Ճապոնիա",
+"Япония",
+"JAPAN"
+],
+"ru": [
+"Банк Японии",
+"7",
+"a/b",
+"AI-chips",
+"#tag"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"японский",
+"Bank of Japan",
+"Токио",
+"Ճապոնիա",
+"Япония",
+"JAPAN"
+],
+"ru": [
+"Япония",
+"Банк Японии",
+"AI-chips"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Yen",
+"Kyōto",
+"-",
+"...",
+" Tokyo ",
+"—",
+"Япония",
+"JAPAN",
+"Seoul\nKorea",
+"O'Brien",
+"japan",
+"japan",
+"a/b",
+"Ճապոնիա",
+"Ճապոնիա"
+],
+"ru": [
+"japan",
+" Tokyo ",
+"Seoul\nKorea",
+"日本",
+"AI-chips",
+"Токио",
+"ok_word",
+"японский",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"B.O.J.",
+"ok_word",
+"7",
+"",
+"Yen",
+"42nd"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"Yen",
+"Kyōto",
+"Tokyo",
+"Япония",
+"Seoul Korea",
+"O'Brien",
+"Ճապոնիա"
+],
+"ru": [
+"japan",
+"Tokyo",
+"Seoul Korea",
+"日本",
+"AI-chips",
+"Токио",
+"ok_word",
+"японский",
+"B.O.J",
+"Yen",
+"42nd"
+]
+}
+},
+{
+"raw": {
+"en": [
+" Tokyo ",
+"японский",
+"JAPAN",
+"Банк Японии",
+"Ճապոնիա",
+"JAPAN",
+"日本",
+"JAPAN",
+" Tokyo ",
+"japan",
+"O'Brien",
+"Seoul\nKorea"
+],
+"ru": [
+"Токио",
+"",
+"...",
+"O'Brien"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"Tokyo",
+"японский",
+"Банк Японии",
+"Ճապոնիա",
+"日本",
+"O'Brien",
+"Seoul Korea"
+],
+"ru": [
+"Токио",
+"O'Brien"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Япония",
+"AI-chips",
+"7",
+"Yen",
+"a/b",
+"B.O.J.",
+"ok_word",
+"O'Brien",
+" .Lead. ",
+"—",
+"B.O.J.",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+" .Lead. ",
+"Bank  of Japan"
+],
+"ru": [
+"日本",
+"42nd",
+"Ճապոնիա",
+"7",
+" Tokyo ",
+"...",
+"Seoul\nKorea",
+"O'Brien",
+"japan",
+"JAPAN",
+"AI-chips",
+"JAPAN",
+"Ճապոնիա",
+"Банк Японии"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"Япония",
+"AI-chips",
+"Yen",
+"B.O.J",
+"ok_word",
+"O'Brien",
+"Lead",
+"Bank of Japan"
+],
+"ru": [
+"日本",
+"42nd",
+"Ճապոնիա",
+"Tokyo",
+"Seoul Korea",
+"O'Brien",
+"japan",
+"AI-chips",
+"Банк Японии"
+]
+}
+},
+{
+"raw": {
+"en": [
+"-",
+"AI-chips",
+"",
+"a/b",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"AI-chips",
+"japan",
+"JAPAN",
+"日本",
+"42nd",
+"42nd",
+" Tokyo ",
+"Ճապոնիա",
+"#tag",
+"японский",
+"Ճապոնիա"
+],
+"ru": [
+"Токио",
+"-",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"7",
+"Токио",
+"Yen",
+"Toyota & Honda"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"AI-chips",
+"日本",
+"42nd",
+"Tokyo",
+"Ճապոնիա",
+"японский"
+],
+"ru": [
+"Japan",
+"Токио",
+"Yen",
+"Toyota & Honda"
+]
+}
+},
+{
+"raw": {
+"en": [
+"—",
+"Japan",
+"Toyota & Honda",
+"42nd"
+],
+"ru": [
+"Seoul\nKorea",
+"Seoul\nKorea",
+"—",
+"O'Brien",
+"Yen",
+"B.O.J.",
+"a/b",
+"-",
+" Tokyo ",
+" Tokyo ",
+"Japan",
+"Банк Японии",
+" Tokyo ",
+"B.O.J.",
+"Seoul\nKorea",
+"Seoul\nKorea",
+"B.O.J.",
+"Japan",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"#tag"
+]
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"Toyota & Honda",
+"42nd"
+],
+"ru": [
+"Japan",
+"Seoul Korea",
+"O'Brien",
+"Yen",
+"B.O.J",
+"Tokyo",
+"Банк Японии"
+]
+}
+},
+{
+"raw": {
+"en": [
+"O'Brien",
+"#tag",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Kyōto",
+"Ճապոնիա"
+],
+"ru": [
+"...",
+"японский"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"O'Brien",
+"Kyōto",
+"Ճապոնիա"
+],
+"ru": [
+"Япония",
+"японский"
+]
+}
+},
+{
+"raw": {
+"en": [
+"a/b",
+"Банк Японии",
+"...",
+"Toyota & Honda",
+"O'Brien",
+"японский",
+" Tokyo "
+],
+"ru": [
+"...",
+"Ճապոնիա",
+"42nd",
+"a/b",
+"Yen",
+"日本",
+"Japan",
+"",
+"JAPAN",
+"Yen",
+" Tokyo ",
+"Ճապոնիա",
+"japan",
+"7"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"Банк Японии",
+"Toyota & Honda",
+"O'Brien",
+"японский",
+"Tokyo"
+],
+"ru": [
+"Japan",
+"Ճապոնիա",
+"42nd",
+"Yen",
+"日本",
+"Tokyo"
+]
+}
+},
+{
+"raw": {
+"en": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"O'Brien",
+"ok_word",
+"Seoul\nKorea",
+"Toyota & Honda",
+"Банк Японии",
+"Ճապոնիա",
+"Yen",
+"Japan",
+"Kyōto",
+"#tag",
+"ok_word",
+"Япония",
+"O'Brien"
+],
+"ru": [
+"-",
+"—",
+"O'Brien",
+"Toyota & Honda",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"42nd",
+"—",
+"Yen",
+"Japan",
+"Банк Японии",
+"日本",
+"JAPAN",
+"—",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"O'Brien",
+"ok_word",
+"Seoul Korea",
+"Toyota & Honda",
+"Банк Японии",
+"Ճապոնիա",
+"Yen",
+"Japan",
+"Kyōto",
+"Япония"
+],
+"ru": [
+"O'Brien",
+"Toyota & Honda",
+"42nd",
+"Yen",
+"Japan",
+"Банк Японии",
+"日本"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Ճապոնիա",
+"7",
+"Toyota & Honda",
+"японский",
+"42nd",
+"—",
+"ok_word",
+"42nd",
+"a/b",
+"Kyōto",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"a/b",
+"..."
+],
+"ru": [
+"...",
+"7",
+"Kyōto",
+" Tokyo ",
+"Япония",
+"-",
+"...",
+"AI-chips"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"Ճապոնիա",
+"Toyota & Honda",
+"японский",
+"42nd",
+"ok_word",
+"Kyōto"
+],
+"ru": [
+"Япония",
+"Kyōto",
+"Tokyo",
+"AI-chips"
+]
+}
+},
+{
+"raw": {
+"en": [
+"B.O.J.",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Seoul\nKorea",
+"Seoul\nKorea",
+"Токио",
+"Toyota & Honda",
+"ok_word",
+"Bank  of Japan",
+"a/b",
+"B.O.J.",
+"Ճապոնիա"
+],
+"ru": [
+"42nd",
+"O'Brien",
+"—",
+" .Lead. ",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"日本",
+"AI-chips",
+" .Lead. ",
+"-",
+"—",
+"japan",
+"B.O.J.",
+"...",
+"Kyōto",
+"JAPAN",
+"ok_word",
+"Yen",
+"B.O.J.",
+"Yen"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"B.O.J",
+"Seoul Korea",
+"Токио",
+"Toyota & Honda",
+"ok_word",
+"Bank of Japan",
+"Ճապոնիա"
+],
+"ru": [
+"42nd",
+"O'Brien",
+"Lead",
+"日本",
+"AI-chips",
+"japan",
+"B.O.J",
+"Kyōto",
+"ok_word",
+"Yen"
+]
+}
+},
+{
+"raw": {
+"en": "not a list",
+"ru": null
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [],
+"ru": []
+}
+},
+{
+"raw": {
+"en": [
+"Ճապոնիա",
+"Toyota & Honda",
+"Kyōto",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"#tag",
+"B.O.J.",
+"-",
+"#tag",
+"Japan",
+"japan",
+"a/b",
+"Япония",
+"B.O.J.",
+"Toyota & Honda",
+"AI-chips",
+"японский",
+"Japan"
+],
+"ru": [
+"AI-chips",
+"Yen",
+"japan",
+"Bank  of Japan",
+"a/b",
+"日本",
+"Bank  of Japan",
+"",
+"japan",
+"—",
+" Tokyo "
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Ճապոնիա",
+"Toyota & Honda",
+"Kyōto",
+"B.O.J",
+"Япония",
+"AI-chips",
+"японский"
+],
+"ru": [
+"Япония",
+"AI-chips",
+"Yen",
+"japan",
+"Bank of Japan",
+"日本",
+"Tokyo"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto",
+"Банк Японии",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Toyota & Honda",
+"B.O.J.",
+" Tokyo ",
+"Bank  of Japan",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+],
+"ru": [
+"—",
+"Japan",
+"a/b",
+"a/b",
+"Seoul\nKorea",
+"—",
+"ok_word",
+"Япония",
+"Япония",
+"Токио",
+"Japan",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Japan",
+"42nd",
+"Япония",
+"Япония",
+"Yen",
+"JAPAN",
+"Yen"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"Kyōto",
+"Банк Японии",
+"Toyota & Honda",
+"B.O.J",
+"Tokyo",
+"Bank of Japan"
+],
+"ru": [
+"Japan",
+"Seoul Korea",
+"ok_word",
+"Япония",
+"Токио",
+"42nd",
+"Yen"
+]
+}
+},
+{
+"raw": {
+"en": [
+"#tag",
+"Bank  of Japan",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"#tag",
+"Bank  of Japan",
+"ok_word",
+"—",
+"Банк Японии"
+],
+"ru": [
+"B.O.J.",
+"AI-chips",
+"Japan",
+"7",
+"",
+"42nd",
+"—",
+"japan",
+"B.O.J.",
+"Kyōto",
+"японский",
+"...",
+"Yen",
+"японский",
+"Bank  of Japan",
+"...",
+" .Lead. ",
+"японский",
+"42nd"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Bank of Japan",
+"ok_word",
+"Банк Японии"
+],
+"ru": [
+"Япония",
+"B.O.J",
+"AI-chips",
+"Japan",
+"42nd",
+"Kyōto",
+"японский",
+"Yen",
+"Bank of Japan",
+"Lead"
+]
+}
+},
+{
+"raw": {
+"en": [
+"ok_word",
+"...",
+"B.O.J.",
+" .Lead. "
+],
+"ru": [
+"日本",
+" .Lead. ",
+"japan",
+"",
+"Ճապոնիա"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"ok_word",
+"B.O.J",
+"Lead"
+],
+"ru": [
+"日本",
+"Lead",
+"japan",
+"Ճապոնիա"
+]
+}
+},
+{
+"raw": {
+"en": [
+"O'Brien",
+"Токио",
+"Kyōto"
+],
+"ru": [
+"-",
+"—"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"O'Brien",
+"Токио",
+"Kyōto"
+],
+"ru": [
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Toyota & Honda",
+"японский",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"7",
+"Токио",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Seoul\nKorea",
+"Toyota & Honda",
+"Toyota & Honda",
+"японский",
+"Kyōto",
+"Bank  of Japan"
+],
+"ru": [
+"Seoul\nKorea",
+" .Lead. ",
+" Tokyo ",
+"日本",
+"a/b",
+"O'Brien",
+"—",
+" .Lead. "
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Toyota & Honda",
+"японский",
+"Токио",
+"Seoul Korea",
+"Kyōto",
+"Bank of Japan"
+],
+"ru": [
+"Япония",
+"Seoul Korea",
+"Lead",
+"Tokyo",
+"日本",
+"O'Brien"
+]
+}
+},
+{
+"raw": {
+"en": [
+"B.O.J.",
+"...",
+"Ճապոնիա",
+"japan",
+"日本",
+"Toyota & Honda",
+"Bank  of Japan",
+"ok_word",
+"Bank  of Japan",
+"Seoul\nKorea",
+"AI-chips",
+"japan",
+"AI-chips",
+"#tag",
+"Seoul\nKorea"
+],
+"ru": [
+" Tokyo ",
+"JAPAN",
+" .Lead. ",
+"Bank  of Japan",
+"Seoul\nKorea",
+"-",
+"Japan",
+"42nd",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Kyōto",
+"Ճապոնիա",
+"O'Brien",
+"...",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Bank  of Japan"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"B.O.J",
+"Ճապոնիա",
+"japan",
+"日本",
+"Toyota & Honda",
+"Bank of Japan",
+"ok_word",
+"Seoul Korea",
+"AI-chips"
+],
+"ru": [
+"Япония",
+"Tokyo",
+"JAPAN",
+"Lead",
+"Bank of Japan",
+"Seoul Korea",
+"42nd",
+"Kyōto",
+"Ճապոնիա",
+"O'Brien"
+]
+}
+},
+{
+"raw": {
+"en": [
+"7",
+"O'Brien",
+"a/b",
+"Токио",
+"japan",
+" Tokyo ",
+"Toyota & Honda",
+"日本",
+"42nd",
+"a/b",
+"7",
+"Toyota & Honda",
+"Yen",
+"日本",
+"Yen"
+],
+"ru": [
+"Yen",
+"Seoul\nKorea",
+"B.O.J.",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"#tag",
+"42nd",
+"ok_word",
+"Yen",
+"японский",
+"японский",
+" .Lead. ",
+"Япония",
+" .Lead. ",
+"7",
+"...",
+" Tokyo ",
+"a/b",
+" Tokyo "
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"O'Brien",
+"Токио",
+"japan",
+"Tokyo",
+"Toyota & Honda",
+"日本",
+"42nd",
+"Yen"
+],
+"ru": [
+"Yen",
+"Seoul Korea",
+"B.O.J",
+"42nd",
+"ok_word",
+"японский",
+"Lead",
+"Япония",
+"Tokyo"
+]
+}
+},
+{
+"raw": {
+"en": [
+"JAPAN",
+"Toyota & Honda",
+"ok_word"
+],
+"ru": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"-",
+"Yen",
+"Токио",
+"Toyota & Honda",
+"#tag",
+"ok_word",
+"-",
+"B.O.J.",
+"Yen",
+"日本",
+"AI-chips",
+"—",
+"Toyota & Honda"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"JAPAN",
+"Toyota & Honda",
+"ok_word"
+],
+"ru": [
+"Japan",
+"Yen",
+"Токио",
+"Toyota & Honda",
+"ok_word",
+"B.O.J",
+"日本",
+"AI-chips"
+]
+}
+},
+{
+"raw": {
+"en": [
+" Tokyo ",
+"japan",
+"Kyōto",
+"Yen",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"-",
+"#tag",
+"O'Brien",
+"japan",
+"O'Brien",
+"Toyota & Honda",
+"AI-chips",
+"—",
+"...",
+" Tokyo ",
+"Токио",
+"AI-chips",
+"-",
+"B.O.J.",
+"Ճապոնիա"
+],
+"ru": [
+"Yen",
+"B.O.J.",
+"-",
+"Япония",
+"...",
+"Japan",
+"Токио",
+"Toyota & Honda",
+"O'Brien",
+"JAPAN",
+"JAPAN",
+"Kyōto",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"японский",
+"—",
+"...",
+"7"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"Tokyo",
+"japan",
+"Kyōto",
+"Yen",
+"O'Brien",
+"Toyota & Honda",
+"AI-chips",
+"Токио",
+"B.O.J",
+"Ճապոնիա"
+],
+"ru": [
+"Yen",
+"B.O.J",
+"Япония",
+"Japan",
+"Токио",
+"Toyota & Honda",
+"O'Brien",
+"Kyōto",
+"японский"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Seoul\nKorea",
+"japan",
+"—",
+"японский",
+"日本",
+" .Lead. ",
+"Bank  of Japan",
+"—",
+"JAPAN",
+"Seoul\nKorea",
+"Japan",
+"ok_word",
+"Toyota & Honda",
+"42nd",
+"JAPAN",
+"Япония",
+"#tag",
+"японский"
+],
+"ru": [
+"японский",
+"#tag",
+"Kyōto",
+"#tag",
+"a/b",
+"Japan",
+"Japan",
+"ok_word",
+"японский",
+"Япония",
+"Банк Японии",
+"-",
+"—",
+"42nd",
+"японский",
+"B.O.J.",
+" .Lead. ",
+" Tokyo "
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"Seoul Korea",
+"japan",
+"японский",
+"日本",
+"Lead",
+"Bank of Japan",
+"ok_word",
+"Toyota & Honda",
+"42nd",
+"Япония"
+],
+"ru": [
+"японский",
+"Kyōto",
+"Japan",
+"ok_word",
+"Япония",
+"Банк Японии",
+"42nd",
+"B.O.J",
+"Lead",
+"Tokyo"
+]
+}
+},
+{
+"raw": {
+"en": [],
+"ru": [
+" Tokyo ",
+"...",
+"-",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"—",
+" .Lead. ",
+"42nd",
+"Bank  of Japan",
+"Bank  of Japan",
+"-",
+"Kyōto",
+"Токио",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Kyōto",
+"42nd"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia"
+],
+"ru": [
+"Japan",
+"Tokyo",
+"Lead",
+"42nd",
+"Bank of Japan",
+"Kyōto",
+"Токио"
+]
+}
+},
+{
+"raw": {
+"en": [],
+"ru": [
+"Bank  of Japan",
+"Ճապոնիա",
+"—",
+"O'Brien",
+"ok_word",
+"AI-chips"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1"
+],
+"ru": [
+"Bank of Japan",
+"Ճապոնիա",
+"O'Brien",
+"ok_word",
+"AI-chips"
+]
+}
+},
+{
+"raw": {
+"en": [
+"日本"
+],
+"ru": [
+"Toyota & Honda",
+"-",
+"Kyōto",
+"Kyōto",
+"O'Brien",
+"",
+"O'Brien",
+"#tag",
+"Kyōto",
+"Bank  of Japan",
+" .Lead. ",
+"AI-chips",
+"-",
+"B.O.J.",
+"O'Brien",
+"",
+"...",
+"Банк Японии",
+"ok_word"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"日本"
+],
+"ru": [
+"Япония",
+"Toyota & Honda",
+"Kyōto",
+"O'Brien",
+"Bank of Japan",
+"Lead",
+"AI-chips",
+"B.O.J",
+"Банк Японии",
+"ok_word"
+]
+}
+},
+{
+"raw": {
+"en": [
+"—",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"a/b",
+"japan",
+"Ճապոնիա",
+"O'Brien",
+"...",
+"Japan",
+"Ճապոնիա",
+"—",
+"japan",
+"Токио",
+"Токио",
+"...",
+"",
+"ok_word",
+" Tokyo ",
+"Japan"
+],
+"ru": [
+"японский",
+"-",
+"ok_word",
+"—",
+"Japan",
+"#tag",
+"#tag",
+"Toyota & Honda",
+"ok_word",
+"O'Brien",
+"B.O.J.",
+"Seoul\nKorea",
+" .Lead. ",
+"ok_word",
+"",
+"японский",
+"",
+"Yen",
+"O'Brien",
+"japan"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"Ճապոնիա",
+"O'Brien",
+"Токио",
+"ok_word",
+"Tokyo"
+],
+"ru": [
+"Japan",
+"японский",
+"ok_word",
+"Toyota & Honda",
+"O'Brien",
+"B.O.J",
+"Seoul Korea",
+"Lead",
+"Yen"
+]
+}
+},
+{
+"raw": {
+"en": [
+"—",
+"Банк Японии",
+"Seoul\nKorea",
+"O'Brien",
+"Банк Японии",
+"",
+"42nd",
+"...",
+"JAPAN"
+],
+"ru": [
+"—",
+" .Lead. ",
+"42nd",
+"Токио",
+"Токио",
+"Банк Японии",
+"Банк Японии",
+" .Lead. ",
+"Yen",
+"#tag",
+"Toyota & Honda",
+"日本",
+"-",
+"Япония",
+"42nd",
+"японский",
+"japan",
+"42nd",
+"японский",
+"—"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"Банк Японии",
+"Seoul Korea",
+"O'Brien",
+"42nd",
+"JAPAN"
+],
+"ru": [
+"Япония",
+"Lead",
+"42nd",
+"Токио",
+"Банк Японии",
+"Yen",
+"Toyota & Honda",
+"日本",
+"японский",
+"japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"japan",
+"Япония",
+"7",
+" Tokyo ",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"#tag"
+],
+"ru": [
+"B.O.J.",
+"Токио",
+"ok_word",
+"японский",
+"...",
+""
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"japan",
+"Япония",
+"Tokyo"
+],
+"ru": [
+"Japan",
+"B.O.J",
+"Токио",
+"ok_word",
+"японский"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Ճապոնիա",
+"Токио",
+"-",
+""
+],
+"ru": [
+"Yen",
+"日本",
+"7",
+"Токио",
+"42nd",
+"-",
+"Seoul\nKorea",
+"AI-chips",
+"ok_word",
+"Kyōto",
+"Япония",
+"japan",
+"O'Brien",
+"Bank  of Japan",
+"Токио",
+"7"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"Ճապոնիա",
+"Токио"
+],
+"ru": [
+"Yen",
+"日本",
+"Токио",
+"42nd",
+"Seoul Korea",
+"AI-chips",
+"ok_word",
+"Kyōto",
+"Япония",
+"japan",
+"O'Brien",
+"Bank of Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+" Tokyo ",
+"B.O.J.",
+"Ճապոնիա",
+"Bank  of Japan",
+"Seoul\nKorea",
+"Ճապոնիա",
+"Yen",
+"...",
+"42nd",
+"JAPAN",
+"Japan",
+"AI-chips",
+"Toyota & Honda",
+"japan",
+"42nd",
+"B.O.J.",
+"Япония",
+"Japan"
+],
+"ru": [
+"Yen",
+"Japan",
+"японский"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"Tokyo",
+"B.O.J",
+"Ճապոնիա",
+"Bank of Japan",
+"Seoul Korea",
+"Yen",
+"42nd",
+"JAPAN",
+"AI-chips",
+"Toyota & Honda",
+"Япония"
+],
+"ru": [
+"Япония",
+"Yen",
+"Japan",
+"японский"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Ճապոնիա",
+"Seoul\nKorea"
+],
+"ru": [
+"7",
+"Kyōto",
+"7",
+"7",
+"日本",
+"японский",
+"—",
+"日本",
+"",
+"-",
+"Bank  of Japan",
+"B.O.J.",
+"#tag",
+"—"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"Ճապոնիա",
+"Seoul Korea"
+],
+"ru": [
+"Япония",
+"Kyōto",
+"日本",
+"японский",
+"Bank of Japan",
+"B.O.J"
+]
+}
+},
+{
+"raw": {
+"en": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Токио"
+],
+"ru": [
+"JAPAN",
+"7",
+"B.O.J.",
+"Токио",
+"Ճապոնիա",
+"Ճապոնիա"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Токио"
+],
+"ru": [
+"Япония",
+"JAPAN",
+"B.O.J",
+"Токио",
+"Ճապոնիա"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Bank  of Japan",
+"Банк Японии",
+" .Lead. ",
+"Bank  of Japan",
+"Toyota & Honda",
+"japan",
+"—",
+"日本",
+"",
+"Kyōto",
+"Ճապոնիա",
+"Seoul\nKorea",
+"#tag",
+"a/b",
+"日本",
+"—",
+"B.O.J."
+],
+"ru": [
+"Bank  of Japan",
+"a/b",
+" .Lead. ",
+" Tokyo ",
+"Ճապոնիա"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"Bank of Japan",
+"Банк Японии",
+"Lead",
+"Toyota & Honda",
+"japan",
+"日本",
+"Kyōto",
+"Ճապոնիա",
+"Seoul Korea",
+"B.O.J"
+],
+"ru": [
+"Bank of Japan",
+"Lead",
+"Tokyo",
+"Ճապոնիա"
+]
+}
+},
+{
+"raw": {
+"en": [
+" Tokyo ",
+"",
+"a/b",
+"Ճապոնիա",
+" .Lead. ",
+"Seoul\nKorea",
+"...",
+"日本",
+"Yen",
+"#tag",
+"JAPAN",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+" .Lead. ",
+"Банк Японии",
+"Банк Японии",
+"-",
+"Japan",
+"—",
+"Токио",
+" Tokyo "
+],
+"ru": [
+"O'Brien",
+"42nd",
+"42nd",
+"-",
+"...",
+"японский",
+"Seoul\nKorea",
+"Bank  of Japan",
+"O'Brien",
+"O'Brien",
+"7",
+"...",
+"ok_word",
+"",
+"Банк Японии",
+"—",
+"a/b",
+"Ճապոնիա",
+"AI-chips"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"Tokyo",
+"Ճապոնիա",
+"Lead",
+"Seoul Korea",
+"日本",
+"Yen",
+"JAPAN",
+"Банк Японии",
+"Токио"
+],
+"ru": [
+"Japan",
+"O'Brien",
+"42nd",
+"японский",
+"Seoul Korea",
+"Bank of Japan",
+"ok_word",
+"Банк Японии",
+"Ճապոնիա",
+"AI-chips"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Japan",
+"Япония",
+"Kyōto",
+"...",
+"ok_word",
+" Tokyo ",
+"#tag"
+],
+"ru": [
+"Банк Японии",
+"japan",
+"Yen",
+"ok_word",
+"—",
+"Банк Японии",
+" Tokyo ",
+"Банк Японии",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"ok_word"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Япония",
+"Kyōto",
+"ok_word",
+"Tokyo"
+],
+"ru": [
+"Япония",
+"Банк Японии",
+"japan",
+"Yen",
+"ok_word",
+"Tokyo"
+]
+}
+},
+{
+"raw": {
+"en": "not a list",
+"ru": null
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan"
+],
+"ru": [
+"Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"a/b",
+"Ճապոնիա",
+"7",
+"7",
+" .Lead. "
+],
+"ru": [
+"AI-chips"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Ճապոնիա",
+"Lead"
+],
+"ru": [
+"Япония",
+"AI-chips"
+]
+}
+},
+{
+"raw": {
+"en": [
+"",
+"Japan",
+"42nd",
+"Япония",
+"...",
+"японский"
+],
+"ru": [
+"...",
+"Банк Японии",
+"ok_word",
+"Ճապոնիա",
+"Ճապոնիա",
+"Kyōto",
+"AI-chips",
+"",
+"#tag",
+"ok_word"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"Japan",
+"42nd",
+"Япония",
+"японский"
+],
+"ru": [
+"Япония",
+"Банк Японии",
+"ok_word",
+"Ճապոնիա",
+"Kyōto",
+"AI-chips"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Japan"
+],
+"ru": [
+"Токио",
+"Kyōto",
+"Yen",
+"Токио"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan"
+],
+"ru": [
+"Токио",
+"Kyōto",
+"Yen"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Ճապոնիա",
+"O'Brien",
+"японский",
+"日本",
+"AI-chips",
+"Bank  of Japan"
+],
+"ru": [
+"Toyota & Honda",
+"Seoul\nKorea",
+"a/b"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"Ճապոնիա",
+"O'Brien",
+"японский",
+"日本",
+"AI-chips",
+"Bank of Japan"
+],
+"ru": [
+"Toyota & Honda",
+"Seoul Korea"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Toyota & Honda",
+"JAPAN",
+"Япония",
+"японский",
+"Токио",
+"japan",
+"Toyota & Honda",
+"O'Brien",
+"...",
+"japan",
+"AI-chips",
+"Токио",
+"a/b",
+"B.O.J."
+],
+"ru": [
+"Yen",
+"-",
+"Yen",
+"Kyōto",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Toyota & Honda",
+"a/b",
+"Yen"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Toyota & Honda",
+"Япония",
+"японский",
+"Токио",
+"O'Brien",
+"AI-chips",
+"B.O.J"
+],
+"ru": [
+"Япония",
+"Yen",
+"Kyōto",
+"Toyota & Honda"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Seoul\nKorea",
+"Japan",
+"",
+"7",
+"O'Brien",
+"",
+"B.O.J.",
+" .Lead. ",
+"...",
+"O'Brien",
+"a/b"
+],
+"ru": [
+"O'Brien",
+"B.O.J.",
+"a/b",
+"B.O.J.",
+"日本",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"Seoul Korea",
+"O'Brien",
+"B.O.J",
+"Lead"
+],
+"ru": [
+"O'Brien",
+"B.O.J",
+"日本"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto"
+],
+"ru": [
+"Bank  of Japan"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Kyōto"
+],
+"ru": [
+"Япония",
+"Bank of Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+" .Lead. ",
+"Toyota & Honda",
+"Япония",
+"JAPAN",
+"JAPAN"
+],
+"ru": [
+"JAPAN",
+"O'Brien",
+"a/b",
+"japan",
+"7",
+"42nd",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Банк Японии",
+"JAPAN",
+"42nd"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"Lead",
+"Toyota & Honda",
+"Япония",
+"JAPAN"
+],
+"ru": [
+"JAPAN",
+"O'Brien",
+"42nd",
+"Банк Японии"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Япония",
+" .Lead. ",
+"—",
+"японский",
+"#tag",
+"日本",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"7"
+],
+"ru": []
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Япония",
+"Lead",
+"японский",
+"日本"
+],
+"ru": [
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"B.O.J.",
+"—",
+"Япония",
+"B.O.J.",
+"Yen",
+"Japan",
+"-",
+"Seoul\nKorea",
+"B.O.J.",
+"a/b",
+"AI-chips",
+"japan",
+"japan",
+"AI-chips",
+" .Lead. ",
+"Bank  of Japan",
+""
+],
+"ru": [
+"B.O.J.",
+"日本",
+"B.O.J.",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"B.O.J.",
+"JAPAN",
+"42nd"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"B.O.J",
+"Япония",
+"Yen",
+"Japan",
+"Seoul Korea",
+"AI-chips",
+"Lead",
+"Bank of Japan"
+],
+"ru": [
+"Япония",
+"B.O.J",
+"日本",
+"JAPAN",
+"42nd"
+]
+}
+},
+{
+"raw": {
+"en": [
+"—",
+"Япония",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Toyota & Honda",
+"Toyota & Honda",
+"O'Brien",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"japan",
+"Yen",
+"Ճապոնիա",
+"AI-chips",
+"#tag",
+"a/b",
+"JAPAN",
+"ok_word"
+],
+"ru": [
+"Bank  of Japan",
+"ok_word",
+"AI-chips",
+"Seoul\nKorea",
+" .Lead. ",
+"Seoul\nKorea",
+"Seoul\nKorea",
+"Банк Японии",
+"Toyota & Honda"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Япония",
+"Toyota & Honda",
+"O'Brien",
+"japan",
+"Yen",
+"Ճապոնիա",
+"AI-chips",
+"ok_word"
+],
+"ru": [
+"Япония",
+"Bank of Japan",
+"ok_word",
+"AI-chips",
+"Seoul Korea",
+"Lead",
+"Банк Японии",
+"Toyota & Honda"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Toyota & Honda",
+"-",
+" Tokyo "
+],
+"ru": [
+"Toyota & Honda",
+"B.O.J.",
+" .Lead. ",
+"ok_word",
+"日本",
+"—",
+"",
+"Kyōto",
+"японский",
+"Ճապոնիա",
+"Токио",
+"Япония",
+"Bank  of Japan"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"Toyota & Honda",
+"Tokyo"
+],
+"ru": [
+"Toyota & Honda",
+"B.O.J",
+"Lead",
+"ok_word",
+"日本",
+"Kyōto",
+"японский",
+"Ճապոնիա",
+"Токио",
+"Япония",
+"Bank of Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto",
+"Ճապոնիա",
+"Kyōto",
+"",
+"B.O.J.",
+"B.O.J.",
+"日本",
+"...",
+"ok_word"
+],
+"ru": [
+"B.O.J.",
+"Kyōto",
+"-",
+"a/b",
+"JAPAN",
+"Япония",
+"",
+"7",
+" .Lead. ",
+"a/b"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"Kyōto",
+"Ճապոնիա",
+"B.O.J",
+"日本",
+"ok_word"
+],
+"ru": [
+"Япония",
+"B.O.J",
+"Kyōto",
+"JAPAN",
+"Lead"
+]
+}
+},
+{
+"raw": {
+"en": [
+"O'Brien",
+"JAPAN",
+"B.O.J.",
+"JAPAN",
+"Kyōto",
+"Seoul\nKorea",
+"a/b",
+"7"
+],
+"ru": [
+"Yen",
+"Toyota & Honda",
+"Ճապոնիա",
+"Kyōto",
+"Ճապոնիա",
+"JAPAN",
+"Япония",
+"Japan",
+"AI-chips"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"O'Brien",
+"JAPAN",
+"B.O.J",
+"Kyōto",
+"Seoul Korea"
+],
+"ru": [
+"Yen",
+"Toyota & Honda",
+"Ճապոնիա",
+"Kyōto",
+"JAPAN",
+"Япония",
+"AI-chips"
+]
+}
+},
+{
+"raw": {
+"en": [
+"-",
+"Токио",
+"-",
+"ok_word",
+"Bank  of Japan",
+"B.O.J."
+],
+"ru": [
+"B.O.J.",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"#tag",
+"Japan",
+"",
+" .Lead. ",
+"日本",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"日本",
+"Japan",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"7",
+"Toyota & Honda",
+"JAPAN",
+"42nd",
+"B.O.J."
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Токио",
+"ok_word",
+"Bank of Japan",
+"B.O.J"
+],
+"ru": [
+"Япония",
+"B.O.J",
+"Japan",
+"Lead",
+"日本",
+"Toyota & Honda",
+"42nd"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Japan",
+"#tag",
+"—",
+"B.O.J.",
+"Ճապոնիա",
+"日本",
+"Токио",
+"Kyōto",
+" .Lead. ",
+"Seoul\nKorea",
+"japan",
+"日本"
+],
+"ru": [
+"...",
+"Seoul\nKorea",
+"ok_word"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"Japan",
+"B.O.J",
+"Ճապոնիա",
+"日本",
+"Токио",
+"Kyōto",
+"Lead",
+"Seoul Korea"
+],
+"ru": [
+"Япония",
+"Seoul Korea",
+"ok_word"
+]
+}
+},
+{
+"raw": {
+"en": [
+"42nd",
+" Tokyo ",
+"Япония",
+"ok_word",
+"日本",
+"-",
+"",
+"...",
+"японский",
+"...",
+"Toyota & Honda",
+"AI-chips",
+"Japan",
+"—",
+"Seoul\nKorea"
+],
+"ru": [
+"B.O.J.",
+"японский",
+"#tag",
+"",
+"JAPAN",
+"Bank  of Japan",
+"a/b",
+"O'Brien",
+"Japan",
+"...",
+" Tokyo ",
+"Ճապոնիա",
+"Bank  of Japan"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"42nd",
+"Tokyo",
+"Япония",
+"ok_word",
+"日本",
+"японский",
+"Toyota & Honda",
+"AI-chips",
+"Japan",
+"Seoul Korea"
+],
+"ru": [
+"B.O.J",
+"японский",
+"JAPAN",
+"Bank of Japan",
+"O'Brien",
+"Tokyo",
+"Ճապոնիա"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Япония",
+"Япония",
+"Yen",
+"a/b"
+],
+"ru": [
+"B.O.J.",
+"Токио",
+"7",
+"japan",
+"...",
+"ok_word",
+"42nd",
+"Kyōto",
+"Токио",
+"a/b",
+"...",
+"42nd",
+"ok_word",
+"O'Brien",
+"Bank  of Japan"
+]
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Япония",
+"Yen"
+],
+"ru": [
+"Japan",
+"B.O.J",
+"Токио",
+"ok_word",
+"42nd",
+"Kyōto",
+"O'Brien",
+"Bank of Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Bank  of Japan",
+" .Lead. ",
+"42nd",
+"японский",
+"Japan",
+"Japan",
+"B.O.J.",
+"B.O.J.",
+"Bank  of Japan",
+"42nd",
+" .Lead. ",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"日本"
+],
+"ru": [
+"Ճապոնիա"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"Bank of Japan",
+"Lead",
+"42nd",
+"японский",
+"Japan",
+"B.O.J",
+"日本"
+],
+"ru": [
+"Japan",
+"Ճապոնիա"
+]
+}
+},
+{
+"raw": {
+"en": [
+"7",
+"Bank  of Japan",
+"—",
+"Toyota & Honda",
+"日本",
+"Seoul\nKorea",
+"42nd",
+"—",
+"ok_word",
+" Tokyo ",
+"Kyōto",
+"Toyota & Honda"
+],
+"ru": [
+"Япония",
+"a/b",
+"Toyota & Honda",
+"Ճապոնիա",
+"Japan",
+"Japan",
+"Япония",
+"Токио",
+"AI-chips",
+"#tag",
+"O'Brien",
+"ok_word"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"Bank of Japan",
+"Toyota & Honda",
+"日本",
+"Seoul Korea",
+"42nd",
+"ok_word",
+"Tokyo",
+"Kyōto"
+],
+"ru": [
+"Япония",
+"Toyota & Honda",
+"Ճապոնիա",
+"Japan",
+"Токио",
+"AI-chips",
+"O'Brien",
+"ok_word"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Bank  of Japan",
+"—",
+"Yen"
+],
+"ru": [
+"a/b",
+"Toyota & Honda",
+"Kyōto",
+"Yen",
+"Банк Японии",
+"B.O.J.",
+" Tokyo ",
+"Токио",
+"a/b",
+"a/b",
+"B.O.J."
+]
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Bank of Japan",
+"Yen"
+],
+"ru": [
+"Japan",
+"Toyota & Honda",
+"Kyōto",
+"Yen",
+"Банк Японии",
+"B.O.J",
+"Tokyo",
+"Токио"
+]
+}
+},
+{
+"raw": {
+"en": [
+"—",
+"ok_word",
+"Банк Японии",
+"AI-chips",
+"Банк Японии",
+"Ճապոնիա",
+"O'Brien",
+"Yen"
+],
+"ru": [
+"Токио",
+"japan",
+"O'Brien",
+" Tokyo ",
+"O'Brien",
+"ok_word",
+" .Lead. ",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Japan",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+" Tokyo ",
+"Ճապոնիա"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"ok_word",
+"Банк Японии",
+"AI-chips",
+"Ճապոնիա",
+"O'Brien",
+"Yen"
+],
+"ru": [
+"Токио",
+"japan",
+"O'Brien",
+"Tokyo",
+"ok_word",
+"Lead",
+"Ճապոնիա"
+]
+}
+},
+{
+"raw": {
+"en": [
+"-",
+"japan",
+"Seoul\nKorea",
+"Токио",
+" Tokyo "
+],
+"ru": [
+"-",
+"Токио",
+"-",
+"Yen",
+"Toyota & Honda",
+"a/b",
+"#tag",
+"japan",
+"Ճապոնիա",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Seoul\nKorea",
+"Yen",
+"",
+"Japan",
+"Bank  of Japan",
+"японский"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"japan",
+"Seoul Korea",
+"Токио",
+"Tokyo"
+],
+"ru": [
+"Токио",
+"Yen",
+"Toyota & Honda",
+"japan",
+"Ճապոնիա",
+"Seoul Korea",
+"Bank of Japan",
+"японский"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Банк Японии",
+"42nd",
+"42nd",
+"",
+"",
+"AI-chips",
+"японский",
+"japan",
+"Seoul\nKorea",
+"японский",
+"Toyota & Honda",
+""
+],
+"ru": [
+"42nd",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"AI-chips",
+"-"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"Банк Японии",
+"42nd",
+"AI-chips",
+"японский",
+"japan",
+"Seoul Korea",
+"Toyota & Honda"
+],
+"ru": [
+"Japan",
+"42nd",
+"AI-chips"
+]
+}
+},
+{
+"raw": {
+"en": "not a list",
+"ru": null
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia"
+],
+"ru": []
+}
+},
+{
+"raw": {
+"en": [
+"a/b",
+" Tokyo ",
+"Kyōto",
+"O'Brien",
+"",
+"Токио",
+"Bank  of Japan",
+"Yen",
+"—",
+"japan",
+"#tag",
+"Япония",
+"Ճապոնիա",
+"...",
+""
+],
+"ru": [
+"#tag",
+"Toyota & Honda",
+"7"
+]
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Tokyo",
+"Kyōto",
+"O'Brien",
+"Токио",
+"Bank of Japan",
+"Yen",
+"japan",
+"Япония",
+"Ճապոնիա"
+],
+"ru": [
+"Japan",
+"Toyota & Honda"
+]
+}
+},
+{
+"raw": {
+"en": [
+"7",
+"Toyota & Honda",
+"日本",
+" Tokyo ",
+"Япония",
+"Япония",
+"Toyota & Honda",
+"O'Brien",
+"Japan",
+"—"
+],
+"ru": [
+"-",
+"japan",
+"japan",
+"Seoul\nKorea",
+"ok_word",
+"O'Brien"
+]
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Toyota & Honda",
+"日本",
+"Tokyo",
+"Япония",
+"O'Brien",
+"Japan"
+],
+"ru": [
+"Japan",
+"Seoul Korea",
+"ok_word",
+"O'Brien"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto",
+"AI-chips",
+"#tag"
+],
+"ru": [
+"42nd",
+"Токио",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Japan",
+"Банк Японии"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"Kyōto",
+"AI-chips"
+],
+"ru": [
+"Japan",
+"42nd",
+"Токио",
+"Банк Японии"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Япония",
+"日本",
+"Toyota & Honda",
+"japan",
+"JAPAN",
+"Банк Японии",
+"—",
+"a/b",
+"Yen",
+"Toyota & Honda",
+"ok_word",
+"—",
+"Seoul\nKorea",
+"...",
+"a/b"
+],
+"ru": [
+"Seoul\nKorea",
+"...",
+"japan",
+"японский",
+"japan",
+"Bank  of Japan",
+"Япония",
+"Japan",
+"японский",
+" .Lead. ",
+"Seoul\nKorea",
+"Yen",
+"a/b",
+"..."
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"Япония",
+"日本",
+"Toyota & Honda",
+"Банк Японии",
+"Yen",
+"ok_word",
+"Seoul Korea"
+],
+"ru": [
+"Japan",
+"Seoul Korea",
+"японский",
+"Bank of Japan",
+"Япония",
+"Lead",
+"Yen"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Toyota & Honda",
+"Kyōto",
+"Токио",
+"Seoul\nKorea",
+"AI-chips",
+"Ճապոնիա",
+" Tokyo ",
+"O'Brien",
+"Japan",
+"Токио",
+" Tokyo ",
+" .Lead. "
+],
+"ru": []
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"Toyota & Honda",
+"Kyōto",
+"Токио",
+"Seoul Korea",
+"AI-chips",
+"Ճապոնիա",
+"Tokyo",
+"O'Brien",
+"Japan",
+"Lead"
+],
+"ru": [
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"—"
+],
+"ru": [
+"Kyōto",
+"日本",
+"AI-chips",
+"Toyota & Honda",
+" .Lead. ",
+"Kyōto",
+"B.O.J.",
+"Yen",
+"...",
+"-",
+" .Lead. ",
+" Tokyo "
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [],
+"ru": [
+"Kyōto",
+"日本",
+"AI-chips",
+"Toyota & Honda",
+"Lead",
+"B.O.J",
+"Yen",
+"Tokyo"
+]
+}
+},
+{
+"raw": {
+"en": [
+"42nd",
+" .Lead. ",
+"Япония",
+"—"
+],
+"ru": [
+"японский",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Банк Японии",
+"#tag",
+"Ճապոնիա",
+"Токио",
+"Kyōto",
+"Банк Японии",
+"B.O.J.",
+" Tokyo "
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"42nd",
+"Lead",
+"Япония"
+],
+"ru": [
+"Japan",
+"японский",
+"Банк Японии",
+"Ճապոնիա",
+"Токио",
+"Kyōto",
+"B.O.J",
+"Tokyo"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Япония",
+"ok_word",
+"a/b",
+"42nd",
+"...",
+"—",
+"Japan",
+"японский",
+"Toyota & Honda",
+"JAPAN",
+"japan",
+"Toyota & Honda",
+"Ճապոնիա",
+"Toyota & Honda"
+],
+"ru": [
+"...",
+"Seoul\nKorea",
+"—",
+"日本",
+"Япония",
+"—",
+"Токио",
+"Yen"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"Япония",
+"ok_word",
+"42nd",
+"Japan",
+"японский",
+"Toyota & Honda",
+"Ճապոնիա"
+],
+"ru": [
+"Япония",
+"Seoul Korea",
+"日本",
+"Токио",
+"Yen"
+]
+}
+},
+{
+"raw": {
+"en": [
+"японский",
+"Seoul\nKorea",
+"-",
+"AI-chips",
+"japan",
+"Kyōto",
+"7",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"O'Brien",
+"-",
+"Япония"
+],
+"ru": [
+"Seoul\nKorea",
+"Bank  of Japan",
+"Ճապոնիա",
+"",
+"Ճապոնիա",
+" .Lead. ",
+"Seoul\nKorea",
+"a/b",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"японский",
+"Bank  of Japan",
+" .Lead. ",
+"японский",
+" .Lead. ",
+"Япония",
+"Япония",
+"Kyōto"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"японский",
+"Seoul Korea",
+"AI-chips",
+"japan",
+"Kyōto",
+"O'Brien",
+"Япония"
+],
+"ru": [
+"Japan",
+"Seoul Korea",
+"Bank of Japan",
+"Ճապոնիա",
+"Lead",
+"японский",
+"Япония",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"—",
+"Toyota & Honda"
+],
+"ru": [
+"B.O.J.",
+"—",
+"—",
+"japan",
+"японский",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"B.O.J.",
+"7",
+"日本",
+"42nd",
+"O'Brien",
+"Токио",
+"-"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"Toyota & Honda"
+],
+"ru": [
+"B.O.J",
+"japan",
+"японский",
+"日本",
+"42nd",
+"O'Brien",
+"Токио"
+]
+}
+},
+{
+"raw": {
+"en": [
+"",
+"Bank  of Japan",
+"42nd",
+"japan",
+"Toyota & Honda",
+"O'Brien",
+"B.O.J.",
+"Japan"
+],
+"ru": []
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Bank of Japan",
+"42nd",
+"japan",
+"Toyota & Honda",
+"O'Brien",
+"B.O.J"
+],
+"ru": [
+"Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"B.O.J.",
+"Japan",
+"ok_word",
+"Bank  of Japan",
+"AI-chips",
+"Банк Японии",
+"Toyota & Honda",
+"7",
+"Japan",
+"japan",
+"ok_word",
+"",
+"B.O.J.",
+"Япония",
+"日本",
+"#tag",
+"..."
+],
+"ru": [
+"Seoul\nKorea",
+"日本",
+"Japan",
+"7",
+"Ճապոնիա",
+"Ճապոնիա",
+"",
+"#tag",
+"Япония",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"",
+" Tokyo ",
+"Kyōto",
+"Bank  of Japan"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"B.O.J",
+"ok_word",
+"Bank of Japan",
+"AI-chips",
+"Банк Японии",
+"Toyota & Honda",
+"Япония",
+"日本"
+],
+"ru": [
+"Япония",
+"Seoul Korea",
+"日本",
+"Japan",
+"Ճապոնիա",
+"Tokyo",
+"Kyōto",
+"Bank of Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"японский",
+"日本",
+"Ճապոնիա",
+"#tag",
+"42nd",
+" Tokyo ",
+"Seoul\nKorea",
+"O'Brien",
+"Seoul\nKorea",
+"Toyota & Honda"
+],
+"ru": [
+"JAPAN",
+"ok_word",
+"JAPAN",
+" Tokyo ",
+"—",
+"",
+"B.O.J.",
+"JAPAN",
+"—"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"японский",
+"日本",
+"Ճապոնիա",
+"42nd",
+"Tokyo",
+"Seoul Korea",
+"O'Brien",
+"Toyota & Honda"
+],
+"ru": [
+"JAPAN",
+"ok_word",
+"Tokyo",
+"B.O.J"
+]
+}
+},
+{
+"raw": {
+"en": [
+"#tag",
+"AI-chips",
+"#tag",
+"-",
+"Токио",
+" Tokyo ",
+"Япония",
+"Ճապոնիա",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"ok_word",
+"Bank  of Japan"
+],
+"ru": [
+"Банк Японии",
+" Tokyo ",
+"日本",
+"Japan",
+"AI-chips",
+"Yen",
+"-",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"AI-chips",
+"...",
+"7"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"AI-chips",
+"Токио",
+"Tokyo",
+"Япония",
+"Ճապոնիա",
+"ok_word",
+"Bank of Japan"
+],
+"ru": [
+"Япония",
+"Банк Японии",
+"Tokyo",
+"日本",
+"Japan",
+"AI-chips",
+"Yen"
+]
+}
+},
+{
+"raw": {
+"en": [
+"#tag",
+"Yen",
+"7",
+"Банк Японии",
+"JAPAN",
+"O'Brien",
+"Japan",
+"Japan",
+"-"
+],
+"ru": [
+" Tokyo ",
+" .Lead. ",
+"B.O.J.",
+"Bank  of Japan",
+"42nd",
+"Japan",
+"JAPAN",
+"...",
+"",
+"Токио",
+"AI-chips",
+" .Lead. ",
+"Банк Японии",
+"日本",
+"O'Brien",
+"Kyōto",
+"Bank  of Japan",
+" .Lead. "
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Yen",
+"Банк Японии",
+"JAPAN",
+"O'Brien"
+],
+"ru": [
+"Япония",
+"Tokyo",
+"Lead",
+"B.O.J",
+"Bank of Japan",
+"42nd",
+"Japan",
+"Токио",
+"AI-chips",
+"Банк Японии",
+"日本",
+"O'Brien",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Toyota & Honda"
+],
+"ru": [
+"日本",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"ok_word",
+"42nd",
+"-",
+"Банк Японии",
+"japan",
+" .Lead. ",
+" .Lead. ",
+"Bank  of Japan",
+"Токио",
+" .Lead. ",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Банк Японии",
+"Toyota & Honda",
+"Japan",
+"Toyota & Honda"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"Toyota & Honda"
+],
+"ru": [
+"日本",
+"ok_word",
+"42nd",
+"Банк Японии",
+"japan",
+"Lead",
+"Bank of Japan",
+"Токио",
+"Toyota & Honda"
+]
+}
+},
+{
+"raw": {
+"en": [
+"42nd",
+"-",
+"Банк Японии",
+"Ճապոնիա",
+"Toyota & Honda",
+"Банк Японии",
+"#tag",
+" .Lead. ",
+"Япония",
+"Ճապոնիա",
+"...",
+"...",
+"日本",
+" .Lead. ",
+"-",
+"ok_word",
+"-",
+"",
+"日本"
+],
+"ru": []
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"42nd",
+"Банк Японии",
+"Ճապոնիա",
+"Toyota & Honda",
+"Lead",
+"Япония",
+"日本",
+"ok_word"
+],
+"ru": []
+}
+},
+{
+"raw": {
+"en": [
+"японский",
+"",
+"AI-chips",
+" .Lead. ",
+"японский",
+"Japan"
+],
+"ru": [
+" Tokyo ",
+"ok_word",
+"japan",
+"Japan",
+"Токио"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"японский",
+"AI-chips",
+"Lead",
+"Japan"
+],
+"ru": [
+"Япония",
+"Tokyo",
+"ok_word",
+"japan",
+"Токио"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Japan",
+"ok_word",
+" .Lead. ",
+"Kyōto",
+"Ճապոնիա",
+"7",
+"B.O.J.",
+"Ճապոնիա",
+"a/b",
+"-",
+"Yen"
+],
+"ru": [
+"JAPAN",
+"42nd",
+"AI-chips",
+"-",
+"a/b",
+"a/b",
+"",
+"Bank  of Japan",
+"日本",
+"42nd",
+" .Lead. ",
+"Toyota & Honda",
+"B.O.J.",
+"B.O.J.",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+" .Lead. ",
+"-",
+"japan",
+"AI-chips"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"ok_word",
+"Lead",
+"Kyōto",
+"Ճապոնիա",
+"B.O.J",
+"Yen"
+],
+"ru": [
+"Japan",
+"42nd",
+"AI-chips",
+"Bank of Japan",
+"日本",
+"Lead",
+"Toyota & Honda",
+"B.O.J"
+]
+}
+},
+{
+"raw": {
+"en": [
+"#tag",
+"B.O.J."
+],
+"ru": [
+"7",
+"Япония",
+"ok_word",
+"Yen",
+"7"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"B.O.J"
+],
+"ru": [
+"Japan",
+"Япония",
+"ok_word",
+"Yen"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto",
+" Tokyo ",
+"японский",
+"",
+"Япония",
+"Токио",
+"-",
+"42nd",
+" Tokyo "
+],
+"ru": [
+"Toyota & Honda",
+" Tokyo ",
+"日本",
+"O'Brien",
+"Банк Японии",
+"Kyōto",
+"日本",
+"japan",
+" Tokyo ",
+"Токио",
+"Япония"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"Kyōto",
+"Tokyo",
+"японский",
+"Япония",
+"Токио",
+"42nd"
+],
+"ru": [
+"Japan",
+"Toyota & Honda",
+"Tokyo",
+"日本",
+"O'Brien",
+"Банк Японии",
+"Kyōto",
+"Токио",
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"#tag",
+"Toyota & Honda",
+"Bank  of Japan",
+"Seoul\nKorea",
+" Tokyo ",
+"Seoul\nKorea",
+"Seoul\nKorea",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Japan",
+"Токио"
+],
+"ru": [
+"Токио"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Toyota & Honda",
+"Bank of Japan",
+"Seoul Korea",
+"Tokyo",
+"Japan",
+"Токио"
+],
+"ru": [
+"Япония",
+"Токио"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Yen",
+"42nd",
+"Ճապոնիա",
+" Tokyo ",
+"",
+"B.O.J.",
+"japan",
+"#tag",
+"...",
+"Bank  of Japan",
+"B.O.J.",
+"Банк Японии",
+"...",
+"Yen",
+"японский",
+"7",
+"-",
+"7",
+"japan",
+""
+],
+"ru": [
+"-",
+"-"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"Yen",
+"42nd",
+"Ճապոնիա",
+"Tokyo",
+"B.O.J",
+"japan",
+"Bank of Japan",
+"Банк Японии",
+"японский"
+],
+"ru": [
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+" Tokyo ",
+"Yen",
+"Банк Японии",
+"—",
+"AI-chips",
+"japan",
+"a/b",
+"Toyota & Honda",
+"Kyōto",
+"japan",
+"Japan",
+"Seoul\nKorea",
+"AI-chips",
+"японский",
+"Kyōto",
+"7"
+],
+"ru": [
+"Toyota & Honda",
+"Япония",
+"ok_word",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"japan",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"...",
+"42nd",
+"—",
+"JAPAN"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"Tokyo",
+"Yen",
+"Банк Японии",
+"AI-chips",
+"japan",
+"Toyota & Honda",
+"Kyōto",
+"Seoul Korea",
+"японский"
+],
+"ru": [
+"Toyota & Honda",
+"Япония",
+"ok_word",
+"japan",
+"42nd"
+]
+}
+},
+{
+"raw": {
+"en": "not a list",
+"ru": null
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan"
+],
+"ru": [
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"—",
+"японский",
+" .Lead. ",
+"a/b",
+"42nd",
+"Bank  of Japan",
+"japan",
+"Ճապոնիա",
+"-",
+"B.O.J.",
+"Банк Японии",
+"Yen",
+"JAPAN",
+"日本",
+"",
+"#tag",
+"日本",
+"-"
+],
+"ru": [
+"Ճապոնիա",
+"—",
+"Банк Японии",
+"O'Brien"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"японский",
+"Lead",
+"42nd",
+"Bank of Japan",
+"Ճապոնիա",
+"B.O.J",
+"Банк Японии",
+"Yen",
+"日本"
+],
+"ru": [
+"Япония",
+"Ճապոնիա",
+"Банк Японии",
+"O'Brien"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Toyota & Honda"
+],
+"ru": [
+"7",
+"7",
+"42nd",
+"Токио",
+"Toyota & Honda"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Toyota & Honda"
+],
+"ru": [
+"Япония",
+"42nd",
+"Токио",
+"Toyota & Honda"
+]
+}
+},
+{
+"raw": {
+"en": [
+" .Lead. ",
+""
+],
+"ru": [
+"-",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"японский",
+"JAPAN",
+"Kyōto"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"Lead"
+],
+"ru": [
+"японский",
+"JAPAN",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"—",
+"Bank  of Japan",
+"Япония",
+"Yen",
+"Япония",
+"Kyōto",
+"Bank  of Japan",
+"",
+"JAPAN",
+"ok_word"
+],
+"ru": [
+"#tag",
+"japan",
+"Seoul\nKorea",
+"Япония",
+"японский",
+"Bank  of Japan",
+"Япония",
+"...",
+"7",
+"42nd",
+"Ճապոնիա"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"Bank of Japan",
+"Япония",
+"Yen",
+"Kyōto",
+"JAPAN",
+"ok_word"
+],
+"ru": [
+"Япония",
+"japan",
+"Seoul Korea",
+"японский",
+"Bank of Japan",
+"42nd",
+"Ճապոնիա"
+]
+}
+},
+{
+"raw": {
+"en": [
+"японский",
+"ok_word"
+],
+"ru": [
+"Япония",
+"Ճապոնիա",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Токио",
+"B.O.J.",
+"O'Brien"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"японский",
+"ok_word"
+],
+"ru": [
+"Япония",
+"Ճապոնիա",
+"Токио",
+"B.O.J",
+"O'Brien"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Bank  of Japan",
+"O'Brien",
+"—",
+"—",
+"日本",
+"7",
+"JAPAN",
+"японский",
+"7",
+"Yen",
+"Ճապոնիա",
+"—",
+"Банк Японии",
+" Tokyo ",
+"日本",
+"японский",
+"AI-chips",
+"Seoul\nKorea"
+],
+"ru": [
+"Japan",
+"AI-chips",
+"Seoul\nKorea",
+"#tag",
+"AI-chips",
+"a/b",
+"a/b",
+"日本",
+"japan",
+" .Lead. ",
+"Япония"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"Bank of Japan",
+"O'Brien",
+"日本",
+"JAPAN",
+"японский",
+"Yen",
+"Ճապոնիա",
+"Банк Японии",
+"Tokyo",
+"AI-chips",
+"Seoul Korea"
+],
+"ru": [
+"Japan",
+"AI-chips",
+"Seoul Korea",
+"日本",
+"Lead",
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"JAPAN",
+"7",
+"",
+"ok_word",
+"Seoul\nKorea",
+"Токио",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"ok_word",
+"日本",
+"42nd",
+"...",
+"O'Brien"
+],
+"ru": [
+"Bank  of Japan",
+"Toyota & Honda",
+"ok_word",
+"AI-chips",
+"7",
+"Банк Японии",
+"Japan"
+]
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"JAPAN",
+"ok_word",
+"Seoul Korea",
+"Токио",
+"日本",
+"42nd",
+"O'Brien"
+],
+"ru": [
+"Japan",
+"Bank of Japan",
+"Toyota & Honda",
+"ok_word",
+"AI-chips",
+"Банк Японии"
+]
+}
+},
+{
+"raw": {
+"en": [
+"",
+"Япония",
+"japan",
+"42nd",
+"Bank  of Japan",
+"Банк Японии",
+" Tokyo "
+],
+"ru": [
+"O'Brien",
+"Bank  of Japan",
+"Ճապոնիա",
+"ok_word",
+" .Lead. ",
+"Банк Японии",
+"Япония",
+"Bank  of Japan",
+"-",
+"Kyōto",
+" .Lead. ",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Ճապոնիա",
+"JAPAN",
+"42nd",
+"Япония",
+"Япония",
+"Seoul\nKorea"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"Япония",
+"42nd",
+"Bank of Japan",
+"Банк Японии",
+"Tokyo"
+],
+"ru": [
+"O'Brien",
+"Bank of Japan",
+"Ճապոնիա",
+"ok_word",
+"Lead",
+"Банк Японии",
+"Япония",
+"Kyōto",
+"JAPAN",
+"42nd",
+"Seoul Korea"
+]
+}
+},
+{
+"raw": {
+"en": [
+"...",
+"ok_word",
+"",
+"42nd",
+"—",
+" Tokyo ",
+"ok_word",
+"B.O.J.",
+"Kyōto",
+"AI-chips",
+"японский",
+"Токио",
+"#tag"
+],
+"ru": [
+"日本",
+"JAPAN",
+"Токио",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"",
+"japan",
+"Kyōto",
+"a/b",
+"Bank  of Japan",
+"Toyota & Honda",
+"Ճապոնիա",
+"42nd",
+"Токио"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"ok_word",
+"42nd",
+"Tokyo",
+"B.O.J",
+"Kyōto",
+"AI-chips",
+"японский",
+"Токио"
+],
+"ru": [
+"Japan",
+"日本",
+"Токио",
+"Kyōto",
+"Bank of Japan",
+"Toyota & Honda",
+"Ճապոնիա",
+"42nd"
+]
+}
+},
+{
+"raw": {
+"en": [
+"日本",
+"Kyōto",
+"japan",
+"a/b",
+"—",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+],
+"ru": [
+"B.O.J.",
+"Toyota & Honda",
+"7",
+"Yen",
+"Kyōto",
+"B.O.J.",
+"Bank  of Japan",
+"Bank  of Japan",
+"JAPAN",
+"AI-chips",
+"AI-chips",
+"Токио",
+"—",
+"日本",
+"Toyota & Honda",
+"japan",
+"Bank  of Japan",
+"AI-chips",
+"",
+"Kyōto"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"日本",
+"Kyōto",
+"japan"
+],
+"ru": [
+"Япония",
+"B.O.J",
+"Toyota & Honda",
+"Yen",
+"Kyōto",
+"Bank of Japan",
+"JAPAN",
+"AI-chips",
+"Токио",
+"日本"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Банк Японии",
+"a/b",
+"O'Brien",
+"Банк Японии",
+"Toyota & Honda",
+"Yen",
+"7",
+"",
+"Bank  of Japan",
+"Yen",
+"a/b",
+"42nd",
+" .Lead. ",
+"Ճապոնիա",
+"Toyota & Honda",
+"...",
+"japan",
+"a/b"
+],
+"ru": [
+"ok_word",
+"Япония",
+"B.O.J.",
+"7"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"Банк Японии",
+"O'Brien",
+"Toyota & Honda",
+"Yen",
+"Bank of Japan",
+"42nd",
+"Lead",
+"Ճապոնիա"
+],
+"ru": [
+"Japan",
+"ok_word",
+"Япония",
+"B.O.J"
+]
+}
+},
+{
+"raw": {
+"en": [
+"AI-chips"
+],
+"ru": [
+"-",
+" .Lead. ",
+"AI-chips",
+"Toyota & Honda",
+"-",
+"Japan",
+"—",
+"ok_word",
+"AI-chips",
+"Ճապոնիա",
+"a/b",
+"Япония",
+"japan",
+"B.O.J.",
+"日本",
+"42nd",
+"#tag",
+"#tag",
+"Kyōto",
+"Kyōto"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"AI-chips"
+],
+"ru": [
+"Lead",
+"AI-chips",
+"Toyota & Honda",
+"Japan",
+"ok_word",
+"Ճապոնիա",
+"Япония",
+"B.O.J",
+"日本",
+"42nd",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"AI-chips",
+"Toyota & Honda",
+"7",
+"...",
+" .Lead. ",
+"42nd"
+],
+"ru": [
+"JAPAN",
+"AI-chips",
+"7",
+" .Lead. ",
+"7",
+"42nd",
+"AI-chips",
+"Bank  of Japan",
+"Seoul\nKorea",
+"",
+"Банк Японии",
+"Seoul\nKorea",
+" .Lead. ",
+"Банк Японии",
+"JAPAN",
+"B.O.J.",
+"JAPAN",
+"japan"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"AI-chips",
+"Toyota & Honda",
+"Lead",
+"42nd"
+],
+"ru": [
+"Japan",
+"AI-chips",
+"Lead",
+"42nd",
+"Bank of Japan",
+"Seoul Korea",
+"Банк Японии",
+"B.O.J"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto",
+"-",
+"Банк Японии",
+"ok_word",
+"Seoul\nKorea",
+"...",
+"AI-chips",
+"японский",
+"日本",
+"Japan"
+],
+"ru": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"-"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"Kyōto",
+"Банк Японии",
+"ok_word",
+"Seoul Korea",
+"AI-chips",
+"японский",
+"日本"
+],
+"ru": [
+"Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"",
+"JAPAN",
+"Банк Японии",
+"ok_word",
+"Япония",
+"",
+"日本",
+"Seoul\nKorea",
+"Seoul\nKorea",
+"42nd",
+"...",
+"Yen",
+"Bank  of Japan",
+"..."
+],
+"ru": [
+"Ճապոնիա",
+"42nd",
+"Токио",
+"...",
+"Bank  of Japan",
+"japan",
+"7",
+"#tag",
+"Банк Японии",
+"Банк Японии",
+" Tokyo "
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"Банк Японии",
+"ok_word",
+"Япония",
+"日本",
+"Seoul Korea",
+"42nd",
+"Yen",
+"Bank of Japan"
+],
+"ru": [
+"Japan",
+"Ճապոնիա",
+"42nd",
+"Токио",
+"Bank of Japan",
+"Банк Японии",
+"Tokyo"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Токио",
+"a/b",
+"Japan",
+"Банк Японии",
+"японский",
+"-",
+"-",
+"JAPAN",
+"Kyōto",
+"AI-chips",
+"Bank  of Japan",
+"42nd",
+"Токио",
+"42nd",
+"...",
+"Bank  of Japan",
+"7",
+"7",
+"O'Brien",
+" .Lead. "
+],
+"ru": [
+"Токио",
+"Токио",
+"#tag",
+"",
+"#tag"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"Токио",
+"Банк Японии",
+"японский",
+"Kyōto",
+"AI-chips",
+"Bank of Japan",
+"42nd",
+"O'Brien",
+"Lead"
+],
+"ru": [
+"Токио"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Япония",
+"a/b",
+"Банк Японии",
+"японский",
+"—",
+"Bank  of Japan",
+"O'Brien",
+"Toyota & Honda",
+"Банк Японии",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Bank  of Japan",
+"Токио",
+"#tag"
+],
+"ru": [
+"Япония",
+"Ճապոնիա",
+"Банк Японии",
+"AI-chips",
+"#tag",
+"",
+"Банк Японии",
+"O'Brien",
+"Kyōto",
+"Kyōto",
+"ok_word",
+"-",
+"-",
+"B.O.J.",
+" .Lead. ",
+"Bank  of Japan",
+"42nd",
+"",
+"a/b",
+"japan"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Япония",
+"Банк Японии",
+"японский",
+"Bank of Japan",
+"O'Brien",
+"Toyota & Honda",
+"Токио"
+],
+"ru": [
+"Япония",
+"Ճապոնիա",
+"Банк Японии",
+"AI-chips",
+"O'Brien",
+"Kyōto",
+"ok_word",
+"B.O.J",
+"Lead",
+"Bank of Japan",
+"42nd",
+"japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"#tag",
+"Токио",
+"Токио",
+"JAPAN",
+"B.O.J.",
+"Банк Японии",
+"Банк Японии",
+"日本",
+"Япония",
+"Japan",
+"O'Brien",
+"Seoul\nKorea",
+"Toyota & Honda"
+],
+"ru": [
+"Япония",
+"Банк Японии",
+"Toyota & Honda",
+"a/b",
+"Kyōto",
+"ok_word",
+"—",
+"Yen",
+"Банк Японии",
+"ok_word",
+"日本",
+"Toyota & Honda",
+"—",
+"Банк Японии",
+"Япония",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+" .Lead. ",
+"японский",
+"AI-chips",
+"Kyōto"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"Токио",
+"JAPAN",
+"B.O.J",
+"Банк Японии",
+"日本",
+"Япония",
+"O'Brien",
+"Seoul Korea",
+"Toyota & Honda"
+],
+"ru": [
+"Japan",
+"Япония",
+"Банк Японии",
+"Toyota & Honda",
+"Kyōto",
+"ok_word",
+"Yen",
+"日本",
+"Lead",
+"японский",
+"AI-chips"
+]
+}
+},
+{
+"raw": {
+"en": [
+"B.O.J.",
+"Kyōto",
+" .Lead. ",
+"...",
+"Банк Японии",
+" .Lead. ",
+"B.O.J.",
+"—"
+],
+"ru": [
+"-",
+"B.O.J.",
+"Kyōto",
+"Seoul\nKorea",
+"...",
+"japan",
+"JAPAN",
+" Tokyo ",
+"ok_word",
+"-",
+"B.O.J.",
+"AI-chips",
+"-",
+"a/b",
+"...",
+"-"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"B.O.J",
+"Kyōto",
+"Lead",
+"Банк Японии"
+],
+"ru": [
+"Япония",
+"B.O.J",
+"Kyōto",
+"Seoul Korea",
+"japan",
+"Tokyo",
+"ok_word",
+"AI-chips"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Bank  of Japan",
+"ok_word",
+"японский",
+"Toyota & Honda",
+"Yen",
+" .Lead. ",
+"#tag",
+"Yen",
+"Банк Японии",
+"Toyota & Honda",
+""
+],
+"ru": [
+"ok_word",
+"Yen",
+"—",
+"Kyōto",
+"B.O.J.",
+"Ճապոնիա",
+"7",
+"Yen",
+"#tag",
+"...",
+"japan",
+"a/b",
+"japan",
+" .Lead. ",
+"японский",
+"O'Brien",
+"—",
+"ok_word",
+"ok_word"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"Bank of Japan",
+"ok_word",
+"японский",
+"Toyota & Honda",
+"Yen",
+"Lead",
+"Банк Японии"
+],
+"ru": [
+"Япония",
+"ok_word",
+"Yen",
+"Kyōto",
+"B.O.J",
+"Ճապոնիա",
+"japan",
+"Lead",
+"японский",
+"O'Brien"
+]
+}
+},
+{
+"raw": {
+"en": [
+"japan",
+"42nd",
+"O'Brien",
+"Kyōto",
+"B.O.J.",
+"JAPAN",
+" .Lead. ",
+"B.O.J.",
+"Yen",
+"ok_word",
+"Kyōto",
+"ok_word",
+"7",
+"O'Brien",
+"японский"
+],
+"ru": [
+"Bank  of Japan",
+"日本",
+"Bank  of Japan",
+"42nd",
+"",
+"O'Brien",
+"#tag",
+"JAPAN",
+"Япония",
+" Tokyo ",
+"日本",
+"AI-chips",
+"...",
+"-",
+"Toyota & Honda",
+"Токио"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"japan",
+"42nd",
+"O'Brien",
+"Kyōto",
+"B.O.J",
+"Lead",
+"Yen",
+"ok_word",
+"японский"
+],
+"ru": [
+"Япония",
+"Bank of Japan",
+"日本",
+"42nd",
+"O'Brien",
+"JAPAN",
+"Tokyo",
+"AI-chips",
+"Toyota & Honda",
+"Токио"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Japan",
+"日本",
+" .Lead. ",
+"O'Brien"
+],
+"ru": [
+"Ճապոնիա",
+"日本",
+"a/b",
+"Ճապոնիա",
+"Japan",
+"日本",
+"7"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"Japan",
+"日本",
+"Lead",
+"O'Brien"
+],
+"ru": [
+"Japan",
+"Ճապոնիա",
+"日本"
+]
+}
+},
+{
+"raw": {
+"en": [
+"-",
+"#tag",
+" Tokyo ",
+"",
+"japan",
+"Toyota & Honda"
+],
+"ru": [
+"a/b",
+"Toyota & Honda",
+"японский"
+]
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Tokyo",
+"japan",
+"Toyota & Honda"
+],
+"ru": [
+"Japan",
+"Toyota & Honda",
+"японский"
+]
+}
+},
+{
+"raw": {
+"en": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"#tag",
+"Yen",
+"—",
+"Kyōto",
+"-",
+"Kyōto",
+"7",
+"Kyōto",
+"Bank  of Japan",
+"Токио",
+"Seoul\nKorea",
+"Toyota & Honda",
+"B.O.J."
+],
+"ru": [
+"O'Brien",
+"Seoul\nKorea",
+"японский",
+"японский",
+"japan",
+"japan",
+"Seoul\nKorea",
+"ok_word",
+"-",
+"7"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"Yen",
+"Kyōto",
+"Bank of Japan",
+"Токио",
+"Seoul Korea",
+"Toyota & Honda",
+"B.O.J"
+],
+"ru": [
+"O'Brien",
+"Seoul Korea",
+"японский",
+"japan",
+"ok_word"
+]
+}
+},
+{
+"raw": {
+"en": "not a list",
+"ru": null
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [],
+"ru": [
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"—",
+"Bank  of Japan",
+"Seoul\nKorea",
+"JAPAN",
+"Yen",
+"Seoul\nKorea",
+"7"
+],
+"ru": [
+"—",
+" Tokyo ",
+"Япония",
+"Токио",
+"AI-chips",
+" Tokyo ",
+"ok_word",
+"japan",
+"Япония",
+"японский",
+"a/b"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"Bank of Japan",
+"Seoul Korea",
+"JAPAN",
+"Yen"
+],
+"ru": [
+"Япония",
+"Tokyo",
+"Токио",
+"AI-chips",
+"ok_word",
+"japan",
+"японский"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Japan",
+"AI-chips",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"7",
+"Seoul\nKorea",
+" .Lead. ",
+"Seoul\nKorea",
+"...",
+"日本",
+"Токио",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"a/b",
+"Kyōto",
+"Ճապոնիա",
+"#tag",
+"日本"
+],
+"ru": [
+"JAPAN",
+"7"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"AI-chips",
+"Seoul Korea",
+"Lead",
+"日本",
+"Токио",
+"Kyōto",
+"Ճապոնիա"
+],
+"ru": [
+"JAPAN"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Toyota & Honda",
+"Bank  of Japan",
+"Токио",
+" Tokyo ",
+"Япония",
+"Toyota & Honda",
+"7"
+],
+"ru": [
+"Yen",
+" .Lead. ",
+"Bank  of Japan",
+"a/b",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Yen",
+"42nd",
+"日本",
+"Kyōto"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"Toyota & Honda",
+"Bank of Japan",
+"Токио",
+"Tokyo",
+"Япония"
+],
+"ru": [
+"Japan",
+"Yen",
+"Lead",
+"Bank of Japan",
+"42nd",
+"日本",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"—",
+" Tokyo ",
+"O'Brien",
+"японский",
+"7",
+"Yen",
+"7",
+"-",
+"O'Brien",
+"японский",
+"Bank  of Japan"
+],
+"ru": [
+"Банк Японии",
+"Japan",
+"#tag",
+"Japan",
+"JAPAN",
+"B.O.J.",
+"Japan",
+"Seoul\nKorea",
+"日本"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Tokyo",
+"O'Brien",
+"японский",
+"Yen",
+"Bank of Japan"
+],
+"ru": [
+"Япония",
+"Банк Японии",
+"Japan",
+"B.O.J",
+"Seoul Korea",
+"日本"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto"
+],
+"ru": [
+"7",
+"Kyōto",
+"42nd",
+"a/b"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"Kyōto"
+],
+"ru": [
+"Japan",
+"Kyōto",
+"42nd"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto",
+"japan",
+"Toyota & Honda",
+"JAPAN",
+" Tokyo ",
+"ok_word",
+"японский",
+"Japan",
+"ok_word",
+"B.O.J.",
+"Ճապոնիա",
+"O'Brien",
+"JAPAN",
+"ok_word",
+"ok_word",
+"-",
+"B.O.J."
+],
+"ru": [
+"японский",
+"—",
+"Seoul\nKorea",
+"японский",
+"a/b",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"#tag"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"Kyōto",
+"japan",
+"Toyota & Honda",
+"Tokyo",
+"ok_word",
+"японский",
+"B.O.J",
+"Ճապոնիա",
+"O'Brien"
+],
+"ru": [
+"японский",
+"Seoul Korea"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Bank  of Japan",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Япония",
+"Yen",
+"Toyota & Honda",
+"AI-chips"
+],
+"ru": [
+"AI-chips",
+"JAPAN",
+"японский",
+"",
+"—",
+"Bank  of Japan",
+"O'Brien",
+"a/b",
+"японский",
+"Ճապոնիա",
+"Bank  of Japan",
+"—",
+"Toyota & Honda",
+"AI-chips",
+"#tag",
+"JAPAN",
+"ok_word",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"#tag",
+"Japan"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Bank of Japan",
+"Япония",
+"Yen",
+"Toyota & Honda",
+"AI-chips"
+],
+"ru": [
+"Япония",
+"AI-chips",
+"JAPAN",
+"японский",
+"Bank of Japan",
+"O'Brien",
+"Ճապոնիա",
+"Toyota & Honda",
+"ok_word"
+]
+}
+},
+{
+"raw": {
+"en": [
+"7",
+"",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Ճապոնիա",
+"...",
+"...",
+"AI-chips",
+"Ճապոնիա",
+"日本",
+"—",
+"японский",
+"Kyōto",
+"日本",
+"AI-chips",
+"AI-chips",
+""
+],
+"ru": [
+"Ճապոնիա",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Токио",
+"Seoul\nKorea"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"Ճապոնիա",
+"AI-chips",
+"日本",
+"японский",
+"Kyōto"
+],
+"ru": [
+"Japan",
+"Ճապոնիա",
+"Токио",
+"Seoul Korea"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Seoul\nKorea",
+"Japan"
+],
+"ru": [
+"日本",
+"JAPAN"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"Seoul Korea",
+"Japan"
+],
+"ru": [
+"Япония",
+"日本",
+"JAPAN"
+]
+}
+},
+{
+"raw": {
+"en": [
+"—",
+"42nd",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+" .Lead. ",
+"Bank  of Japan",
+"7",
+"..."
+],
+"ru": [
+"Япония",
+"AI-chips",
+"Kyōto",
+"a/b",
+"AI-chips",
+"JAPAN",
+"японский",
+"Ճապոնիա",
+" .Lead. ",
+"Банк Японии",
+"Seoul\nKorea",
+"JAPAN",
+"日本",
+"7",
+"японский",
+"ok_word",
+"AI-chips",
+"Токио"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"42nd",
+"Lead",
+"Bank of Japan"
+],
+"ru": [
+"Япония",
+"AI-chips",
+"Kyōto",
+"JAPAN",
+"японский",
+"Ճապոնիա",
+"Lead",
+"Банк Японии",
+"Seoul Korea",
+"日本",
+"ok_word",
+"Токио"
+]
+}
+},
+{
+"raw": {
+"en": [
+"—",
+"42nd",
+"B.O.J.",
+"Ճապոնիա",
+"японский",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"B.O.J.",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"ok_word",
+"Seoul\nKorea",
+"JAPAN",
+"Ճապոնիա",
+"AI-chips",
+"Япония",
+"",
+"—",
+" .Lead. ",
+"O'Brien"
+],
+"ru": [
+"a/b",
+"a/b",
+"...",
+"B.O.J.",
+"JAPAN",
+"ok_word",
+"Bank  of Japan",
+"Япония",
+"Toyota & Honda",
+"Ճապոնիա",
+"Seoul\nKorea"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"42nd",
+"B.O.J",
+"Ճապոնիա",
+"японский",
+"ok_word",
+"Seoul Korea",
+"JAPAN",
+"AI-chips",
+"Япония",
+"Lead",
+"O'Brien"
+],
+"ru": [
+"Япония",
+"B.O.J",
+"JAPAN",
+"ok_word",
+"Bank of Japan",
+"Toyota & Honda",
+"Ճապոնիա",
+"Seoul Korea"
+]
+}
+},
+{
+"raw": {
+"en": [
+" Tokyo ",
+"Toyota & Honda",
+"",
+"42nd",
+"japan",
+"-",
+" .Lead. ",
+"Банк Японии",
+"日本",
+"Токио"
+],
+"ru": [
+"Japan",
+"Токио",
+" .Lead. "
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"Tokyo",
+"Toyota & Honda",
+"42nd",
+"japan",
+"Lead",
+"Банк Японии",
+"日本",
+"Токио"
+],
+"ru": [
+"Japan",
+"Токио",
+"Lead"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Токио",
+"Ճապոնիա",
+"JAPAN",
+"42nd",
+"Bank  of Japan",
+"B.O.J.",
+"日本",
+"AI-chips",
+"JAPAN",
+" .Lead. ",
+"AI-chips",
+"a/b",
+"AI-chips",
+"japan",
+"",
+"7",
+"Токио"
+],
+"ru": [
+"AI-chips",
+"-",
+"Банк Японии",
+"日本",
+"Toyota & Honda",
+"O'Brien",
+"Япония",
+"Банк Японии",
+"AI-chips",
+"—",
+"Bank  of Japan",
+"AI-chips",
+"#tag",
+"ok_word",
+"42nd",
+"Kyōto",
+"日本",
+"...",
+"Банк Японии",
+"..."
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Токио",
+"Ճապոնիա",
+"JAPAN",
+"42nd",
+"Bank of Japan",
+"B.O.J",
+"日本",
+"AI-chips",
+"Lead"
+],
+"ru": [
+"Япония",
+"AI-chips",
+"Банк Японии",
+"日本",
+"Toyota & Honda",
+"O'Brien",
+"Bank of Japan",
+"ok_word",
+"42nd",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Seoul\nKorea",
+" Tokyo ",
+"Токио",
+"AI-chips",
+"ok_word",
+"японский",
+"JAPAN",
+"42nd",
+" Tokyo ",
+"a/b",
+"Ճապոնիա",
+"日本",
+"Toyota & Honda",
+" .Lead. ",
+" Tokyo ",
+"JAPAN",
+"JAPAN",
+"Toyota & Honda"
+],
+"ru": [
+"Банк Японии",
+"Токио",
+"...",
+"Yen",
+"O'Brien"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"Seoul Korea",
+"Tokyo",
+"Токио",
+"AI-chips",
+"ok_word",
+"японский",
+"42nd",
+"Ճապոնիա",
+"日本",
+"Toyota & Honda",
+"Lead"
+],
+"ru": [
+"Банк Японии",
+"Токио",
+"Yen",
+"O'Brien"
+]
+}
+},
+{
+"raw": {
+"en": [
+"#tag",
+" Tokyo ",
+"Япония",
+"...",
+"O'Brien",
+"Toyota & Honda",
+"O'Brien"
+],
+"ru": [
+"Токио",
+"—",
+"Ճապոնիա",
+"O'Brien",
+"B.O.J.",
+"Yen",
+"JAPAN",
+"O'Brien",
+"Ճապոնիա",
+"ok_word",
+"Токио",
+"Toyota & Honda",
+"JAPAN",
+"O'Brien",
+"японский",
+"Kyōto"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"Tokyo",
+"Япония",
+"O'Brien",
+"Toyota & Honda"
+],
+"ru": [
+"Япония",
+"Токио",
+"Ճապոնիա",
+"O'Brien",
+"B.O.J",
+"Yen",
+"JAPAN",
+"ok_word",
+"Toyota & Honda",
+"японский",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Банк Японии",
+"Токио",
+"japan",
+"Kyōto",
+"Kyōto",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+" .Lead. ",
+"Toyota & Honda",
+"#tag",
+"#tag",
+"—",
+"japan",
+"Банк Японии"
+],
+"ru": []
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"Банк Японии",
+"Токио",
+"japan",
+"Kyōto",
+"Lead",
+"Toyota & Honda"
+],
+"ru": []
+}
+},
+{
+"raw": {
+"en": [],
+"ru": [
+" Tokyo ",
+"—",
+"японский",
+"—",
+"Toyota & Honda",
+"Kyōto",
+"Ճապոնիա",
+" Tokyo ",
+"#tag",
+"—",
+"42nd",
+"7"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan"
+],
+"ru": [
+"Tokyo",
+"японский",
+"Toyota & Honda",
+"Kyōto",
+"Ճապոնիա",
+"42nd"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Ճապոնիա",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"42nd",
+"日本",
+"-",
+"B.O.J.",
+"Ճապոնիա"
+],
+"ru": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"японский",
+"Toyota & Honda",
+"",
+"O'Brien",
+"AI-chips",
+" .Lead. ",
+" .Lead. ",
+"AI-chips",
+"Japan",
+" .Lead. ",
+"японский",
+"Банк Японии",
+"Japan",
+"#tag",
+"Kyōto",
+"japan",
+"Ճապոնիա"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Ճապոնիա",
+"42nd",
+"日本",
+"B.O.J"
+],
+"ru": [
+"Япония",
+"японский",
+"Toyota & Honda",
+"O'Brien",
+"AI-chips",
+"Lead",
+"Japan",
+"Банк Японии",
+"Kyōto",
+"Ճապոնիա"
+]
+}
+},
+{
+"raw": {
+"en": [
+"日本"
+],
+"ru": [
+"Bank  of Japan",
+"",
+"a/b",
+"Bank  of Japan",
+"Japan",
+"japan",
+"ok_word",
+"ok_word",
+"...",
+"..."
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"日本"
+],
+"ru": [
+"Japan",
+"Bank of Japan",
+"ok_word"
+]
+}
+},
+{
+"raw": {
+"en": [
+"O'Brien",
+"O'Brien",
+"Japan",
+"японский",
+" .Lead. "
+],
+"ru": [
+"Yen",
+"",
+"#tag",
+"Toyota & Honda",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Toyota & Honda",
+"japan",
+"Банк Японии",
+"O'Brien",
+"Yen",
+"B.O.J."
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"O'Brien",
+"Japan",
+"японский",
+"Lead"
+],
+"ru": [
+"Япония",
+"Yen",
+"Toyota & Honda",
+"japan",
+"Банк Японии",
+"O'Brien",
+"B.O.J"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto",
+"Япония",
+"Bank  of Japan",
+"#tag",
+"ok_word",
+"Япония",
+"Япония",
+"7",
+"japan"
+],
+"ru": [
+"Токио",
+"Bank  of Japan"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"Kyōto",
+"Япония",
+"Bank of Japan",
+"ok_word",
+"japan"
+],
+"ru": [
+"Токио",
+"Bank of Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"a/b",
+" .Lead. ",
+"Seoul\nKorea",
+"Seoul\nKorea"
+],
+"ru": [
+"日本",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"a/b",
+"",
+"Япония",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"...",
+"JAPAN"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"Lead",
+"Seoul Korea"
+],
+"ru": [
+"日本",
+"Япония",
+"JAPAN"
+]
+}
+},
+{
+"raw": {
+"en": [
+"a/b",
+"японский",
+"B.O.J.",
+"Yen",
+"Токио",
+"—",
+"JAPAN",
+"",
+"a/b",
+"Банк Японии",
+"",
+"Japan",
+"ok_word",
+"#tag"
+],
+"ru": [
+"-",
+"Kyōto",
+"42nd",
+"Toyota & Honda",
+"Toyota & Honda",
+"JAPAN",
+"...",
+"O'Brien",
+"Банк Японии",
+"O'Brien",
+" Tokyo ",
+"O'Brien"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"японский",
+"B.O.J",
+"Yen",
+"Токио",
+"JAPAN",
+"Банк Японии",
+"ok_word"
+],
+"ru": [
+"Kyōto",
+"42nd",
+"Toyota & Honda",
+"JAPAN",
+"O'Brien",
+"Банк Японии",
+"Tokyo"
+]
+}
+},
+{
+"raw": {
+"en": [
+"-",
+"JAPAN",
+"японский",
+"—"
+],
+"ru": [
+"Toyota & Honda",
+" .Lead. ",
+"日本",
+"Toyota & Honda",
+"O'Brien",
+"японский",
+"японский",
+"Ճապոնիա",
+"Toyota & Honda",
+"42nd",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"JAPAN",
+" Tokyo ",
+"AI-chips",
+"Bank  of Japan",
+"Seoul\nKorea"
+]
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"JAPAN",
+"японский"
+],
+"ru": [
+"Japan",
+"Toyota & Honda",
+"Lead",
+"日本",
+"O'Brien",
+"японский",
+"Ճապոնիա",
+"42nd",
+"Tokyo",
+"AI-chips",
+"Bank of Japan",
+"Seoul Korea"
+]
+}
+},
+{
+"raw": {
+"en": "not a list",
+"ru": null
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia"
+],
+"ru": [
+"Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto",
+"...",
+"Kyōto",
+"японский",
+"AI-chips",
+"Япония",
+"日本",
+"Япония",
+" Tokyo ",
+"7",
+"",
+"...",
+"a/b",
+"Ճապոնիա",
+"Japan"
+],
+"ru": [
+"7",
+"AI-chips",
+"ok_word",
+"Токио"
+]
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Kyōto",
+"японский",
+"AI-chips",
+"Япония",
+"日本",
+"Tokyo",
+"Ճապոնիա",
+"Japan"
+],
+"ru": [
+"Japan",
+"AI-chips",
+"ok_word",
+"Токио"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Банк Японии",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Seoul\nKorea",
+"ok_word",
+"Seoul\nKorea",
+"JAPAN",
+"Банк Японии",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Toyota & Honda",
+"Japan",
+"Токио",
+"a/b"
+],
+"ru": [
+"Toyota & Honda",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Seoul\nKorea",
+"Toyota & Honda",
+"Japan",
+"Toyota & Honda",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"42nd",
+"Yen",
+"japan",
+"Japan",
+"7",
+"#tag",
+"японский",
+"JAPAN",
+"#tag",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"a/b",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"japan"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"Банк Японии",
+"Seoul Korea",
+"ok_word",
+"JAPAN",
+"Toyota & Honda",
+"Токио"
+],
+"ru": [
+"Japan",
+"Toyota & Honda",
+"Seoul Korea",
+"42nd",
+"Yen",
+"японский"
+]
+}
+},
+{
+"raw": {
+"en": [
+"-",
+"Ճապոնիա",
+" .Lead. ",
+"Токио",
+"Seoul\nKorea",
+"",
+"#tag",
+"японский",
+"日本",
+"ok_word",
+"7",
+"-",
+"ok_word"
+],
+"ru": [
+"Toyota & Honda",
+"a/b",
+" .Lead. ",
+"...",
+"Yen",
+"ok_word",
+"...",
+"-",
+"#tag",
+"7",
+"AI-chips",
+"Kyōto",
+"Seoul\nKorea",
+"-",
+"B.O.J.",
+"Япония",
+"—",
+"..."
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"Ճապոնիա",
+"Lead",
+"Токио",
+"Seoul Korea",
+"японский",
+"日本",
+"ok_word"
+],
+"ru": [
+"Toyota & Honda",
+"Lead",
+"Yen",
+"ok_word",
+"AI-chips",
+"Kyōto",
+"Seoul Korea",
+"B.O.J",
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"日本",
+"",
+"Yen",
+"Yen",
+"日本",
+" Tokyo ",
+"Банк Японии",
+"Токио",
+"#tag",
+"Bank  of Japan",
+"Банк Японии",
+"Toyota & Honda",
+"ok_word",
+"日本",
+"Kyōto",
+"Bank  of Japan",
+"japan",
+" Tokyo "
+],
+"ru": []
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"日本",
+"Yen",
+"Tokyo",
+"Банк Японии",
+"Токио",
+"Bank of Japan",
+"Toyota & Honda",
+"ok_word",
+"Kyōto"
+],
+"ru": [
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"a/b",
+"O'Brien",
+"JAPAN",
+"日本",
+"#tag"
+],
+"ru": [
+"Ճապոնիա",
+"Seoul\nKorea",
+"...",
+"O'Brien",
+"Токио"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"O'Brien",
+"日本"
+],
+"ru": [
+"Japan",
+"Ճապոնիա",
+"Seoul Korea",
+"O'Brien",
+"Токио"
+]
+}
+},
+{
+"raw": {
+"en": [
+"JAPAN",
+"7",
+"Seoul\nKorea",
+"日本",
+"Kyōto",
+"Банк Японии",
+"#tag",
+"Япония",
+"Seoul\nKorea",
+"Токио",
+"42nd",
+"Bank  of Japan",
+"японский",
+"Japan",
+"",
+"O'Brien"
+],
+"ru": [
+" .Lead. ",
+"-",
+"JAPAN",
+"Yen",
+"Банк Японии",
+"-",
+" .Lead. "
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"JAPAN",
+"Seoul Korea",
+"日本",
+"Kyōto",
+"Банк Японии",
+"Япония",
+"Токио",
+"42nd",
+"Bank of Japan",
+"японский",
+"O'Brien"
+],
+"ru": [
+"Japan",
+"Lead",
+"Yen",
+"Банк Японии"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Toyota & Honda",
+"Япония",
+"japan",
+"Kyōto",
+"42nd",
+"B.O.J.",
+"42nd",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"japan",
+"Токио",
+"7",
+"Japan",
+"ok_word",
+"JAPAN"
+],
+"ru": [
+"a/b",
+"Kyōto",
+"Toyota & Honda",
+"japan"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Toyota & Honda",
+"Япония",
+"Kyōto",
+"42nd",
+"B.O.J",
+"Токио",
+"ok_word"
+],
+"ru": [
+"Япония",
+"Kyōto",
+"Toyota & Honda",
+"japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto",
+"...",
+"AI-chips",
+"a/b",
+"O'Brien",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"a/b",
+"Bank  of Japan",
+" Tokyo ",
+"a/b",
+"42nd",
+"42nd",
+"O'Brien",
+"O'Brien",
+"O'Brien",
+"42nd",
+"a/b",
+"japan",
+"B.O.J."
+],
+"ru": [
+"-",
+"Kyōto",
+"..."
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"Kyōto",
+"AI-chips",
+"O'Brien",
+"Bank of Japan",
+"Tokyo",
+"42nd",
+"japan",
+"B.O.J"
+],
+"ru": [
+"Japan",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"a/b",
+"7",
+"Toyota & Honda",
+"Ճապոնիա",
+"JAPAN",
+"Токио",
+"日本",
+"日本"
+],
+"ru": [
+"7",
+"Toyota & Honda",
+"42nd"
+]
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Toyota & Honda",
+"Ճապոնիա",
+"JAPAN",
+"Токио",
+"日本"
+],
+"ru": [
+"Japan",
+"Toyota & Honda",
+"42nd"
+]
+}
+},
+{
+"raw": {
+"en": [
+"japan",
+"#tag",
+"B.O.J.",
+"Kyōto",
+" Tokyo ",
+"Токио",
+"-",
+"Ճապոնիա",
+"#tag",
+"japan"
+],
+"ru": [
+"O'Brien",
+"...",
+"Япония",
+"...",
+"japan",
+"ok_word",
+" Tokyo ",
+"-",
+"Ճապոնիա",
+"Токио"
+]
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"japan",
+"B.O.J",
+"Kyōto",
+"Tokyo",
+"Токио",
+"Ճապոնիա"
+],
+"ru": [
+"Japan",
+"O'Brien",
+"Япония",
+"ok_word",
+"Tokyo",
+"Ճապոնիա",
+"Токио"
+]
+}
+},
+{
+"raw": {
+"en": [
+"B.O.J."
+],
+"ru": [
+"B.O.J.",
+"Bank  of Japan"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"B.O.J"
+],
+"ru": [
+"Япония",
+"B.O.J",
+"Bank of Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"日本",
+"Банк Японии",
+"Toyota & Honda"
+],
+"ru": [
+"Япония",
+"Toyota & Honda",
+"японский",
+"...",
+"Bank  of Japan",
+"#tag",
+"Yen",
+"...",
+"a/b",
+"-",
+"B.O.J.",
+"a/b"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"日本",
+"Банк Японии",
+"Toyota & Honda"
+],
+"ru": [
+"Япония",
+"Toyota & Honda",
+"японский",
+"Bank of Japan",
+"Yen",
+"B.O.J"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Seoul\nKorea",
+"a/b",
+"Банк Японии",
+"Toyota & Honda",
+"...",
+"Bank  of Japan"
+],
+"ru": [
+"7"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"Seoul Korea",
+"Банк Японии",
+"Toyota & Honda",
+"Bank of Japan"
+],
+"ru": [
+"Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Yen",
+"—",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+" .Lead. ",
+"",
+"B.O.J.",
+"a/b",
+"Ճապոնիա",
+"Банк Японии",
+"日本",
+"JAPAN"
+],
+"ru": [
+"AI-chips",
+"—",
+"日本",
+" Tokyo ",
+"",
+"JAPAN",
+"...",
+"ok_word",
+"7",
+"Japan"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"Yen",
+"Lead",
+"B.O.J",
+"Ճապոնիա",
+"Банк Японии",
+"日本",
+"JAPAN"
+],
+"ru": [
+"Japan",
+"AI-chips",
+"日本",
+"Tokyo",
+"ok_word"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Japan",
+"a/b",
+"7",
+"JAPAN"
+],
+"ru": [
+"ok_word",
+"—",
+"-",
+"Yen",
+"日本",
+"Yen",
+"#tag",
+"42nd",
+"—",
+"日本",
+"Япония",
+"...",
+"Yen",
+"Toyota & Honda",
+"AI-chips",
+"Bank  of Japan",
+"B.O.J."
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan"
+],
+"ru": [
+"ok_word",
+"Yen",
+"日本",
+"42nd",
+"Япония",
+"Toyota & Honda",
+"AI-chips",
+"Bank of Japan",
+"B.O.J"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Seoul\nKorea",
+"B.O.J.",
+"японский",
+" .Lead. ",
+"Банк Японии",
+"-"
+],
+"ru": []
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"Seoul Korea",
+"B.O.J",
+"японский",
+"Lead",
+"Банк Японии"
+],
+"ru": [
+"Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Japan",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Toyota & Honda",
+"B.O.J.",
+"Seoul\nKorea",
+"Kyōto",
+"#tag",
+"B.O.J.",
+"—",
+"a/b",
+"Japan"
+],
+"ru": [
+"japan",
+" .Lead. ",
+"Токио",
+"-",
+"Yen",
+"Yen",
+"AI-chips",
+"JAPAN",
+"日本",
+"Kyōto",
+"42nd",
+"#tag",
+"Yen",
+"Япония",
+"Seoul\nKorea"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"Japan",
+"Toyota & Honda",
+"B.O.J",
+"Seoul Korea",
+"Kyōto"
+],
+"ru": [
+"japan",
+"Lead",
+"Токио",
+"Yen",
+"AI-chips",
+"日本",
+"Kyōto",
+"42nd",
+"Япония",
+"Seoul Korea"
+]
+}
+},
+{
+"raw": {
+"en": [
+"JAPAN",
+"JAPAN",
+"#tag",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"42nd",
+"ok_word",
+"японский",
+"a/b",
+" Tokyo ",
+"42nd",
+"Банк Японии",
+"Toyota & Honda",
+"AI-chips",
+"O'Brien",
+"Japan"
+],
+"ru": []
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"JAPAN",
+"42nd",
+"ok_word",
+"японский",
+"Tokyo",
+"Банк Японии",
+"Toyota & Honda",
+"AI-chips",
+"O'Brien"
+],
+"ru": [
+"Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"...",
+"AI-chips",
+"Банк Японии",
+"#tag",
+"7",
+"ok_word",
+"Kyōto",
+"#tag",
+"JAPAN",
+"O'Brien",
+"—",
+"a/b",
+" .Lead. ",
+"Токио",
+" Tokyo ",
+"Toyota & Honda",
+"Kyōto",
+"ok_word",
+" Tokyo "
+],
+"ru": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"42nd",
+"-",
+"Yen",
+"",
+"Kyōto",
+"—",
+"",
+"Japan",
+" .Lead. ",
+"Yen",
+"Токио",
+"Япония"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"AI-chips",
+"Банк Японии",
+"ok_word",
+"Kyōto",
+"JAPAN",
+"O'Brien",
+"Lead",
+"Токио",
+"Tokyo",
+"Toyota & Honda"
+],
+"ru": [
+"42nd",
+"Yen",
+"Kyōto",
+"Japan",
+"Lead",
+"Токио",
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [],
+"ru": [
+"日本",
+"Bank  of Japan",
+"JAPAN",
+"Yen",
+"Банк Японии",
+"42nd"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan"
+],
+"ru": [
+"Япония",
+"日本",
+"Bank of Japan",
+"JAPAN",
+"Yen",
+"Банк Японии",
+"42nd"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Bank  of Japan",
+"—",
+" Tokyo ",
+"Japan",
+" .Lead. ",
+"Kyōto",
+"Bank  of Japan",
+"...",
+"AI-chips",
+"японский",
+"Toyota & Honda",
+"Toyota & Honda",
+"Токио",
+"Toyota & Honda",
+"japan",
+"ok_word",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"japan",
+"B.O.J.",
+"..."
+],
+"ru": [
+"",
+"a/b",
+" Tokyo ",
+"Япония",
+"42nd",
+"Yen",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"7",
+"Seoul\nKorea",
+"Yen",
+"AI-chips",
+"",
+"O'Brien",
+"...",
+"ok_word",
+"...",
+"a/b",
+"a/b",
+"japan",
+"Toyota & Honda"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"Bank of Japan",
+"Tokyo",
+"Japan",
+"Lead",
+"Kyōto",
+"AI-chips",
+"японский",
+"Toyota & Honda",
+"Токио",
+"ok_word",
+"B.O.J"
+],
+"ru": [
+"Япония",
+"Tokyo",
+"42nd",
+"Yen",
+"Seoul Korea",
+"AI-chips",
+"O'Brien",
+"ok_word",
+"japan",
+"Toyota & Honda"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Bank  of Japan",
+" .Lead. ",
+"ok_word",
+"",
+" .Lead. ",
+" Tokyo ",
+"японский",
+"7",
+"O'Brien",
+"#tag",
+"Seoul\nKorea",
+"B.O.J.",
+"Япония",
+" .Lead. ",
+"JAPAN"
+],
+"ru": [
+" Tokyo ",
+" .Lead. ",
+"Yen",
+"Seoul\nKorea",
+"-"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"Bank of Japan",
+"Lead",
+"ok_word",
+"Tokyo",
+"японский",
+"O'Brien",
+"Seoul Korea",
+"B.O.J",
+"Япония",
+"JAPAN"
+],
+"ru": [
+"Japan",
+"Tokyo",
+"Lead",
+"Yen",
+"Seoul Korea"
+]
+}
+},
+{
+"raw": {
+"en": [
+"AI-chips",
+"JAPAN",
+"7"
+],
+"ru": [
+"",
+"japan",
+"a/b",
+"Toyota & Honda",
+" Tokyo ",
+"",
+"AI-chips",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Seoul\nKorea",
+"日本",
+"Япония",
+"AI-chips",
+" Tokyo ",
+"Ճապոնիա",
+"japan"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"AI-chips"
+],
+"ru": [
+"Япония",
+"japan",
+"Toyota & Honda",
+"Tokyo",
+"AI-chips",
+"Seoul Korea",
+"日本",
+"Ճապոնիա"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Банк Японии"
+],
+"ru": [
+"Toyota & Honda",
+"Токио",
+"—",
+"O'Brien",
+"Kyōto",
+"ok_word",
+"日本",
+"",
+"",
+"japan",
+"...",
+"Kyōto"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"Банк Японии"
+],
+"ru": [
+"Япония",
+"Toyota & Honda",
+"Токио",
+"O'Brien",
+"Kyōto",
+"ok_word",
+"日本",
+"japan"
+]
+}
+},
+{
+"raw": {
+"en": "not a list",
+"ru": null
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [],
+"ru": []
+}
+},
+{
+"raw": {
+"en": [
+"Токио",
+"a/b",
+"Seoul\nKorea"
+],
+"ru": [
+"#tag",
+"Kyōto",
+"Япония",
+"японский",
+"...",
+"7",
+"7",
+"Ճապոնիա",
+"японский",
+"Bank  of Japan",
+"Ճապոնիա",
+"—",
+"B.O.J.",
+"Япония",
+"AI-chips",
+"Seoul\nKorea",
+"Yen",
+"Kyōto",
+"—"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"Токио",
+"Seoul Korea"
+],
+"ru": [
+"Япония",
+"Kyōto",
+"японский",
+"Ճապոնիա",
+"Bank of Japan",
+"B.O.J",
+"AI-chips",
+"Seoul Korea",
+"Yen"
+]
+}
+},
+{
+"raw": {
+"en": [],
+"ru": [
+"#tag",
+"Seoul\nKorea",
+"ok_word",
+"японский",
+"a/b",
+"JAPAN",
+"42nd",
+"Bank  of Japan",
+"#tag"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan"
+],
+"ru": [
+"Seoul Korea",
+"ok_word",
+"японский",
+"JAPAN",
+"42nd",
+"Bank of Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Банк Японии",
+"japan",
+"Bank  of Japan",
+"Seoul\nKorea",
+"Japan",
+"O'Brien",
+"Seoul\nKorea",
+"Kyōto",
+"Japan",
+"Seoul\nKorea",
+"Bank  of Japan"
+],
+"ru": []
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"Банк Японии",
+"Bank of Japan",
+"Seoul Korea",
+"O'Brien",
+"Kyōto"
+],
+"ru": [
+"Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"42nd",
+"Yen",
+"JAPAN",
+"O'Brien",
+"Банк Японии",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Kyōto",
+"japan",
+"Ճապոնիա",
+"JAPAN",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"японский"
+],
+"ru": [
+"japan",
+"日本",
+"AI-chips",
+"a/b",
+" .Lead. ",
+"",
+"7",
+"",
+" Tokyo ",
+"японский",
+"Toyota & Honda",
+"",
+"Япония",
+"Kyōto",
+"a/b",
+"Kyōto",
+"AI-chips"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"42nd",
+"Yen",
+"JAPAN",
+"O'Brien",
+"Банк Японии",
+"Kyōto",
+"Ճապոնիա",
+"японский"
+],
+"ru": [
+"japan",
+"日本",
+"AI-chips",
+"Lead",
+"Tokyo",
+"японский",
+"Toyota & Honda",
+"Япония",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Япония",
+"Япония",
+"#tag",
+"Токио",
+"B.O.J.",
+"Bank  of Japan",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"",
+"42nd",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Toyota & Honda"
+],
+"ru": [
+"Bank  of Japan",
+"japan",
+"JAPAN",
+" Tokyo ",
+" .Lead. ",
+"",
+"B.O.J.",
+"Kyōto"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"Япония",
+"Токио",
+"B.O.J",
+"Bank of Japan",
+"42nd",
+"Toyota & Honda"
+],
+"ru": [
+"Japan",
+"Bank of Japan",
+"Tokyo",
+"Lead",
+"B.O.J",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Ճապոնիա",
+"#tag",
+"Ճապոնիա",
+"Япония",
+"Kyōto",
+"—",
+"...",
+"Банк Японии",
+"japan",
+"Seoul\nKorea",
+"42nd",
+"Япония",
+"#tag",
+"Japan",
+"ok_word"
+],
+"ru": [
+"japan",
+"#tag"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"Ճապոնիա",
+"Япония",
+"Kyōto",
+"Банк Японии",
+"Seoul Korea",
+"42nd",
+"ok_word"
+],
+"ru": [
+"japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto",
+"...",
+"Yen"
+],
+"ru": [
+"#tag",
+"a/b",
+"O'Brien",
+"Japan",
+"Japan",
+"O'Brien",
+"7",
+"Токио",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"AI-chips",
+"Токио",
+"Япония",
+"Seoul\nKorea"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"Kyōto",
+"Yen"
+],
+"ru": [
+"O'Brien",
+"Japan",
+"Токио",
+"AI-chips",
+"Япония",
+"Seoul Korea"
+]
+}
+},
+{
+"raw": {
+"en": [
+"#tag",
+"Seoul\nKorea",
+" .Lead. ",
+"японский",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Toyota & Honda",
+"#tag",
+"japan",
+"Ճապոնիա",
+"",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"7"
+],
+"ru": [
+"AI-chips",
+"japan",
+"JAPAN",
+"-",
+"ok_word",
+"Япония",
+"Yen"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"Seoul Korea",
+"Lead",
+"японский",
+"Toyota & Honda",
+"Ճապոնիա"
+],
+"ru": [
+"Japan",
+"AI-chips",
+"ok_word",
+"Япония",
+"Yen"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Bank  of Japan",
+" Tokyo ",
+"Ճապոնիա",
+"Банк Японии",
+"B.O.J.",
+"Bank  of Japan",
+"AI-chips",
+"B.O.J.",
+"日本",
+" Tokyo ",
+"Yen",
+"Япония",
+"Yen",
+"Seoul\nKorea",
+"Kyōto",
+"Bank  of Japan",
+" Tokyo ",
+"Yen",
+"—"
+],
+"ru": [
+"Токио",
+"AI-chips",
+"7",
+"B.O.J.",
+"Япония",
+"Токио",
+" Tokyo ",
+"Japan",
+"ok_word",
+"Япония",
+"-",
+"—",
+"Токио",
+"Bank  of Japan",
+"Bank  of Japan"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"Bank of Japan",
+"Tokyo",
+"Ճապոնիա",
+"Банк Японии",
+"B.O.J",
+"AI-chips",
+"日本",
+"Yen",
+"Япония",
+"Seoul Korea",
+"Kyōto"
+],
+"ru": [
+"Токио",
+"AI-chips",
+"B.O.J",
+"Япония",
+"Tokyo",
+"Japan",
+"ok_word",
+"Bank of Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"日本",
+"Yen",
+"Toyota & Honda",
+"7",
+"Seoul\nKorea",
+"42nd",
+"Bank  of Japan",
+"a/b"
+],
+"ru": [
+"Япония",
+"",
+" .Lead. ",
+"Kyōto",
+" Tokyo ",
+"",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+]
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"日本",
+"Yen",
+"Toyota & Honda",
+"Seoul Korea",
+"42nd",
+"Bank of Japan"
+],
+"ru": [
+"Japan",
+"Япония",
+"Lead",
+"Kyōto",
+"Tokyo"
+]
+}
+},
+{
+"raw": {
+"en": [],
+"ru": [
+"Ճապոնիա",
+"Bank  of Japan",
+"日本",
+"японский",
+"#tag",
+"...",
+"B.O.J.",
+"#tag",
+"Yen",
+"-",
+"Япония",
+" Tokyo ",
+"42nd",
+"ok_word",
+"#tag",
+"Токио",
+"Kyōto",
+"Yen"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1"
+],
+"ru": [
+"Япония",
+"Ճապոնիա",
+"Bank of Japan",
+"日本",
+"японский",
+"B.O.J",
+"Yen",
+"Tokyo",
+"42nd",
+"ok_word",
+"Токио",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto"
+],
+"ru": [
+"—",
+"ok_word",
+"O'Brien",
+"японский",
+"a/b",
+"—",
+"B.O.J.",
+"-",
+"Toyota & Honda",
+"O'Brien",
+"японский",
+"Токио",
+"Банк Японии",
+" Tokyo ",
+"японский",
+"Bank  of Japan",
+"a/b",
+"-"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Kyōto"
+],
+"ru": [
+"Япония",
+"ok_word",
+"O'Brien",
+"японский",
+"B.O.J",
+"Toyota & Honda",
+"Токио",
+"Банк Японии",
+"Tokyo",
+"Bank of Japan"
+]
+}
+},
+{
+"raw": {
+"en": [],
+"ru": [
+"B.O.J.",
+"Kyōto",
+"Bank  of Japan",
+"Bank  of Japan",
+"a/b",
+"AI-chips",
+"O'Brien",
+"Ճապոնիա",
+"B.O.J."
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia"
+],
+"ru": [
+"Japan",
+"B.O.J",
+"Kyōto",
+"Bank of Japan",
+"AI-chips",
+"O'Brien",
+"Ճապոնիա"
+]
+}
+},
+{
+"raw": {
+"en": [
+"日本",
+" Tokyo ",
+"-",
+"Yen",
+"B.O.J.",
+"7",
+"Yen",
+"...",
+"Japan",
+"...",
+"AI-chips",
+"Япония",
+"Yen"
+],
+"ru": [
+"Kyōto",
+"42nd",
+"Япония",
+"Токио",
+"JAPAN",
+"ok_word",
+"O'Brien"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"日本",
+"Tokyo",
+"Yen",
+"B.O.J",
+"Japan",
+"AI-chips",
+"Япония"
+],
+"ru": [
+"Kyōto",
+"42nd",
+"Япония",
+"Токио",
+"JAPAN",
+"ok_word",
+"O'Brien"
+]
+}
+},
+{
+"raw": {
+"en": [
+" .Lead. ",
+"Seoul\nKorea",
+"японский",
+"Япония",
+"японский",
+"ok_word",
+"",
+"Kyōto",
+"O'Brien",
+"Банк Японии",
+"Ճապոնիա",
+"",
+"japan",
+"Kyōto",
+"",
+"—",
+"#tag"
+],
+"ru": [
+"—",
+"B.O.J.",
+" .Lead. ",
+"7",
+"O'Brien"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"Lead",
+"Seoul Korea",
+"японский",
+"Япония",
+"ok_word",
+"Kyōto",
+"O'Brien",
+"Банк Японии",
+"Ճապոնիա",
+"japan"
+],
+"ru": [
+"Япония",
+"B.O.J",
+"Lead",
+"O'Brien"
+]
+}
+},
+{
+"raw": {
+"en": [
+"...",
+"Bank  of Japan",
+" .Lead. ",
+" .Lead. ",
+"Kyōto",
+"JAPAN",
+"—"
+],
+"ru": [
+"Kyōto",
+"7",
+" Tokyo ",
+" .Lead. ",
+"японский",
+"Япония",
+"Seoul\nKorea",
+"AI-chips",
+"-",
+"japan",
+"B.O.J.",
+"42nd",
+"Japan",
+"Bank  of Japan",
+"Bank  of Japan",
+"O'Brien",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Bank of Japan",
+"Lead",
+"Kyōto"
+],
+"ru": [
+"Япония",
+"Kyōto",
+"Tokyo",
+"Lead",
+"японский",
+"Seoul Korea",
+"AI-chips",
+"japan",
+"B.O.J",
+"42nd",
+"Bank of Japan",
+"O'Brien"
+]
+}
+},
+{
+"raw": {
+"en": [
+"ok_word",
+"Банк Японии",
+"AI-chips",
+"Yen",
+"—",
+"-",
+"Seoul\nKorea"
+],
+"ru": [
+"японский",
+"Yen",
+"...",
+"Япония",
+"Kyōto",
+" .Lead. "
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"ok_word",
+"Банк Японии",
+"AI-chips",
+"Yen",
+"Seoul Korea"
+],
+"ru": [
+"Япония",
+"японский",
+"Yen",
+"Kyōto",
+"Lead"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Япония",
+"японский",
+"a/b",
+"Toyota & Honda",
+"Bank  of Japan",
+"a/b",
+"JAPAN",
+"—",
+"AI-chips",
+"O'Brien",
+"Банк Японии"
+],
+"ru": [
+"7",
+"a/b",
+"Bank  of Japan",
+"",
+"Yen",
+"Toyota & Honda",
+"Kyōto",
+"",
+"японский"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Colombia",
+"Япония",
+"японский",
+"Toyota & Honda",
+"Bank of Japan",
+"JAPAN",
+"AI-chips",
+"O'Brien",
+"Банк Японии"
+],
+"ru": [
+"Япония",
+"Bank of Japan",
+"Yen",
+"Toyota & Honda",
+"Kyōto",
+"японский"
+]
+}
+},
+{
+"raw": {
+"en": [
+"JAPAN",
+"Yen",
+"...",
+"Токио",
+"Ճապոնիա",
+"#tag",
+" Tokyo ",
+"日本",
+"Japan",
+"Kyōto",
+"日本",
+"...",
+"Toyota & Honda",
+"—",
+"JAPAN"
+],
+"ru": [
+"JAPAN",
+"Япония",
+"O'Brien",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"японский",
+"B.O.J.",
+"japan",
+"#tag",
+"japan",
+"Seoul\nKorea"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"JAPAN",
+"Yen",
+"Токио",
+"Ճապոնիա",
+"Tokyo",
+"日本",
+"Kyōto",
+"Toyota & Honda"
+],
+"ru": [
+"JAPAN",
+"Япония",
+"O'Brien",
+"японский",
+"B.O.J",
+"Seoul Korea"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Toyota & Honda",
+"JAPAN",
+"ok_word",
+"Toyota & Honda",
+"AI-chips",
+"日本",
+"ok_word"
+],
+"ru": [
+"Toyota & Honda",
+"AI-chips",
+"Toyota & Honda",
+"ok_word",
+"O'Brien",
+"",
+"Seoul\nKorea",
+"ok_word",
+"42nd",
+"",
+"42nd",
+"a/b",
+"Seoul\nKorea",
+" Tokyo ",
+"AI-chips",
+"Bank  of Japan",
+"-",
+""
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"Toyota & Honda",
+"ok_word",
+"AI-chips",
+"日本"
+],
+"ru": [
+"Japan",
+"Toyota & Honda",
+"AI-chips",
+"ok_word",
+"O'Brien",
+"Seoul Korea",
+"42nd",
+"Tokyo",
+"Bank of Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"ok_word",
+"Seoul\nKorea",
+"Ճապոնիա"
+],
+"ru": [
+"Yen",
+"Япония",
+"日本",
+"AI-chips",
+"Япония",
+"日本",
+"-"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"ok_word",
+"Seoul Korea",
+"Ճապոնիա"
+],
+"ru": [
+"Yen",
+"Япония",
+"日本",
+"AI-chips"
+]
+}
+},
+{
+"raw": {
+"en": [
+"B.O.J.",
+"Toyota & Honda",
+"B.O.J.",
+"ok_word",
+" Tokyo ",
+"7",
+" Tokyo ",
+"-",
+"42nd",
+"Yen",
+"...",
+"...",
+"Япония",
+"Токио",
+" .Lead. ",
+"Kyōto",
+" Tokyo ",
+"—",
+"Yen"
+],
+"ru": [
+"Банк Японии",
+"-",
+"японский",
+"Seoul\nKorea",
+"...",
+"-",
+"...",
+"Japan",
+"Токио",
+"Япония",
+"японский",
+"#tag",
+"Япония",
+"日本",
+"japan",
+"#tag",
+"7",
+"Seoul\nKorea",
+"Yen"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"B.O.J",
+"Toyota & Honda",
+"ok_word",
+"Tokyo",
+"42nd",
+"Yen",
+"Япония",
+"Токио",
+"Lead",
+"Kyōto"
+],
+"ru": [
+"Банк Японии",
+"японский",
+"Seoul Korea",
+"Japan",
+"Токио",
+"Япония",
+"日本",
+"Yen"
+]
+}
+},
+{
+"raw": {
+"en": [
+"日本",
+"Bank  of Japan",
+"Bank  of Japan",
+"Япония",
+"Bank  of Japan",
+"#tag",
+"日本",
+" Tokyo ",
+"Japan",
+"AI-chips",
+"Токио",
+"B.O.J.",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"42nd",
+"Bank  of Japan",
+"#tag",
+"Япония",
+"Токио",
+" Tokyo "
+],
+"ru": [
+"7",
+"JAPAN",
+"Япония",
+"a/b",
+"—",
+"Yen",
+"...",
+"-",
+"...",
+"O'Brien",
+"Japan",
+"японский",
+"—",
+"Ճապոնիա",
+"B.O.J.",
+"Токио",
+"—"
+]
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"日本",
+"Bank of Japan",
+"Япония",
+"Tokyo",
+"Japan",
+"AI-chips",
+"Токио",
+"B.O.J",
+"42nd"
+],
+"ru": [
+"Japan",
+"Япония",
+"Yen",
+"O'Brien",
+"японский",
+"Ճապոնիա",
+"B.O.J",
+"Токио"
+]
+}
+},
+{
+"raw": {
+"en": [
+"JAPAN",
+"—"
+],
+"ru": [
+"7",
+"Bank  of Japan",
+"Токио",
+"Банк Японии",
+"42nd",
+"AI-chips",
+"ok_word",
+"AI-chips",
+"JAPAN",
+"Япония",
+"Bank  of Japan",
+"Toyota & Honda",
+"japan",
+"—",
+"Ճապոնիա",
+"японский",
+"—",
+"JAPAN"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"JAPAN"
+],
+"ru": [
+"Japan",
+"Bank of Japan",
+"Токио",
+"Банк Японии",
+"42nd",
+"AI-chips",
+"ok_word",
+"Япония",
+"Toyota & Honda",
+"Ճապոնիա",
+"японский"
+]
+}
+},
+{
+"raw": {
+"en": "not a list",
+"ru": null
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [],
+"ru": [
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"japan",
+"JAPAN",
+"Япония",
+"Yen",
+" Tokyo "
+],
+"ru": [
+" .Lead. ",
+"日本",
+"",
+"",
+"7",
+" Tokyo ",
+"O'Brien",
+"japan"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"japan",
+"Япония",
+"Yen",
+"Tokyo"
+],
+"ru": [
+"Lead",
+"日本",
+"Tokyo",
+"O'Brien",
+"japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Japan",
+"a/b"
+],
+"ru": [
+"AI-chips",
+"Ճապոնիա",
+" Tokyo ",
+"...",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Seoul\nKorea",
+"Seoul\nKorea",
+"Japan",
+"B.O.J.",
+"Банк Японии",
+"Kyōto"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan"
+],
+"ru": [
+"Япония",
+"AI-chips",
+"Ճապոնիա",
+"Tokyo",
+"Seoul Korea",
+"Japan",
+"B.O.J",
+"Банк Японии",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"#tag",
+" .Lead. ",
+"42nd",
+"Банк Японии",
+"Japan",
+"-",
+"7",
+"",
+"",
+"...",
+"Kyōto",
+"—",
+"Токио",
+"Ճապոնիա",
+"Япония",
+"Токио",
+"Toyota & Honda",
+"Япония",
+"Япония",
+"Ճապոնիա"
+],
+"ru": [
+"7",
+"JAPAN",
+"7",
+"japan"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Lead",
+"42nd",
+"Банк Японии",
+"Japan",
+"Kyōto",
+"Токио",
+"Ճապոնիա",
+"Япония",
+"Toyota & Honda"
+],
+"ru": [
+"Япония",
+"JAPAN"
+]
+}
+},
+{
+"raw": {
+"en": [
+"B.O.J.",
+"Bank  of Japan",
+" Tokyo ",
+"Toyota & Honda",
+"Банк Японии",
+"...",
+"...",
+"42nd",
+"Toyota & Honda",
+"Bank  of Japan"
+],
+"ru": [
+"Ճապոնիա",
+"日本",
+"Seoul\nKorea",
+"#tag",
+"Bank  of Japan",
+"японский",
+"Japan",
+"japan",
+"Kyōto"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"B.O.J",
+"Bank of Japan",
+"Tokyo",
+"Toyota & Honda",
+"Банк Японии",
+"42nd"
+],
+"ru": [
+"Japan",
+"Ճապոնիա",
+"日本",
+"Seoul Korea",
+"Bank of Japan",
+"японский",
+"Kyōto"
+]
+}
+},
+{
+"raw": {
+"en": [
+"",
+"O'Brien",
+"-",
+"#tag",
+"Kyōto",
+"...",
+"Toyota & Honda",
+"japan",
+"",
+" Tokyo ",
+"a/b",
+"日本",
+"Seoul\nKorea"
+],
+"ru": [
+"японский",
+"Bank  of Japan",
+"—",
+" .Lead. ",
+"...",
+"...",
+"a/b",
+"Seoul\nKorea",
+"Toyota & Honda",
+"Токио",
+"42nd",
+"japan",
+" .Lead. ",
+"Yen",
+"Япония",
+"AI-chips"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia",
+"O'Brien",
+"Kyōto",
+"Toyota & Honda",
+"japan",
+"Tokyo",
+"日本",
+"Seoul Korea"
+],
+"ru": [
+"японский",
+"Bank of Japan",
+"Lead",
+"Seoul Korea",
+"Toyota & Honda",
+"Токио",
+"42nd",
+"japan",
+"Yen",
+"Япония",
+"AI-chips"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Bank  of Japan",
+"B.O.J.",
+"Kyōto",
+"O'Brien",
+"Seoul\nKorea",
+"B.O.J."
+],
+"ru": [
+"-",
+"Toyota & Honda",
+"JAPAN"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"Bank of Japan",
+"B.O.J",
+"Kyōto",
+"O'Brien",
+"Seoul Korea"
+],
+"ru": [
+"Japan",
+"Toyota & Honda"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Japan",
+"Yen",
+"B.O.J.",
+"японский",
+"Япония",
+"日本",
+"japan",
+"42nd",
+"ok_word",
+" .Lead. ",
+"B.O.J.",
+" .Lead. ",
+"—",
+"",
+"7",
+"Банк Японии",
+"-",
+"Bank  of Japan",
+"JAPAN"
+],
+"ru": [
+"B.O.J.",
+"AI-chips",
+"B.O.J.",
+"...",
+"Ճապոնիա",
+"Токио",
+"AI-chips",
+"-",
+"ok_word",
+"Toyota & Honda",
+"Japan",
+"a/b"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Formula 1",
+"Japan",
+"Yen",
+"B.O.J",
+"японский",
+"Япония",
+"日本",
+"42nd",
+"ok_word",
+"Lead",
+"Банк Японии",
+"Bank of Japan"
+],
+"ru": [
+"Japan",
+"B.O.J",
+"AI-chips",
+"Ճապոնիա",
+"Токио",
+"ok_word",
+"Toyota & Honda"
+]
+}
+},
+{
+"raw": {
+"en": [
+"JAPAN"
+],
+"ru": [
+"japan",
+"JAPAN",
+"日本",
+"42nd",
+"7",
+"7",
+"японский",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"ok_word",
+"Seoul\nKorea",
+" .Lead. ",
+"—",
+"7",
+"AI-chips",
+"...",
+"ok_word",
+"Ճապոնիա",
+"Toyota & Honda"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"JAPAN"
+],
+"ru": [
+"Япония",
+"japan",
+"日本",
+"42nd",
+"японский",
+"ok_word",
+"Seoul Korea",
+"Lead",
+"AI-chips",
+"Ճապոնիա",
+"Toyota & Honda"
+]
+}
+},
+{
+"raw": {
+"en": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Bank  of Japan",
+"—",
+"japan",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Токио"
+],
+"ru": [
+"JAPAN",
+"a/b",
+"ok_word",
+"B.O.J.",
+"Банк Японии",
+"日本",
+"#tag",
+"japan"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"Bank of Japan",
+"Токио"
+],
+"ru": [
+"JAPAN",
+"ok_word",
+"B.O.J",
+"Банк Японии",
+"日本"
+]
+}
+},
+{
+"raw": {
+"en": [
+"7",
+"日本",
+"AI-chips",
+"Toyota & Honda"
+],
+"ru": []
+},
+"names": {
+"en": "",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"日本",
+"AI-chips",
+"Toyota & Honda"
+],
+"ru": [
+"Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Токио",
+"—",
+"...",
+"Банк Японии",
+"-",
+"42nd"
+],
+"ru": [
+"Япония",
+"—",
+"O'Brien",
+"...",
+"Seoul\nKorea",
+"японский",
+"Япония",
+"Банк Японии",
+" .Lead. ",
+"японский",
+"Япония",
+"日本",
+"ok_word",
+"Токио",
+"B.O.J.",
+"-",
+" Tokyo ",
+"42nd",
+"a/b"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"Токио",
+"Банк Японии",
+"42nd"
+],
+"ru": [
+"Япония",
+"O'Brien",
+"Seoul Korea",
+"японский",
+"Банк Японии",
+"Lead",
+"日本",
+"ok_word",
+"Токио",
+"B.O.J",
+"Tokyo",
+"42nd"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Kyōto"
+],
+"ru": [
+"Toyota & Honda",
+"42nd",
+"B.O.J.",
+" .Lead. ",
+"Kyōto",
+"Seoul\nKorea",
+"#tag",
+"Toyota & Honda",
+"Japan",
+"Yen",
+"Seoul\nKorea",
+"Yen",
+"日本",
+"Япония",
+"日本",
+"B.O.J.",
+"Банк Японии",
+"Ճապոնիա",
+"7"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Colombia",
+"Kyōto"
+],
+"ru": [
+"Japan",
+"Toyota & Honda",
+"42nd",
+"B.O.J",
+"Lead",
+"Kyōto",
+"Seoul Korea",
+"Yen",
+"日本",
+"Япония",
+"Банк Японии",
+"Ճապոնիա"
+]
+}
+},
+{
+"raw": {
+"en": [
+"7",
+"-",
+"Toyota & Honda",
+"a/b",
+"7",
+"-",
+"Yen",
+"Bank  of Japan",
+"-",
+"ok_word",
+"Банк Японии",
+"日本"
+],
+"ru": [
+"O'Brien",
+"Yen"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"Toyota & Honda",
+"Yen",
+"Bank of Japan",
+"ok_word",
+"Банк Японии",
+"日本"
+],
+"ru": [
+"O'Brien",
+"Yen"
+]
+}
+},
+{
+"raw": {
+"en": [
+"japan",
+"Ճապոնիա",
+"42nd",
+"a/b",
+"42nd",
+"-",
+"...",
+"42nd",
+"",
+"Банк Японии"
+],
+"ru": [
+"O'Brien",
+"",
+"Токио",
+"Bank  of Japan",
+"Toyota & Honda",
+"japan",
+"...",
+"Japan",
+"7"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1",
+"japan",
+"Ճապոնիա",
+"42nd",
+"Банк Японии"
+],
+"ru": [
+"Япония",
+"O'Brien",
+"Токио",
+"Bank of Japan",
+"Toyota & Honda",
+"japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+"a/b",
+" Tokyo ",
+"japan",
+"Yen",
+"ok_word",
+"#tag",
+"japan",
+"японский",
+"日本",
+"Toyota & Honda",
+"Bank  of Japan",
+"—",
+"японский",
+"японский",
+"...",
+"-"
+],
+"ru": [
+"—",
+"Банк Японии",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"japan",
+" Tokyo ",
+"ok_word",
+"японский",
+"—",
+"Toyota & Honda"
+]
+},
+"names": {
+"en": "Japan",
+"ru": ""
+},
+"want": {
+"en": [
+"Japan",
+"Tokyo",
+"Yen",
+"ok_word",
+"японский",
+"日本",
+"Toyota & Honda",
+"Bank of Japan"
+],
+"ru": [
+"Банк Японии",
+"japan",
+"Tokyo",
+"ok_word",
+"японский",
+"Toyota & Honda"
+]
+}
+},
+{
+"raw": {
+"en": [
+"-",
+"Kyōto",
+"Банк Японии",
+"—",
+"JAPAN",
+" .Lead. ",
+"#tag",
+"Ճապոնիա",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"",
+"...",
+"",
+"42nd",
+"日本",
+""
+],
+"ru": [
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"JAPAN",
+"Japan",
+"Токио",
+"Bank  of Japan",
+"Токио",
+"JAPAN",
+"O'Brien",
+"...",
+"42nd",
+"7"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"Kyōto",
+"Банк Японии",
+"JAPAN",
+"Lead",
+"Ճապոնիա",
+"42nd",
+"日本"
+],
+"ru": [
+"JAPAN",
+"Токио",
+"Bank of Japan",
+"O'Brien",
+"42nd"
+]
+}
+},
+{
+"raw": {
+"en": [
+"#tag",
+"японский",
+"Банк Японии",
+"Seoul\nKorea",
+"ok_word",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"-",
+" .Lead. ",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"AI-chips",
+"Bank  of Japan",
+"AI-chips"
+],
+"ru": [
+"ok_word",
+"Kyōto",
+"Bank  of Japan"
+]
+},
+"names": {
+"en": "",
+"ru": ""
+},
+"want": {
+"en": [
+"японский",
+"Банк Японии",
+"Seoul Korea",
+"ok_word",
+"Lead",
+"AI-chips",
+"Bank of Japan"
+],
+"ru": [
+"ok_word",
+"Kyōto",
+"Bank of Japan"
+]
+}
+},
+{
+"raw": {
+"en": [
+" .Lead. ",
+"O'Brien",
+"a/b",
+"—",
+"Токио",
+"japan"
+],
+"ru": []
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Lead",
+"O'Brien",
+"Токио"
+],
+"ru": [
+"Япония"
+]
+}
+},
+{
+"raw": {
+"en": [
+"Япония",
+"—",
+"JAPAN",
+"-",
+"O'Brien",
+"—",
+"Токио",
+" Tokyo ",
+"",
+"Ճապոնիա",
+"a/b",
+"—",
+""
+],
+"ru": [
+"#tag",
+" Tokyo ",
+"#tag",
+" .Lead. ",
+"Yen",
+"Токио"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Japan",
+"Япония",
+"O'Brien",
+"Токио",
+"Tokyo",
+"Ճապոնիա"
+],
+"ru": [
+"Япония",
+"Tokyo",
+"Lead",
+"Yen",
+"Токио"
+]
+}
+},
+{
+"raw": {
+"en": [
+"AI-chips",
+"Bank  of Japan"
+],
+"ru": [
+"#tag",
+"—",
+"JAPAN",
+"японский",
+"Токио",
+"-",
+"Банк Японии"
+]
+},
+"names": {
+"en": "Japan",
+"ru": "Japan"
+},
+"want": {
+"en": [
+"Japan",
+"AI-chips",
+"Bank of Japan"
+],
+"ru": [
+"Japan",
+"японский",
+"Токио",
+"Банк Японии"
+]
+}
+},
+{
+"raw": {
+"en": [],
+"ru": [
+"Japan",
+"Seoul\nKorea",
+"#tag",
+"Токио",
+"42nd",
+"-",
+"Япония",
+"Япония",
+"7",
+"日本",
+"Japan"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"Formula 1"
+],
+"ru": [
+"Япония",
+"Japan",
+"Seoul Korea",
+"Токио",
+"42nd",
+"日本"
+]
+}
+},
+{
+"raw": {
+"en": [
+" .Lead. ",
+"42nd",
+"O'Brien",
+"-",
+" Tokyo ",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"-"
+],
+"ru": [
+"7",
+"",
+"Seoul\nKorea",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Банк Японии",
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+"Bank  of Japan",
+" Tokyo ",
+"japan",
+"日本",
+"O'Brien",
+"японский",
+"Kyōto",
+"B.O.J.",
+"Yen"
+]
+},
+"names": {
+"en": "Formula 1",
+"ru": ""
+},
+"want": {
+"en": [
+"Formula 1",
+"Lead",
+"42nd",
+"O'Brien",
+"Tokyo"
+],
+"ru": [
+"Seoul Korea",
+"Банк Японии",
+"Bank of Japan",
+"Tokyo",
+"japan",
+"日本",
+"O'Brien",
+"японский",
+"Kyōto",
+"B.O.J",
+"Yen"
+]
+}
+},
+{
+"raw": {
+"en": [],
+"ru": [
+"#tag",
+"—",
+"7",
+"ok_word"
+]
+},
+"names": {
+"en": "Colombia",
+"ru": ""
+},
+"want": {
+"en": [
+"Colombia"
+],
+"ru": [
+"ok_word"
+]
+}
+},
+{
+"raw": {
+"en": [
+"japan",
+"Bank  of Japan",
+"a/b",
+"ok_word",
+"Япония",
+"Japan",
+"",
+"...",
+"O'Brien",
+"B.O.J.",
+"Yen",
+"японский",
+"Банк Японии",
+"Ճապոնիա",
+"ok_word"
+],
+"ru": [
+"JAPAN"
+]
+},
+"names": {
+"en": "",
+"ru": "Япония"
+},
+"want": {
+"en": [
+"japan",
+"Bank of Japan",
+"ok_word",
+"Япония",
+"O'Brien",
+"B.O.J",
+"Yen",
+"японский",
+"Банк Японии",
+"Ճապոնիա"
+],
+"ru": [
+"Япония",
+"JAPAN"
+]
+}
+}
+]

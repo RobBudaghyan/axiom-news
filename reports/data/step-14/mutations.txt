@@ -1,0 +1,26 @@
+CAUGHT: keyword rule: a custom tag always allowed (job/custom.py): FAILED (failures=12)
+CAUGHT: keyword rule: substring instead of whole word (job/custom.py): FAILED (failures=2)
+CAUGHT: keyword rule: case-sensitive (job/custom.py): FAILED (failures=2)
+CAUGHT: pass 1 ignores the rule for new stories (job/run.py): FAILED (failures=1)
+CAUGHT: pass 1 ignores the rule in merges (job/run.py): FAILED (failures=1)
+CAUGHT: editor ignores the rule (job/editor.py): FAILED (failures=3)
+CAUGHT: fallback keeps the boosted topic score (job/editor.py): FAILED (failures=2)
+CAUGHT: fallback: the custom tag stays the main topic (job/custom.py): FAILED (failures=5)
+CAUGHT: the hourly sweep never runs (job/run.py): FAILED (failures=1)
+CAUGHT: backfill never runs in the job (job/run.py): FAILED (errors=1)
+CAUGHT: backfill without the recent headlines (job/custom.py): FAILED (failures=1)
+CAUGHT: backfill does not try the next provider (job/custom.py): FAILED (failures=1)
+CAUGHT: backfill: the topic's own name not first (job/custom.py): FAILED (failures=4)
+CAUGHT: glossary spelling off for Google headlines (job/custom.py): FAILED (failures=1)
+CAUGHT: glossary spelling off for the editor (job/editor.py): FAILED (failures=1)
+CAUGHT: glossary: Takaichi entry gone (config/glossary.yaml): FAILED (failures=4, errors=1)
+CAUGHT: editor prompt: non-event line gone (prompts/editor.md): FAILED (failures=1)
+CAUGHT: Worker: keywords not saved with a new topic (worker/src/custom.js): 1
+CAUGHT: Worker: too few keywords still saved (worker/src/custom.js): 1
+CAUGHT: Worker: keyword cleaning differs from the job (no dedupe) (worker/src/custom.js): 1
+CAUGHT: Worker: the check prompt does not ask for keywords (worker/src/custom.js): 2
+CAUGHT: Worker: the Settings button back under digests (worker/src/cron.js): 7
+CAUGHT: Worker: an em dash in a Russian digest text (config/i18n/ru.json): 10
+CAUGHT: Worker: length limit ignored (worker/src/digest.js): 9
+
+24 of 24 caught

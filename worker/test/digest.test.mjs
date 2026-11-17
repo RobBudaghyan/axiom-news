@@ -420,6 +420,6 @@ describe("planDigest", () => {
     assert.equal(plan.stories.length, 1);
     assert.equal(plan.nextAt, yerevan(20));
     assert.match(plan.text, /^<p><b>Good afternoon, Sam<\/b> · 1 story in the last 24 hours<\/p><table bordered><tr><th align="center">🇦🇲 Armenia<\/th><\/tr><\/table><p>🇦🇲 <b>Armenia passes/);
-    assert.equal(plan.button, "⚙️ Settings");
+    assert.equal(plan.button, undefined);
   });
 });

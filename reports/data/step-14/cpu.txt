@@ -1,0 +1,30 @@
+== before run 1
+live layout: rich
+planDigest, 40 candidates, en: 275 microseconds
+planDigest, 40 candidates, ru: 250 microseconds
+cron tick: 8 due readers (live layout rich): 4.42 ms
+== after run 1
+live layout: rich
+planDigest, 40 candidates, en: 250 microseconds
+planDigest, 40 candidates, ru: 244 microseconds
+cron tick: 8 due readers (live layout rich): 4.28 ms
+== before run 2
+live layout: rich
+planDigest, 40 candidates, en: 269 microseconds
+planDigest, 40 candidates, ru: 259 microseconds
+cron tick: 8 due readers (live layout rich): 5.20 ms
+== after run 2
+live layout: rich
+planDigest, 40 candidates, en: 259 microseconds
+planDigest, 40 candidates, ru: 272 microseconds
+cron tick: 8 due readers (live layout rich): 4.95 ms
+== before run 3
+live layout: rich
+planDigest, 40 candidates, en: 256 microseconds
+planDigest, 40 candidates, ru: 250 microseconds
+cron tick: 8 due readers (live layout rich): 4.99 ms
+== after run 3
+live layout: rich
+planDigest, 40 candidates, en: 262 microseconds
+planDigest, 40 candidates, ru: 256 microseconds
+cron tick: 8 due readers (live layout rich): 4.53 ms

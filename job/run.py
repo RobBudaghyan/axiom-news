@@ -80,6 +80,7 @@ class RunStats:
     custom: "custom.SearchStats | None" = None
     links: "custom.ResolveStats | None" = None
     custom_deleted: int | None = None
+    custom_unkeyed: int = 0          # Step 14: stories the keyword rule took off a custom topic this run
     custom_errors: list[str] = field(default_factory=list)   # written to `errors` as component 'custom'
     guard: dict | None = None
     translate_delayed: bool = False
@@ -141,6 +142,7 @@ class Job:
         self.ai_topics = list(self.topics)
         self.topic_order = list(self.main_order)
         self.custom_topics: list[custom.CustomTopic] = []
+        self.rule = custom.KeywordRule([])     # Step 14: the keyword rule (set with the custom topics)
         self.custom_enabled = custom_enabled
         self.custom_cfg = custom_cfg
         self.gnews_fetcher = gnews_fetcher
@@ -227,7 +229,7 @@ class Job:
         since = int(now - self.s.existing_window_h * 3600)
         return self.db.query(
             "SELECT id, summary, topics, importance, best_url, best_source, best_tier, "
-            "best_published_at FROM stories WHERE updated_at >= ? AND merged_into IS NULL "
+            "best_published_at, headline, description FROM stories WHERE updated_at >= ? AND merged_into IS NULL "
             "ORDER BY updated_at DESC LIMIT ?",
             [since, limit])
 
@@ -362,13 +364,15 @@ class Job:
         inserts = []
         for s in new_stories:
             items = [by_id[i] for i in s.item_ids]
-            summary = s.summary or ai.clean_summary(best_item(items)["title"])
+            summary = custom.spell_names(s.summary or ai.clean_summary(best_item(items)["title"]))
             best = best_item(items, summary)
+            # Step 14: a custom tag only with one of its keywords in the summary (job/custom.py)
+            tags = self.rule.tags(list(s.topics), summary)
             inserts.append((
                 "INSERT INTO stories (summary, topics, importance, best_url, best_source, best_tier, "
                 "best_published_at, source_count, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?) "
                 "RETURNING id",
-                [summary, json.dumps(s.topics), s.importance, best["url"], best["source_name"],
+                [summary, json.dumps(tags), s.importance, best["url"], best["source_name"],
                  best["tier"], best["published_at"], len(items), now, now]))
         merge_stmts, item_updates = [], []
         old_items = self.old_best_items(merges, existing_by_id)
@@ -376,7 +380,10 @@ class Job:
             old = existing_by_id[story_id]
             items = [by_id[i] for o in outs for i in o.item_ids]
             tags = set(json.loads(old["topics"])) | {t for o in outs for t in o.topics}
-            summary = next((o.summary for o in outs if o.summary), old["summary"])
+            summary = custom.spell_names(next((o.summary for o in outs if o.summary), old["summary"]))
+            # Step 14: the new summary or the story's current headline and description
+            tags = set(self.rule.tags(sorted(tags), "\n".join(
+                [summary, old.get("headline") or "", old.get("description") or ""])))
             importance = max([old["importance"], *(o.importance for o in outs)])
             cand = best_item(items, summary)
             # The old link is scored like a new one (Step 7): an English title that matches the
@@ -498,6 +505,28 @@ class Job:
         floor = self._custom_cfg().get("editor_floor") if self.custom_topics else None
         self.ai_topics = list(self.topics) + [{**t.as_topic(), "floor": floor} for t in self.custom_topics]
         self.topic_order = self.main_order + [t.tag for t in self.custom_topics]
+        self.rule = custom.KeywordRule(self.ai_topics)
+
+    def run_keywords(self, stats: RunStats) -> None:
+        """Step 14: match keywords for custom topics that have none yet (one AI call a topic)."""
+        try:
+            done = custom.backfill_keywords(
+                self.db, self.plans, on_call=lambda p, ok, n, res, err, kind: self._log_call(p, ok, n, res, err, kind=kind))
+            if done:
+                self.log(f"custom topics: keywords written for {', '.join(done)}")
+        except Exception as exc:
+            stats.custom_errors.append(f"custom topics: keywords failed: {type(exc).__name__}: {exc}")
+
+    def run_enforce(self, now: int, stats: RunStats) -> None:
+        """Step 14: the keyword rule over the digest window (stories written before it, or before
+        their topic had keywords)."""
+        try:
+            changed = custom.enforce(self.db, self.rule, now)
+            stats.custom_unkeyed = len(changed)
+            if changed:
+                self.log(f"custom topics: keyword rule took {len(changed)} stories off a custom topic")
+        except Exception as exc:
+            stats.custom_errors.append(f"custom topics: keyword rule failed: {type(exc).__name__}: {exc}")
 
     def run_custom_search(self, now: int, stats: RunStats) -> None:
         if not self.custom_topics:
@@ -590,6 +619,7 @@ class Job:
         try:
             self.sync_topics()
             if self.custom_enabled:
+                self.run_keywords(stats)
                 self.load_custom(stats)
             since = self.lookback_since(now)
             results = self.fetcher(self.sources, now)
@@ -619,6 +649,7 @@ class Job:
                 stats.ai_errors.append(f"dupes: {type(exc).__name__}: {exc}")
             stats.editor = self.run_editor(now, stats) if self.editor_enabled else None
             if self.custom_enabled:
+                self.run_enforce(now, stats)
                 self.run_resolve_links(now, stats)
             state = self.check_guard(now, stats)
             if self.translate_enabled and state["level"] >= 2:

@@ -335,7 +335,7 @@ describe("admin data and actions", () => {
     assert.equal(fetchMock.calls[0].body.chat_id, OWNER);
     assert.match(fetchMock.calls[0].url, /\/sendRichMessage$/);   // Step 11: the same rich message as the cron's
     assert.match(fetchMock.calls[0].body.rich_message.html, /strike reported/);
-    assert.equal(fetchMock.calls[0].body.reply_markup.inline_keyboard[0][0].text, "⚙️ Settings");
+    assert.equal(fetchMock.calls[0].body.reply_markup, undefined);   // Step 14: no button under digests
     assert.deepEqual(sqlite.prepare("SELECT story_id FROM sent").all().map((x) => x.story_id), [a]);
     const again = await call(binding, "/api/admin/digest", { init: await initFor(OWNER), body: {} });
     assert.match(again.body.message, /nothing new/);   // never twice

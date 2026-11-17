@@ -29,7 +29,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
-from job import ai
+from job import ai, custom
 from job.config import ROOT, Settings
 from job.d1 import in_list_statements
 
@@ -148,6 +148,8 @@ READER_BOOST = """
      topic score 8). But most items on a busy subject are routine and keep a topic score of 5 or
      less, even when a follower might glance at them. 6 or more means a follower would be sorry
      to miss it: about 2 to 5 events per reader topic on a normal day, rarely more.
+     A non-event (a situation that "remains", "continues" or is "unchanged", such as "China's
+     naval presence near Japan remains normalized") is 3 or 4 for a reader topic too, never 6.
      Give a reader topic as the event's topic only when the event is mainly ABOUT that subject.
      "Canada's prime minister visits China" or "the US limits China's access to AI chips" are
      not Japan, even when a Japanese outlet reports them; a regional summit is not about each
@@ -493,8 +495,9 @@ def validate_events(data: dict, by_id: dict[int, dict], items: dict[int, list[di
             if bad:
                 ev.dropped.append(f"description S{leader['id']}: {', '.join(bad)}")
                 desc = ""
-            ev.headline = head or None
-            ev.description = desc or None
+            # Step 14: glossary spellings, after the fact guard (the articles may spell it the other way)
+            ev.headline = custom.spell_names(head) or None
+            ev.description = custom.spell_names(desc) or None
             ev.emojis = clean_emojis(str(raw.get("emojis") or "")) or None
         events.append(ev)
     return events, [i for i in by_id if i not in used]
@@ -503,10 +506,13 @@ def validate_events(data: dict, by_id: dict[int, dict], items: dict[int, list[di
 # ---------------------------------------------------------------- writes
 
 def write_statements(events: list[Event], by_id: dict[int, dict], topic_order: list[str],
-                     now: int) -> tuple[list, int]:
+                     now: int, rule: "custom.KeywordRule | None" = None) -> tuple[list, int]:
     """D1 statements for the validated events; returns (statements, stories merged away).
     The oldest story of a group is kept (the one most likely already sent). Users who received
-    a merged-away story get a `sent` row for the kept one, so they never get the event twice."""
+    a merged-away story get a `sent` row for the kept one, so they never get the event twice.
+    Step 14, the keyword rule (job/custom.py): a custom tag stays, and can be the main topic, only
+    with one of its keywords in the headline or description written here; otherwise the main topic
+    falls back to the best main topic and the topic score to the score (no boost)."""
     stmts, merged = [], 0
     for ev in events:
         group = [by_id[i] for i in ev.ids]
@@ -524,6 +530,12 @@ def write_statements(events: list[Event], by_id: dict[int, dict], topic_order: l
         emo = ev.emojis or leader.get("emojis")
         ts = ev.topic_score if ev.topic_score is not None else leader.get("topic_score")
         ts = None if ts is None else max(int(ts), ev.score)
+        if rule:
+            kept, main, moved = rule.apply([t for t in topic_order if t in tagset], main,
+                                           custom.story_text(head, desc, leader.get("summary")))
+            tagset = set(kept)
+            if moved:
+                ts = ev.score
         # scored_at: the first time the editor scored this story (kept on later re-edits). Digests
         # look at it, so a story scored after a digest went out still reaches the next one.
         stmts.append((
@@ -593,6 +605,7 @@ class Editor:
         # Step 13: a custom topic carries its own candidate floor (like Armenia's 3)
         self.floors = {**(self.s.editor_topic_floor or {}),
                        **{t["tag"]: t["floor"] for t in topics if t.get("floor") is not None}}
+        self.rule = custom.KeywordRule(topics)    # Step 14
 
     def pool(self, now: int, min_importance: int | None = None, hours: float = 24) -> list[dict]:
         """Stories of the last `hours` the editor may see. The floor is editor_min_importance,
@@ -666,7 +679,7 @@ class Editor:
             if got is None:
                 continue
             events, left_out = got
-            stmts, merged = write_statements(events, by_id, self.topic_order, now)
+            stmts, merged = write_statements(events, by_id, self.topic_order, now, self.rule)
             if not self.dry_run:
                 self.db.batch(stmts)
             out.candidates += len(cands)

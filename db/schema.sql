@@ -199,6 +199,7 @@ CREATE TABLE IF NOT EXISTS custom_topics (
   definition   TEXT NOT NULL,                        -- one English sentence for the AI passes
   queries      TEXT NOT NULL,                        -- JSON [{q, ed}] (ed: a key of config/custom_topics.json editions)
   boost_max    INTEGER NOT NULL DEFAULT 0,           -- 0..2, like topic_boost_max
+  keywords     TEXT,                                 -- Step 14: JSON {en: [...], ru: [...]}, 5-15 each; a story keeps this tag only if one is in its English headline or description
   aliases      TEXT NOT NULL DEFAULT '[]',           -- JSON: normalised inputs that mapped here
   created_by   INTEGER,
   created_at   INTEGER NOT NULL,

@@ -86,7 +86,7 @@ describe("planDigest: untranslated stories are held", () => {
   test("nothing qualifies: the quiet note in Russian; an English reader never holds anything", () => {
     const quiet = planDigest(user(), [], TOPICS, yerevan(20, 5), CONFIG);
     assert.equal(quiet.text, "<p><b>Добрый вечер, Rob</b> · Спокойный период: с 14:00 ничего важного по вашим темам.</p>");
-    assert.equal(quiet.button, "⚙️ Настройки");
+    assert.equal(quiet.button, undefined);
     assert.equal(quiet.fallback, null);
     assert.deepEqual(quiet.heldIds, []);
     const weak = planDigest(user(), [story("Weak", ["politics"], 4)], TOPICS, yerevan(20, 5), CONFIG);
