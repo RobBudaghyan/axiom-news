@@ -16,16 +16,19 @@ bot @axiom_news_bot at the end.
   a strict final score 1-10, the main topic, a one-sentence headline, a 1-3 sentence description
   (only facts from the articles) and 2-3 emojis. If it fails, digests use the first-pass data.
   Step 8: it also gives a **topic score** (for followers of the main topic: the score plus a
-  boost, capped in code at 0 for Politics and Wars & Conflicts, 1 for the two wars, 2 for Armenia
-  and Russia), sees up to 90 new stories per call, and makes a second call on a backlog.
+  boost, capped in code at 0 for Politics & Conflicts, 1 for Economy & Markets and the two wars, 2
+  for Armenia and Russia), sees up to 90 new stories per call, and makes a second call on a backlog.
 - **Digests per user** at chosen local times (on the hour, 06:00-23:00, 1 to 5; defaults
   09:00/14:00/20:00), time zone from the phone. **No fixed count (Step 8):** a story is in if its
   final score is 7+, or its main topic is followed and its topic score is 6+ and above its final
-  score. No maximum, no topic cap: the digest is ONE message of at most 3,900 characters (never
+  score. **Off means off (Step 15, owner):** a story whose main topic is one of the six main topics
+  and switched off for the reader never reaches them; otherwise one tag they have on is enough. No maximum, no topic cap: the digest is ONE message of at most 3,900 characters (never
   folded behind "Show more"); if longer, the lowest-ranked stories are cut, keeping each followed
   topic's best story. Building a digest is a database filter with no AI. The same story is never sent
   to a user twice; if nothing qualifies, a short "quiet period" note.
-- **Topics:** Politics, Wars & Conflicts, Armenia, Russia, Iran war, Ukraine war.
+- **Topics (Step 15):** Politics & Conflicts (Политика и конфликты; the merge of Politics and Wars &
+  Conflicts), Economy & Markets (Экономика и рынки, new), Armenia, Russia, Iran War (Война в Иране),
+  Ukraine War (Война на Украине). All six on for a new user.
 - **Reader languages (Step 9):** English (default) and Russian; Armenian and French are built and
   approved on quality but hidden (`config/languages.json`). Everything a reader sees is in their
   language: digest text, greeting, headings, quiet note, bot replies, menu button, commands, the
@@ -80,6 +83,18 @@ bot @axiom_news_bot at the end.
   checks wait ("try again in a few minutes"). Every Gemini model refusing, or the limit reached:
   translations wait too. Pass 1 and the editor never wait. Admin shows it; the owner gets one
   alert a day.
+- **Help and Feedback (Step 15):** "Help" and "Send feedback" rows at the bottom of Settings, each
+  its own page with Telegram's back button. Help: eight short sections and a privacy note, every
+  language. Feedback: 1,000 characters, 10 a reader a day, forwarded to the owner with name and id,
+  listed in Admin. /help points to Settings.
+- **Welcome (Step 15):** /start from a new user: a short welcome with "Set up". The first Mini App
+  open: a 3-step setup (topics, times, done), skippable; then one sample digest of the last 24 h by
+  the normal rules. One reminder the next day (10:00 to 20:00 their time) for someone who never
+  opened the app. Readers imported from the old bot (`import-users.mjs`, `imported = 1`) get none
+  of it; they get the announcement.
+- **Announcements (Step 15):** Admin, owner only. Written in English; AI translates into every
+  language the audience reads (all users or one language); checked, editable, previewed to the
+  owner, then sent 25 per 5-minute tick, each user claimed before sending (never twice).
 - **Not in v1:** paid features, ads, user-added sources, instant alerts, channels.
 - **Digest format (owner, Step 11: design "E5f").** A Telegram **rich message**
   (`sendRichMessage`). One line: "**Good evening, Sam** · 6 stories since 2 PM" (12-hour time in
@@ -136,7 +151,7 @@ bot @axiom_news_bot at the end.
 | 2026-11-14 | Brand red #b1161c; dark mode uses #d0232a fills and #ff6b6b text; Admin failures orange, warnings amber (owner) | #b1161c is only 2.4:1 on a dark cell |
 | 2026-11-14 | Step 6 coverage experiment (Google News search feeds) runs in **shadow mode only**: last step of `hourly.yml`, D1 keys only, `continue-on-error`, own tables `shadow_items`/`shadow_runs` (owner: measure first) | must not change digests, the pool or users; no AI keys = no AI calls possible |
 | 2026-11-14 | Google News searches use `when:2h`; English and Russian editions; Armenian script only "Երևան" | a 1-day window returns the day's 100 most relevant, ~10% of them recent; Armenian-language results are near zero and the hy/AM edition answers in Russian |
-| 2026-11-14 | Google News shadow step **paused** (`enabled: false` in `config/gnews_queries.yaml`); code and `shadow_*` tables kept; the step exits before any D1 or Google request (Step 7) | the gap was our own feeds, not Google; kept for custom topics with no curated feed (e.g. "Colombia") |
+| 2026-11-14 | Google News shadow step **paused** (Step 7); removed in Step 15 | the gap was our own feeds, not Google; kept for custom topics with no curated feed (e.g. "Colombia") |
 | 2026-11-14 | Eight Armenian feeds added: News.am Russian, Factor.am, Aravot, 168.am, A1+, ArmInfo English, CivilNet and Hetq in Armenian (Step 7) | the pool had only News.am English (1-2 items/h) of the big outlets; News.am Russian/Armenian publish 5-10/h. Armenpress, 1lurer, Panorama, Shamshyan: no RSS; Arka, Mediamax blocked from GitHub; Lragir unreachable |
 | 2026-11-14 | Russian over Armenian-script editions of the same outlet (News.am) | 86% the same articles; Armenian script costs 164 Gemini tokens per item, Russian 89, English 70 |
 | 2026-11-14 | Per-feed cap `max_items` in `sources.yaml` (default 8): News.am Russian and 168.am 20, A1+ 12, Factor.am and Aravot 10; what a cap cuts is logged and kept in `feed_health.cut` | busiest Armenian feeds publish up to ~14 items in an hour; the 8 cap is still right for the rest |
@@ -194,6 +209,14 @@ bot @axiom_news_bot at the end.
 | 2026-11-17 | Glossary: the first `en` form is ours, the others are replaced in Google headlines, pass-1 summaries and editor texts (after the fact guard); Takaichi/Takaiti and Sanae added in four languages | "Takaiti" came from the editor reading a Russian article (Такаити), not from a Google item |
 | 2026-11-17 | Editor prompt: non-events ("remains", "continues", "unchanged") are 3-4, never 6, for main and reader topics | "China's naval presence near Japan remains normalized" got a topic score of 6 |
 | 2026-11-17 | Digest design E5f kept; the "⚙️ Settings" button under digests and quiet notes removed (owner, Step 14) | the owner rejected four plain layouts and four heading variants; the menu button and /settings still open the Mini App |
+| 2026-11-17 | Politics and Wars & Conflicts merged into `politics_conflicts`; `economy_markets` added; boost caps 0 and 1 (owner, Step 15) | owner; a migration, not a rename (tags are never renamed): every follower of either old topic follows the new one, every user got Economy & Markets |
+| 2026-11-17 | Off means off = "main topic off, never" (owner, Step 15) | the old gate already needed one tag the reader has on, but war stories carry the broad tag too, so Iran War off still let Iran stories in |
+| 2026-11-17 | No new economy feeds (Step 15) | FT, WSJ, Bloomberg, Economist, CNBC, MarketWatch and four Russian business dailies were already in: about 440 items in 48 h; the gap was the prompt calling market news "not news" |
+| 2026-11-17 | Fact guard: ordinary words at a sentence start pass (`config/common_words.txt`, built from the pool), party names anywhere (Step 15) | 62 of 166 drops in 30 days were only "Severe", "Recent", "Hundreds", "Republican" and the like |
+| 2026-11-17 | Keywords refreshed after 7 days and on Admin's button; a weak answer keeps the old ones (Step 15) | Step 14 risk: keywords were written once and went stale |
+| 2026-11-17 | Welcome, sample digest and reminder are claimed in D1 before anything is sent (`UPDATE ... RETURNING`) (Step 15) | exactly once even with a double tap or two overlapping cron ticks |
+| 2026-11-17 | Announcements: one AI call for all languages, the owner previews exactly what is sent, a send row per user written before the message (Step 15) | the owner sees every version; a retry never sends twice |
+| 2026-11-17 | Google News shadow leftovers removed (Step 15) | paused since Step 7; `job/gnews.py` kept for custom topics |
 | 2026-11-15 | pre_checkout_query is answered from the invoice payload alone (no database read) | Telegram cancels the payment after 10 s; measured a few microseconds |
 | 2026-11-15 | Table `tips`: user, amount, Telegram charge id (UNIQUE), time, refunded time; nothing else | the owner's rule; the charge id is needed for refunds, and UNIQUE makes a repeated update count once |
 | 2026-11-15 | /paysupport forwards the user's note to the owner; /terms states the tip terms; the owner refunds from Admin after a confirm (refundStarPayment) | Telegram's rules for bots that take Stars |
@@ -271,18 +294,22 @@ bot @axiom_news_bot at the end.
   design unchanged after two rounds of previews; the Settings button under digests removed.
   Python 172 tests, Worker 225; 24 of 24 rules broken on purpose caught. Details in
   `reports/step-14-relevance-and-design.md`.
+- **Step 15 done (2026-11-17): the final product before the switch.** Politics & Conflicts and Economy &
+  Markets, off means off, the fact guard fix, weekly keywords, Help and Send feedback, the welcome
+  flow with setup and sample digest, one reminder, the announcement tool, the import script, and a
+  cleanup (one-off scripts archived, the shadow experiment removed, D1 test data deleted). Python 164
+  tests, Worker 261, click-through 136; 52 rules broken on purpose, all caught. Details in
+  `reports/step-15-final-product.md`.
 - Two users: the owner and one more (Russian).
 
 ## Next step
-Watch the custom topics for a few days with the keyword rule (Step 14): stories under each custom
-section (Admin: Custom topics), real stories the rule drops because no keyword fits (seen for
-Australia: Chalmers, New South Wales), and Google's 429s. Keywords are written once and never
-refreshed, so a new leader is missed until someone resets the topic's keywords. Then switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, which also sets
-the Russian command list, then invite the first users). Watch the first real Russian reader's
-digests: the first hourly run after they choose Russian translates about 70 stories in one call;
-Admin's "Languages" section shows calls, tokens, stories held for translation and full English
-fallbacks. Admin's "Tips" section shows Stars received. Before that: a few days of real digests with the Step 8 rules, and a look at the
-fold on an iPhone if any user has one.
+Switch to the real bot @axiom_news_bot: new token and webhook, `setup-bot.mjs` (also the Russian
+command list), then import the old bot's readers (`worker/scripts/import-users.mjs users.json
+--dry`, then without `--dry`; they get no welcome) and send them an announcement from Admin. Before
+that: the owner's check of Help and Feedback and the simulated welcome (sent 2026-11-17), his emoji
+pick for the two new topics, and a few days of real digests with the new topics. Watch: Economy &
+Markets volume, Armenia-only readers (about 12 stories a digest in the 48 h replay, from the Step 8
+topic path), keyword refreshes in Admin, and the first live reminder and sample digest.
 
 ## Known issues / open questions
 - **Translations (Step 9):** the code checks catch numbers, names, alphabets and accents, not a
@@ -325,18 +352,14 @@ fold on an iPhone if any user has one.
 - **The Mini App design (Step 12)** was checked in headless Edge with a stand-in for Telegram and
   chosen by the owner on the TEST bot; not seen on an iPhone. Telegram clients older than 6.9 keep
   their own header colour (the page itself is unchanged).
-- **Step 6 shadow step (paused):** if switched on again, its D1 rows (about 15-20k written a day) are not in
-  Admin's "D1 today", and Google News feeds are for "personal, non-commercial use" per their own
-  notice (owner to decide before adoption). Its old rows stay in `shadow_items` (its prune only runs
-  when it is on).
+- **Google News** feeds are for "personal, non-commercial use" per their own notice; custom topics use
+  them (owner accepted, Step 13). The Step 6 shadow experiment was removed in Step 15.
 - **Tips (Step 10):** the per-chat command list of a reader who picked Russian before Step 10 keeps
   the old two commands until they change language again (none exist yet). Telegram may ask the bot
   to handle disputes; Stars received can be withdrawn only through Telegram's own rules (not set up).
-- **Keyword rule (Step 14):** keywords come from the AI once and are not refreshed. They can be dated
-  (the first Japan answer had Kishida and Ishiba; the backfill now shows recent headlines) and
-  incomplete: 4 real Australian stories of 24 h (all scored 2-4, none in a digest) were dropped for
-  lack of a keyword. Resetting a topic's `keywords` to NULL makes the next run ask again (one call).
-  There is no Admin editor for keywords yet.
+- **Keyword rule (Step 14):** keywords can still miss a real story (4 Australian stories in 24 h had no
+  keyword). Since Step 15 they are refreshed weekly with recent headlines and on Admin's "Keywords"
+  button; there is still no hand editor.
 - **Custom topics (Step 13):** Google answers 429 to about one search a run from GitHub since there
   are 2 topics (10 searches); the searches not yet started then wait an hour. Both topics still fill
   their cap of 8 most runs; with more topics, try fewer parallel requests (`search_workers` 8). If

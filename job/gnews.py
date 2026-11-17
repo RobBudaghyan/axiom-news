@@ -1,4 +1,4 @@
-"""Google News RSS search feeds (Step 6 coverage experiment, shadow mode only).
+"""Google News RSS search feeds, the source of custom topics (Step 13; first tried in Step 6).
 
     https://news.google.com/rss/search?q=<query> when:2h&hl=en-US&gl=US&ceid=US:en
 
@@ -21,34 +21,16 @@ import re
 import time
 import unicodedata
 from dataclasses import dataclass
-from pathlib import Path
-from urllib.parse import quote, quote_plus, urlsplit
+from urllib.parse import quote, quote_plus
 
 import feedparser
 import requests
-import yaml
 
 from job.fetch import USER_AGENT, clean_text
 
-ROOT = Path(__file__).resolve().parent.parent
 SEARCH = "https://news.google.com/rss/search"
 ARTICLE = "https://news.google.com/rss/articles/"
 BATCH = "https://news.google.com/_/DotsSplashUi/data/batchexecute"
-
-
-def load_queries(path: Path = ROOT / "config" / "gnews_queries.yaml") -> dict:
-    return yaml.safe_load(path.read_text(encoding="utf-8"))
-
-
-def query_list(cfg: dict) -> list[dict]:
-    """Flatten the config into [{key, topic, q, ed, hl, gl, ceid}], one per query."""
-    out = []
-    for topic, queries in (cfg.get("topics") or {}).items():
-        for n, q in enumerate(queries or []):
-            ed = cfg["editions"][q["ed"]]
-            out.append({"key": f"{topic}:{q['ed']}:{n}", "topic": topic, "q": q["q"], "ed": q["ed"],
-                        **ed})
-    return out
 
 
 def search_url(q: str, hl: str, gl: str, ceid: str, window: str | None = None) -> str:
@@ -146,11 +128,6 @@ def resolve(link: str, *, session: requests.Session | None = None, timeout: floa
     if not str(url).startswith("http"):
         raise ValueError("no URL in answer")
     return url
-
-
-def domain(url: str) -> str:
-    host = urlsplit(url or "").netloc.lower()
-    return host[4:] if host.startswith("www.") else host
 
 
 # ---------------------------------------------------------------- title similarity (no AI)

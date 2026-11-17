@@ -1,11 +1,20 @@
 # Architecture
 
-Status: designed in Step 1, updated in Steps 2-6 (2026-11-14). Running in the cloud since
+Status: designed in Step 1, updated through Step 15 (2026-11-17). Running in the cloud since
 Step 3, still on the TEST bot: the hourly job on GitHub Actions (public repo
 `RobBudaghyan/axiom-news`), the D1 database, and the Worker `axiom-news` (webhook, digest cron,
-hourly job trigger, alerts, and since Step 4 the Mini App and its API, §4a). Since Step 5 every
-hourly run also makes an **editor** AI call that merges, strictly scores and writes the stories
-digests show (§3, step 6).
+hourly job trigger, alerts, the Mini App and its API, §4a). Every hourly run also makes an
+**editor** AI call that merges, strictly scores and writes the stories digests show (§3, step 6).
+Readers can add their own topics (§4c); Step 15 added the topics Politics & Conflicts and Economy
+& Markets, "off means off", Help and Feedback, the welcome flow and the owner's announcements (§4d).
+
+**For a newcomer, in one paragraph:** a Python job runs every hour on GitHub's servers. It reads
+the news feeds, asks an AI to group and score the articles, asks a second "editor" AI call to
+judge the best stories and write their text, translates what may be sent, and writes everything
+to a Cloudflare D1 database. A Cloudflare Worker (JavaScript) is the bot: it answers Telegram,
+serves the settings Mini App and, every 5 minutes, builds each due reader's digest with a database
+query and no AI. The two halves share only data files (`config/`, `prompts/`, `db/schema.sql`) and
+test fixtures (`tests/fixtures/`), so the job and the Worker apply the same rules.
 
 ## 1. Components
 
@@ -14,7 +23,8 @@ digests show (§3, step 6).
                                                 ▼    skips if a run started < 45 min ago)
  ┌─────────────────────────────────────────────────────────┐
  │ HOURLY JOB  (Python, ~2 min, then the VM is gone)        │
- │ 1. fetch ~115 RSS feeds (config/sources.yaml)            │
+ │ 1. fetch ~120 RSS feeds (config/sources.yaml) + Google   │
+ │    News searches for readers' own topics (Step 13)       │
  │ 2. drop already-seen URLs, keep <= 8 newest per feed (*) │
  │ 3. AI pass, usually ONE call: group, tag, score, write   │
  │    (Gemini -> 2nd Gemini model -> Groq -> else pending)  │
@@ -32,8 +42,9 @@ digests show (§3, step 6).
                 │ D1 binding (inside Cloudflare)
  ┌──────────────┴──────────────────────────────────────────┐
  │ CLOUDFLARE WORKER  (JavaScript, one Worker)              │
- │ • POST /telegram   bot webhook (/start, /settings, help) │
+ │ • POST /telegram   bot webhook (/start, /settings, /help)│
  │ • cron */5 min     send due digests (<= 8 users/tick),   │
+ │                    one reminder, announcement batches,   │
  │                    check job health, alert the owner     │
  │ • cron 7 * * * *   start the hourly GitHub job           │
  │ • /app/            Mini App files (static assets, free)  │
@@ -230,7 +241,7 @@ Pashinyan said the two countries are close to full normalisation.
   "Show more". Telegram counts the text after HTML parsing, in UTF-16 units. Per Telegram's June
   2026 update only the new bot *rich messages* fold ("Show More" after about 8,000 characters);
   plain `sendMessage` text stays capped at 4,096. The owner's phone test (2026-11-15, Android, 5
-  labelled messages of 1,400 to 3,993 characters, `scripts/fold-test.mjs`): none folded. The limit
+  labelled messages of 1,400 to 3,993 characters, `worker/scripts/archive/fold-test.mjs`): none folded. The limit
   is **3,900**, under the 4,096 cap; iPhone and desktop were not checked. Too long: stories are cut
   (see Digests above), the two-message split is gone.
 - **The quiet note:** "Good afternoon, Sam. Quiet period: nothing important on your topics since
@@ -242,44 +253,21 @@ Pashinyan said the two countries are close to full normalisation.
 a story gains new sources after it was sent, it is still never sent again; an editor merge copies
 `sent` rows to the story it keeps.
 
-## 3a. Coverage experiment: Google News search feeds (Step 6, shadow mode only)
+## 3a. Google News searches (Step 6 experiment, Step 13 custom topics)
 
-**Paused since 2026-11-14 (Step 7):** `enabled: false` in `config/gnews_queries.yaml`; the
-workflow step stays but `job.shadow` exits before any D1 or Google request. Code and tables are
-kept for later custom topics that have no curated feed.
-
-Goal under test: fewer blind spots (medium-importance news, especially Armenia) by adding
-per-topic Google News RSS searches (`news.google.com/rss/search?q=...`) to the curated feeds.
-**Step 6 only measures.** Nothing it collects reaches the live story pool, the AI passes, digests,
-the Admin tab or users.
-
-- **Queries:** `config/gnews_queries.yaml`, 30 queries over the 6 topics (English and Russian
-  editions; one Armenian-script query), each with `when:2h`. Edit there, no code change.
-- **Where it runs:** the last step of `hourly.yml`, after the real job has finished, as its own
-  process with **only the D1 secrets** (no AI keys, so it cannot make an AI call),
-  `continue-on-error`, a 2-minute cap, a 15-second fetch budget, and an exit code that is always 0.
-  It skips if a shadow run happened in the last 40 minutes.
-- **What it does** (`job/shadow.py`, `job/gnews.py`): fetch all queries (8 in parallel; about
-  0.5-3 s), keep one row per Google article id, drop ids already stored, then compare each new
-  title with the live `items` titles of the last 24 h (read only) and the shadow titles of the last
-  24 h: rarity-weighted shared words over the smaller title (`title_dup_threshold` 0.5). The scores
-  are stored, so the threshold can be re-judged later. Writes go only to `shadow_items` and
-  `shadow_runs` (§5); errors to `shadow_runs.error`, never to `errors`. Rows older than 3 days are
-  pruned by the step itself.
-- **What Google gives:** titles only ("Headline - Outlet", no snippet), the outlet's name and
-  site, a date, and a `news.google.com/rss/articles/<id>` link. The real article URL needs two
-  more requests per link (`gnews.resolve`, 0.3-1.7 s), so a production design would resolve only
-  stories that reach a digest. The feed's copyright notice restricts use to "a personal feed
-  reader for personal, non-commercial use" (Step 6 report).
-- **One-off AI measurement:** `scripts/shadow_ai_sample.py` runs the real first pass over a
-  sample of shadow items in an in-memory sandbox, with the live pool's last 24 h of stories copied
-  in as existing stories. Nothing is written to D1.
+Step 6 tried Google News RSS searches for the main topics in a "shadow" step that measured
+without changing anything; Step 7 paused it (the gap was our own feeds). Step 13 reused the
+parser for readers' own topics (`job/gnews.py`, §4c). Step 15 removed the shadow leftovers:
+`job/shadow.py`, its tests, the probe workflow and scripts, `config/gnews_queries.yaml`, and the
+D1 tables `shadow_items` (1,494 rows) and `shadow_runs` (3). The parser tests are in
+`tests/test_gnews.py`. Google's feed notice limits use to "a personal feed reader for personal,
+non-commercial use" (Step 6 report); the owner accepted that risk for custom topics.
 
 ## 4. Time zones and scheduling
 
 - Each user has `timezone` (IANA name, e.g. `Asia/Yerevan`) and `digest_times`, a list of 1 to 5
   local `"HH:00"` values **on the hour between 06:00 and 23:00** (Step 5; half hours before that
-  were moved to the nearest hour, 08:30 -> 09:00, by `worker/scripts/migrate-times.mjs`). The
+  were moved to the nearest hour, 08:30 -> 09:00, by `worker/scripts/archive/migrate-times.mjs`). The
   defaults are 09:00, 14:00 and 20:00.
 - **Auto-detection:** every time the user opens the Mini App, it sends
   `Intl.DateTimeFormat().resolvedOptions().timeZone` from their device (`POST /api/open`).
@@ -513,11 +501,51 @@ the icon centring (28 checks since Step 5).
   topic, recent checks, blocked names) with Delete and Block (Block also puts every name and alias on
   `topic_blocks`), and an "AI budget, today" section.
 
+## 4d. Step 15: topics, off means off, Help and Feedback, welcome, announcements
+
+- **Main topics.** `politics_conflicts` (Politics & Conflicts) replaced `politics` and
+  `wars_conflicts`; `economy_markets` (Economy & Markets) is new; Armenia, Russia, Iran War and
+  Ukraine War are unchanged. Tags are never renamed, so the merge was a migration
+  (`worker/scripts/migrate-topics.mjs`: every follower of either old topic follows the new one,
+  every user got Economy & Markets, stories re-tagged). Boost caps: 0 for Politics & Conflicts, 1
+  for Economy & Markets (`config/digest.json`). Pass 1 no longer calls economy news "not news";
+  the editor has 4/6/8 examples for it and a rule that culture and sport stay below 6 on the main
+  topics.
+- **Off means off.** A story whose main topic is one of the six main topics and switched off for
+  the reader never reaches them, even through another tag they have on; otherwise one tag they
+  have on is enough. The six tags are `topic_specificity` in `config/digest.json`. The rule is in
+  three places that must agree: `CANDIDATE_SQL` and `qualifies()` in `worker/src/digest.js`, and
+  `ELIGIBLE_SQL` and `qualifies()` in `job/translate.py`; `tests/fixtures/eligible_cases.json`
+  (five readers with topics off) checks all of them and the SQL on sqlite.
+- **Fact guard.** A capitalised word at the start of a sentence passes if it is an ordinary word
+  (`config/common_words.txt`, words the pool writes in lower case); party names pass anywhere;
+  real names and numbers are still checked. Custom topic keywords are refreshed after 7 days
+  (`custom_topics.keywords_at`) and on Admin's "Keywords" button.
+- **Help and Send feedback.** Two rows at the bottom of Settings open their own pages with
+  Telegram's back button. Feedback (`feedback` table, `worker/src/feedback.js`): 1,000 characters,
+  10 a reader in 24 h, forwarded to the owner with the reader's name and id; Admin lists the
+  latest 20. `/help` points to Settings.
+- **Welcome flow** (`worker/src/onboard.js`). /start from a new user: a short welcome in their
+  Telegram language with "Set up". The first Mini App open shows a 3-step setup (topics, times,
+  done), skippable; Done or Skip calls `POST /api/onboard` once (`users.onboarded_at`, claimed with
+  `UPDATE ... WHERE onboarded_at IS NULL RETURNING`), which sends a labelled sample digest of the
+  last 24 hours by the normal rules (its stories are marked sent). A user who never opened the app
+  gets one reminder after 24 h, between 10:00 and 20:00 their time (`reminded_at`, claimed before
+  sending). Users imported from the old bot (`worker/scripts/import-users.mjs`, `imported = 1`)
+  get none of this.
+- **Announcements** (`worker/src/announce.js`, Admin, owner only). The owner writes in English
+  and picks all users or one language; one AI call (the Worker's topic-check chain) translates it
+  into every language the audience reads, and each version is checked (no dash, the same numbers,
+  the alphabet, сводка, на Украине). The owner edits, previews (every version comes to him), then
+  sends; Send needs a preview of exactly that text. The 5-minute cron sends 25 a tick; each user
+  is claimed in `announcement_sends` before the message goes out, so a retry or two overlapping
+  ticks never send twice.
+
 ## 5. Database (Cloudflare D1, SQLite)
 
 | Table | Key columns | Notes |
 |---|---|---|
-| `users` | `id` (Telegram user id) PK, `first_name`, `language` (Telegram's code), `lang` (the reader's language, Step 9), `timezone`, `tz_detected` 0/1 (2 = hand-picked before Step 5), `digest_times` JSON (on the hour, 06:00-23:00), `topics` JSON, `paused`, `blocked`, `created_at`, `last_digest_at`, `next_digest_at`; `max_stories` and `format` are unused since Step 5 (kept so no old code can break on them) | index on `next_digest_at`. `blocked=1` when Telegram returns 403 because the user blocked the bot. `tz_detected`: 0 default, 1 device (§4) |
+| `users` | `id` (Telegram user id) PK, `first_name`, `language` (Telegram's code), `lang` (the reader's language, Step 9), `timezone`, `tz_detected` 0/1 (2 = hand-picked before Step 5), `digest_times` JSON (on the hour, 06:00-23:00), `topics` JSON, `paused`, `blocked`, `created_at`, `last_digest_at`, `next_digest_at`; Step 15: `onboarded_at`, `opened_at`, `reminded_at`, `imported`; `max_stories` and `format` are unused since Step 5 (kept so no old code can break on them) | index on `next_digest_at`. `blocked=1` when Telegram returns 403 because the user blocked the bot. `tz_detected`: 0 default, 1 device (§4) |
 | `topics` | `tag` PK, `label_en`, `emoji`, `sort`, `is_default` | synced from `config/topics.yaml` by the job, read by the Worker; other languages' labels are in `config/i18n` (Step 9) |
 | `story_translations` | (`story_id`, `lang`) PK, `ok`, `headline`, `description`, `src` (the English text it was made from), `note` (why a check rejected it), `provider`, `created_at` | Step 9 (§4b); written by the job, read with the digest candidates; pruned with stories |
 | `items` | `id` PK, `url_hash` UNIQUE, `source_key`, `source_name`, `tier`, `url`, `title`, `snippet`, `published_at`, `fetched_at`, `status` (pending/done/dropped/expired), `story_id` | index on `status`; pruned after 7 days |
@@ -528,10 +556,11 @@ the icon centring (28 checks since Step 5).
 | `ai_calls` | `id`, `at`, `provider`, `model`, `ok`, `input_tokens`, `output_tokens`, `ms`, `error`, `kind` (Step 5: `batch` or `editor`; Step 9: `translate_<lang>`; Step 13: `topic_check`, written by the Worker), `code` (Step 13: HTTP status of a failed call) | Admin tab: AI usage, per language; index on `at` for the AI budget guard (Step 13) |
 | `custom_topics`, `custom_follows`, `topic_blocks`, `topic_checks`, `custom_topic_days` | Step 13 (§4c): shared custom topics (`tag` c<id>, names in four languages, emoji, definition, searches, boost cap, aliases, `searched_at`, `orphan_since`), who follows what, blocked names, every add request (outcome, whether the AI was called), and per topic per day what the searches did | `custom_topics.id` is AUTOINCREMENT (a deleted topic's tag is never reused); `items.headline_only`/`hint_topic` and `stories.link_state` were added too |
 | `errors` | `id`, `at`, `component` (job/worker), `message` | Admin tab: recent errors |
-| `shadow_items`, `shadow_runs` | Step 6 experiment only (§3a): one row per Google News article (title, outlet, link, date, query, title-similarity to the live pool and to earlier shadow rows) and one row per shadow run (counts per topic, HTTP codes, errors, its own D1 rows) | read by nobody but the experiment's scripts; pruned after 3 days (runs after 30) |
+| `feedback` | `id`, `user_id`, `at`, `text`, `forwarded` | Step 15: readers' feedback (§4d); kept until the user is deleted |
+| `announcements`, `announcement_sends` | Step 15 (§4d): one row per announcement (`status` draft/previewed/sending/done/cancelled, `audience`, `texts` JSON per language, `notes`); one row per announcement and user (`ok` NULL while sending, 1 sent, 0 failed) | the send row is written before the message, so nothing goes out twice |
 
-`sent` is the only per-user table besides `users`, and deleting a user must also delete their `sent`
-rows (lesson 16 in LESSONS.md). Indexes are kept to a minimum because every index update counts as
+Deleting a user must also delete their rows in the other per-user tables: `sent` (lesson 16 in
+LESSONS.md), `digest_holds`, `custom_follows`, `feedback` and `announcement_sends`. Indexes are kept to a minimum because every index update counts as
 an extra "row written" on D1. Times are INTEGER unix seconds. The schema is `db/schema.sql`,
 applied with `scripts/apply_schema.py` through the REST API; columns added to existing tables
 are listed in that script's `MIGRATIONS` (an `ALTER TABLE` whose "duplicate column" error is
@@ -659,35 +688,30 @@ Worker's health alert would report missing runs.
 ## 9. Repository layout
 
 ```
-config/topics.yaml, config/sources.yaml   shared data (Step 1)
-config/digest.json                        digest settings read by the Worker and the job (Step 3)
-prompts/story_batch.md                    first AI prompt template (Step 1)
-prompts/editor.md                         editor prompt: merge, strict score, headline, description, emojis (Step 5)
+config/topics.yaml, config/sources.yaml   the six main topics; the feeds
+config/digest.json                        digest rules read by the Worker and the job (bars, caps, topic order)
+config/custom_topics.json, ai_budget.json readers' own topics; the AI budget guard
+config/languages.json, i18n/, glossary.yaml   reader languages, every text a reader sees, name spellings
+config/common_words.txt                   ordinary English words for the fact guard (Step 15)
+config/line_emoji.json, candidates/       fallback line emojis; tested feeds not added
+prompts/story_batch.md, editor.md, translate.md   the AI prompts
 db/schema.sql                             D1 tables (applied via REST: scripts/apply_schema.py)
-job/                                      Python hourly job: config, fetch, ai, d1, dupes, editor, run
-tests/                                    unittest suite for the job and the dupes grouping
-scripts/check_feeds.py                    feed health check (--all re-tests disabled feeds)
-scripts/ai_probe.py                       real batch-size test for Gemini and Groq (Step 2)
-scripts/set_secrets.py, scan_secrets.py   copy .env to GitHub/Worker secrets; pre-push secret scan
-worker/src/                               the Worker: index, bot, cron, digest, health, github, telegram, db,
-                                          and (Step 4) api, auth, settings, admin
-worker/public/app/                        the Mini App: index.html, app.css, app.js; public/_headers (cache)
+job/                                      the hourly job: run, fetch, ai, d1, dupes, editor, translate, custom, gnews, guard, config
+tests/, tests/fixtures/                   job tests; fixtures shared with the Worker tests
+scripts/                                  apply_schema, set_secrets, scan_secrets, check_feeds, make_*_cases (fixtures),
+                                          make_common_words, ai_probe, discover_feeds, source_dry_run, armenia_* (dev tools)
+scripts/archive/                          one-off scripts of past steps (measurements, replays, mutation checks)
+worker/src/                               the Worker: index, bot, api, auth, settings, digest, cron, custom, guard, onboard,
+                                          announce, feedback, tips, admin, health, github, telegram, i18n, db
+worker/public/app/                        the Mini App: index.html, app.css, app.js, i18n.js (generated); _headers
 worker/test/                              node:test suite (node:sqlite with the real schema)
-worker/scripts/digest-cli.mjs             dev tool: owner's digest / previews / length / CPU checks
-worker/scripts/stamp-app.mjs              content hashes for the Mini App files (run by npm run deploy)
-worker/scripts/setup-bot.mjs              chat menu button + command list (once per bot)
-worker/scripts/dev-server.mjs, dev/       local Mini App preview with demo data and a Telegram stand-in
-worker/scripts/screenshots.mjs, ui-check.mjs   headless Edge screenshots and click-through check
-worker/scripts/api-check.mjs              checks the live API (signed with the token in .env)
-worker/scripts/migrate-times.mjs          Step 5, once: half-hour digest times -> nearest hour
+worker/scripts/                           digest-cli (previews, replays), stamp-app, setup-bot, dev-server + dev/,
+                                          ui-check, screenshots, api-check, migrate-topics, import-users
+worker/scripts/archive/                   one-off scripts of past steps (previews, CPU checks, migrations that ran)
 worker/wrangler.toml                      Worker config: D1 binding, crons, assets, vars (no secrets)
 docs/screenshots/                         the Mini App at 390 px, light and dark (demo data)
-.github/workflows/                        hourly.yml, backup-schedule.yml, check-feeds.yml, gnews-probe.yml
-config/gnews_queries.yaml                 Step 6: Google News search terms (shadow experiment, paused)
-config/candidates/armenia.yaml            Step 7: tested Armenian feeds (good ones are in sources.yaml)
-scripts/armenia_stats.py, discover_feeds.py, source_dry_run.py, armenia_grouping.py   Step 7 tools
-job/gnews.py, job/shadow.py               Step 6: Google News fetch/parse/resolve; shadow collection
-scripts/gnews_probe.py, shadow_ai_sample.py   Step 6: feasibility probe; sandbox AI sample
+.github/workflows/                        hourly.yml, backup-schedule.yml, check-feeds.yml
+reports/, reports/data/                   one report per step, with its numbers and screenshots
 ```
 
 ## 10. Known design risks

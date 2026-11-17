@@ -33,7 +33,7 @@ export function allowedTimes(cfg = CONFIG) {
 
 // Step 5 migration: an older time like "08:30" goes to the nearest allowed hour (a half hour
 // rounds up: 08:30 -> 09:00), clamped to the allowed range; duplicates removed, sorted, at most
-// max_times. Used by scripts/migrate-times.mjs.
+// max_times. Used by scripts/archive/migrate-times.mjs (Step 5).
 export function roundTimes(times, cfg = CONFIG) {
   const L = cfg.settings_limits;
   const lo = minutes(L.earliest), hi = minutes(L.latest), step = L.step_minutes;
