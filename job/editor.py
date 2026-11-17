@@ -214,6 +214,8 @@ I US U.S UN EU UK NATO American Americans European Europeans Western President P
 Ministry Foreign Defence Defense Secretary Parliament Government State States United Department
 Army Navy Air Force Forces Court Supreme Council Security Republic Federation National Office
 General Affairs Committee Agency Union
+Republican Republicans Democrat Democrats Democratic Conservative Conservatives Labour Liberal Liberals
+Socialist Socialists Communist Communists Green Greens Party GOP
 Monday Tuesday Wednesday Thursday Friday Saturday Sunday January February March April May June
 July August September October November December
 """.split())
@@ -260,6 +262,22 @@ def _stem(word: str) -> str:
 # Ordinary words that often start a sentence. Any other capitalised first word is checked like a
 # name (a headline usually starts with its actor, which must come from the articles). Other
 # ordinary words pass anyway when the articles use them in lower case.
+# Step 15: ordinary English words the pool itself writes in lower case (config/common_words.txt,
+# written by scripts/make_common_words.py). A sentence-initial capitalised word in this list is an
+# ordinary word ("Severe", "Recent", "Hundreds"), not an invented name.
+COMMON_WORDS_FILE = Path(__file__).resolve().parent.parent / "config" / "common_words.txt"
+
+
+def _load_common_words() -> frozenset[str]:
+    try:
+        text = COMMON_WORDS_FILE.read_text(encoding="utf-8")
+    except OSError:
+        return frozenset()
+    return frozenset(w.strip() for w in text.splitlines() if w.strip() and not w.startswith("#"))
+
+
+COMMON_WORDS = _load_common_words()
+
 SENTENCE_OPENERS = set("""
 A An The This That These Those It Its He She They We His Her Their Both All Some Many Most No One Two
 Three Four Five Several Few Other Another Each Every After Before During Following Amid Despite Since
@@ -333,8 +351,9 @@ def unknown_facts(text: str, source: str, check_names: bool) -> list[str]:
     for k, m in enumerate(names):
         before = text[:m.start()].rstrip()
         opener = not before or before[-1] in ".!?:\"'("
-        if opener and (m.group(0) in SENTENCE_OPENERS or m.group(0).lower()[:4] in known4):
-            continue      # an ordinary word starting a sentence ("Polls show...", "Workers voted...")
+        if opener and (m.group(0) in SENTENCE_OPENERS or m.group(0).lower()[:4] in known4
+                       or m.group(0).lower() in COMMON_WORDS):
+            continue      # an ordinary word starting a sentence ("Polls show...", "Severe smog...")
         if m.start() in expanded_ok:
             continue
         word = m.group(0)
@@ -352,7 +371,10 @@ def unknown_facts(text: str, source: str, check_names: bool) -> list[str]:
                 continue          # "AI-generated": only capitalised parts can be names
             low = part.lower()
             # a demonym of a name in the source: "Iranian" for "Iran", "Azerbaijani" for "Azerbaijan"
-            if _stem(part) not in known and not any(low.startswith(w) for w in roots):
+            # Step 15: and the other way round, a name the source uses in a longer form ("West" for
+            # "Western", "Iran" for "Iranian")
+            if (_stem(part) not in known and not any(low.startswith(w) for w in roots)
+                    and not (len(low) >= 4 and any(w.startswith(low) for w in roots))):
                 bad.append(part)
     return bad
 

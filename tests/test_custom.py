@@ -8,6 +8,7 @@ the 7-day cleanup, the guard's order and that no custom-topic failure ever fails
 from __future__ import annotations
 
 import json
+import time
 import random
 import sys
 import unittest
@@ -33,14 +34,17 @@ def add_user(db, uid, paused=0, blocked=0, lang="en"):
              [uid, f"U{uid}", json.dumps(["politics_conflicts"]), 1, paused, blocked, lang])
 
 
-def add_topic(db, tid, name, queries=None, boost=2, searched_at=None, orphan_since=None, keywords="name"):
-    """keywords: "name" = just the topic's name (Step 14), None = not written yet (the job backfills)."""
+def add_topic(db, tid, name, queries=None, boost=2, searched_at=None, orphan_since=None, keywords="name",
+              keywords_at="now"):
+    """keywords: "name" = just the topic's name (Step 14), None = not written yet (the job backfills).
+    keywords_at (Step 15): "now" = written just now (no refresh due), or a time, or None."""
     queries = queries if queries is not None else [{"q": name, "ed": "en"}, {"q": f"{name} news", "ed": "en_gb"}]
     kw = json.dumps({"en": [name], "ru": [name]}) if keywords == "name" else None if keywords is None else json.dumps(keywords)
+    kw_at = (int(time.time()) if kw else None) if keywords_at == "now" else keywords_at
     db.query("INSERT INTO custom_topics (id, tag, names, emoji, definition, queries, boost_max, created_at, searched_at, "
-             "orphan_since, keywords) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+             "orphan_since, keywords, keywords_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
              [tid, f"c{tid}", json.dumps({"en": name, "ru": name, "hy": name, "fr": name}), "📌",
-              f"News about {name}.", json.dumps(queries), boost, 1, searched_at, orphan_since, kw])
+              f"News about {name}.", json.dumps(queries), boost, 1, searched_at, orphan_since, kw, kw_at])
 
 
 def follow(db, uid, tid, enabled=1):

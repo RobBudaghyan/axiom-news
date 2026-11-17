@@ -508,7 +508,8 @@ class Job:
         self.rule = custom.KeywordRule(self.ai_topics)
 
     def run_keywords(self, stats: RunStats) -> None:
-        """Step 14: match keywords for custom topics that have none yet (one AI call a topic)."""
+        """Step 14: match keywords for custom topics that have none yet; Step 15: refreshed weekly and
+        on the owner's Admin button (one AI call a topic, at most 5 a run)."""
         try:
             done = custom.backfill_keywords(
                 self.db, self.plans, on_call=lambda p, ok, n, res, err, kind: self._log_call(p, ok, n, res, err, kind=kind))

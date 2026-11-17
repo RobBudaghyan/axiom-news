@@ -13,7 +13,7 @@
 //   POST /api/topics/add      {name}    Step 13: add a custom topic (one AI check), return {state, result}
 //   POST /api/topics/remove   {id}      Step 13: stop following a custom topic (edit mode), return state
 //   POST /api/topics/switch   {id, on}  Step 13 fixes: switch a custom topic on or off, return state
-//   POST /api/admin/topic     {id, action}  Step 13: delete or block a custom topic (owner only)
+//   POST /api/admin/topic     {id, action}  Step 13: delete or block a custom topic; Step 15: "keywords" refreshes its keywords (owner only)
 import { verifyInitData } from "./auth.js";
 import { CONFIG, candidateStatement, hhmm, localParts, nextSlot, planDigest } from "./digest.js";
 import { SettingsError, TZ_AUTO, TZ_DEFAULT, nextDigestAfterChange, publicUser, validZone, validatePatch } from "./settings.js";
@@ -178,13 +178,14 @@ async function switchCustom(db, tg, body, now, cfg, isOwner) {
 async function adminTopic(db, body, now) {
   const id = Number(body?.id);
   const action = body?.action;
-  if (!Number.isInteger(id) || id <= 0 || !["delete", "block"].includes(action)) {
-    return json(400, { ok: false, message: "Which topic, and delete or block?" });
+  if (!Number.isInteger(id) || id <= 0 || !["delete", "block", "keywords"].includes(action)) {
+    return json(400, { ok: false, message: "Which topic, and delete, block or refresh keywords?" });
   }
   const [[topic]] = await db.batch([{ sql: "SELECT id, tag, names, aliases FROM custom_topics WHERE id = ?1", params: [id] }]);
   if (!topic) return json(404, { ok: false, message: "That topic is already gone." });
   await db.batch(adminTopicStatements(topic, action, now));
   const name = JSON.parse(topic.names || "{}").en || topic.tag;
+  if (action === "keywords") return json(200, { ok: true, message: `Keywords for "${name}" are refreshed by the next hourly run.` });
   return json(200, { ok: true, message: action === "block" ? `Blocked "${name}": deleted, and it cannot be created again.`
     : `Deleted "${name}". Its followers no longer have it.` });
 }

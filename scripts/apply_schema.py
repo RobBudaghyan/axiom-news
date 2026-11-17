@@ -43,6 +43,7 @@ MIGRATIONS = [
     "ALTER TABLE ai_calls ADD COLUMN code INTEGER",
     "ALTER TABLE custom_follows ADD COLUMN enabled INTEGER NOT NULL DEFAULT 1",   # Step 13 fixes: the switch
     "ALTER TABLE custom_topics ADD COLUMN keywords TEXT",   # Step 14: match keywords (job/custom.py KeywordRule)
+    "ALTER TABLE custom_topics ADD COLUMN keywords_at INTEGER",   # Step 15: weekly keyword refresh
 ]
 
 

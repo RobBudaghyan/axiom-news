@@ -571,16 +571,24 @@ def _answer(text: str) -> dict:
     return json.loads(text)
 
 
+KEYWORDS_REFRESH_DAYS = 7
+MIN_REFRESH_KEYWORDS = 5     # a refresh keeps the old keywords unless the new answer has this many
+
+
 def backfill_keywords(db, plans, *, limit: int = 5, on_call: Callable | None = None, now: int | None = None,
                       headlines: int = 30) -> list[str]:
-    """Topics with no keywords yet (made before Step 14, or the check gave too few): one AI call
-    each, the providers in order until one answers, with the topic's latest Google headlines (the
-    last 2 days) so the model sees today's names. A topic whose every call fails waits for the next
-    run. Returns the tags filled."""
+    """Topics with no keywords yet (made before Step 14, or the check gave too few), and (Step 15)
+    topics whose keywords are 7+ days old or marked for a refresh in Admin (keywords_at 0): one AI
+    call each, the providers in order until one answers, with the topic's latest Google headlines
+    (the last 2 days) so the model sees today's names. A refresh keeps the old keywords if the new
+    answer has fewer than 5 English ones (it only moves keywords_at on). A topic whose every call
+    fails waits for the next run. Returns the tags filled."""
     now = int(time.time()) if now is None else now
     on_call = on_call or (lambda *a, **k: None)
-    rows = db.query("SELECT id, tag, names, definition FROM custom_topics WHERE tag IS NOT NULL AND keywords IS NULL "
-                    "ORDER BY id LIMIT ?", [limit])
+    rows = db.query("SELECT id, tag, names, definition, keywords FROM custom_topics WHERE tag IS NOT NULL AND "
+                    "(keywords IS NULL OR keywords_at IS NULL OR keywords_at <= ?) "
+                    "ORDER BY keywords IS NOT NULL, coalesce(keywords_at, 0), id LIMIT ?",
+                    [now - KEYWORDS_REFRESH_DAYS * 86400, limit])
     done = []
     for r in rows:
         names = _json(r["names"], {})
@@ -598,8 +606,11 @@ def backfill_keywords(db, plans, *, limit: int = 5, on_call: Callable | None = N
                 on_call(p, False, 1, res, f"{p.name}: keywords: {type(exc).__name__}: {exc}"[:300], kind="topic_keywords")
                 continue
             on_call(p, True, 1, res, None, kind="topic_keywords")
-            db.query("UPDATE custom_topics SET keywords = ? WHERE id = ? AND keywords IS NULL",
-                     [json.dumps(kw, ensure_ascii=False), r["id"]])
-            done.append(r["tag"])
+            if r.get("keywords") and len(kw["en"]) < MIN_REFRESH_KEYWORDS:
+                db.query("UPDATE custom_topics SET keywords_at = ? WHERE id = ?", [now, r["id"]])   # keep the old ones
+            else:
+                db.query("UPDATE custom_topics SET keywords = ?, keywords_at = ? WHERE id = ?",
+                         [json.dumps(kw, ensure_ascii=False), now, r["id"]])
+                done.append(r["tag"])
             break
     return done

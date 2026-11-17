@@ -200,6 +200,7 @@ CREATE TABLE IF NOT EXISTS custom_topics (
   queries      TEXT NOT NULL,                        -- JSON [{q, ed}] (ed: a key of config/custom_topics.json editions)
   boost_max    INTEGER NOT NULL DEFAULT 0,           -- 0..2, like topic_boost_max
   keywords     TEXT,                                 -- Step 14: JSON {en: [...], ru: [...]}, 5-15 each; a story keeps this tag only if one is in its English headline or description
+  keywords_at  INTEGER,                              -- Step 15: when the keywords were written; the job refreshes them after 7 days (0 = refresh now, Admin)
   aliases      TEXT NOT NULL DEFAULT '[]',           -- JSON: normalised inputs that mapped here
   created_by   INTEGER,
   created_at   INTEGER NOT NULL,

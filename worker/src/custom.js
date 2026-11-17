@@ -452,10 +452,10 @@ export async function addTopic(ctx, body) {
   const aliases = [...new Set([norm].filter((x) => !Object.values(a.names).map(normName).includes(x)))];
   await db.batch([
     ...logs,
-    { sql: "INSERT INTO custom_topics (names, emoji, definition, queries, boost_max, aliases, created_by, created_at, keywords) " +
-           "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+    { sql: "INSERT INTO custom_topics (names, emoji, definition, queries, boost_max, aliases, created_by, created_at, keywords, keywords_at) " +
+           "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
       params: [JSON.stringify(a.names), a.emoji, a.definition, JSON.stringify(a.queries), a.boostMax,
-               JSON.stringify(aliases), user.id, now, a.keywords ? JSON.stringify(a.keywords) : null] },
+               JSON.stringify(aliases), user.id, now, a.keywords ? JSON.stringify(a.keywords) : null, a.keywords ? now : null] },
     { sql: "UPDATE custom_topics SET tag = 'c' || id WHERE id = last_insert_rowid()", params: [] },
     { sql: "INSERT INTO custom_follows (user_id, topic_id, at) VALUES (?1, last_insert_rowid(), ?2)", params: [user.id, now] },
     { sql: "INSERT INTO topic_checks (user_id, at, input, outcome, topic_id, reason, ai) " +
@@ -552,9 +552,11 @@ export function shapeCustomAdmin(rows, now, budget = BUDGET) {
   };
 }
 
-// POST /api/admin/topic {id, action: "delete" | "block"}. Block also puts every name and alias of
-// the topic on the block list, so it cannot be created again.
+// POST /api/admin/topic {id, action: "delete" | "block" | "keywords"}. Block also puts every name
+// and alias of the topic on the block list, so it cannot be created again. Step 15: "keywords" asks
+// the next hourly run to write fresh keywords (keywords_at 0); the old ones count until then.
 export function adminTopicStatements(topic, action, now) {
+  if (action === "keywords") return [{ sql: "UPDATE custom_topics SET keywords_at = 0 WHERE id = ?1", params: [topic.id] }];
   const out = [];
   if (action === "block") {
     for (const norm of topicNorms(topic)) {

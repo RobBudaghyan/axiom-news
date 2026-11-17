@@ -10,6 +10,8 @@ with no boost. Checked where tags are written (pass 1, the editor) and once a ru
 from __future__ import annotations
 
 import json
+from pathlib import Path
+ROOT = Path(__file__).resolve().parent.parent
 import random
 import sys
 import unittest
@@ -288,6 +290,34 @@ class TestBackfill(unittest.TestCase):
         gem2 = FakeProvider("gemini", [{"keywords": {"en": ["Japanese", "Tokyo"], "ru": []}}])
         self.assertEqual(custom.backfill_keywords(db, self.plans(gem2)), ["c1"])
 
+    def test_step15_keywords_are_refreshed_after_a_week_not_before(self):
+        db = new_db()
+        old = {"en": ["Japan", "Kishida", "Ishiba", "Tokyo", "Yen"], "ru": ["Япония"]}
+        add_topic(db, 1, "Japan", keywords=old, keywords_at=T0 - 6 * 86400)
+        add_topic(db, 2, "Australia", keywords={"en": ["Australia"], "ru": []}, keywords_at=T0 - 8 * 86400)
+        gem = FakeProvider("gemini", [{"keywords": {"en": ["Australian", "Albanese", "Canberra", "Sydney", "RBA"], "ru": []}}])
+        self.assertEqual(custom.backfill_keywords(db, self.plans(gem), now=T0), ["c2"])
+        self.assertEqual(len(gem.prompts), 1, "one call, only for the topic 7+ days old")
+        rows = {r["id"]: r for r in db.query("SELECT id, keywords, keywords_at FROM custom_topics")}
+        self.assertEqual(json.loads(rows[1]["keywords"]), old)
+        self.assertEqual(rows[2]["keywords_at"], T0)
+        self.assertIn("Albanese", json.loads(rows[2]["keywords"])["en"])
+        # a day later Japan is due
+        gem2 = FakeProvider("gemini", [{"keywords": {"en": ["Japanese", "Takaichi", "Tokyo", "Yen", "BOJ"], "ru": []}}])
+        self.assertEqual(custom.backfill_keywords(db, self.plans(gem2), now=T0 + 86400 + 1), ["c1"])
+        self.assertIn("Takaichi", json.loads(db.query("SELECT keywords FROM custom_topics WHERE id = 1")[0]["keywords"])["en"])
+
+    def test_step15_a_weak_refresh_keeps_the_old_keywords(self):
+        db = new_db()
+        old = {"en": ["Japan", "Takaichi", "Tokyo", "Yen", "Osaka"], "ru": ["Япония"]}
+        add_topic(db, 1, "Japan", keywords=old, keywords_at=0)       # Admin: "Keywords" pressed
+        gem = FakeProvider("gemini", [{"keywords": {"en": ["Japanese"], "ru": []}}])
+        self.assertEqual(custom.backfill_keywords(db, self.plans(gem), now=T0), [])
+        r = db.query("SELECT keywords, keywords_at FROM custom_topics")[0]
+        self.assertEqual(json.loads(r["keywords"]), old)
+        self.assertEqual(r["keywords_at"], T0, "not asked again every hour")
+        self.assertEqual(custom.backfill_keywords(db, self.plans(FakeProvider("gemini", [])), now=T0 + 3600), [])
+
     def test_the_job_backfills_before_the_ai_passes_and_logs_the_call(self):
         db = new_db()
         add_user(db, 1)
@@ -357,6 +387,34 @@ class TestNonEvents(unittest.TestCase):
         self.assertIn('("China\'s naval\n        presence near Japan remains normalized"', text)
         self.assertIn("is 3 or 4, never 6, however serious the subject", text)
         self.assertIn('A non-event (a situation that "remains", "continues" or is "unchanged"', text)
+
+
+class TestStep15Prompts(unittest.TestCase):
+    def render(self):
+        prompt = editor.load_editor_prompt()
+        return " ".join(editor.render_prompt(prompt.template, today="2027-01-15", topics=TOPICS + [topic()], facts=["f"],
+                                             facts_checked="x", new=[], compare=[], items={}).split())
+
+    def test_culture_and_sport_stay_below_6_on_main_topics(self):
+        text = self.render()
+        self.assertIn("CULTURE AND SPORT stay below 6 on the six main topics, in the score AND the topic score", text)
+        self.assertIn("chess and sport results are 5 at most", text)
+        self.assertIn('"Armenian grandmaster beats Carlsen" 3, 4', text)
+        self.assertIn('"Gala concert in Moscow marks Unity Day" 2, 2', text)
+        self.assertIn("A reader topic about a sport or culture is scored by its own rule", text)
+
+    def test_economy_and_markets_has_4_6_8_examples_and_its_boost_rule(self):
+        text = self.render()
+        self.assertIn('economy_markets: "Global stocks plunge as a major bank collapses" 8, 8', text)
+        self.assertIn('"Oil jumps 6% after OPEC+ announces a surprise output cut" 6, 6', text)
+        self.assertIn('"The European Central Bank holds rates, as expected" 4, 4', text)
+        self.assertIn("economy_markets: +1 at most", text)
+        self.assertIn("Always +0 for politics_conflicts", text)
+        self.assertNotIn("wars_conflicts", text)
+        pass1 = " ".join(open(ROOT / "prompts" / "story_batch.md", encoding="utf-8").read().split())
+        self.assertIn("Economy news with wide impact IS news (economy_markets)", pass1)
+        self.assertNotIn('"stocks rise after inflation data" are not news', pass1)
+        self.assertNotIn("wars_conflicts", pass1)
 
 
 if __name__ == "__main__":

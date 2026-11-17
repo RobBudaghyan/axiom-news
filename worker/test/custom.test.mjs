@@ -222,6 +222,21 @@ describe("Step 13: adding a custom topic", () => {
     assert.equal(g.level, 1);
   });
 
+  test("Step 15: Admin's Keywords button asks the next run for fresh keywords; owner only; the old ones stay", async () => {
+    const { binding, sqlite } = setup();
+    fetchMock = ai();
+    await add(binding, A, "Colombia");
+    const before = sqlite.prepare("SELECT keywords, keywords_at FROM custom_topics WHERE id = 1").get();
+    assert.ok(before.keywords && before.keywords_at > 0, "the check writes keywords and their time");
+    assert.equal((await call(binding, "/api/admin/topic", A, { id: 1, action: "keywords" })).status, 403);
+    const r = await call(binding, "/api/admin/topic", OWNER, { id: 1, action: "keywords" });
+    assert.equal(r.status, 200);
+    assert.match(r.body.message, /refreshed by the next hourly run/);
+    const after = sqlite.prepare("SELECT keywords, keywords_at FROM custom_topics WHERE id = 1").get();
+    assert.deepEqual([after.keywords, after.keywords_at], [before.keywords, 0]);
+    assert.equal(sqlite.prepare("SELECT count(*) AS n FROM custom_follows").get().n, 1, "nothing deleted");
+  });
+
   test("block list: Admin blocks a topic; nobody can create it again (no AI call); only the owner may", async () => {
     const { binding, sqlite } = setup();
     fetchMock = ai();

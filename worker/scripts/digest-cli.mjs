@@ -72,7 +72,7 @@ function arg(name, fallback) {
   return v && !v.startsWith("--") ? v : fallback;
 }
 
-const POOL_COLUMNS = "id, summary, headline, description, emojis, main_topic, best_url, best_source, importance, final_score, " +
+export const POOL_COLUMNS = "id, summary, headline, description, emojis, main_topic, best_url, best_source, importance, final_score, " +
   "topic_score, scored_at, topics, created_at, updated_at, dup_group";
 
 // Test profiles for the replay and the CPU check (Step 8). The owner is read from D1.
@@ -94,7 +94,7 @@ function profiles(user, topics) {
 // placed in the window where it first appeared (created_at), and none is shown twice. Uses the
 // real planDigest (two-score rule and length cut). For tuning the bars:
 //   --windows [--profile owner|dad|armenia3h|all6h|all] [--hours 48] [--bars "7,5;7,6"] [--show]
-async function windows(db, user, topics, now, cfg, hours = 24, pool = null) {
+export async function windows(db, user, topics, now, cfg, hours = 24, pool = null) {
   const tz = user.timezone || cfg.default_timezone;
   const times = parseList(user.digest_times, cfg.default_times);
   const slots = [];   // every digest time of the user in the last `hours` (zones have 15-minute offsets at most)
@@ -122,7 +122,9 @@ async function windows(db, user, topics, now, cfg, hours = 24, pool = null) {
     const label = partial && i === slots.length - 1 ? `now ${hhmm(localParts(end, tz))} (window still open)` : hhmm(localParts(end, tz));
     const tag = (s) => `[${storyScore(s, cfg)}${s.final_score != null ? `/t${topicScore(s, cfg)}` : " unedited"}]`;
     summary.push({ at: label, stories: plan.stories.length, cut: plan.cut, byTopic, chars: visibleLength(plan.text),
-      armenia: plan.stories.filter((s) => parseList(s.topics).includes("armenia")).map((s) => `${tag(s)} ${s.headline}`) });
+      armenia: plan.stories.filter((s) => parseList(s.topics).includes("armenia")).map((s) => `${tag(s)} ${s.headline}`),
+      list: plan.stories.map((s) => ({ id: s.id, primary: s.primary, main: s.main_topic, tags: parseList(s.topics),
+        score: storyScore(s, cfg), topic: topicScore(s, cfg), headline: s.headline ?? s.summary })) });
     if (process.argv.includes("--verbose") || process.argv.includes("--show")) {
       console.log(`\n=== digest at ${label} (${tz}), window from ${hhmm(localParts(from, tz))}: ` +
         `${plan.stories.length} stories (${plan.cut} cut for length), ${visibleLength(plan.text)} characters`);

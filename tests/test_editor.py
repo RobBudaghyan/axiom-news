@@ -163,6 +163,45 @@ class Validation(unittest.TestCase):
             self.assertEqual(editor.unknown_facts(text, src, True), [], text)
         self.assertEqual(editor.unknown_facts("Officials said Macron came.", src, False), [])  # non-Latin: numbers only
 
+    def test_step15_ordinary_capitalised_words_at_a_sentence_start_pass(self):
+        # Real drops from the live errors log (2026-11), with the stories' own article texts.
+        cases = [
+            ("Severe air pollution left residents with headaches and breathing difficulties.",
+             "Toxic air chokes Iranian cities, residents report health problems :: Worsening air pollution "
+             "across Iran has left citizens reporting headaches, nausea and breathing difficulties"),
+            ("Recent central bank minutes temper expectations for rate cuts.",
+             "Australian Dollar: RBA minutes temper easing bets. RBA minutes suggest the central bank is "
+             "tempering expectations for interest rate cuts."),
+            ("Hundreds of residential buildings in Kyiv's Darnytskyi district remain without heating.",
+             "317 Buildings in Kyiv's Darnytskyi District left without heating after Russian attack :: A total "
+             "of 317 residential buildings in Kyiv's Darnytskyi district remain without heating"),
+            ("Escalating border clashes raise fears of a regional war.",
+             "Ethiopia-Eritrea border clashes raise fears of regional war :: As Ethiopian troops push Tigrayan "
+             "forces toward the Eritrean border, fears of a new regional war are growing."),
+            ("Investors moved into megacap tech before the drawdown.",
+             "Tepper, Loeb among fund managers piling into Nvidia and other megacap tech on the eve of October drawdown"),
+            ("Growing air links create a favourable climate for Boeing orders.",
+             "Can Xi-Trump talks at Apec turn China's pledge to buy 200 Boeing jets into firm orders? :: China's "
+             "expanding air links ... creating a more favourable"),
+            ("Official data show wage growth slowed to 3.5%.", "UK Wage Growth Slows to 3.5% in Three Months to September"),
+            ("Pence said the Republican Party must return to high standards.",
+             "Pence says Trump administration has 'air of corruption' and GOP must return to 'high standards'"),
+            ("The Russian Foreign Ministry says the West uses education against sovereignty.",
+             "Color revolutions now built into Western playbook, Russian MFA :: education as instruments for "
+             "undermining sovereignty, Russian Deputy Foreign Minister"),
+        ]
+        for text, src in cases:
+            self.assertEqual(editor.unknown_facts(text, src, True), [], text)
+
+    def test_step15_invented_names_are_still_dropped(self):
+        src = "Toxic air chokes Iranian cities :: Worsening air pollution across Iran has left citizens with headaches"
+        self.assertEqual(editor.unknown_facts("Erdogan said the air is toxic.", src, True), ["Erdogan"])
+        self.assertEqual(editor.unknown_facts("Severe smog hit Tehran and Isfahan.", src, True), ["Tehran", "Isfahan"])
+        self.assertEqual(editor.unknown_facts("Moscow blamed the smog on Washington.", src, True), ["Moscow", "Washington"])
+        self.assertEqual(editor.unknown_facts("Severe smog left 40 people ill.", src, True), ["40"])
+        self.assertIn("severe", editor.COMMON_WORDS)
+        self.assertFalse({"moscow", "kyiv", "pashinyan", "trump", "putin"} & editor.COMMON_WORDS)
+
     def test_emojis(self):
         self.assertEqual(editor.clean_emojis("🇷🇺🇺🇸🤝📝🎉"), "🇷🇺🇺🇸🤝📝")      # at most 4
         self.assertEqual(editor.clean_emojis("🗣️ ☢️"), "🗣️☢️")               # VS16 kept

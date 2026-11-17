@@ -744,7 +744,8 @@
         `${n(x.today.new_items)} new items (${n(x.today.dup_dropped)} already in the pool) · 24 h: ` +
         `${plural(x.stories_24h, "story", "stories")} (${x.main_24h} as main topic), ${n(x.sent_24h)} sent` +
         (x.orphan_since ? ` · deleted 7 days after ${when(x.orphan_since, tz)}` : "")),
-      right: `<button class="link" data-action="topic-admin" data-act="delete" data-value="${x.id}" data-name="${esc(x.name)}" ${S.busy.topicAdmin ? "disabled" : ""}>Delete</button>` +
+      right: `<button class="link" data-action="topic-admin" data-act="keywords" data-value="${x.id}" data-name="${esc(x.name)}" ${S.busy.topicAdmin ? "disabled" : ""}>Keywords</button>` +
+        `<button class="link" data-action="topic-admin" data-act="delete" data-value="${x.id}" data-name="${esc(x.name)}" ${S.busy.topicAdmin ? "disabled" : ""}>Delete</button>` +
         `<button class="link danger" data-action="topic-admin" data-act="block" data-value="${x.id}" data-name="${esc(x.name)}" ${S.busy.topicAdmin ? "disabled" : ""}>Block</button>` })).join("");
     const outcomes = Object.entries(C.checks_24h).map(([k, v]) => `${v} ${k.replace("_", " ")}`).join(", ");
     const checkRows = kv("Topic checks, 24 h", n(Object.values(C.checks_24h).reduce((a, b) => a + b, 0)), outcomes || "none")
@@ -836,7 +837,7 @@
     const msg = act === "block"
       ? `Block "${name}"? It is deleted for every follower and nobody can create it again.`
       : `Delete "${name}"? Its followers lose it; anyone can add it again later.`;
-    if (!(await confirmBox(msg))) return;
+    if (act !== "keywords" && !(await confirmBox(msg))) return;
     S.busy.topicAdmin = true;
     renderView();
     try {

@@ -30,6 +30,11 @@ welcome and announcements, cleanup), then `reports/step-15-final-product.md`.
   items, Bloomberg economics 50, WSJ markets 50, CNBC 47, MarketWatch 46, FT markets 12, plus
   Interfax, Kommersant, RBC and Vedomosti 220 to 320 each. The new prompt keeps more of them, but
   they are already in the AI calls.
+- **Live (2026-11-17):** Worker deployed, migration run. The owner: politics, wars_conflicts,
+  armenia, russia, iran_war, ukraine_war became politics_conflicts, economy_markets, armenia,
+  russia, iran_war, ukraine_war. The second user had no main topic on (only `[]`) and now has
+  economy_markets. 4,716 stories re-tagged, 0 left on old tags; the topics table holds the six
+  new rows.
 - Tests: Python 174, Worker 232, click-through 94 of 94. Mutations 9 of 9 caught
   (`scripts/step15_mutations.py 1`).
 - CPU: one digest 0.31 ms, a tick with 8 readers 4.7 ms (Step 14: 0.25-0.28 and 4.3-5.0).
