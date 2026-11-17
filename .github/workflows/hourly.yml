@@ -24,6 +24,7 @@ on:
       CLOUDFLARE_ACCOUNT_ID: { required: true }
       D1_DATABASE_ID: { required: true }
       CLOUDFLARE_D1_TOKEN: { required: true }
+      STAGING_D1_DATABASE_ID: { required: false }
 
 permissions:
   contents: read
@@ -54,3 +55,14 @@ jobs:
           GEMINI_FALLBACK_MODEL: gemini-3.1-flash-lite
           GROQ_MODEL: openai/gpt-oss-120b
         run: python -m job.run --min-gap-minutes "${{ inputs.min_gap_minutes || '20' }}"
+      # Step 16: copy the new stories into the staging D1 (no AI). It runs every 3 hours (the script
+      # keeps its own clock in staging) and can never fail the news job.
+      - name: Sync stories to staging
+        if: ${{ always() }}
+        continue-on-error: true
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+          CLOUDFLARE_D1_TOKEN: ${{ secrets.CLOUDFLARE_D1_TOKEN }}
+          STAGING_D1_DATABASE_ID: ${{ secrets.STAGING_D1_DATABASE_ID }}
+        run: python scripts/sync_staging.py --auto

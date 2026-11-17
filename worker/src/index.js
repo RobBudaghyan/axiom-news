@@ -12,6 +12,24 @@ import { t } from "./i18n.js";
 
 export const HOURLY_CRON = "7 * * * *";
 
+// Step 16: two copies of this Worker (wrangler.toml): production and staging. Switches (vars):
+//   ENV_NAME       "production" or "staging" (Admin shows it in big letters)
+//   USER_SENDS     "off": no digests, reminders or announcements go out (production until launch)
+//   JOB_DISPATCH   "off": never start the hourly GitHub job (staging: the job runs for production only)
+//   SEND_STUB      "on": Telegram is never called for a user message, it counts as delivered (load test)
+//   HEALTH_ALERTS  "off": no job-health or AI-guard alerts to the owner (staging)
+export const envName = (env) => (env.ENV_NAME === "staging" ? "staging" : "production");
+const on = (v, dflt = true) => (v == null ? dflt : String(v) !== "off");
+export const switches = (env) => ({
+  userSends: on(env.USER_SENDS), dispatch: on(env.JOB_DISPATCH), stub: env.SEND_STUB === "on", alerts: on(env.HEALTH_ALERTS),
+});
+let stubId = 0;
+// The function that sends one user message: the real one, or (SEND_STUB) a stand-in that never
+// calls Telegram and answers like a delivered message.
+export function userSender(env, real) {
+  return switches(env).stub ? async () => ({ message_id: ++stubId, stub: true }) : real;
+}
+
 function sameSecret(a, b) {
   if (!a || !b || a.length !== b.length) return false;
   let diff = 0;
@@ -50,7 +68,7 @@ export default {
       const now = nowS();
       try {
         return await handleApi(request, env, db, now, {
-          send: (chatId, text, extra) => sendDigestMessage(env.TELEGRAM_BOT_TOKEN, chatId, text, extra),
+          send: userSender(env, (chatId, text, extra) => sendDigestMessage(env.TELEGRAM_BOT_TOKEN, chatId, text, extra)),
           dispatch: (e) => dispatchJob(e),
           tg: (method, body) => tgCall(env.TELEGRAM_BOT_TOKEN, method, body),
           appUrl: appUrl(env, url),
@@ -68,18 +86,19 @@ export default {
     const db = d1Binding(env.DB);
     const now = Math.floor((event.scheduledTime ?? Date.now()) / 1000);
     const hourly = event.cron === HOURLY_CRON;
+    const sw = switches(env);
     const extraProblems = [];
     try {
-      if (hourly) {
+      if (hourly && sw.dispatch) {
         const r = await dispatchJob(env);
         if (!r.ok) extraProblems.push(r.problem);
       }
       const out = await runTick(db, {
-        send: (chatId, text, extra) => sendDigestMessage(env.TELEGRAM_BOT_TOKEN, chatId, text, extra),
+        send: userSender(env, (chatId, text, extra) => sendDigestMessage(env.TELEGRAM_BOT_TOKEN, chatId, text, extra)),
         appUrl: env.APP_URL,
         alert: (text) => sendPlain(env.TELEGRAM_BOT_TOKEN, Number(env.OWNER_TELEGRAM_ID), text),
-      }, now, { digests: !hourly, guard: hourly, extraProblems });
-      console.log(JSON.stringify({ tick: event.cron, hourly, ...out }));
+      }, now, { digests: !hourly && sw.userSends, guard: hourly && sw.alerts, health: sw.alerts, extraProblems });
+      console.log(JSON.stringify({ tick: event.cron, env: envName(env), hourly, ...out }));
     } catch (e) {
       await logError(db, `cron ${event.cron}: ${e.message}`, now);
       throw e;

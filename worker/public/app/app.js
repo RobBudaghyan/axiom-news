@@ -902,7 +902,9 @@
       sub: esc(`${when(e.at, tz)} · ${e.component === "job" ? "News job" : e.component === "worker" ? "Bot server" : e.component}`) })).join("")
       + (!S.allErrors && A.errors.length > 8 ? row({ title: `Show all ${A.errors.length}`, tag: "button", cls: "action tap", attrs: 'data-action="all-errors"' }) : "");
 
-    return `<div class="updated"><span>Updated ${esc(hm(A.now, tz))}</span>${S.adminLoading ? '<span class="spinner spin-sm"></span>'
+    // Step 16: which copy this is, in big letters (staging amber, production red)
+    const envBadge = `<div class="env-label ${A.env === "staging" ? "staging" : "production"}" id="env-label">${A.env === "staging" ? "STAGING" : "PRODUCTION"}</div>`;
+    return `${envBadge}<div class="updated"><span>Updated ${esc(hm(A.now, tz))}</span>${S.adminLoading ? '<span class="spinner spin-sm"></span>'
       : '<button class="link" data-action="refresh" style="font-size:13px">Refresh</button>'}</div>
       ${section("", status + runRow + okRow + trigRow + alertRow)}
       ${section("Actions", actions, "Both ask before they run.")}

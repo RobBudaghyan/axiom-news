@@ -4,8 +4,10 @@
   "type": "module",
   "scripts": {
     "test": "node --test --test-reporter=spec test/",
-    "deploy": "node scripts/stamp-app.mjs && wrangler deploy",
+    "deploy:staging": "node scripts/stamp-app.mjs && wrangler deploy --env staging && node scripts/ship-check.mjs record",
+    "deploy:prod": "node scripts/stamp-app.mjs && node scripts/ship-check.mjs && wrangler deploy",
     "tail": "wrangler tail --format json",
+    "tail:staging": "wrangler tail --env staging --format json",
     "digest": "node scripts/digest-cli.mjs",
     "stamp": "node scripts/stamp-app.mjs",
     "preview": "node scripts/dev-server.mjs",

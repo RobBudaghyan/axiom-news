@@ -1,6 +1,9 @@
-# Cloudflare Worker for Axiom News (TEST bot during development).
-# Secrets are NOT here. They are set with `wrangler secret put` (scripts/set_secrets.py):
-#   TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, OWNER_TELEGRAM_ID, GITHUB_DISPATCH_TOKEN,
+# Cloudflare Worker for Axiom News. Two copies (Step 16):
+#   production  `axiom-news`          D1 axiom-d1          npm run deploy:prod     (the real bot at launch)
+#   staging     `axiom-news-staging`  D1 axiom-d1-staging  npm run deploy:staging  (the TEST bot @justatia_bot)
+# Every change goes to staging first; production only after the owner says "ship it" (CLAUDE.md).
+# Secrets are NOT here. They are set per copy with scripts/set_secrets.py (worker-prod / worker-staging):
+#   TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, OWNER_TELEGRAM_ID, GITHUB_DISPATCH_TOKEN (production only),
 #   GEMINI_API_KEY, GROQ_API_KEY (Step 13: the one AI check of a reader's new custom topic)
 name = "axiom-news"
 main = "src/index.js"
@@ -24,6 +27,13 @@ database_name = "axiom-d1"
 database_id = "2a1eb212-95b8-4715-b628-2967cbcb0367"
 
 [vars]
+ENV_NAME = "production"
+# Step 16: until the launch (the real bot), production sends nothing to users: the TEST bot and the
+# users' copy live on staging. Owner alerts still go out. Set to "on" at launch.
+USER_SENDS = "off"
+JOB_DISPATCH = "on"
+SEND_STUB = "off"
+HEALTH_ALERTS = "on"
 GITHUB_REPO = "RobBudaghyan/axiom-news"
 GITHUB_WORKFLOW = "hourly.yml"
 GITHUB_REF = "main"
@@ -35,4 +45,43 @@ GEMINI_FALLBACK_MODEL = "gemini-3.1-flash-lite"
 GROQ_MODEL = "openai/gpt-oss-120b"
 
 [observability]
+enabled = true
+
+# ------------------------------------------------------------------ staging (Step 16)
+# A private copy for trying every change first. Its own D1 (stories copied from production by
+# scripts/sync_staging.py, no AI calls of its own except a reader's custom-topic check), never starts
+# the hourly job, sends no job-health alerts (the job runs for production only).
+[env.staging]
+name = "axiom-news-staging"
+workers_dev = true
+
+[env.staging.assets]
+directory = "./public"
+html_handling = "auto-trailing-slash"
+not_found_handling = "none"
+
+[env.staging.triggers]
+crons = ["*/5 * * * *"]
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "axiom-d1-staging"
+database_id = "aa4a473a-72fe-4f4a-a9e0-e15f4426d24b"
+
+[env.staging.vars]
+ENV_NAME = "staging"
+USER_SENDS = "on"
+JOB_DISPATCH = "off"
+# "on" only during a load test: Telegram is never called, every send counts as delivered.
+SEND_STUB = "off"
+HEALTH_ALERTS = "off"
+GITHUB_REPO = "RobBudaghyan/axiom-news"
+GITHUB_WORKFLOW = "hourly.yml"
+GITHUB_REF = "main"
+APP_URL = "https://axiom-news-staging.axiom-news-worker.workers.dev/app/"
+GEMINI_MODEL = "gemini-3.5-flash-lite"
+GEMINI_FALLBACK_MODEL = "gemini-3.1-flash-lite"
+GROQ_MODEL = "openai/gpt-oss-120b"
+
+[env.staging.observability]
 enabled = true

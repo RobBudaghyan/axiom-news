@@ -27,7 +27,9 @@ import { asTopicRows, enabledOnly, followedStatement, withCustomTopics } from ".
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 
-export function loadEnv(path = `${ROOT}.env`) {
+// Step 16: with AXIOM_ENV=staging, ../.env.staging (the staging D1 id and webhook secret) is read
+// on top of ../.env, so every script can run against the staging copy.
+function readEnvFile(path) {
   const env = {};
   for (const line of readFileSync(path, "utf8").replace(/^﻿/, "").split(/\r?\n/)) {
     const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/);
@@ -36,6 +38,11 @@ export function loadEnv(path = `${ROOT}.env`) {
     if (v.length >= 2 && v[0] === v[v.length - 1] && `"'`.includes(v[0])) v = v.slice(1, -1);
     env[m[1]] = v;
   }
+  return env;
+}
+export const STAGING = process.env.AXIOM_ENV === "staging";
+export function loadEnv(path = `${ROOT}.env`) {
+  const env = { ...readEnvFile(path), ...(STAGING ? readEnvFile(path.replace(/\.env$/, ".env.staging")) : {}) };
   return { ...env, ...Object.fromEntries(Object.entries(process.env).filter(([k, v]) => k in env && v)) };
 }
 

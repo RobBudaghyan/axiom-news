@@ -144,7 +144,8 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
   const health = assessHealth({ runs, lastOk, meta, extra: opts.extraProblems ?? [] }, now, cfg.default_timezone);
   out.problems = health.problems;
   for (const p of opts.extraProblems ?? []) writes.push(errorStatement(p, now));
-  if (health.alert) {
+  // Step 16: staging (opts.health false) never alerts the owner about the job: it runs for production only
+  if (health.alert && opts.health !== false) {
     try {
       await io.alert(health.alert);
       writes.push(...health.writes);

@@ -5,9 +5,13 @@ Usage (from the project folder):
     venv/Scripts/python scripts/set_secrets.py check      # which .env names are set (no values)
     venv/Scripts/python scripts/set_secrets.py webhook    # create TELEGRAM_WEBHOOK_SECRET in .env if empty
     venv/Scripts/python scripts/set_secrets.py github     # gh secret set (the 5 the job needs)
-    venv/Scripts/python scripts/set_secrets.py worker     # wrangler secret put (the 6 the Worker needs)
+    venv/Scripts/python scripts/set_secrets.py worker-prod      # wrangler secret put, production Worker (6)
+    venv/Scripts/python scripts/set_secrets.py worker-staging   # the staging Worker: .env with .env.staging on top
+                                                                # (its own webhook secret; no GitHub dispatch token)
 
-Each side gets only what it needs: the job never sees the Telegram token. Since Step 13 the Worker
+Each side gets only what it needs: the job never sees the Telegram token. Step 16: two Worker copies,
+production and staging (wrangler.toml [env.staging]); staging never starts the job, so it gets no
+GitHub token. Since Step 13 the Worker
 also has the two AI keys (owner's choice): it checks a reader's new custom topic once, in a few
 seconds, and logs every such call in ai_calls.
 """
@@ -26,12 +30,13 @@ ENV = ROOT / ".env"
 GITHUB = ("GEMINI_API_KEY", "GROQ_API_KEY", "CLOUDFLARE_ACCOUNT_ID", "D1_DATABASE_ID", "CLOUDFLARE_D1_TOKEN")
 WORKER = ("TELEGRAM_BOT_TOKEN", "TELEGRAM_WEBHOOK_SECRET", "OWNER_TELEGRAM_ID", "GITHUB_DISPATCH_TOKEN",
           "GEMINI_API_KEY", "GROQ_API_KEY")   # Step 13: the custom-topic check
+WORKER_STAGING = tuple(k for k in WORKER if k != "GITHUB_DISPATCH_TOKEN")
 REPO = os.environ.get("AXIOM_REPO", "")   # owner/name; read from git remote if empty
 
 
-def read_env() -> dict[str, str]:
+def read_env(path: Path = ENV) -> dict[str, str]:
     env = {}
-    for line in ENV.read_text(encoding="utf-8-sig").splitlines():
+    for line in path.read_text(encoding="utf-8-sig").splitlines():
         m = re.match(r"\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$", line)
         if m and not line.lstrip().startswith("#"):
             v = m.group(2)
@@ -89,11 +94,15 @@ def main() -> int:
         names, target = GITHUB, repo()
         cmd = lambda k: [gh(), "secret", "set", k, "--repo", target]  # noqa: E731
         cwd = ROOT
-    elif what == "worker":
-        names = WORKER
+    elif what in ("worker-prod", "worker-staging"):
+        staging = what == "worker-staging"
+        names = WORKER_STAGING if staging else WORKER
+        if staging:
+            env.update(read_env(ROOT / ".env.staging"))
         wrangler = ROOT / "worker" / "node_modules" / "wrangler" / "bin" / "wrangler.js"
         node = shutil.which("node") or r"C:\Program Files\nodejs\node.exe"
-        cmd = lambda k: [node, str(wrangler), "secret", "put", k]  # noqa: E731
+        extra = ["--env", "staging"] if staging else []
+        cmd = lambda k: [node, str(wrangler), "secret", "put", k, *extra]  # noqa: E731
         cwd = ROOT / "worker"
     else:
         print(__doc__)

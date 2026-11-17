@@ -11,12 +11,13 @@
 //   node scripts/setup-bot.mjs --check    only read back what is set
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { loadEnv } from "./digest-cli.mjs";
+import { STAGING, loadEnv } from "./digest-cli.mjs";
 import { tgCall } from "../src/telegram.js";
 import { DICTS, LANGS, commandList, t } from "../src/i18n.js";
 
 const toml = readFileSync(fileURLToPath(new URL("../wrangler.toml", import.meta.url)), "utf8");
-const APP_URL = /^APP_URL\s*=\s*"([^"]+)"/m.exec(toml)?.[1];
+// Step 16: AXIOM_ENV=staging takes the staging copy's address ([env.staging] in wrangler.toml)
+const APP_URL = /^APP_URL\s*=\s*"([^"]+)"/m.exec(toml.split("[env.staging]")[STAGING ? 1 : 0])?.[1];
 if (!APP_URL) throw new Error("APP_URL missing in wrangler.toml");
 const token = loadEnv().TELEGRAM_BOT_TOKEN;
 if (!token) throw new Error("TELEGRAM_BOT_TOKEN missing in .env");

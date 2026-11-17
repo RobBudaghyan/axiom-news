@@ -19,8 +19,7 @@ ENV_KEYS = (
 )
 
 
-def load_env(path: Path = ROOT / ".env") -> dict[str, str]:
-    """Read KEY=value lines from .env. A non-empty real environment variable wins."""
+def _read_env_file(path: Path) -> dict[str, str]:
     env: dict[str, str] = {}
     if path.exists():
         for line in path.read_text(encoding="utf-8-sig").splitlines():
@@ -32,6 +31,22 @@ def load_env(path: Path = ROOT / ".env") -> dict[str, str]:
             if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
                 value = value[1:-1]
             env[key.strip()] = value
+    return env
+
+
+def load_env(path: Path = ROOT / ".env") -> dict[str, str]:
+    """Read KEY=value lines from .env. A non-empty real environment variable wins.
+
+    Step 16: with AXIOM_ENV=staging, .env.staging (the staging D1 id and webhook secret) is read on
+    top of .env, so a job change can be run locally against the staging database first:
+        AXIOM_ENV=staging venv/Scripts/python -m job.run
+    """
+    env = _read_env_file(path)
+    if os.environ.get("AXIOM_ENV") == "staging":
+        staging = path.with_name(".env.staging")
+        if not staging.exists():
+            raise SystemExit("AXIOM_ENV=staging but .env.staging is missing")
+        env.update(_read_env_file(staging))
     for key in ENV_KEYS:
         if os.environ.get(key):
             env[key] = os.environ[key]

@@ -313,6 +313,7 @@ export async function handleApi(request, env, db, now, io, cfg = CONFIG) {
           let at = 0;
           for (const b of blocks) { parts.push(rows.slice(at, at + b.length)); at += b.length; }
           const out = shapeAdmin(parts[0], now, cfg);
+          out.env = env?.ENV_NAME === "staging" ? "staging" : "production";   // Step 16: Admin says which copy this is
           out.custom = shapeCustomAdmin(parts[1].slice(0, CUSTOM_ADMIN_COUNT), now);
           out.tips = shapeTips(...parts[2]);
           out.feedback = shapeFeedback(...parts[3].slice(0, FEEDBACK_ADMIN_COUNT));
