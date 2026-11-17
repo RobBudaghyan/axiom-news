@@ -21,8 +21,8 @@ SOURCES = [
     {"key": "gamma", "name": "Gamma Wire", "url": "https://gamma.test/rss", "tier": 3},
 ]
 TOPICS = [
-    {"tag": "politics", "label": {"en": "Politics"}, "emoji": "P", "default": True, "definition": "politics"},
-    {"tag": "wars_conflicts", "label": {"en": "Wars"}, "emoji": "W", "default": True, "definition": "wars"},
+    {"tag": "politics_conflicts", "label": {"en": "Politics & Conflicts"}, "emoji": "P", "default": True, "definition": "politics_conflicts"},
+    {"tag": "economy_markets", "label": {"en": "Economy & Markets"}, "emoji": "E", "default": True, "definition": "economy"},
     {"tag": "armenia", "label": {"en": "Armenia"}, "emoji": "A", "default": True, "definition": "armenia"},
     {"tag": "russia", "label": {"en": "Russia"}, "emoji": "R", "default": True, "definition": "russia"},
     {"tag": "iran_war", "label": {"en": "Iran"}, "emoji": "I", "default": True, "definition": "iran"},
@@ -112,7 +112,7 @@ def grouping_responder(topics_by_key: dict[str, list[str]], importance: int = 6,
             words = by_id[ids[0]].split(":", 1)[1].strip()      # like a real summary: reuses title words
             stories.append({"item_ids": ids, "existing_story_id": f"S{target}" if target else None,
                             "summary": "" if target else f"Summary of {key}: {words}",
-                            "topics": topics_by_key.get(key, ["politics"]), "importance": importance})
+                            "topics": topics_by_key.get(key, ["politics_conflicts"]), "importance": importance})
         return {"stories": stories, "not_news_ids": not_news}
     return respond
 

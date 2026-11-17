@@ -136,7 +136,7 @@ describe("owner rules in the new format", () => {
         assert.doesNotMatch(DICTS[lang].digest[k], FORBIDDEN, `${lang} digest.${k}`);
       }
       const dashy = [{ id: nextId++, summary: "x", headline: "Talks — day two", description: "Both sides – met — again.",
-        topics: '["politics"]', main_topic: "politics", final_score: 8, best_url: "https://x.test/a", best_source: "Outlet — X",
+        topics: '["politics_conflicts"]', main_topic: "politics_conflicts", final_score: 8, best_url: "https://x.test/a", best_source: "Outlet — X",
         tr_headline: "Переговоры — второй день", tr_description: "Стороны – встретились." }];
       const plan = planDigest(user(lang), dashy, TOPICS, yerevan(20, 5), CONFIG, { lang });
       assert.doesNotMatch(plan.text, FORBIDDEN, lang);
@@ -145,7 +145,7 @@ describe("owner rules in the new format", () => {
   });
 
   test("the editor's 2-3 emojis are shown in full; a story without them gets the dictionary emoji", () => {
-    const a = { id: nextId++, summary: "x", headline: "Talks resume", topics: '["politics"]', main_topic: "politics", final_score: 8,
+    const a = { id: nextId++, summary: "x", headline: "Talks resume", topics: '["politics_conflicts"]', main_topic: "politics_conflicts", final_score: 8,
       best_url: "https://x.test/a", best_source: "O", emojis: "🇺🇸🇮🇷🕊️" };
     const b = { ...a, id: nextId++, headline: "Iran fires missiles at a tanker", emojis: null };
     const T = planDigest(user("en"), [a, b], TOPICS, yerevan(20, 5), CONFIG).text;

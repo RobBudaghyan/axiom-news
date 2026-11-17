@@ -16,8 +16,8 @@
     "quiet_line": "Спокойный период: {since} ничего важного по вашим темам."
   },
   "topics": {
-    "politics": "Политика",
-    "wars_conflicts": "Войны и конфликты",
+    "politics_conflicts": "Политика и конфликты",
+    "economy_markets": "Экономика и рынки",
     "armenia": "Армения",
     "russia": "Россия",
     "iran_war": "Война в Иране",

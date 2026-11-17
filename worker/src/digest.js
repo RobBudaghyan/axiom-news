@@ -36,6 +36,8 @@ const DAY = 86400;
 // it was made from an older English text: `src` must equal the current one, compared here in SQL).
 // Step 10: a story held back from an earlier digest for want of a translation (digest_holds) stays
 // a candidate after its window passed, while it is inside the 24 h floor ?11.
+// Step 15: ?12 the six main topic tags; a story whose main topic is one of them and not in the
+// reader's topics ?2 is never a candidate (off means off).
 export const CANDIDATE_SQL = `
 SELECT id, summary, headline, description, emojis, best_url, best_source, importance, final_score, topic_score,
        topics, main_topic, updated_at, dup_group, tr_headline, tr_description
@@ -54,6 +56,8 @@ FROM (
              AND EXISTS (SELECT 1 FROM digest_holds h WHERE h.user_id = ?1 AND h.story_id = s.id)))
     AND s.merged_into IS NULL
     AND EXISTS (SELECT 1 FROM json_each(s.topics) x WHERE x.value IN (SELECT u.value FROM json_each(?2) u))
+    AND NOT (coalesce(s.main_topic, '') IN (SELECT m.value FROM json_each(?12) m)
+             AND coalesce(s.main_topic, '') NOT IN (SELECT u.value FROM json_each(?2) u))
     AND NOT EXISTS (SELECT 1 FROM sent x WHERE x.user_id = ?1 AND x.story_id = s.id)
 )
 WHERE g >= ?5 OR (followed AND t >= ?7 AND (?9 = 0 OR t > final_score OR main_topic GLOB 'c[0-9]*'))
@@ -81,7 +85,7 @@ export function candidateStatement(user, now, cfg = CONFIG, lang = effectiveLang
     params: [user.id, JSON.stringify(parseList(user.topics)), digestSince(user.last_digest_at, now, cfg),
              cfg.candidate_limit, cfg.editorial_bar, cfg.unedited_offset, cfg.topic_bar,
              JSON.stringify(cfg.topic_boost_max ?? {}), cfg.topic_needs_boost ? 1 : 0, lang,
-             now - cfg.max_lookback_hours * 3600],
+             now - cfg.max_lookback_hours * 3600, JSON.stringify(mainTags(cfg))],
   };
 }
 
@@ -138,6 +142,11 @@ export function dedupe(candidates) {
   return { kept, dropped };
 }
 
+// Step 15 (owner, "off means off"): the six main topic tags (topic_specificity lists exactly them).
+// A story whose main topic is one of them and switched off for the reader never reaches them, even
+// through another tag they have on; otherwise one tag they have on is enough.
+export const mainTags = (cfg = CONFIG) => cfg.main_tags ?? cfg.topic_specificity ?? [];
+
 // Does a story qualify for a user who follows userTopics (the two-score rule)? With
 // cfg.topic_needs_boost the topic path is only for stories that matter MORE to followers than to
 // everyone (topic score above the global score); otherwise every global-6 story would reach the
@@ -145,6 +154,7 @@ export function dedupe(candidates) {
 export function qualifies(s, userTopics, cfg = CONFIG) {
   const tags = parseList(s.topics);
   if (!tags.some((t) => userTopics.includes(t))) return false;
+  if (s.main_topic && mainTags(cfg).includes(s.main_topic) && !userTopics.includes(s.main_topic)) return false;
   if (storyScore(s, cfg) >= cfg.editorial_bar) return true;
   const t = topicScore(s, cfg);
   return t != null && !!s.main_topic && userTopics.includes(s.main_topic) && t >= cfg.topic_bar &&

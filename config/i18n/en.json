@@ -16,8 +16,8 @@
     "quiet_line": "Quiet period: nothing important on your topics {since}."
   },
   "topics": {
-    "politics": "Politics",
-    "wars_conflicts": "Wars & Conflicts",
+    "politics_conflicts": "Politics & Conflicts",
+    "economy_markets": "Economy & Markets",
     "armenia": "Armenia",
     "russia": "Russia",
     "iran_war": "Iran War",

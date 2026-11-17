@@ -50,8 +50,10 @@ MAX_DESCRIPTION = 600
 
 # Stories that could reach a digest: the Worker's CANDIDATE_SQL rule (worker/src/digest.js) for a
 # reader who follows every topic. ?1 since, ?2 unedited_offset, ?3 boost caps (JSON), ?4 editorial
-# bar, ?5 topic bar, ?6 topic_needs_boost (0/1), ?7 the topic tags (JSON). Step 13 fixes: a custom
-# main topic (c<id>) uses its topic score as it is (no cap, no "above the score" rule).
+# bar, ?5 topic bar, ?6 topic_needs_boost (0/1), ?7 the topic tags (JSON), ?8 the six main topic
+# tags (JSON). Step 13 fixes: a custom main topic (c<id>) uses its topic score as it is (no cap, no
+# "above the score" rule). Step 15 (off means off): a story whose main topic is a main topic the
+# reader has off never qualifies.
 ELIGIBLE_SQL = """
 SELECT id, summary, headline, description, g FROM (
   SELECT s.*, coalesce(s.final_score, s.importance - ?2) AS g,
@@ -62,6 +64,8 @@ SELECT id, summary, headline, description, g FROM (
   WHERE max(s.updated_at, coalesce(s.scored_at, 0)) >= ?1
     AND s.merged_into IS NULL
     AND EXISTS (SELECT 1 FROM json_each(s.topics) x WHERE x.value IN (SELECT u.value FROM json_each(?7) u))
+    AND NOT (coalesce(s.main_topic, '') IN (SELECT m.value FROM json_each(?8) m)
+             AND coalesce(s.main_topic, '') NOT IN (SELECT u.value FROM json_each(?7) u))
 )
 WHERE g >= ?4 OR (main_topic IN (SELECT u.value FROM json_each(?7) u) AND t >= ?5
                   AND (?6 = 0 OR t > final_score OR main_topic GLOB 'c[0-9]*'))
@@ -127,15 +131,24 @@ def load_translate_prompt(path: Path = TRANSLATE_PROMPT) -> TranslatePrompt:
 
 def eligible_params(now: int, cfg: dict, tags: list[str], hours: float = 24) -> list:
     return [int(now - hours * 3600), cfg["unedited_offset"], json.dumps(cfg.get("topic_boost_max") or {}),
-            cfg["editorial_bar"], cfg["topic_bar"], 1 if cfg.get("topic_needs_boost") else 0, json.dumps(tags)]
+            cfg["editorial_bar"], cfg["topic_bar"], 1 if cfg.get("topic_needs_boost") else 0, json.dumps(tags),
+            json.dumps(main_tags(cfg))]
+
+
+def main_tags(cfg: dict) -> list[str]:
+    """The six main topic tags: config/digest.json topic_specificity lists exactly them."""
+    return list(cfg.get("main_tags") or cfg.get("topic_specificity") or [])
 
 
 def qualifies(s: dict, cfg: dict, tags: list[str]) -> bool:
-    """The digest rule for a reader who follows every topic, in Python (the fixture test checks it
+    """The digest rule for a reader who follows `tags` (the job uses every topic), in Python (the fixture test checks it
     against ELIGIBLE_SQL here and against qualifies() in worker/src/digest.js)."""
     story_tags = json.loads(s["topics"]) if isinstance(s["topics"], str) else s["topics"]
     if not any(t in tags for t in story_tags):
         return False
+    main = s.get("main_topic")
+    if main and main in main_tags(cfg) and main not in tags:
+        return False                         # Step 15: its main topic is switched off
     final = s.get("final_score")
     g = final if final is not None else (s.get("importance") or 0) - cfg["unedited_offset"]
     if g >= cfg["editorial_bar"]:

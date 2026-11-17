@@ -30,7 +30,7 @@ BUDGET = guard.load_budget()
 
 def add_user(db, uid, paused=0, blocked=0, lang="en"):
     db.query("INSERT INTO users (id, first_name, topics, created_at, paused, blocked, lang) VALUES (?,?,?,?,?,?,?)",
-             [uid, f"U{uid}", json.dumps(["politics"]), 1, paused, blocked, lang])
+             [uid, f"U{uid}", json.dumps(["politics_conflicts"]), 1, paused, blocked, lang])
 
 
 def add_topic(db, tid, name, queries=None, boost=2, searched_at=None, orphan_since=None, keywords="name"):
@@ -244,7 +244,7 @@ class TestAIPasses(unittest.TestCase):
         follow(db, 1, 2)
         google = FakeGoogle({"Formula 1": [gi("F1: Verstappen wins Abu Dhabi Grand Prix")],
                              "Colombia": [gi("COL: Colombia central bank cuts rates")]})
-        j, gem = job_with(db, google, responder=grouping_responder({"F1": ["c2"], "COL": ["c1", "politics"]}))
+        j, gem = job_with(db, google, responder=grouping_responder({"F1": ["c2"], "COL": ["c1", "politics_conflicts"]}))
         st = j.run()
         p = gem.prompts[0]
         self.assertIn("READER TOPICS", p)
@@ -253,7 +253,7 @@ class TestAIPasses(unittest.TestCase):
         self.assertIn("this overrides the FILTER rule for them", p)
         self.assertIn("F1: Verstappen wins Abu Dhabi Grand Prix [headline only]", p)
         topics = sorted(json.loads(r["topics"]) for r in db.query("SELECT topics FROM stories"))
-        self.assertEqual(topics, [["c2"], ["politics", "c1"]])
+        self.assertEqual(topics, [["c2"], ["politics_conflicts", "c1"]])
         self.assertEqual(st.stories_created, 2)
 
     def test_editor_prompt_floor_and_custom_main_topic(self):
@@ -262,14 +262,14 @@ class TestAIPasses(unittest.TestCase):
                             "boost_max": 2, "floor": 3}]
         t = int(T0 - H)
         ids = []
-        for summary, tags, imp in (("Colombia peso slides", ["c1"], 3), ("Minor politics note", ["politics"], 3),
-                                   ("Big vote", ["politics"], 6)):
+        for summary, tags, imp in (("Colombia peso slides", ["c1"], 3), ("Minor politics note", ["politics_conflicts"], 3),
+                                   ("Big vote", ["politics_conflicts"], 6)):
             ids.append(db.query("INSERT INTO stories (summary, topics, importance, best_url, best_source, best_tier, "
                                 "source_count, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?) RETURNING id",
                                 [summary, json.dumps(tags), imp, "https://x.test", "X", 2, 1, t, t])[0]["id"])
         answer = {"events": [{"ids": [f"S{ids[0]}"], "score": 4, "topic": "c1", "topic_score": 6, "headline": "Colombia peso slides",
                               "description": "", "emojis": "🇨🇴📉"},
-                             {"ids": [f"S{ids[2]}"], "score": 6, "topic": "politics", "topic_score": 6, "headline": "Big vote",
+                             {"ids": [f"S{ids[2]}"], "score": 6, "topic": "politics_conflicts", "topic_score": 6, "headline": "Big vote",
                               "description": "", "emojis": "🗳️"}]}
         gem = FakeProvider("gemini", [answer])
         s = Settings()
@@ -288,7 +288,7 @@ class TestAIPasses(unittest.TestCase):
         self.assertIn("a technology or field (AI regulation): 8 a major law passed", p)
         self.assertNotIn("up to the cap", p)
         self.assertIn(f"S{ids[0]} | c1", p)                     # importance 3 passes the custom floor
-        self.assertNotIn(f"S{ids[1]} | politics", p)            # importance 3 politics does not
+        self.assertNotIn(f"S{ids[1]} | politics_conflicts", p)            # importance 3 politics does not
         self.assertEqual(res.status, "ok")
         row = db.query("SELECT main_topic, topic_score FROM stories WHERE id = ?", [ids[0]])[0]
         self.assertEqual((row["main_topic"], row["topic_score"]), ("c1", 6))

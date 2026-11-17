@@ -86,10 +86,10 @@ describe("digest cron", () => {
     const { db, sqlite } = fakeD1();
     const now = yerevan(14, 5);
     okRun(sqlite, now - 1800);
-    addStory(sqlite, "Armenia and Azerbaijan sign border deal", ["armenia", "politics"], 7, now - 600,
+    addStory(sqlite, "Armenia and Azerbaijan sign border deal", ["armenia", "politics_conflicts"], 7, now - 600,
       { final_score: 8, headline: "Armenia and Azerbaijan sign a border deal", description: "Both sides signed in Washington.",
         emojis: "🇦🇲🇦🇿📝" });
-    addStory(sqlite, "Iran fires missiles at a tanker in the Gulf", ["iran_war", "wars_conflicts"], 6, now - 300,
+    addStory(sqlite, "Iran fires missiles at a tanker in the Gulf", ["iran_war", "economy_markets"], 6, now - 300,
       { final_score: 7 });
     const outbox = [];
     const io = { send: async (id, text, extra) => { outbox.push({ id, text, extra }); return { message_id: outbox.length }; },

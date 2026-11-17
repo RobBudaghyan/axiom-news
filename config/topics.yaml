@@ -8,27 +8,29 @@
 #               (Old-project lesson: a bare label alone caused wrong tags.)
 #   default:    new users start subscribed to it.
 topics:
-  - tag: politics
-    label: {en: "Politics", ru: "Политика"}
+  - tag: politics_conflicts
+    label: {en: "Politics & Conflicts", ru: "Политика и конфликты"}
     emoji: "🏛️"
     default: true
     definition: >-
-      Government, elections, legislation, diplomacy, sanctions, major court rulings,
-      and economic policy decisions with political weight (central bank moves, trade
-      deals, tariffs). Any country. The core of the story must be a government,
-      election, party, law, court or official policy act. Not: company news (CEO
-      changes, IPOs, earnings, IT outages), market moves (stocks, bonds, currencies,
-      inflation data) unless the story is about a government decision, technology,
-      celebrity news, sports, lifestyle.
+      Government, elections, legislation, diplomacy, sanctions, major court rulings, and
+      armed conflicts anywhere in the world: military operations, attacks, terrorism,
+      ceasefires, peace talks, arms deliveries and major defence developments. Any
+      country. Stories about the Ukraine war or an Iran war also get this tag. Not:
+      economy and market news (that is economy_markets) unless a government decision
+      is the core of the story, technology, celebrity news, sports, lifestyle.
 
-  - tag: wars_conflicts
-    label: {en: "Wars & Conflicts", ru: "Войны и конфликты"}
-    emoji: "⚔️"
+  - tag: economy_markets
+    label: {en: "Economy & Markets", ru: "Экономика и рынки"}
+    emoji: "📈"
     default: true
     definition: >-
-      Armed conflicts, military operations, attacks, terrorism, ceasefires, peace
-      talks, arms deliveries and major military/defence developments anywhere in the
-      world. Stories about the Ukraine war or an Iran war also get this tag.
+      Economies and economic data (growth, inflation, jobs), central banks and interest
+      rates, stock, bond and currency markets when they move a lot, trade deals and
+      tariffs, energy and commodity prices, and big company news with wide impact (a
+      giant firm collapses, a huge merger, a market-moving decision). Not: routine
+      company news (products, mid-size results, executive changes), a day's market
+      moves with no event behind them, stock tips.
 
   - tag: armenia
     label: {en: "Armenia", ru: "Армения"}
@@ -61,7 +63,7 @@ topics:
       programme strikes and talks, and incidents in neighbouring countries caused by
       the conflict. Not: Iranian domestic news with no link to the conflict; the
       Israel-Hamas war in Gaza, the West Bank or Israeli domestic politics when the
-      item does not involve Iran (those are wars_conflicts or politics).
+      item does not involve Iran (those are politics_conflicts).
 
   - tag: ukraine_war
     label: {en: "Ukraine War", ru: "Война на Украине"}

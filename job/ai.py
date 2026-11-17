@@ -361,6 +361,7 @@ DASH_SPACED = re.compile(r"\s+[‒–—―]\s+")
 DASH_ANY = re.compile(r"[‒–—―]")
 CONTROL = re.compile(r"[\x00-\x1f\x7f]")
 WAR_TAGS = ("ukraine_war", "iran_war")
+BROAD_TAG = "politics_conflicts"
 
 
 def clean_summary(text: str) -> str:
@@ -400,7 +401,8 @@ def validate_stories(data: dict, item_ids: set[int], existing_ids: set[int],
                      topic_order: list[str]) -> list[StoryOut]:
     """Apply the rules from prompts/story_batch.md 'Notes for the job code': drop unknown tags
     and item ids, ids used twice (first wins), clamp importance, drop stories without a valid
-    tag or item, add wars_conflicts next to a specific war tag (lesson 8)."""
+    tag or item, add politics_conflicts next to a specific war tag (lesson 8; Step 15 merged
+    wars_conflicts into it)."""
     used: set[int] = set()
     known = set(topic_order)
     out = []
@@ -417,7 +419,7 @@ def validate_stories(data: dict, item_ids: set[int], existing_ids: set[int],
                 ids.append(v)
         tags = {str(t).strip() for t in raw.get("topics") or []} & known
         if tags & set(WAR_TAGS):
-            tags.add("wars_conflicts")
+            tags.add(BROAD_TAG)
         if not ids or not tags:
             continue
         try:

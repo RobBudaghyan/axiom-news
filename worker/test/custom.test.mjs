@@ -301,7 +301,7 @@ describe("Step 13: adding a custom topic", () => {
     const now = nowS();
     sqlite.prepare("INSERT INTO custom_topic_days (topic_id, day, searches, fetched, dup_dropped, new_items) VALUES (1, ?, 6, 140, 20, 31)")
       .run(new Date(now * 1000).toISOString().slice(0, 10));
-    const sid = addStory(sqlite, "Colombia election", ["politics", "c1"], 6, now - 600, { final_score: 6, main_topic: "c1", topic_score: 8 });
+    const sid = addStory(sqlite, "Colombia election", ["politics_conflicts", "c1"], 6, now - 600, { final_score: 6, main_topic: "c1", topic_score: 8 });
     sqlite.prepare("INSERT INTO sent (user_id, story_id, sent_at) VALUES (?, ?, ?)").run(A, sid, now - 300);
     const r = await call(binding, "/api/admin", OWNER);
     const t = r.body.custom.topics[0];
@@ -364,8 +364,8 @@ describe("Step 13 fixes: the switch, edit-mode delete and the emoji", () => {
     await add(binding, B, "Colombia");
     await sw(binding, A, 1, false);
     const rows = (u) => sqlite.prepare("SELECT t.*, f.enabled FROM custom_follows f JOIN custom_topics t ON t.id = f.topic_id WHERE f.user_id = ?").all(u);
-    assert.deepEqual(JSON.parse(withCustomTopics({ topics: "[\"politics\"]" }, rows(A)).topics), ["politics"]);
-    assert.deepEqual(JSON.parse(withCustomTopics({ topics: "[\"politics\"]" }, rows(B)).topics), ["politics", "c1"]);
+    assert.deepEqual(JSON.parse(withCustomTopics({ topics: "[\"politics_conflicts\"]" }, rows(A)).topics), ["politics_conflicts"]);
+    assert.deepEqual(JSON.parse(withCustomTopics({ topics: "[\"politics_conflicts\"]" }, rows(B)).topics), ["politics_conflicts", "c1"]);
   });
 
   test("the last topic switched on cannot go off; with a main topic on it can; bad input refused", async () => {
@@ -376,7 +376,7 @@ describe("Step 13 fixes: the switch, edit-mode delete and the emoji", () => {
     const r = await sw(binding, A, 1, false);
     assert.equal(r.status, 400);
     assert.equal(r.body.code, "keep_topic");
-    await call(binding, "/api/settings", A, { topics: ["politics"] });
+    await call(binding, "/api/settings", A, { topics: ["politics_conflicts"] });
     assert.equal((await sw(binding, A, 1, false)).status, 200);
     const main = await call(binding, "/api/settings", A, { topics: [] });
     assert.equal(main.body.code, "keep_topic", "a switched-off custom topic does not count as 'on'");
@@ -428,12 +428,12 @@ describe("Step 13: custom topics in digests", () => {
     topics: JSON.stringify(topics), main_topic: main, updated_at: T_NOW - 600, dup_group: null, ...extra });
 
   test("Step 13 fixes: the topic score counts as it is for a custom topic (no cap, no 'above the score' rule)", () => {
-    const user = withCustomTopics({ id: 1, topics: JSON.stringify(["politics"]) }, [COL]);
+    const user = withCustomTopics({ id: 1, topics: JSON.stringify(["politics_conflicts"]) }, [COL]);
     const mine = JSON.parse(user.topics);
     assert.equal(qualifies(story(1, ["c1"], 1, 8, "c1"), mine, CONFIG), true, "a Grand Prix result: global 1, topic 8");
     assert.equal(qualifies(story(2, ["c1"], 6, 6, "c1"), mine, CONFIG), true, "topic 6 equal to the score is enough");
     assert.equal(qualifies(story(3, ["c1"], 4, 5, "c1"), mine, CONFIG), false, "below the topic bar of 6");
-    assert.equal(qualifies(story(4, ["c1"], 1, 8, "c1"), ["politics"], CONFIG), false, "not followed: not in");
+    assert.equal(qualifies(story(4, ["c1"], 1, 8, "c1"), ["politics_conflicts"], CONFIG), false, "not followed: not in");
     assert.equal(qualifies(story(5, ["c1"], 1, 8, "c1"), mine, { ...CONFIG, topic_boost_max: { ...CONFIG.topic_boost_max, c1: 0 } }), true,
       "a cap in the settings does not apply to a custom topic");
     // the 6 main topics keep the Step 8 rule
@@ -461,12 +461,20 @@ describe("Step 13: custom topics in digests", () => {
     const capped = { ...cfg, candidate_limit: 1000, topic_boost_max: { ...cfg.topic_boost_max, c1: 0, c2: 0 } };
     const [again] = await db.batch([candidateStatement({ id: 9, topics: JSON.stringify(data.tags), last_digest_at: null }, T_NOW, capped)]);
     assert.deepEqual(again.map((r) => r.id).sort((a, b) => a - b), data.cases.filter((c) => c.eligible).map((c) => c.id));
+    // Step 15: off means off, per reader with topics switched off
+    let uid = 20;
+    for (const [name, tags] of Object.entries(data.readers)) {
+      addUser(sqlite, { id: ++uid, topics: JSON.stringify(tags) });
+      const [got] = await db.batch([candidateStatement({ id: uid, topics: JSON.stringify(tags), last_digest_at: null }, T_NOW,
+        { ...cfg, candidate_limit: 1000 })]);
+      assert.deepEqual(got.map((r) => r.id).sort((a, b) => a - b), data.cases.filter((c) => c.eligible_for[name]).map((c) => c.id), name);
+    }
   });
 
   test("its own section, in the reader's language, before broader sections; SQL agrees", async () => {
     const { db, sqlite } = fakeD1();
-    const u = addUser(sqlite, { id: 5, topics: JSON.stringify(["politics"]), lang: "ru" });
-    const sid = addStory(sqlite, "Colombia vote", ["politics", "c1"], 6, T_NOW - 600, { final_score: 5, topic_score: 7, main_topic: "c1",
+    const u = addUser(sqlite, { id: 5, topics: JSON.stringify(["politics_conflicts"]), lang: "ru" });
+    const sid = addStory(sqlite, "Colombia vote", ["politics_conflicts", "c1"], 6, T_NOW - 600, { final_score: 5, topic_score: 7, main_topic: "c1",
       headline: "Colombia votes" });
     sqlite.prepare("INSERT INTO story_translations (story_id, lang, ok, headline, description, src, created_at) VALUES (?, 'ru', 1, 'Колумбия голосует', '', ?, 1)")
       .run(sid, "Colombia votes\n");
@@ -474,22 +482,22 @@ describe("Step 13: custom topics in digests", () => {
     const cfg = CONFIG;
     const [rows] = await db.batch([candidateStatement(user, T_NOW, cfg)]);
     assert.equal(rows.length, 1, "the SQL picks it via the topic path");
-    const plan = planDigest(user, rows, [{ tag: "politics", label_en: "Politics", emoji: "🏛️" }, ...asTopicRows([COL])], T_NOW, cfg);
+    const plan = planDigest(user, rows, [{ tag: "politics_conflicts", label_en: "Politics", emoji: "🏛️" }, ...asTopicRows([COL])], T_NOW, cfg);
     assert.deepEqual(plan.storyIds, [sid]);
     assert.match(plan.text, /🇨🇴 Колумбия<\/th>/);
     assert.match(plan.text, /Колумбия голосует/);
   });
 
   test("a story tagged with a custom topic and a main topic goes under the custom one (most specific)", () => {
-    const user = withCustomTopics({ id: 1, topics: JSON.stringify(["politics"]) }, [COL]);
-    const picked = pickStories([story(1, ["politics", "c1"], 7, 7, null)], JSON.parse(user.topics), CONFIG);
+    const user = withCustomTopics({ id: 1, topics: JSON.stringify(["politics_conflicts"]) }, [COL]);
+    const picked = pickStories([story(1, ["politics_conflicts", "c1"], 7, 7, null)], JSON.parse(user.topics), CONFIG);
     assert.equal(picked[0].primary, "c1");
   });
 
   test("the length cut keeps the custom section's best story", () => {
-    const user = withCustomTopics({ id: 1, topics: JSON.stringify(["politics"]) }, [COL]);
+    const user = withCustomTopics({ id: 1, topics: JSON.stringify(["politics_conflicts"]) }, [COL]);
     const long = "word ".repeat(110);
-    const list = [...Array.from({ length: 12 }, (_, i) => story(10 + i, ["politics"], 8, 8, "politics", { description: long })),
+    const list = [...Array.from({ length: 12 }, (_, i) => story(10 + i, ["politics_conflicts"], 8, 8, "politics_conflicts", { description: long })),
       story(99, ["c1"], 5, 7, "c1", { description: long })];
     const cfg = CONFIG;
     const picked = pickStories(list, JSON.parse(user.topics), cfg);
@@ -501,8 +509,8 @@ describe("Step 13: custom topics in digests", () => {
   test("cron: a due reader gets the custom section; never twice; a reader who does not follow it does not", async () => {
     const { db, sqlite } = fakeD1();
     const now = yerevan(20, 2);
-    addUser(sqlite, { id: 5, topics: JSON.stringify(["politics"]), next_digest_at: yerevan(20), last_digest_at: yerevan(14) });
-    addUser(sqlite, { id: 6, topics: JSON.stringify(["politics"]), next_digest_at: yerevan(20), last_digest_at: yerevan(14) });
+    addUser(sqlite, { id: 5, topics: JSON.stringify(["politics_conflicts"]), next_digest_at: yerevan(20), last_digest_at: yerevan(14) });
+    addUser(sqlite, { id: 6, topics: JSON.stringify(["politics_conflicts"]), next_digest_at: yerevan(20), last_digest_at: yerevan(14) });
     sqlite.prepare("INSERT INTO custom_topics (id, tag, names, emoji, definition, queries, boost_max, created_at) VALUES (1, 'c1', ?, '🇨🇴', 'd', '[]', 2, 1)")
       .run(COL.names);
     sqlite.prepare("INSERT INTO custom_follows (user_id, topic_id, at) VALUES (5, 1, 1)").run();
@@ -523,7 +531,7 @@ describe("Step 13: custom topics in digests", () => {
   test("Step 13 fixes: cron leaves out a custom topic its reader switched off", async () => {
     const { db, sqlite } = fakeD1();
     const now = yerevan(20, 2);
-    addUser(sqlite, { id: 5, topics: JSON.stringify(["politics"]), next_digest_at: yerevan(20), last_digest_at: yerevan(14) });
+    addUser(sqlite, { id: 5, topics: JSON.stringify(["politics_conflicts"]), next_digest_at: yerevan(20), last_digest_at: yerevan(14) });
     sqlite.prepare("INSERT INTO custom_topics (id, tag, names, emoji, definition, queries, boost_max, created_at) VALUES (1, 'c1', ?, '🇨🇴', 'd', '[]', 2, 1)")
       .run(COL.names);
     sqlite.prepare("INSERT INTO custom_follows (user_id, topic_id, at, enabled) VALUES (5, 1, 1, 0)").run();

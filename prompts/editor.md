@@ -67,9 +67,18 @@ stories side by side and judge each one yourself.
         situation that "remains", "continues", "persists" or is "unchanged" ("China's naval
         presence near Japan remains normalized", "tensions continue", "the rate stays at 5%", "talks
         are still stalled") is 3 or 4, never 6, however serious the subject
-   1-2  not news for these readers, however widely reported: company and market news, IT
-        outages, flight disruptions and air traffic control failures, celebrity, sport, culture,
-        coins and ceremonies
+   1-2  not news for these readers, however widely reported: routine company news (a product,
+        a CEO change at a mid-size firm, quarterly results with no wider effect), a day's market
+        moves with no event behind them, IT outages, flight disruptions and air traffic control
+        failures, celebrity, sport, culture, coins and ceremonies. Economy news with wide
+        impact (a central bank decision, a trade deal, an energy price shock, a market crash, a
+        giant company's failure) is real news: score it like any other event
+   CULTURE AND SPORT stay below 6 on the six main topics, in the score AND the topic score:
+   ceremonies, concerts, festivals, exhibitions, awards, anniversaries, chess and sport results
+   are 5 at most however proud or popular, e.g. "Armenian grandmaster beats Carlsen" 3, 4; "Gala
+   concert in Moscow marks Unity Day" 2, 2; "Yerevan hosts a wine festival" 2, 3; "Russia wins a
+   hockey friendly" 2, 2. (A reader topic about a sport or culture is scored by its own rule
+   below.)
    Score the event, not the number of outlets. A claim carried only by one tier-3 outlet and
    confirmed by no other source is 5 at most. For Armenia news, judge what matters for Armenia:
    a real step in relations with Turkey, Azerbaijan, Russia, the EU or the US, security,
@@ -78,11 +87,14 @@ stories side by side and judge each one yourself.
 
 3. TOPIC. Give each event the ONE topic tag from the list above that it is mainly about: the
    section a reader would look for it in. A summit of the US, Russian and Chinese leaders is
-   politics, not iran_war, even if Iran will be discussed.
+   politics_conflicts, not iran_war, even if Iran will be discussed. A central bank, market,
+   trade or energy price story is economy_markets, unless it is mainly about one of the
+   country or war topics (Russia's central bank is russia; oil prices jumping after a strike in
+   the Gulf is iran_war).
    TOPIC SCORE. Also give each event a topic_score from 1 to 10: how important it is for a
    reader who follows that main topic closely. Start from the score and add a boost:
-   - +0 for most events, on every topic. Always +0 for politics and wars_conflicts (broad
-     topics: their readers already get the world scale). Always +0 for statements, warnings
+   - +0 for most events, on every topic. Always +0 for politics_conflicts (a broad topic: its
+     readers already get the world scale). Always +0 for statements, warnings
      and criticism with no decision; analysis, commentary, interviews; forums, conferences,
      ceremonies; visits and meetings with no outcome; daily military reports (drones shot down,
      shelling, strikes with few casualties); follow-ups.
@@ -93,7 +105,11 @@ stories side by side and judge each one yourself.
      court ruling, arrest or sentence of a known figure, a government decision or new law, a
      concrete step with a neighbour). +2 for a significant one (a political arrest or trial of a
      leading figure, a security incident with casualties, a big change in relations with Turkey,
-     Azerbaijan, Russia, the EU or the US, a constitutional or election step).{reader_boost}
+     Azerbaijan, Russia, the EU or the US, a constitutional or election step).
+   - economy_markets: +1 at most, only for a decision or shock with wide effect that the world
+     scale underrates (a major central bank changes rates, a large trade or tariff deal, a sharp
+     energy price move on a supply event). Routine market moves, forecasts, earnings and
+     analysts' views are +0.{reader_boost}
    On a normal day only about 3 to 6 events per topic reach a topic score of 7 or more.
    Examples (score, then topic score):
    - armenia: "CSTO strips Armenia of voting rights" 7, 9; "Armenia and Turkey are close to
@@ -115,12 +131,16 @@ stories side by side and judge each one yourself.
      envoys prepare a large prisoner swap" 6, 7; "Russian strike on Pavlohrad injures a
      seven-year-old boy and others" 6, 6; "Fifty-four combat engagements along the front line
      over the past day" 4, 4; "Scheduled power outages in Ukrainian regions" 4, 4.
-   - wars_conflicts: "Myanmar airstrike kills 12 at a displacement camp" 7, 7; "Floods and cold
-     hit Gaza as the aid block persists" 6, 6; "Teenager arrested for setting fire to a
+   - politics_conflicts: "Trump to meet Xi and Putin in China" 8, 8; "Myanmar airstrike kills 12
+     at a displacement camp" 7, 7; "Italy fines Meta 887 million dollars over photo privacy" 6,
+     6; "Floods and cold hit Gaza as the aid block persists" 6, 6; "France reaffirms support for
+     Morocco's position on Western Sahara" 4, 4; "Teenager arrested for setting fire to a
      communications cabinet" 4, 4.
-   - politics: "Trump to meet Xi and Putin in China" 8, 8; "Italy fines Meta 887 million dollars
-     over photo privacy" 6, 6; "France reaffirms support for Morocco's position on Western
-     Sahara" 4, 4.
+   - economy_markets: "Global stocks plunge as a major bank collapses" 8, 8; "The Federal Reserve
+     cuts interest rates by half a point" 7, 8; "The US and the EU agree to cut tariffs on cars and
+     steel" 6, 7; "Oil jumps 6% after OPEC+ announces a surprise output cut" 6, 6; "The European
+     Central Bank holds rates, as expected" 4, 4; "Shares of a mid-size retailer fall after weak
+     results" 2, 2; "Analysts expect gold to keep rising" 3, 3.
    For an EDITED story, give a topic_score as well, even when you keep its text.
 
 4. WRITE for each event. For an EDITED story whose facts did not change, you may leave

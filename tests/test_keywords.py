@@ -82,9 +82,9 @@ class TestMatch(unittest.TestCase):
         self.assertFalse(aus.allows("c2", "Austria votes"))
 
     def test_main_topics_and_unknown_custom_tags_are_never_touched(self):
-        self.assertTrue(self.rule.allows("politics", "anything"))
+        self.assertTrue(self.rule.allows("politics_conflicts", "anything"))
         self.assertTrue(self.rule.allows("c9", "anything"))       # no active reader: left alone
-        self.assertEqual(self.rule.tags(["politics", "c1", "c9"], "Canada and China"), ["politics", "c9"])
+        self.assertEqual(self.rule.tags(["politics_conflicts", "c1", "c9"], "Canada and China"), ["politics_conflicts", "c9"])
 
     def test_no_keywords_yet_uses_the_names(self):
         r = custom.KeywordRule([topic(keywords={})])
@@ -92,8 +92,8 @@ class TestMatch(unittest.TestCase):
         self.assertFalse(r.allows("c1", "Japanese steel"))
 
     def test_fallback_main_topic_is_the_most_specific(self):
-        kept, main, moved = self.rule.apply(["politics", "russia", "c1"], "c1", "Putin meets Xi")
-        self.assertEqual((kept, main, moved), (["politics", "russia"], "russia", True))
+        kept, main, moved = self.rule.apply(["politics_conflicts", "russia", "c1"], "c1", "Putin meets Xi")
+        self.assertEqual((kept, main, moved), (["politics_conflicts", "russia"], "russia", True))
         self.assertEqual(self.rule.apply(["c1"], "c1", "Canada and China"), ([], None, True))
         self.assertEqual(self.rule.apply(["c1"], "c1", "Japan votes"), (["c1"], "c1", False))
 
@@ -112,23 +112,23 @@ class TestPass1(unittest.TestCase):
         add_topic(db, 1, "Japan", keywords=JAPAN)
         follow(db, 1, 1)
         google = FakeGoogle({"Japan": [gi("CAN: Canadian PM Carney arrives in China"), gi("JAP: Japan economy shrinks")]})
-        j, _ = job_with(db, google, responder=grouping_responder({"CAN": ["politics", "c1"], "JAP": ["c1"]}))
+        j, _ = job_with(db, google, responder=grouping_responder({"CAN": ["politics_conflicts", "c1"], "JAP": ["c1"]}))
         j.run_enforce = lambda *a: None          # pass 1 alone (the hourly sweep is tested apart)
         j.run()
         got = {r["summary"].split(":")[0]: json.loads(r["topics"]) for r in db.query("SELECT summary, topics FROM stories")}
-        self.assertEqual(got, {"Summary of CAN": ["politics"], "Summary of JAP": ["c1"]})
+        self.assertEqual(got, {"Summary of CAN": ["politics_conflicts"], "Summary of JAP": ["c1"]})
 
     def test_a_merge_keeps_the_tag_only_with_a_keyword(self):
         db = new_db()
         add_user(db, 1)
         add_topic(db, 1, "Japan", keywords=JAPAN)
         follow(db, 1, 1)
-        old = story(db, "Xi meets Carney in Shenzhen", ["politics", "c1"], t=int(T0 - 2 * H))
+        old = story(db, "Xi meets Carney in Shenzhen", ["politics_conflicts", "c1"], t=int(T0 - 2 * H))
         google = FakeGoogle({"Japan": [gi("XI: Xi and Carney cut tariffs")]})
         j, _ = job_with(db, google, responder=grouping_responder({"XI": ["c1"]}, merge={"XI": "Xi meets"}))
         j.run_enforce = lambda *a: None
         j.run()
-        self.assertEqual(row(db, old)["topics"], ["politics"])
+        self.assertEqual(row(db, old)["topics"], ["politics_conflicts"])
 
 
 class TestEditor(unittest.TestCase):
@@ -142,9 +142,9 @@ class TestEditor(unittest.TestCase):
 
     def test_custom_main_topic_without_keyword_falls_back_with_no_boost(self):
         db = new_db()
-        a = story(db, "China and Canada slash tariffs", ["politics", "c1"], imp=6)
+        a = story(db, "China and Canada slash tariffs", ["politics_conflicts", "c1"], imp=6)
         b = story(db, "Japan economy shrinks", ["c1"], imp=5)
-        c = story(db, "Kadena base gets F-15EX jets", ["wars_conflicts", "c1"], imp=5)
+        c = story(db, "Kadena base gets F-15EX jets", ["economy_markets", "c1"], imp=5)
         answer = {"events": [
             {"ids": [f"S{a}"], "score": 6, "topic": "c1", "topic_score": 7, "headline": "China and Canada slash tariffs",
              "description": "", "emojis": ""},
@@ -158,9 +158,9 @@ class TestEditor(unittest.TestCase):
         res, _ = self.run_editor(db, answer)
         self.assertEqual(res.status, "ok")
         ra, rb, rc = row(db, a), row(db, b), row(db, c)
-        self.assertEqual((ra["topics"], ra["main_topic"], ra["topic_score"]), (["politics"], "politics", 6))
+        self.assertEqual((ra["topics"], ra["main_topic"], ra["topic_score"]), (["politics_conflicts"], "politics_conflicts", 6))
         self.assertEqual((rb["topics"], rb["main_topic"], rb["topic_score"]), (["c1"], "c1", 7))
-        self.assertEqual((rc["topics"], rc["main_topic"]), (["wars_conflicts", "c1"], "c1"))
+        self.assertEqual((rc["topics"], rc["main_topic"]), (["economy_markets", "c1"], "c1"))
 
     def test_only_custom_tags_and_no_keyword_leaves_the_custom_path(self):
         db = new_db()
@@ -177,14 +177,14 @@ class TestEditor(unittest.TestCase):
 class TestEnforce(unittest.TestCase):
     def test_old_rows_are_fixed_once_and_good_ones_left_alone(self):
         db = new_db()
-        bad = story(db, "s", ["politics", "c1"], headline="US restricts China's access to AI chips", main="c1", final=6, ts=7)
+        bad = story(db, "s", ["politics_conflicts", "c1"], headline="US restricts China's access to AI chips", main="c1", final=6, ts=7)
         good = story(db, "s", ["c1"], headline="Japan scrambles jets", main="c1", final=6, ts=7)
         old = story(db, "s", ["c1"], headline="Canada and China", main="c1", final=6, ts=7, t=int(T0 - 30 * H))
         rule = custom.KeywordRule([topic()])
         changed = custom.enforce(db, rule, T0)
         self.assertEqual([c["id"] for c in changed], [bad])
         r = row(db, bad)
-        self.assertEqual((r["topics"], r["main_topic"], r["topic_score"]), (["politics"], "politics", 6))
+        self.assertEqual((r["topics"], r["main_topic"], r["topic_score"]), (["politics_conflicts"], "politics_conflicts", 6))
         self.assertEqual(row(db, good)["topics"], ["c1"])
         self.assertEqual(row(db, old)["topics"], ["c1"])      # outside the digest window: not read
         self.assertEqual(custom.enforce(db, rule, T0), [])
@@ -194,10 +194,10 @@ class TestEnforce(unittest.TestCase):
         add_user(db, 1)
         add_topic(db, 1, "Japan", keywords=JAPAN)
         follow(db, 1, 1)
-        bad = story(db, "s", ["politics", "c1"], headline="China and Canada slash tariffs", main="c1", final=6, ts=6)
+        bad = story(db, "s", ["politics_conflicts", "c1"], headline="China and Canada slash tariffs", main="c1", final=6, ts=6)
         j, _ = job_with(db)
         st = j.run()
-        self.assertEqual(row(db, bad)["topics"], ["politics"])
+        self.assertEqual(row(db, bad)["topics"], ["politics_conflicts"])
         self.assertEqual(st.custom_unkeyed, 1)
 
 
@@ -216,7 +216,7 @@ class TestInvariant(unittest.TestCase):
             ids, answer = [], {"events": []}
             for _ in range(50):
                 text = " ".join(rnd.choice(words) for _ in range(5))
-                tags = rnd.sample(["politics", "russia", "c1", "c2"], rnd.randint(1, 3))
+                tags = rnd.sample(["politics_conflicts", "russia", "c1", "c2"], rnd.randint(1, 3))
                 sid = story(db, text, tags, imp=5)
                 ids.append(sid)
                 head = " ".join(rnd.choice(words) for _ in range(4))
@@ -329,10 +329,10 @@ class TestGlossarySpelling(unittest.TestCase):
     def test_the_editor_text_gets_it_after_the_fact_guard(self):
         """The real case: the editor wrote "Takaiti" from a Russian article (Такаити)."""
         db = new_db()
-        sid = story(db, "Putin and Japanese Prime Minister Takaiti may meet", ["politics", "c1"])
+        sid = story(db, "Putin and Japanese Prime Minister Takaiti may meet", ["politics_conflicts", "c1"])
         db.query("INSERT INTO items (url_hash, source_key, source_name, tier, url, title, fetched_at, status, story_id) "
                  "VALUES ('k', 'a', 'Interfax', 1, 'u', 'Putin and Japan PM Sanae Takaiti may meet at APEC in Shenzhen', ?, 'done', ?)", [T0, sid])
-        gem = FakeProvider("gemini", [{"events": [{"ids": [f"S{sid}"], "score": 5, "topic": "politics", "topic_score": 5,
+        gem = FakeProvider("gemini", [{"events": [{"ids": [f"S{sid}"], "score": 5, "topic": "politics_conflicts", "topic_score": 5,
                                                    "headline": "Putin and Japanese Prime Minister Takaiti may meet at APEC",
                                                    "description": "Putin and Sanae Takaiti could meet in Shenzhen.",
                                                    "emojis": ""}]}])

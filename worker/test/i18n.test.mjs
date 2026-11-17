@@ -138,7 +138,7 @@ describe("owner rule: in Russian, digest is always сводка", () => {
     for (const s of strings({ ...DICTS.ru, _comment: "" })) assert.doesNotMatch(s, bad, s);
     const now = yerevan(20, 5);
     const u = user("ru", { next_digest_at: yerevan(9) + 86400, paused: 0 });
-    const s = { ...story("Big news", ["politics"], 8), tr_headline: "Большая новость", tr_description: "Текст." };
+    const s = { ...story("Big news", ["politics_conflicts"], 8), tr_headline: "Большая новость", tr_description: "Текст." };
     for (const x of [planDigest(u, [s], TOPICS, now, CONFIG).text, planDigest(u, [], TOPICS, now, CONFIG).text,
       welcomeText(u, TOPICS, now, true, "ru"), welcomeText(u, TOPICS, now, false, "ru"), helpText(u, now, "ru"),
       helpText(null, now, "ru"), helpText({ ...u, paused: 1 }, now, "ru"), settingsText("ru")]) assert.doesNotMatch(x, bad, x);
@@ -187,14 +187,14 @@ describe("Russian grammar", () => {
 
   test("greeting by time of day, 24-hour time, the first name unchanged", () => {
     const u = user("ru", { first_name: "Rob" });
-    const s = story("Big news", ["politics"], 8);
+    const s = story("Big news", ["politics_conflicts"], 8);
     const tr = { ...s, tr_headline: "Большая новость", tr_description: "Подробности." };
     const first = (text) => text.split("</p>")[0] + "</p>";
     const at = (h) => first(planDigest(u, [tr], TOPICS, yerevan(h, 5), CONFIG).text);
     assert.equal(at(9), "<p><b>Доброе утро, Rob</b> · 1 история с 14:00</p>");
     assert.equal(at(14), "<p><b>Добрый день, Rob</b> · 1 история с 14:00</p>");
     assert.equal(at(20), "<p><b>Добрый вечер, Rob</b> · 1 история с 14:00</p>");
-    const five = Array.from({ length: 5 }, (_, i) => ({ ...story(`News ${i}`, ["politics"], 8), tr_headline: `Новость ${i}`, tr_description: "Текст." }));
+    const five = Array.from({ length: 5 }, (_, i) => ({ ...story(`News ${i}`, ["politics_conflicts"], 8), tr_headline: `Новость ${i}`, tr_description: "Текст." }));
     assert.equal(first(planDigest({ ...u, last_digest_at: null }, five, TOPICS, yerevan(20, 5), CONFIG).text),
       "<p><b>Добрый вечер, Rob</b> · 5 историй за последние 24 часа</p>");
     assert.equal(planDigest({ ...u, last_digest_at: yerevan(9, 30) }, [], TOPICS, yerevan(20, 5), CONFIG).text,
@@ -266,7 +266,7 @@ describe("never a mixed-language digest", () => {
   test("candidate SQL: a translation counts only while it was made from the current English text", async () => {
     const { db, sqlite } = fakeD1();
     const now = yerevan(20, 5);
-    const id = addStory(sqlite, "Summary", ["politics"], 6, now - 3600, { final_score: 8, headline: "Old headline", description: "Desc." });
+    const id = addStory(sqlite, "Summary", ["politics_conflicts"], 6, now - 3600, { final_score: 8, headline: "Old headline", description: "Desc." });
     addTranslation(sqlite, id, "ru", "Старый заголовок", "Описание.");
     addTranslation(sqlite, id, "fr", "Mauvais", null, { ok: 0 });
     const u = { ...user("ru"), last_digest_at: null };
@@ -284,7 +284,7 @@ describe("never a mixed-language digest", () => {
     const now = yerevan(14, 2);
     addUser(sqlite, { lang: "ru", next_digest_at: yerevan(14), last_digest_at: yerevan(9) });
     const a = addStory(sqlite, "A", ["armenia"], 6, now - 600, { final_score: 8, headline: "Armenia story" });
-    addStory(sqlite, "B", ["politics"], 6, now - 600, { final_score: 8, headline: "Politics story" });
+    addStory(sqlite, "B", ["politics_conflicts"], 6, now - 600, { final_score: 8, headline: "Politics story" });
     assert.ok(a);
     const outbox = [];
     const io = { send: async (chat, text) => outbox.push(text), alert: async () => {} };
@@ -338,7 +338,7 @@ describe("language defaults and the language setting", () => {
     const [reply, ...setup] = fetchMock.calls;
     assert.match(reply.body.text, /^Добро пожаловать в Axiom News, Rob!/);
     assert.match(reply.body.text, /в 09:00, 14:00 и 20:00 \(часовой пояс: Ереван\)/);
-    assert.match(reply.body.text, /Темы: Политика, Войны и конфликты, Армения, Россия, Война в Иране и Война на Украине\./);
+    assert.match(reply.body.text, /Темы: Политика и конфликты, Экономика и рынки, Армения, Россия, Война в Иране и Война на Украине\./);
     assert.equal(reply.body.reply_markup.inline_keyboard[0][0].text, "Открыть настройки");
     const cmd = setup.find((c) => c.url.endsWith("/setMyCommands")).body;
     assert.deepEqual(cmd.scope, { type: "chat", chat_id: OWNER });
@@ -402,7 +402,7 @@ describe("language defaults and the language setting", () => {
     assert.equal(ok.status, 200);
     assert.equal(langOf(sqlite), "ru");
     assert.equal(ok.body.user.lang, "ru");
-    assert.equal(ok.body.topics[0].label, "Политика");
+    assert.equal(ok.body.topics[0].label, "Политика и конфликты");
     assert.deepEqual(fetchMock.calls.map((c) => c.url.split("/").pop()).sort(), ["setChatMenuButton", "setMyCommands"]);
     for (const bad of ["xx", 5, ...(LANGS.enabled.includes("fr") ? [] : ["fr"])]) {
       const r = await call(binding, "/api/settings", init, { lang: bad });
@@ -442,7 +442,18 @@ describe("the stories the job translates = the stories digests can pick", () => 
     assert.ok(data.cases.some((c) => c.eligible) && data.cases.some((c) => !c.eligible));
   });
 
+  test("Step 15: off means off, per reader, agrees with the fixture (and the Python job)", () => {
+    const data = JSON.parse(read("tests/fixtures/eligible_cases.json"));
+    const cfg = { ...CONFIG, ...data.cfg };
+    for (const [name, tags] of Object.entries(data.readers)) {
+      const wrong = data.cases.filter((c) => qualifies({ ...c, topics: JSON.stringify(c.topics) }, tags, cfg) !== c.eligible_for[name]);
+      assert.deepEqual(wrong.map((c) => c.id), [], name);
+    }
+    const off = data.cases.filter((c) => cfg.main_tags.includes(c.main_topic) && !data.readers.wars_off.includes(c.main_topic));
+    assert.ok(off.length > 0 && off.every((c) => !c.eligible_for.wars_off));
+  });
+
   test("primaryTopic is unchanged by language (sections follow the English tags)", () => {
-    assert.equal(primaryTopic(["armenia", "politics"], ALL, CONFIG.topic_specificity, "armenia"), "armenia");
+    assert.equal(primaryTopic(["armenia", "politics_conflicts"], ALL, CONFIG.topic_specificity, "armenia"), "armenia");
   });
 });

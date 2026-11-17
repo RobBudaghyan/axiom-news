@@ -108,7 +108,7 @@ describe("admin gating", () => {
 describe("settings validation", () => {
   const tags = ALL;
   test("accepts good values and normalises them", () => {
-    assert.deepEqual(validatePatch({ topics: ["armenia", "politics", "armenia"] }, tags), { topics: ["politics", "armenia"] });
+    assert.deepEqual(validatePatch({ topics: ["armenia", "politics_conflicts", "armenia"] }, tags), { topics: ["politics_conflicts", "armenia"] });
     assert.deepEqual(validatePatch({ digest_times: ["20:00", "06:00", "23:00"] }, tags), { digest_times: ["06:00", "20:00", "23:00"] });
     assert.deepEqual(validatePatch({ paused: true }, tags), { paused: 1 });
   });
@@ -124,7 +124,7 @@ describe("settings validation", () => {
   const bad = [
     [{ topics: [] }, /at least one topic/],
     [{ topics: ["sports"] }, /does not exist/],
-    [{ topics: "politics" }, /must be a list/],
+    [{ topics: "politics_conflicts" }, /must be a list/],
     [{ digest_times: [] }, /at least one digest time/],
     [{ digest_times: ["05:00"] }, /between 06:00 and 23:00/],
     [{ digest_times: ["09:30"] }, /on the hour/],
@@ -265,7 +265,7 @@ describe("admin data and actions", () => {
     addUser(sqlite, { id: FRIEND, first_name: "Ani", paused: 1 });
     // two digests in the last day (3 + 1 stories, one of them merged away later and copied to its
     // kept story: still 4), one older digest that does not count
-    const st = [1, 2, 3, 4, 5, 6].map((i) => addStory(sqlite, `S${i}`, ["politics"], 7, now - 7200));
+    const st = [1, 2, 3, 4, 5, 6].map((i) => addStory(sqlite, `S${i}`, ["politics_conflicts"], 7, now - 7200));
     sqlite.prepare("UPDATE stories SET merged_into = ? WHERE id = ?").run(st[5], st[2]);
     const sent = sqlite.prepare("INSERT INTO sent (user_id, story_id, sent_at) VALUES (?, ?, ?)");
     for (const s of [st[0], st[1], st[2], st[5]]) sent.run(OWNER, s, now - 5000);   // st[5]: the copy of st[2]

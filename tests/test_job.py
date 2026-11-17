@@ -41,7 +41,7 @@ class Base(unittest.TestCase):
             entry("gamma", "ARM: Yerevan passes budget", 30, now),
             entry("beta", "OFF: football result", 10, now),
         ]
-        self.responder = grouping_responder({"IRAN": ["iran_war"], "ARM": ["armenia", "politics"]})
+        self.responder = grouping_responder({"IRAN": ["iran_war"], "ARM": ["armenia", "politics_conflicts"]})
 
 
 class HappyPath(Base):
@@ -56,7 +56,7 @@ class HappyPath(Base):
         self.assertEqual(iran["best_source"], "Alpha Times")            # tier 1 beats earlier tier 2
         self.assertIn("alpha.test", iran["best_url"])
         self.assertEqual(iran["source_count"], 2)
-        self.assertEqual(json.loads(iran["topics"]), ["wars_conflicts", "iran_war"])  # lesson 8
+        self.assertEqual(json.loads(iran["topics"]), ["politics_conflicts", "iran_war"])  # lesson 8
         self.assertEqual(item_statuses(self.db)["OFF: football result"], "dropped")
         self.assertEqual(stats.items_unaccounted, 0)
         run = last_run(self.db)
@@ -131,7 +131,7 @@ class Fallback(Base):
             from tests.helpers import prompt_items
             ids = sorted(prompt_items(prompt).values())[:2]
             return {"stories": [{"item_ids": ids, "existing_story_id": None, "summary": "S",
-                                 "topics": ["politics"], "importance": 5}], "not_news_ids": []}
+                                 "topics": ["politics_conflicts"], "importance": 5}], "not_news_ids": []}
         gem = FakeProvider("gemini", [lazy, lazy])
         groq = FakeProvider("groq", [grouping_responder({})])
         make_job(self.db, gem, groq, self.feeds, self.clock).run()
@@ -278,7 +278,7 @@ class Merge(Base):
         s = rows[0]
         self.assertEqual((s["source_count"], s["importance"], s["best_source"]), (2, 7, "Alpha Times"))
         self.assertEqual(s["summary"], "Summary of UA: drone strike on Kharkiv")  # empty AI summary keeps it
-        self.assertEqual(json.loads(s["topics"]), ["wars_conflicts", "russia", "ukraine_war"])
+        self.assertEqual(json.loads(s["topics"]), ["politics_conflicts", "russia", "ukraine_war"])
         self.assertEqual(s["updated_at"], int(self.clock()))
         self.assertEqual(last_run(self.db)["stories_merged"], 1)
 
@@ -286,7 +286,7 @@ class Merge(Base):
         def respond(prompt):
             ids = list(prompt_items_ids(prompt))
             return {"stories": [{"item_ids": ids, "existing_story_id": "S999", "summary": "S",
-                                 "topics": ["politics"], "importance": 5}], "not_news_ids": []}
+                                 "topics": ["politics_conflicts"], "importance": 5}], "not_news_ids": []}
         make_job(self.db, FakeProvider("gemini", [respond]), FakeProvider("groq", []), self.feeds,
                  self.clock).run()
         self.assertEqual(len(self.db.query("SELECT * FROM stories")), 1)
@@ -348,21 +348,21 @@ def prompt_items_ids(prompt):
 
 
 class Validation(unittest.TestCase):
-    ORDER = ["politics", "wars_conflicts", "armenia", "russia", "iran_war", "ukraine_war"]
+    ORDER = ["politics_conflicts", "economy_markets", "armenia", "russia", "iran_war", "ukraine_war"]
 
     def test_rules(self):
         data = {"stories": [
             {"item_ids": [1, 2, 99], "topics": ["ukraine_war", "sport"], "importance": 15,
              "summary": "Strikes hit Kyiv — officials say 5 dead – more feared"},
-            {"item_ids": [2, 3], "topics": ["politics"], "importance": 0, "summary": "dup id 2"},
+            {"item_ids": [2, 3], "topics": ["politics_conflicts"], "importance": 0, "summary": "dup id 2"},
             {"item_ids": [4], "topics": ["sport"], "importance": 5, "summary": "no valid tag"},
-            {"item_ids": [], "topics": ["politics"], "importance": 5, "summary": "no items"},
+            {"item_ids": [], "topics": ["politics_conflicts"], "importance": 5, "summary": "no items"},
             {"item_ids": [5], "topics": ["armenia"], "importance": "6", "existing_story_id": 77,
              "summary": "years 2024—2025"},
         ], "not_news_ids": []}
         out = ai.validate_stories(data, {1, 2, 3, 4, 5}, {77}, self.ORDER)
         self.assertEqual([s.item_ids for s in out], [[1, 2], [3], [5]])
-        self.assertEqual(out[0].topics, ["wars_conflicts", "ukraine_war"])
+        self.assertEqual(out[0].topics, ["politics_conflicts", "ukraine_war"])
         self.assertEqual((out[0].importance, out[1].importance, out[2].importance), (10, 1, 6))
         self.assertEqual(out[0].summary, "Strikes hit Kyiv, officials say 5 dead, more feared")
         self.assertEqual(out[2].summary, "years 2024-2025")

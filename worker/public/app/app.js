@@ -256,7 +256,7 @@
   const card = (rows) => `<div class="group">${rows}</div>`;
   const grid = (buttons) => `<div class="grid">${buttons}</div>`;
   // A soft colour per topic for its square (iOS system hues at low strength)
-  const TINT = { politics: "0, 122, 255", wars_conflicts: "142, 142, 147", armenia: "255, 149, 0", russia: "88, 86, 214",
+  const TINT = { politics_conflicts: "0, 122, 255", economy_markets: "48, 176, 199", armenia: "255, 149, 0", russia: "88, 86, 214",
     iran_war: "52, 199, 89", ukraine_war: "255, 204, 0" };
   const tint = (tag) => `--tint: rgba(${TINT[tag] || "142, 142, 147"}, 0.18)`;
 

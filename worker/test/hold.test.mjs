@@ -44,9 +44,9 @@ describe("planDigest: untranslated stories are held", () => {
 
   test("the length cut runs after the drop: the room a held story leaves goes to translated stories", () => {
     const long = (n) => `${"Подробное описание событий дня. ".repeat(n)}`.trim();
-    const top = story("Top story without a translation", ["politics"], 10, { description: "x".repeat(560) });
+    const top = story("Top story without a translation", ["politics_conflicts"], 10, { description: "x".repeat(560) });
     const rest = Array.from({ length: 6 }, (_, i) =>
-      ru(story(`Translated story ${i}`, ["politics"], 8 - (i % 2)), `Переведённая история ${i}`, long(17)));
+      ru(story(`Translated story ${i}`, ["politics_conflicts"], 8 - (i % 2)), `Переведённая история ${i}`, long(17)));
     const all = [top, ...rest];
     const plan = planDigest(user(), all, TOPICS, yerevan(20, 5), CONFIG);
     assert.equal(plan.lang, "ru");
@@ -63,9 +63,9 @@ describe("planDigest: untranslated stories are held", () => {
 
   test("a translated story that still does not fit is cut, and only the held one is held", () => {
     const cfg = { ...CONFIG, message_char_limit: 300 };
-    const a = ru(story("A", ["politics"], 9), "Первая история", "Короткое описание первой истории.");
-    const b = ru(story("B", ["politics"], 8), "Вторая история", "Короткое описание второй истории, подлиннее чем первая.");
-    const c = story("C", ["politics"], 8);
+    const a = ru(story("A", ["politics_conflicts"], 9), "Первая история", "Короткое описание первой истории.");
+    const b = ru(story("B", ["politics_conflicts"], 8), "Вторая история", "Короткое описание второй истории, подлиннее чем первая.");
+    const c = story("C", ["politics_conflicts"], 8);
     const plan = planDigest(user(), [a, b, c], TOPICS, yerevan(20, 5), cfg);
     assert.deepEqual(plan.heldIds, [c.id]);
     assert.ok(plan.storyIds.length >= 1 && plan.storyIds.length + plan.cut === 2);
@@ -89,9 +89,9 @@ describe("planDigest: untranslated stories are held", () => {
     assert.equal(quiet.button, undefined);
     assert.equal(quiet.fallback, null);
     assert.deepEqual(quiet.heldIds, []);
-    const weak = planDigest(user(), [story("Weak", ["politics"], 4)], TOPICS, yerevan(20, 5), CONFIG);
+    const weak = planDigest(user(), [story("Weak", ["politics_conflicts"], 4)], TOPICS, yerevan(20, 5), CONFIG);
     assert.match(weak.text, /^<p><b>Добрый вечер, Rob<\/b> · Спокойный период/);
-    const en = planDigest(user({ lang: "en" }), [story("No tr", ["politics"], 8)], TOPICS, yerevan(20, 5), CONFIG);
+    const en = planDigest(user({ lang: "en" }), [story("No tr", ["politics_conflicts"], 8)], TOPICS, yerevan(20, 5), CONFIG);
     assert.deepEqual(en.heldIds, []);
     assert.equal(en.storyIds.length, 1);
   });
@@ -103,7 +103,7 @@ describe("cron: a held story waits for its translation", () => {
     addUser(sqlite, { lang: "ru", next_digest_at: yerevan(14), last_digest_at: yerevan(9) });
     const t0 = yerevan(13);
     const a = addStory(sqlite, "A", ["armenia"], 6, t0, { final_score: 8, headline: "Armenia story" });
-    const b = addStory(sqlite, "B", ["politics"], 6, t0, { final_score: 8, headline: "Politics story" });
+    const b = addStory(sqlite, "B", ["politics_conflicts"], 6, t0, { final_score: 8, headline: "Politics story" });
     addTranslation(sqlite, a, "ru", "История об Армении");
     return { db, sqlite, a, b };
   }
@@ -160,7 +160,7 @@ describe("cron: a held story waits for its translation", () => {
     const { db, sqlite } = fakeD1();
     addUser(sqlite, { lang: "ru", next_digest_at: yerevan(14), last_digest_at: yerevan(9) });
     const a = addStory(sqlite, "A", ["armenia"], 6, yerevan(13), { final_score: 8, headline: "Armenia story" });
-    const b = addStory(sqlite, "B", ["politics"], 6, yerevan(13), { final_score: 8, headline: "Politics story" });
+    const b = addStory(sqlite, "B", ["politics_conflicts"], 6, yerevan(13), { final_score: 8, headline: "Politics story" });
     const outbox = [];
     const out = await runTick(db, io(outbox), yerevan(14, 2));
     assert.equal(out.lang_fallback, 1);

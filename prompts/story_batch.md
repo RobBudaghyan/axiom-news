@@ -44,13 +44,17 @@ YOUR TASKS
 
 2. FILTER. Keep an item only if it is real news on at least one topic below.
    Put everything else in not_news_ids: news outside all the topics, however big
-   (technology outages, company and market news with no policy angle, sport,
-   science, health, ordinary crime), ads, lifestyle, entertainment, celebrity,
+   (technology outages, routine company news, sport, science, health, ordinary
+   crime), ads, lifestyle, entertainment, celebrity,
    weather, horoscopes, podcasts/newsletters with no specific news, opinion pieces
    with no new facts, ceremonial events where nothing was decided ("minister
    visited a museum"), vague "officials discussed cooperation" with no outcome.
-   For example "Microsoft outage hits Outlook worldwide", "Nvidia CEO resigns" and
-   "stocks rise after inflation data" are not news here, however widely reported.
+   For example "Microsoft outage hits Outlook worldwide", "a retailer launches a new
+   app" and "a stock-picking tip" are not news here, however widely reported. Economy
+   news with wide impact IS news (economy_markets): central bank decisions, inflation
+   and jobs data that move markets, trade deals and tariffs, energy prices, big market
+   moves, and big company news with wide effect (a giant firm collapses, a huge merger).
+   A daily market wrap with no event behind it is not.
    When genuinely unsure whether an on-topic item is significant real news, KEEP
    it: a missed story is worse than a marginal one. Do not create a story for a
    not-news item; only list its id in not_news_ids.
@@ -62,7 +66,7 @@ YOUR TASKS
    A story matches a topic through direct or indirect connection: spillover from a
    conflict in another country still belongs to that conflict (e.g. "Jordan
    intercepts missile debris amid Iran-Israel strikes" -> iran_war,
-   wars_conflicts). Use every tag that genuinely applies. Every story you return
+   politics_conflicts). Use every tag that genuinely applies. Every story you return
    must have at least one tag; never force a tag onto an off-topic item, put it in
    not_news_ids instead.
 

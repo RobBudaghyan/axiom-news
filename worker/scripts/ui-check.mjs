@@ -124,15 +124,15 @@ try {
   check("Telegram's header, background and bottom bar take the page colour", r.tg.length === 3 && r.tg.every((c) => c.endsWith(" #f2f2f7")) &&
     r.bg === "rgb(242, 242, 247)", `${r.tg.join("; ")} / ${r.bg}`);
 
-  r = await b.run(`${SERVER} const n = calls(), t = window.__toasts.length; click('[data-value=wars_conflicts]'); await settled();
+  r = await b.run(`${SERVER} const n = calls(), t = window.__toasts.length; click('[data-value=economy_markets]'); await settled();
     return { u: await server(), toasts: window.__toasts.slice(t), haptics: since(n).filter((c) => c.startsWith('haptic')) };`);
-  check("topic switched on is saved", r.u.topics.includes("wars_conflicts"), r.u.topics.join(","));
+  check("topic switched on is saved", r.u.topics.includes("economy_markets"), r.u.topics.join(","));
   check("a save gives one light haptic tap and no toast", !r.toasts.length && JSON.stringify(r.haptics) === '["haptic impact light"]',
     `${JSON.stringify(r.haptics)} / toasts ${JSON.stringify(r.toasts)}`);
 
-  r = await b.run(`${SERVER} for (const t of ['politics', 'armenia', 'russia']) { click('[data-value=' + t + ']'); await wait(120); }
-    await settled(); const t0 = window.__toasts.length; click('[data-value=wars_conflicts]'); await wait(300);
-    return { u: await server(), toast: window.__toasts.slice(t0).join(' | '), on: document.querySelector('[data-value=wars_conflicts]').getAttribute('aria-checked') };`);
+  r = await b.run(`${SERVER} for (const t of ['politics_conflicts', 'armenia', 'russia']) { click('[data-value=' + t + ']'); await wait(120); }
+    await settled(); const t0 = window.__toasts.length; click('[data-value=economy_markets]'); await wait(300);
+    return { u: await server(), toast: window.__toasts.slice(t0).join(' | '), on: document.querySelector('[data-value=economy_markets]').getAttribute('aria-checked') };`);
   check("the last topic cannot be switched off (a short error still shows)", r.u.topics.length === 1 && r.on === "true" && /^Keep at least one topic$/.test(r.toast),
     `${r.u.topics.join(",")} / ${r.toast}`);
 
@@ -269,7 +269,7 @@ try {
     return { rows: mine(), toasts: window.__toasts.slice(t) };`);
   check("My topics: a sixth AI check in a day is refused before any AI call (5 a day per reader)",
     r.rows.length === 2 && JSON.stringify(r.toasts) === '["Up to 5 new topics a day. Try again tomorrow."]', JSON.stringify(r));
-  r = await b.run(`${SERVER} for (const t of ['politics', 'armenia', 'russia', 'wars_conflicts']) {
+  r = await b.run(`${SERVER} for (const t of ['politics_conflicts', 'armenia', 'russia', 'economy_markets']) {
       const el = document.querySelector('[data-action=topic][data-value=' + t + ']'); if (el.getAttribute('aria-checked') === 'true') { el.click(); await wait(150); } }
     await settled(); return (await server()).topics;`);
   check("with a custom topic, every main topic may be off", Array.isArray(r) && r.length === 0, JSON.stringify(r));

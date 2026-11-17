@@ -32,7 +32,7 @@ def add_user(db, uid, lang, paused=0, blocked=0):
              [uid, f"U{uid}", lang, paused, blocked, T0])
 
 
-def add_story(db, headline, *, final=7, topic=None, main="politics", topics=("politics",), importance=6,
+def add_story(db, headline, *, final=7, topic=None, main="politics_conflicts", topics=("politics_conflicts",), importance=6,
               age_h=1.0, description="A description.", merged_into=None):
     t = int(T0 - age_h * H)
     return db.query(
@@ -116,7 +116,7 @@ class LanguageFilter(unittest.TestCase):
                add_story(db, "Topic path", final=5, topic=7, main="armenia", topics=("armenia",)),
                add_story(db, "Unedited but huge", final=None, importance=9, main=None)]
         no = [add_story(db, "Weak", final=5, topic=5),
-              add_story(db, "Boost capped at 0 for politics", final=5, topic=8, main="politics"),
+              add_story(db, "Boost capped at 0 for politics", final=5, topic=8, main="politics_conflicts"),
               add_story(db, "Too old", final=8, age_h=25),
               add_story(db, "Unedited medium", final=None, importance=8, main=None)]
         no.append(add_story(db, "Merged away", final=8, merged_into=yes[0]))
@@ -422,6 +422,34 @@ class SharedRule(unittest.TestCase):
                       c["final_score"], c["topic_score"], c["main_topic"]])
         got = {r["id"] for r in db.query(translate.ELIGIBLE_SQL, translate.eligible_params(T0, cfg, tags))}
         self.assertEqual(got, {c["id"] for c in data["cases"] if c["eligible"]})
+
+    def test_off_means_off_for_readers_with_topics_switched_off(self):
+        # Step 15: a story whose main topic is a main topic the reader has off never qualifies,
+        # even through another tag they have on; the Python rule and the SQL agree per reader.
+        data = json.loads((ROOT / "tests" / "fixtures" / "eligible_cases.json").read_text(encoding="utf-8"))
+        cfg = data["cfg"]
+        db = new_db()
+        for c in data["cases"]:
+            db.query("INSERT INTO stories (id, summary, topics, importance, best_url, best_source, best_tier, "
+                     "created_at, updated_at, final_score, topic_score, main_topic) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                     [c["id"], "s", json.dumps(c["topics"]), c["importance"], "u", "src", 1, T0, T0,
+                      c["final_score"], c["topic_score"], c["main_topic"]])
+        for name, tags in data["readers"].items():
+            for c in data["cases"]:
+                self.assertEqual(translate.qualifies(c, cfg, tags), c["eligible_for"][name], (name, c))
+                if c["main_topic"] in cfg["main_tags"] and c["main_topic"] not in tags:
+                    self.assertFalse(c["eligible_for"][name], (name, c))
+            got = {r["id"] for r in db.query(translate.ELIGIBLE_SQL, translate.eligible_params(T0, cfg, tags))}
+            self.assertEqual(got, {c["id"] for c in data["cases"] if c["eligible_for"][name]}, name)
+
+    def test_a_ten_with_its_main_topic_off_reaches_nobody_who_has_it_off(self):
+        cfg = {**translate.load_digest_config()}
+        s = {"topics": ["iran_war", "politics_conflicts"], "importance": 10, "final_score": 10,
+             "topic_score": 10, "main_topic": "iran_war"}
+        self.assertFalse(translate.qualifies(s, cfg, ["politics_conflicts", "armenia"]))
+        self.assertTrue(translate.qualifies(s, cfg, ["iran_war"]))
+        unedited = {**s, "final_score": None, "topic_score": None, "main_topic": None}
+        self.assertTrue(translate.qualifies(unedited, cfg, ["politics_conflicts"]), "no main topic: one tag is enough")
 
 
 class Prompt(unittest.TestCase):

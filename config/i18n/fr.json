@@ -16,8 +16,8 @@
     "quiet_line": "Période calme : rien d'important sur vos sujets {since}."
   },
   "topics": {
-    "politics": "Politique",
-    "wars_conflicts": "Guerres et conflits",
+    "politics_conflicts": "Politique et conflits",
+    "economy_markets": "Économie et marchés",
     "armenia": "Arménie",
     "russia": "Russie",
     "iran_war": "Guerre en Iran",

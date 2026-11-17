@@ -31,9 +31,9 @@ function seed() {
     "paused, blocked, created_at, last_digest_at, next_digest_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
   const people = [
     [OWNER, "Sam", "Asia/Yerevan", 1, ["09:00", "14:00", "20:00"], ALL, 0, 0],
-    [101, "Ani", "Asia/Yerevan", 1, ["09:00", "19:00"], ["armenia", "politics", "russia"], 0, 0],
+    [101, "Ani", "Asia/Yerevan", 1, ["09:00", "19:00"], ["armenia", "politics_conflicts", "russia"], 0, 0],
     [102, "David", "Europe/Berlin", 1, ["07:00", "13:00", "21:00"], ALL, 0, 0],
-    [103, "Mariam", "America/Los_Angeles", 1, ["09:00"], ["iran_war", "wars_conflicts"], 1, 0],
+    [103, "Mariam", "America/Los_Angeles", 1, ["09:00"], ["iran_war", "economy_markets"], 1, 0],
     [104, "Narek", "Asia/Yerevan", 0, ["09:00", "14:00", "20:00"], ALL, 0, 1],
     [105, "Lilit", "Europe/London", 1, ["08:00", "12:00", "18:00", "22:00"], ALL, 0, 0],
   ];
@@ -97,9 +97,9 @@ function seed() {
   sqlite.prepare("INSERT INTO meta (key, value) VALUES ('feed_health', ?), ('d1_worker', ?)")
     .run(JSON.stringify({ at: now - 1200, feeds }), JSON.stringify({ day: Math.floor(now / 86400), r: 6120, w: 214 }));
   // a few stories, so "Send me a digest now" has something to send
-  const S = [["Ukraine and Russia agree to a new prisoner exchange", ["ukraine_war", "wars_conflicts"], 8],
-    ["Armenian parliament passes the 2027 budget", ["armenia", "politics"], 6],
-    ["Iran says talks with the US will resume next week", ["iran_war", "politics"], 7]];
+  const S = [["Ukraine and Russia agree to a new prisoner exchange", ["ukraine_war", "politics_conflicts"], 8],
+    ["Armenian parliament passes the 2027 budget", ["armenia", "politics_conflicts"], 6],
+    ["Iran says talks with the US will resume next week", ["iran_war", "politics_conflicts"], 7], ["The central bank cuts rates by half a point", ["economy_markets"], 7]];
   for (const [s, t, score] of S) addStory(sqlite, s, t, score, now - 1800, { final_score: score, headline: s, emojis: "🗞️" });
   // Step 10: three made-up tips (one refunded) for the Admin "Tips" section
   const tip = sqlite.prepare("INSERT INTO tips (user_id, amount, charge_id, at, refunded_at) VALUES (?,?,?,?,?)");
