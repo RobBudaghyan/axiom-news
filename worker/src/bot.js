@@ -9,6 +9,7 @@ import { CONFIG, describeSlot, nextSlot, parseList } from "./digest.js";
 import { chooseLang, commandList, effectiveLang, listJoin, t, topicLabel, zoneName } from "./i18n.js";
 import { settingsButton } from "./telegram.js";
 import { errorStatement } from "./db.js";
+import { needsSetup, setupButton } from "./onboard.js";
 import { TIP_AMOUNTS, amountOf, allowedAmount, answerPreCheckout, invoiceFields, recordPayment } from "./tips.js";
 
 export function settingsText(lang = "en") {
@@ -30,6 +31,9 @@ export function welcomeText(user, topics, now, isNew, lang = effectiveLang(user)
     `${t(lang, "bot.welcome_topics", { topics: topicNames(parseList(user.topics), topics, lang) })}\n\n` +
     t(lang, "bot.welcome_next", { when: describeSlot(user.next_digest_at, now, tz, lang), button: t(lang, "bot.button") });
 }
+
+export const welcomeSetupText = (user, lang = effectiveLang(user)) =>
+  t(lang, "bot.welcome_setup", { name: user.first_name || t(lang, "bot.friend") });
 
 export function helpText(user, now, lang = effectiveLang(user)) {
   if (!user) return t(lang, "bot.help_new");
@@ -131,7 +135,13 @@ export async function handleUpdate(update, ctx) {
       }]);
     }
     const lang = effectiveLang(user);
-    await ctx.reply(id, welcomeText(user, topics, now, isNew, lang), button(ctx, lang));
+    // Step 15: a new user (or one who has not finished the setup yet) gets a short welcome and the
+    // "Set up" button; a returning or imported user gets the usual "welcome back" with settings.
+    if (isNew || needsSetup(user)) {
+      await ctx.reply(id, welcomeSetupText(user, lang), setupButton(ctx.appUrl, lang));
+    } else {
+      await ctx.reply(id, welcomeText(user, topics, now, false, lang), button(ctx, lang));
+    }
     if (isNew && lang !== "en") {
       const problems = await setChatLanguage(ctx.tg, id, lang, ctx.appUrl);
       if (problems.length) await db.batch(problems.map((p) => errorStatement(p, now)));

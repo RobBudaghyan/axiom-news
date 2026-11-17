@@ -7,6 +7,8 @@ import { HEALTH_STATEMENTS, assessHealth } from "./health.js";
 import { errorStatement, takeUsage, usageStatement } from "./db.js";
 import { asTopicRows, guardAlert, withCustomTopics } from "./custom.js";
 import { countStatement } from "./guard.js";
+import { reminderStatement, runReminders } from "./onboard.js";
+import { activeStatement, runAnnouncementBatch } from "./announce.js";
 
 const DUE_WHERE = "next_digest_at IS NOT NULL AND next_digest_at <= ?1 AND paused = 0 AND blocked = 0";
 const DUE_SQL = `SELECT * FROM users WHERE ${DUE_WHERE} ORDER BY next_digest_at LIMIT ?2`;
@@ -60,14 +62,15 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
   const reads = [
     ...HEALTH_STATEMENTS,
     ...(digests ? [{ sql: DUE_SQL, params: [now, cfg.max_users_per_tick] }, { sql: TOPICS_SQL, params: [] },
-                   { sql: DUE_CUSTOM_SQL, params: [now, cfg.max_users_per_tick] }] : []),
+                   { sql: DUE_CUSTOM_SQL, params: [now, cfg.max_users_per_tick] },
+                   reminderStatement(now), activeStatement()] : []),   // Step 15: one reminder, announcements
     ...(guard ? [countStatement(now),
                  { sql: "SELECT key, value FROM meta WHERE key IN ('ai_guard', 'ai_guard_alert_day')", params: [] }] : []),
   ];
   const got = await db.batch(reads);
   const [runs, lastOk, meta] = got;
-  const [due = [], topics = [], custom = []] = digests ? got.slice(3, 6) : [];
-  const [guardCounts, guardMeta] = guard ? got.slice(digests ? 6 : 3) : [];
+  const [due = [], topics = [], custom = [], reminders = [], announcing = []] = digests ? got.slice(3, 8) : [];
+  const [guardCounts, guardMeta] = guard ? got.slice(digests ? 8 : 3) : [];
   const writes = [];
   const out = { due: due.length, sent: 0, quiet: 0, blocked: 0, failed: 0, stories: 0, cut: 0, alert: false };
 
@@ -113,6 +116,17 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
       out.cut += plan.cut ?? 0;            // stories that qualified but did not fit (Step 8)
       writes.push(...digestWrites(user, plan, sentIds, now));
     }
+  }
+
+  // Step 15: after the digests, the one reminder (users who never opened the app) and a batch of
+  // the owner's announcement; each claims its rows before sending, so nothing goes out twice.
+  if (reminders.length) {
+    try { out.reminders = (await runReminders(db, io, reminders, now)).sent; }
+    catch (e) { writes.push(errorStatement(`reminders: ${e.message}`, now)); }
+  }
+  if (announcing.length) {
+    try { out.announcement = await runAnnouncementBatch(db, io, announcing, now); }
+    catch (e) { writes.push(errorStatement(`announcement: ${e.message}`, now)); }
   }
 
   const health = assessHealth({ runs, lastOk, meta, extra: opts.extraProblems ?? [] }, now, cfg.default_timezone);

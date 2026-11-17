@@ -221,7 +221,7 @@
     syncTabs();
   }
   function syncTabs() {
-    $("#title").textContent = S.page ? tr(PAGE_TITLES[S.page]) : S.tab === "admin" ? "Admin" : tr("app.title");
+    $("#title").textContent = S.page ? pageTitle() : S.tab === "admin" ? "Admin" : tr("app.title");
     const tabs = $("#tabs");
     if (!tabs) return;
     tabs.querySelectorAll("button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.value === S.tab)));
@@ -307,6 +307,7 @@
     return count[top] >= opaque * 0.06 ? HUES[top][0] : GREY;
   }
   let retintTimer = 0;
+  const tintTries = new Map();
   function emojiTint(emoji) {
     if (tints.has(emoji)) return tints.get(emoji);
     let rgb = null;
@@ -319,7 +320,11 @@
       x.font = `30px ${getComputedStyle(document.body).fontFamily}`;
       x.fillText(emoji, 20, 22);
       rgb = hueOf(x.getImageData(0, 0, 40, 40).data);
-      if (rgb === null) {   // try again once the font is there; grey meanwhile
+      // Step 15: a grey result may be the font's placeholder box (the emoji font not ready yet), so
+      // a grey is tried again up to 3 times (300 ms apart) before it is kept; a grey emoji stays grey.
+      const tries = tintTries.get(emoji) ?? 0;
+      if (rgb === null || (rgb === GREY && tries < 3)) {   // try again once the font is there; grey meanwhile
+        tintTries.set(emoji, tries + 1);
         clearTimeout(retintTimer);
         retintTimer = setTimeout(retint, 300);
         try { document.fonts.ready.then(() => setTimeout(retint, 50)); } catch { /* no font API */ }
@@ -506,7 +511,51 @@
   // Two rows near the bottom of Settings, each opening its own page with Telegram's back button.
   // Settings itself keeps no helper text; the help text lives on its page.
   const PAGE_TITLES = { help: "app.help", feedback: "app.feedback" };
-  const PAGES = { help: () => helpHTML(), feedback: () => feedbackHTML() };
+  const PAGES = { help: () => helpHTML(), feedback: () => feedbackHTML(), setup: () => setupHTML() };
+  const SETUP_TITLES = ["app.setup_topics", "app.setup_times", "app.setup_done"];
+  const pageTitle = () => tr(S.page === "setup" ? SETUP_TITLES[(S.step || 1) - 1] : PAGE_TITLES[S.page]);
+
+  // Step 15: the first open's 3-step setup (topics, times, done), skippable. Every choice saves at
+  // once like in Settings; Done or Skip tells the server, which sends one sample digest.
+  function setupHTML() {
+    const step = S.step || 1;
+    const head = tr("app.setup_step", { n: step });
+    if (step === 1) return sec(head, topicsHTML(), 'id="topics"') + setupNav("skip", "next");
+    if (step === 2) return sec(head, timesHTML(), 'id="times"') + setupNav("back", "next");
+    return `<section class="section"><h2 class="section-head">${esc(head)}</h2>${heroHTML()}</section>` +
+      sec("", card(`<p class="help-p">${esc(tr("app.setup_sample"))}</p>`)) + setupNav(null, "finish");
+  }
+  const setupNav = (left, right) => `<section class="section setup-nav">${grid(
+    (left ? `<button class="b s2" data-action="setup-${left}" ${S.busy.setup ? "disabled" : ""}>${esc(tr(`app.setup_${left}`))}</button>` : "") +
+    `<button class="b ${left ? "s4" : "s6"} primary" data-action="setup-${right}" ${S.busy.setup ? "disabled" : ""}>` +
+    `${S.busy.setup && right === "finish" ? '<span class="spinner small"></span>' : esc(tr(`app.setup_${right}`))}</button>`)}</section>`;
+  function setupStep(delta) {
+    S.step = Math.min(3, Math.max(1, (S.step || 1) + delta));
+    haptic("select");
+    syncTabs();
+    renderView(true);
+    window.scrollTo({ top: 0 });
+  }
+  async function finishSetup(skipped) {
+    if (S.busy.setup) return;
+    S.busy.setup = true;
+    renderView();
+    try {
+      await chain;   // the last topic or time tap is saved first, so the sample follows it
+      S.st = await api("/api/onboard", { skipped });
+      S.busy = {};
+      haptic("success");
+      S.page = null;
+      renderShell();
+      renderView(true);
+      window.scrollTo({ top: 0 });
+    } catch (e) {
+      S.busy = {};
+      renderView();
+      haptic("error");
+      toast(e.message, "err", 3200);
+    }
+  }
   const navRow = (action, icon, cls, label) => `<button class="row has-icon tap nav" data-action="${action}">` +
     `<span class="sq solid ${cls}" aria-hidden="true">${icon}</span><span class="row-main row-title">${esc(label)}</span>` +
     `<span class="chev" aria-hidden="true">${I.chev}</span></button>`;
@@ -799,6 +848,35 @@
         right: x.refunded_at ? badge("Refunded", "mute")
           : `<button class="link" data-action="refund" data-value="${x.id}" data-amount="${x.amount}" data-name="${esc(x.name)}" ${S.busy.refund ? "disabled" : ""}>Refund</button>` })).join("");
 
+    // Step 15: the announcement tool (write in English, AI translates, edit, preview to yourself, send)
+    const AN = A.announce || { recent: [], languages: ["en"], enabled: ["en"] };
+    const LNAME = { en: "English", ru: "Russian", hy: "Armenian", fr: "French" };
+    const cur = AN.recent.find((x) => x.status === "draft" || x.status === "previewed");
+    const aud = S.annAudience || "all";
+    let annBody;
+    if (cur) {
+      const edits = S.annEdit || {};
+      annBody = card(Object.keys(cur.texts).map((l) => row({ title: `${esc(LNAME[l] || l)}${cur.audience !== "all" && l === "en" && cur.audience !== "en" ? " (fallback)" : ""}`,
+          sub: cur.notes[l] ? esc(`The AI version was not used: ${cur.notes[l]}. Please write it.`) : "" }) +
+        `<textarea class="fb-input ann-text" data-lang="${esc(l)}" rows="4">${esc(edits[l] ?? cur.texts[l])}</textarea>`).join("")) +
+        `<div class="grid ann-actions">` +
+        `<button class="b s2" data-action="ann-preview" data-value="${cur.id}" ${S.busy.ann ? "disabled" : ""}>Preview</button>` +
+        `<button class="b s2 primary" data-action="ann-send" data-value="${cur.id}" ${S.busy.ann || cur.status !== "previewed" || S.annDirty ? "disabled" : ""}>Send</button>` +
+        `<button class="b s2" data-action="ann-cancel" data-value="${cur.id}" ${S.busy.ann ? "disabled" : ""}>Cancel</button></div>`;
+    } else {
+      const choices = ["all", ...AN.enabled];
+      annBody = card(`<textarea class="fb-input" id="ann-en" rows="5" maxlength="2000" placeholder="Write the announcement in English">${esc(S.annDraft || "")}</textarea>`) +
+        `<div class="grid ann-actions">${choices.map((c) => `<button class="b ${choices.length > 3 ? "s2" : "s3"}" data-action="ann-audience" data-value="${c}" aria-pressed="${aud === c}">${c === "all" ? "All users" : esc(LNAME[c] || c)}</button>`).join("")}` +
+        `<button class="b s6 primary" data-action="ann-translate" ${S.busy.ann ? "disabled" : ""}>${S.busy.ann ? '<span class="spinner small"></span>' : "Translate"}</button></div>`;
+    }
+    const annRows = AN.recent.filter((x) => x !== cur).map((x) => row({ title: `<span class="clamp">${esc(x.texts.en || "")}</span>`,
+      sub: esc(`#${x.id} · ${x.audience === "all" ? "all users" : LNAME[x.audience] || x.audience} · ${when(x.created_at, tz)}` +
+        (x.sent || x.failed ? ` · ${x.sent} sent${x.failed ? `, ${x.failed} failed` : ""}` : "")),
+      right: badge(x.status, x.status === "done" ? "ok" : x.status === "sending" ? "warn" : "mute") })).join("");
+    const annFoot = cur ? (cur.status === "previewed" && !S.annDirty ? "Previewed. Send goes to every user in their language, a batch every 5 minutes, never twice."
+      : "Check or edit each version, then Preview (it comes to you first). Send unlocks after a preview of exactly this text.")
+      : `Languages your users read: ${AN.languages.map((l) => LNAME[l] || l).join(", ")}. Translate makes one version for each.`;
+
     // Step 15: the latest feedback from readers (each is also forwarded to the owner's chat)
     const FB = A.feedback || { total: 0, recent: [] };
     const fbRows = FB.recent.map((x) => row({ title: `<span class="clamp">${esc(x.text)}</span>`,
@@ -856,6 +934,8 @@
       ${section("Custom topics", (ctRows || row({ title: "No custom topics yet" })) + checkRows, C.topics.length ? "Delete removes it from its followers. Block also stops anyone creating it again. Both ask first." : "")}
       ${feeds}
       ${section("Users", tiles + userRows)}
+      <section class="section" id="announce"><h2 class="section-head">Announcement</h2>${annBody}<p class="section-foot">${esc(annFoot)}</p></section>
+      ${annRows ? section("Recent announcements", annRows) : ""}
       ${section("Recent feedback", fbRows || row({ title: "No feedback yet" }), FB.total ? `${plural(FB.total, "message", "messages")} in all; the latest 20 here. Each one is also sent to your Telegram chat.` : "")}
       ${section("Tips", tipRows, T.last.length ? "Last 10 tips. Refund returns the Stars to the person (asks first)." : "No tips yet.")}
       ${section("Languages, last 24 h", langRowsA || row({ title: "No data" }), "A story with no translation yet is held: left out of the digest and sent in a later one once translated. A digest goes out fully in English only when none of its stories is translated; the badge counts those.")}
@@ -877,6 +957,40 @@
       toast(r.message, "ok", 3600);
     } catch (e) {
       haptic(e.status === 409 ? "warning" : "error");
+      toast(e.message, "err", 4200);
+    }
+    S.busy = {};
+    loadAdmin(true);
+  }
+
+  // Step 15: the announcement tool
+  async function announceAction(act, el) {
+    const id = el ? Number(el.dataset.value) : null;
+    const texts = {};
+    document.querySelectorAll(".ann-text").forEach((t) => { texts[t.dataset.lang] = t.value; });
+    let body;
+    if (act === "draft") {
+      const text = ($("#ann-en") || {}).value || "";
+      if (!text.trim()) { haptic("warning"); return; }
+      body = { action: "draft", text, audience: S.annAudience || "all" };
+    } else if (act === "send") {
+      haptic("impact", "medium");
+      if (!(await confirmBox("Send this announcement now? Every user in the audience gets it once, in their language. This cannot be undone."))) return;
+      body = { action: "send", id, texts };
+    } else if (act === "cancel") {
+      if (!(await confirmBox("Cancel this announcement? Nothing more is sent."))) return;
+      body = { action: "cancel", id };
+    } else body = { action: "preview", id, texts };
+    S.busy.ann = true;
+    renderView();
+    try {
+      const r = await api("/api/admin/announce", body);
+      haptic("success");
+      toast(r.message, "ok", 3600);
+      if (act === "draft") S.annDraft = "";
+      if (act !== "draft") { S.annEdit = {}; S.annDirty = false; }
+    } catch (e) {
+      haptic("error");
       toast(e.message, "err", 4200);
     }
     S.busy = {};
@@ -964,6 +1078,15 @@
       case "open-help": openPage("help"); break;
       case "open-feedback": openPage("feedback"); break;
       case "fb-send": sendFeedback(); break;
+      case "setup-next": setupStep(1); break;
+      case "setup-back": setupStep(-1); break;
+      case "setup-skip": finishSetup(true); break;
+      case "setup-finish": finishSetup(false); break;
+      case "ann-audience": S.annAudience = v; haptic("select"); renderView(); break;
+      case "ann-translate": announceAction("draft"); break;
+      case "ann-preview": announceAction("preview", el); break;
+      case "ann-send": announceAction("send", el); break;
+      case "ann-cancel": announceAction("cancel", el); break;
       default: break;
     }
   });
@@ -973,6 +1096,14 @@
     if (ev.target && ev.target.id === "add-topic") { ev.preventDefault(); addTopic(); }
   });
   document.addEventListener("input", (ev) => {
+    if (ev.target && ev.target.id === "ann-en") S.annDraft = ev.target.value;
+    if (ev.target && ev.target.classList && ev.target.classList.contains("ann-text")) {
+      S.annEdit = S.annEdit || {};
+      S.annEdit[ev.target.dataset.lang] = ev.target.value;
+      S.annDirty = true;
+      const b = $('[data-action="ann-send"]');
+      if (b) b.disabled = true;   // an edit needs a new preview first
+    }
     if (ev.target && ev.target.id === "fb-input") {
       S.fbDraft = ev.target.value;
       const b = $('[data-action="fb-send"]');
@@ -1006,6 +1137,7 @@
       return;
     }
     setLang(S.st.user.lang);
+    if (S.st.setup) { S.page = "setup"; S.step = 1; }   // Step 15: the first open
     renderShell();
     renderView();
   }

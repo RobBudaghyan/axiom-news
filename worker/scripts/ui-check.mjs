@@ -240,7 +240,7 @@ try {
     return { rows: mine(), add: !!document.querySelector('#my-topics .add-row'), server: await serverOn() };`);
   check("My topics: at 3 topics the add row disappears; a switched-off topic still counts",
     r.rows.length === 3 && !r.add && JSON.stringify(r.server) === '["Colombia:on","Formula 1:off","AI regulation:on"]', JSON.stringify(r));
-  r = await b.run(LAYOUT);
+  r = await b.run(`await wait(450); ${LAYOUT}`);   // after the new row's 0.34 s slide-in
   check("My topics: the layout rules hold with three topics (48 px rows, 44 px targets, no helper text)", layoutOk(r), JSON.stringify(r).slice(0, 500));
   r = await b.run(`${SERVER} ${MY} const n = calls(); click('[data-action=edit-topics]'); await wait(300);
     const m = document.querySelector('#my-topics .minus'), c = m.querySelector('.mc'); const a = m.getBoundingClientRect(), d = c.getBoundingClientRect();
@@ -415,7 +415,9 @@ for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
         await w.open(`${BASE}/app/?theme=${scheme}&as=owner`, scheme);
         const L = await w.run(LAYOUT);
         check(`${width} px, ${lang === "ru" ? "Russian" : "English"}, ${scheme}: the layout rules hold (My topics too)`, layoutOk(L), JSON.stringify(L).slice(0, 600));
-        const M = await w.run(`const t = [...document.querySelectorAll('#my-topics .ct .row-title')];
+        // the emoji tint is sampled from a canvas; if the emoji font is not ready yet the app retries (300 ms, fonts.ready)
+        const M = await w.run(`await until(() => getComputedStyle(document.querySelector('#my-topics .ct .sq')).backgroundColor !== 'rgba(142, 142, 147, 0.18)', 2000).catch(() => {});
+          const t = [...document.querySelectorAll('#my-topics .ct .row-title')];
           return { n: t.length, head: text('#my-topics .section-head span'), edit: text('#my-topics [data-action=edit-topics]'),
             ph: document.querySelector('#topic-input')?.placeholder, names: t.map((e) => e.textContent),
             flag: document.querySelector('#my-topics .ct .sq').textContent, tint: getComputedStyle(document.querySelector('#my-topics .ct .sq')).backgroundColor,
@@ -456,6 +458,140 @@ for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
     await w.close();
   }
 }
+// ------------------------------------------------------------ Step 15: the first open's setup
+// A new reader (as=new, no row yet) sees "Your topics" (1 of 3), "Digest times" (2 of 3), "All set"
+// (3 of 3); Skip or Done ends it once and the server sends the sample digest. Every size, both
+// languages, both themes: 48 px rows and buttons, the buttons on the six columns, nothing wider.
+const SETUP_LAYOUT = `const v = document.querySelector('#view');
+  const box = (e) => e.getBoundingClientRect();
+  const items = [...v.querySelectorAll('.b, .group .row')].filter((e) => e.offsetParent);
+  const heights = [...new Set(items.map((e) => Math.round(box(e).height)))];
+  const card = v.querySelector('.section .group, .section .grid'), nav = v.querySelector('.setup-nav .grid');   // step 2: the times grid
+  const navOk = nav ? Math.abs(box(nav).left - box(card).left) < 0.6 && Math.abs(box(nav).right - box(card).right) < 0.6 : false;
+  const cut = [...v.querySelectorAll('.b, .row-title')].filter((e) => e.scrollWidth > e.clientWidth + 1).map((e) => e.textContent.trim());
+  return { title: text('#title'), head: text('#view .section-head'), heights, navOk, cut, tabs: !!document.querySelector('#tabs'),
+    sideways: document.documentElement.scrollWidth > window.innerWidth,
+    nav: [...v.querySelectorAll('.setup-nav .b')].map((b) => b.textContent.trim()) };`;
+{
+  await fetch(`${BASE}/__reset`, { method: "POST" });
+  const n = await openBrowser();
+  try {
+    await n.open(`${BASE}/app/?theme=light&as=new`);
+    let r = await n.run(`${SERVER} ${SETUP_LAYOUT}`);
+    check("setup step 1: 'Your topics', 1 of 3, the six topics on, Skip and Next, no tabs",
+      r.title === "Your topics" && r.head === "1 of 3" && r.nav.join() === "Skip,Next" && !r.tabs && r.heights.join() === "48" && r.navOk &&
+      !r.cut.length && !r.sideways, JSON.stringify(r));
+    r = await n.run(`${SERVER} const on = [...document.querySelectorAll('[data-action=topic][aria-checked=true]')].length;
+      click('[data-value=ukraine_war]'); await settled(); const u = await server();
+      click('[data-action=setup-next]'); await wait(300); const s2 = (() => { ${SETUP_LAYOUT} })();
+      const times = [...document.querySelectorAll('[data-action=time]')].length, on2 = [...document.querySelectorAll('[data-action=time][aria-pressed=true]')].map((x) => x.dataset.value);
+      click('[data-value="20:00"]'); await settled(); const u2 = await server();
+      click('[data-action=setup-back]'); await wait(300); const back = text('#title');
+      click('[data-action=setup-next]'); await wait(200); click('[data-action=setup-next]'); await wait(300); const s3 = (() => { ${SETUP_LAYOUT} })();
+      const hero = !!document.querySelector('#hero'), sample = text('#view .help-p');
+      return { on, saved: u.topics, s2, times, on2, savedTimes: u2.digest_times, back, s3, hero, sample };`);
+    check("setup: a topic tap saves at once; step 2 'Digest times', 2 of 3, 18 hours with 09, 14, 20 on, Back and Next on the grid",
+      r.on === 6 && !r.saved.includes("ukraine_war") && r.s2.title === "Digest times" && r.s2.head === "2 of 3" && r.times === 18 &&
+      r.on2.join() === "09:00,14:00,20:00" && r.s2.nav.join() === "Back,Next" && r.s2.navOk && r.s2.heights.join() === "48" &&
+      r.savedTimes.join() === "09:00,14:00" && r.back === "Your topics", JSON.stringify(r).slice(0, 700));
+    check("setup step 3: 'All set', 3 of 3, the next digest and one line about the sample, one Done button",
+      r.s3.title === "All set" && r.s3.head === "3 of 3" && r.hero && /sample digest of the last 24 hours/.test(r.sample) && r.s3.nav.join() === "Done" &&
+      r.s3.navOk && !r.s3.sideways, JSON.stringify(r.s3));
+    r = await n.run(`${SERVER} const k = calls(); click('[data-action=setup-finish]'); await until(() => text('#title') === 'Settings', 6000); await wait(300);
+      const st = await (await fetch('/api/open', { method: 'POST', headers: { authorization: 'tma ' + Telegram.WebApp.initData, 'content-type': 'application/json' }, body: '{}' })).json();
+      return { title: text('#title'), topics: !!document.querySelector('#topics .group, #topics'), haptic: since(k).filter((c) => c.startsWith('haptic')), setup: st.setup,
+        more: !!document.querySelector('#more') };`);
+    check("setup Done: Settings opens, a success haptic, the server ends the setup (it never shows again)",
+      r.title === "Settings" && r.topics && r.more && r.haptic.includes("haptic success") && r.setup === false, JSON.stringify(r));
+    await n.open(`${BASE}/app/?theme=light&as=new`);
+    r = await n.run(`return { title: text('#title') };`);
+    check("setup: reopening the app goes straight to Settings", r.title === "Settings", JSON.stringify(r));
+    await fetch(`${BASE}/__reset`, { method: "POST" });
+    await n.open(`${BASE}/app/?theme=dark&as=new&tg_lang=ru`, "dark");
+    r = await n.run(`${SERVER} const a = (() => { ${SETUP_LAYOUT} })(); click('[data-action=setup-skip]'); await until(() => text('#title') === 'Настройки', 6000);
+      const u = await server(); return { a, title: text('#title'), lang: u.lang, topics: u.topics.length, times: u.digest_times };`);
+    check("setup in Russian, dark: 'Ваши темы', '1 из 3', Пропустить and Далее; Skip keeps the defaults",
+      r.a.title === "Ваши темы" && r.a.head === "1 из 3" && r.a.nav.join() === "Пропустить,Далее" && r.title === "Настройки" && r.lang === "ru" &&
+      r.topics === 6 && r.times.join() === "09:00,14:00,20:00", JSON.stringify(r));
+    check("no console errors (setup)", n.consoleErrors().length === 0, JSON.stringify(n.consoleErrors()[0]?.params ?? "").slice(0, 200));
+  } catch (e) {
+    check("setup checks ran to the end", false, e.message);
+  } finally {
+    await n.close();
+  }
+}
+for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
+  const w = await openBrowser({ width, port });
+  try {
+    for (const lang of ["en", "ru"]) {
+      for (const scheme of ["light", "dark"]) {
+        await fetch(`${BASE}/__reset`, { method: "POST" });
+        await w.open(`${BASE}/app/?theme=${scheme}&as=new&tg_lang=${lang}`, scheme);
+        const S = await w.run(`const out = []; for (let i = 0; i < 3; i++) { out.push((() => { ${SETUP_LAYOUT} })());
+          if (i < 2) { click('[data-action=setup-next]'); await wait(250); } } return out;`);
+        const ru = lang === "ru";
+        check(`${width} px, ${ru ? "Russian" : "English"}, ${scheme}: the three setup steps keep the layout rules`,
+          S.every((x) => x.heights.join() === "48" && x.navOk && !x.cut.length && !x.sideways && !x.tabs) &&
+          S.map((x) => x.head).join() === (ru ? "1 из 3,2 из 3,3 из 3" : "1 of 3,2 of 3,3 of 3"), JSON.stringify(S).slice(0, 600));
+      }
+    }
+  } catch (e) {
+    check(`${width} px setup ran to the end`, false, e.message);
+  } finally {
+    await w.close();
+  }
+}
+
+// ------------------------------------------------------------ Step 15: the announcement tool (Admin)
+{
+  await fetch(`${BASE}/__reset`, { method: "POST" });
+  const a = await openBrowser();
+  try {
+    await a.open(`${BASE}/app/?theme=light&as=owner&confirm=1`);
+    let r = await a.run(`${SERVER} click('[data-action=tab][data-value=admin]'); await until(() => document.querySelector('#announce'), 6000);
+      const sec = document.querySelector('#announce');
+      return { head: text('#announce .section-head'), aud: [...sec.querySelectorAll('[data-action=ann-audience]')].map((b) => b.textContent + ':' + b.getAttribute('aria-pressed')),
+        foot: text('#announce .section-foot') };`);
+    check("Admin: Announcement section with the English field and the audience (All users, English, Russian)",
+      r.head === "Announcement" && r.aud.join() === "All users:true,English:false,Russian:false" && /English, Russian/.test(r.foot), JSON.stringify(r));
+    r = await a.run(`${SERVER} const t0 = window.__toasts.length; const i = document.querySelector('#ann-en'); i.value = 'New: Economy & Markets from 5 December.';
+      i.dispatchEvent(new Event('input', { bubbles: true })); click('[data-action=ann-translate]');
+      await until(() => document.querySelectorAll('.ann-text').length, 8000); await wait(300);
+      const versions = [...document.querySelectorAll('.ann-text')].map((x) => x.dataset.lang + '=' + x.value);
+      const send = document.querySelector('[data-action=ann-send]');
+      return { versions, sendOff: send.disabled, toasts: window.__toasts.slice(t0) };`);
+    check("Translate: one version per language users read (English and Russian), Send locked until a preview",
+      r.versions.length === 2 && r.versions[0] === "en=New: Economy & Markets from 5 December." && /^ru=Новости Axiom: 5\.$/.test(r.versions[1]) && r.sendOff,
+      JSON.stringify(r));
+    r = await a.run(`${SERVER} const t0 = window.__toasts.length; click('[data-action=ann-preview]'); await until(() => window.__toasts.length > t0, 6000);
+      await until(() => !document.querySelector('[data-action=ann-send]').disabled, 6000).catch(() => {});
+      const sendOn = !document.querySelector('[data-action=ann-send]').disabled; const t1 = window.__toasts.slice(t0);
+      const ta = document.querySelector('.ann-text[data-lang=ru]'); ta.value = ta.value + ' Ура'; ta.dispatchEvent(new Event('input', { bubbles: true }));
+      const st = (await (await fetch('/api/admin', { headers: { authorization: 'tma ' + Telegram.WebApp.initData } })).json()).announce.recent.map((x) => x.id + ':' + x.status);
+      return { t1, sendOn, locked: document.querySelector('[data-action=ann-send]').disabled, st };`);
+    check("Preview to me: sent to the owner; Send unlocks; an edit locks it again until a new preview",
+      r.t1.join() === "Preview sent to you: 2 versions." && r.sendOn && r.locked, JSON.stringify(r));
+    r = await a.run(`${SERVER} const t0 = window.__toasts.length; click('[data-action=ann-preview]'); await until(() => window.__toasts.length > t0, 6000);
+      await until(() => !document.querySelector('[data-action=ann-send]').disabled, 6000).catch(() => {});
+      const t1 = window.__toasts.length; click('[data-action=ann-send]'); await until(() => window.__toasts.length > t1, 6000); await wait(600);
+      return { toast: window.__toasts.slice(t1).join(), badge: [...document.querySelectorAll('.badge')].map((b) => b.textContent).filter((x) => /sending|done/.test(x)),
+        fresh: !!document.querySelector('#ann-en') };`);
+    check("Send (after a confirm): sending in batches, listed under Recent announcements; the field is free for the next one",
+      /Sending now/.test(r.toast) && r.badge.includes("sending") && r.fresh, JSON.stringify(r));
+    r = await a.run(`const res = await fetch('/api/admin/announce', { method: 'POST', headers: { authorization: 'tma ' + Telegram.WebApp.initData, 'content-type': 'application/json' },
+      body: JSON.stringify({ action: 'draft', text: 'x', audience: 'all' }) }); return res.status;`);
+    check("the owner's API works (200)", r === 200, String(r));
+    await a.open(`${BASE}/app/?theme=light&as=friend`);
+    r = await a.run(`const res = await fetch('/api/admin/announce', { method: 'POST', headers: { authorization: 'tma ' + Telegram.WebApp.initData, 'content-type': 'application/json' },
+      body: JSON.stringify({ action: 'draft', text: 'x', audience: 'all' }) }); return res.status;`);
+    check("a reader calling the announcement API gets 403", r === 403, String(r));
+  } catch (e) {
+    check("announcement checks ran to the end", false, e.message);
+  } finally {
+    await a.close();
+  }
+}
+
 console.log(results.join("\n"));
 console.log(failed ? `${failed} check(s) failed` : `all ${results.length} checks passed`);
 process.exit(failed ? 1 : 0);

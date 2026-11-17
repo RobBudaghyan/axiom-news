@@ -381,10 +381,10 @@ describe("bot: Open settings button", () => {
     fetchMock = mockFetch(() => undefined);
     await worker.fetch(post("/start"), { ...env(binding), APP_URL: "https://w.test/app/" });
     await worker.fetch(post("/settings"), { ...env(binding), APP_URL: "https://w.test/app/" });
-    for (const c of fetchMock.calls) {
-      assert.deepEqual(c.body.reply_markup, { inline_keyboard: [[{ text: "Open settings", web_app: { url: "https://w.test/app/" } }]] });
-    }
-    assert.match(fetchMock.calls[0].body.text, /Tap Open settings/);
+    // Step 15: a new user's /start carries "Set up" (the setup opens in the Mini App), /settings "Open settings"
+    assert.deepEqual(fetchMock.calls[0].body.reply_markup, { inline_keyboard: [[{ text: "Set up", web_app: { url: "https://w.test/app/" } }]] });
+    assert.deepEqual(fetchMock.calls[1].body.reply_markup, { inline_keyboard: [[{ text: "Open settings", web_app: { url: "https://w.test/app/" } }]] });
+    assert.match(fetchMock.calls[0].body.text, /Tap Set up/);
     assert.match(fetchMock.calls[1].body.text, /^Choose your topics, language and when your digests arrive/);
     assert.doesNotMatch(fetchMock.calls.map((c) => c.body.text).join(), /[—–]/);
   });

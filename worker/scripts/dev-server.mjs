@@ -3,7 +3,9 @@
 // Telegram itself is replaced by scripts/dev/mock-telegram.js. Used for the screenshots.
 //
 //   node scripts/dev-server.mjs            then open http://localhost:8790/app/?theme=dark&as=owner
-//   query: theme=light|dark, as=owner|friend, confirm=0 (the confirm popup answers Cancel)
+//   query: theme=light|dark, as=owner|friend|new, confirm=0 (the confirm popup answers Cancel)
+//   Step 15: as=new is a reader opening the app for the first time (no row yet: the setup shows);
+//   tg_lang=ru gives them a Russian Telegram
 //   POST /__reset puts the demo data back as it was at start
 import { createServer } from "node:http";
 import { readFileSync, existsSync } from "node:fs";
@@ -13,13 +15,13 @@ import worker from "../src/index.js";
 import { signInitData } from "../src/auth.js";
 import { nextSlot } from "../src/digest.js";
 import { ALL, addStory, fakeD1 } from "../test/helpers.mjs";
-import { geminiResponse, isGemini, isGroq, promptOf, topicAnswer } from "../test/fake-ai.mjs";
+import { announceAnswer, geminiResponse, isAnnouncePrompt, isGemini, isGroq, promptOf, topicAnswer } from "../test/fake-ai.mjs";
 
 const PORT = Number(process.env.PORT || 8790);
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const PUBLIC = join(ROOT, "public");
 const TOKEN = "100000:local-preview-token";   // not a real bot token
-const OWNER = 42, FRIEND = 101;   // FRIEND = the demo user "Ani"
+const OWNER = 42, FRIEND = 101, NEWBIE = 300;   // FRIEND = the demo user "Ani"; NEWBIE = Step 15's new reader
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8" };
 
 // ------------------------------------------------------------------ demo data (all invented)
@@ -41,6 +43,9 @@ function seed() {
     user.run(id, name, tz, det, JSON.stringify(times), JSON.stringify(topics), paused, blocked, now - 9 * 86400,
       blocked ? now - 5 * 86400 : now - (2 + id % 5) * H, nextSlot(now, tz, times));
   }
+  // Step 15: the demo users have done the setup and opened the app long ago
+  sqlite.prepare("UPDATE users SET onboarded_at = created_at, opened_at = created_at").run();
+  sqlite.prepare("UPDATE users SET lang = 'ru' WHERE id = 102").run();   // a Russian reader, so announcements have two versions
   // 7 days of hourly runs at about :07
   const run = sqlite.prepare("INSERT INTO job_runs (started_at, finished_at, status, feeds_ok, feeds_failed, items_fetched, " +
     "items_new, items_pending_in, stories_created, stories_merged, items_dropped, items_expired, items_left_pending, provider, " +
@@ -135,7 +140,8 @@ globalThis.fetch = async (url, init) => {
   const u = String(url);
   if (isGemini(u) || isGroq(u)) {
     await new Promise((r) => setTimeout(r, AI_DELAY_MS));
-    return new Response(JSON.stringify(geminiResponse(topicAnswer(promptOf(JSON.parse(init.body))))));
+    const prompt = promptOf(JSON.parse(init.body));   // Step 15: the announcement translation too
+    return new Response(JSON.stringify(geminiResponse(isAnnouncePrompt(prompt) ? announceAnswer(prompt) : topicAnswer(prompt))));
   }
   if (u.endsWith("/createInvoiceLink")) return new Response(JSON.stringify({ ok: true, result: "https://t.me/$demo-invoice" }));
   if (u.startsWith("https://api.telegram.org/")) return new Response(JSON.stringify({ ok: true, result: { message_id: 1 } }));
@@ -144,10 +150,10 @@ globalThis.fetch = async (url, init) => {
 };
 
 async function page(query) {
-  const as = query.get("as") === "friend" ? FRIEND : OWNER;
-  const name = as === OWNER ? "Sam" : "Ani";
+  const as = query.get("as") === "friend" ? FRIEND : query.get("as") === "new" ? NEWBIE : OWNER;
+  const name = as === OWNER ? "Sam" : as === FRIEND ? "Ani" : "Nora";
   const initData = await signInitData({ query_id: "AAHdev", auth_date: String(Math.floor(Date.now() / 1000)),
-    user: JSON.stringify({ id: as, first_name: name, language_code: "en" }) }, TOKEN);
+    user: JSON.stringify({ id: as, first_name: name, language_code: query.get("tg_lang") || "en" }) }, TOKEN);
   const mock = { initData, theme: query.get("theme") === "dark" ? "dark" : "light", confirm: query.get("confirm") !== "0",
     pay: query.get("pay") !== "0" };
   return readFileSync(join(PUBLIC, "app", "index.html"), "utf8").replace(

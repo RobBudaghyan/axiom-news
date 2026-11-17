@@ -65,3 +65,14 @@ export const isGroq = (url) => url.startsWith("https://api.groq.com/");
 
 // The prompt text inside a Gemini request body.
 export const promptOf = (body) => body?.contents?.[0]?.parts?.[0]?.text ?? body?.messages?.[0]?.content ?? "";
+
+// Step 15: a stand-in for the announcement translation: each language gets a short text in its own
+// alphabet with the English text's numbers, so every check passes (the local preview only).
+const STAND_IN = { ru: "Новости Axiom", hy: "Axiom-ի նորություններ", fr: "Nouvelles d'Axiom" };
+export function announceAnswer(prompt) {
+  const english = /ENGLISH TEXT:\n([\s\S]*?)\n\nReturn JSON only/.exec(prompt)?.[1] ?? "";
+  const langs = [...(/"translations": \{([^}]*)\}/.exec(prompt)?.[1] ?? "").matchAll(/"(\w+)":/g)].map((m) => m[1]);
+  const nums = (english.match(/\d+(?:[.,]\d+)*/g) ?? []).join(" ");
+  return { translations: Object.fromEntries(langs.map((l) => [l, `${STAND_IN[l] ?? "Axiom"}${nums ? `: ${nums}` : ""}.`])) };
+}
+export const isAnnouncePrompt = (prompt) => /You translate a short announcement/.test(prompt);

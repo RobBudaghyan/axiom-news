@@ -32,7 +32,7 @@ describe("webhook", () => {
     assert.equal(fetchMock.calls.length, 0);
   });
 
-  test("/start creates the user with defaults and sends a welcome naming the times", async () => {
+  test("/start creates the user with defaults and sends the short welcome with Set up (Step 15)", async () => {
     const { binding, sqlite } = fakeD1();
     fetchMock = mockFetch(() => undefined);
     const res = await worker.fetch(post(update("/start")), env(binding));
@@ -47,7 +47,12 @@ describe("webhook", () => {
     assert.match(reply.url, /\/sendMessage$/);
     assert.equal(reply.body.chat_id, OWNER);
     assert.match(reply.body.text, /^Welcome to Axiom News, Ruben!/);
-    assert.match(reply.body.text, /09:00, 14:00 and 20:00 \(Yerevan time\)/);
+    assert.match(reply.body.text, /Tap Set up to choose your topics and times\. It takes a minute\.$/);
+    assert.equal(reply.body.reply_markup.inline_keyboard[0][0].text, "Set up");
+    assert.ok(reply.body.reply_markup.inline_keyboard[0][0].web_app.url);
+    assert.equal(u.onboarded_at, null);
+    assert.equal(u.opened_at, null);
+    assert.equal(u.imported, 0);
     assert.doesNotMatch(reply.body.text, /[—–]/);
   });
 

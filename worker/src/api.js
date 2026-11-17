@@ -13,7 +13,9 @@
 //   POST /api/topics/add      {name}    Step 13: add a custom topic (one AI check), return {state, result}
 //   POST /api/topics/remove   {id}      Step 13: stop following a custom topic (edit mode), return state
 //   POST /api/topics/switch   {id, on}  Step 13 fixes: switch a custom topic on or off, return state
+//   POST /api/onboard         {skipped} Step 15: the setup is done or skipped; the first call sends the sample digest
 //   POST /api/feedback        {text}    Step 15: store a reader's feedback and forward it to the owner
+//   POST /api/admin/announce  {action, ...}  Step 15: draft (translate), preview, send or cancel an announcement (owner only)
 //   POST /api/admin/topic     {id, action}  Step 13: delete or block a custom topic; Step 15: "keywords" refreshes its keywords (owner only)
 import { verifyInitData } from "./auth.js";
 import { CONFIG, candidateStatement, hhmm, localParts, nextSlot, planDigest } from "./digest.js";
@@ -25,6 +27,9 @@ import { errorStatement } from "./db.js";
 import { LANGS, chooseLang, effectiveLang, t, topicLabel } from "./i18n.js";
 import { setChatLanguage } from "./bot.js";
 import { TIP_AMOUNTS, allowedAmount, invoiceFields, refundTip, tipsStatements, shapeTips } from "./tips.js";
+import { needsSetup, onboard, sendDigestNow } from "./onboard.js";
+import { ANNOUNCE_ADMIN_COUNT, announceAdminStatements, cancelAnnouncement, draftAnnouncement, previewAnnouncement,
+  shapeAnnounce, startAnnouncement } from "./announce.js";
 import { FEEDBACK_ADMIN_COUNT, feedbackStatements, sendFeedback, shapeFeedback } from "./feedback.js";
 import { CUSTOM_ADMIN_COUNT, TOPICS_CFG, addTopic, adminTopicStatements, asTopicRows, customAdminStatements, enabledOnly,
   followedStatement, publicCustom, removeStatements, shapeCustomAdmin, switchStatement, withCustomTopics } from "./custom.js";
@@ -53,6 +58,7 @@ function state(user, topics, isOwner, cfg, custom = []) {
     limits: { ...L, max_custom: TOPICS_CFG.max_per_user, custom_name_max: TOPICS_CFG.name_max },
     tips: { amounts: [...TIP_AMOUNTS] },   // Step 11: 100, 500, 1000 for everyone
     is_owner: isOwner,
+    setup: needsSetup(user),   // Step 15: show the 3-step setup
   };
 }
 
@@ -78,18 +84,19 @@ async function open(db, tg, body, now, cfg, isOwner) {
       id: tg.id, first_name: firstName, language, lang: chooseLang(language), timezone: deviceTz ?? cfg.default_timezone,
       tz_detected: deviceTz ? TZ_AUTO : TZ_DEFAULT, digest_times: JSON.stringify(cfg.default_times),
       topics: JSON.stringify(topics.filter((t) => t.is_default).map((t) => t.tag)),
-      paused: 0, blocked: 0, created_at: now,
+      paused: 0, blocked: 0, created_at: now, opened_at: now, onboarded_at: null, imported: 0,
     };
     user.next_digest_at = nextSlot(now, user.timezone, cfg.default_times);
     await db.batch([{
       sql: "INSERT INTO users (id, first_name, language, lang, timezone, tz_detected, digest_times, topics, " +
-           "created_at, next_digest_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10) ON CONFLICT(id) DO NOTHING",
+           "created_at, next_digest_at, opened_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?9) ON CONFLICT(id) DO NOTHING",
       params: [user.id, firstName, language, user.lang, user.timezone, user.tz_detected, user.digest_times,
                user.topics, now, user.next_digest_at],
     }]);
     return state(user, topics, isOwner, cfg);
   }
   const after = { ...user };
+  if (!user.opened_at) after.opened_at = now;   // Step 15: the first open (no reminder after it)
   if (firstName && firstName !== user.first_name) after.first_name = firstName;   // lesson 14
   if (language !== user.language) after.language = language;   // Telegram's code only; never users.lang
   // The zone always follows the phone (Step 5: there is no hand-picked zone any more), so it
@@ -99,7 +106,7 @@ async function open(db, tg, body, now, cfg, isOwner) {
     after.tz_detected = TZ_AUTO;
     if (deviceTz !== user.timezone) after.next_digest_at = nextDigestAfterChange(user, after, now, cfg);
   }
-  const changed = ["first_name", "language", "timezone", "tz_detected", "next_digest_at"].filter((k) => after[k] !== user[k]);
+  const changed = ["first_name", "language", "timezone", "tz_detected", "next_digest_at", "opened_at"].filter((k) => after[k] !== user[k]);
   if (changed.length) {
     await db.batch([{
       sql: `UPDATE users SET ${changed.map((k, i) => `${k} = ?${i + 1}`).join(", ")} WHERE id = ?${changed.length + 1}`,
@@ -194,17 +201,26 @@ async function adminTopic(db, body, now) {
 
 // ------------------------------------------------------------------ admin actions
 
+// Step 15: the announcement tool. Every answer is {ok, message, announcement?} (Admin stays English).
+async function announce(db, env, body, now, io) {
+  const act = body?.action;
+  const r = act === "draft" ? await draftAnnouncement(db, env, body, now)
+    : act === "preview" ? await previewAnnouncement(db, body, now, io, env.OWNER_TELEGRAM_ID)
+    : act === "send" ? await startAnnouncement(db, body, now)
+    : act === "cancel" ? await cancelAnnouncement(db, body, now)
+    : { error: "Draft, preview, send or cancel?" };
+  if (r.error) return json(400, { ok: false, message: r.error });
+  const message = act === "draft" ? (Object.keys(r.notes).length ? "Translated. Some versions need your text (see the notes)." : "Translated. Check each version, then send yourself a preview.")
+    : act === "preview" ? `Preview sent to you: ${r.previews} ${r.previews === 1 ? "version" : "versions"}.`
+    : act === "send" ? "Sending now, a batch every 5 minutes. Progress shows here."
+    : "Cancelled.";
+  return json(200, { ok: true, message, announcement: r });
+}
+
 async function digestNow(db, ownerId, now, cfg, io) {
-  const [rows, topics, custom] = await db.batch([{ sql: USER_SQL, params: [ownerId] }, { sql: TOPICS_SQL, params: [] },
-    followedStatement(ownerId)]);
-  const user = rows[0];
-  if (!user) return fail(404, "no_user");
-  const u = withCustomTopics(user, custom);   // Step 13: the custom topics switched on
-  const [cands] = await db.batch([candidateStatement(u, now, cfg)]);
-  const plan = planDigest(u, cands, [...topics, ...asTopicRows(enabledOnly(custom))], now, cfg);
-  const ids = await sendDigest(io, user.id, plan);
-  await db.batch(digestWrites(user, plan, ids, now));
-  const n = ids.length;
+  const r = await sendDigestNow(db, ownerId, now, cfg, io);   // Step 15: shared with the sample digest
+  if (!r) return fail(404, "no_user");
+  const n = r.ids.length;
   return json(200, {
     ok: true, stories: n,
     message: n ? `Sent: ${n} ${n === 1 ? "story" : "stories"}. Check your chat with the bot.`
@@ -278,16 +294,21 @@ export async function handleApi(request, env, db, now, io, cfg = CONFIG) {
       case "POST /api/topics/add": return await addCustom(db, env, tg, body, now, cfg, isOwner);
       case "POST /api/topics/remove": return await removeCustom(db, tg, body, now, cfg, isOwner);
       case "POST /api/topics/switch": return await switchCustom(db, tg, body, now, cfg, isOwner);
+      case "POST /api/onboard": {
+        const r = await onboard(db, tg.id, body, now, cfg, io);
+        return json(200, { ...(await open(db, tg, {}, now, cfg, isOwner)), sample: r });
+      }
       case "POST /api/feedback": return json(200, await sendFeedback(db, tg, body, now, io, env.OWNER_TELEGRAM_ID));
       case "GET /api/admin":
       case "POST /api/admin/digest":
       case "POST /api/admin/run-job":
       case "POST /api/admin/refund":
-      case "POST /api/admin/topic": {
+      case "POST /api/admin/topic":
+      case "POST /api/admin/announce": {
         if (!isOwner) return fail(403, "owner_only");
         if (route === "GET /api/admin") {
           // One batch, each block sliced by its own count (Step 15: no position taken from the end).
-          const blocks = [adminStatements(now), customAdminStatements(now), tipsStatements(), feedbackStatements()];
+          const blocks = [adminStatements(now), customAdminStatements(now), tipsStatements(), feedbackStatements(), announceAdminStatements()];
           const rows = await db.batch(blocks.flat());
           const parts = [];
           let at = 0;
@@ -296,11 +317,13 @@ export async function handleApi(request, env, db, now, io, cfg = CONFIG) {
           out.custom = shapeCustomAdmin(parts[1].slice(0, CUSTOM_ADMIN_COUNT), now);
           out.tips = shapeTips(...parts[2]);
           out.feedback = shapeFeedback(...parts[3].slice(0, FEEDBACK_ADMIN_COUNT));
+          out.announce = shapeAnnounce(...parts[4].slice(0, ANNOUNCE_ADMIN_COUNT));
           return json(200, out);
         }
         if (route === "POST /api/admin/digest") return await digestNow(db, tg.id, now, cfg, io);
         if (route === "POST /api/admin/refund") return await refund(db, body, now, io);
         if (route === "POST /api/admin/topic") return await adminTopic(db, body, now);
+        if (route === "POST /api/admin/announce") return await announce(db, env, body, now, io);
         return await runJobNow(db, env, now, cfg, io);
       }
       default: return fail(404, "not_found");

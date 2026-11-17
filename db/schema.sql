@@ -4,7 +4,7 @@
 -- Indexes are kept to a minimum: on D1 every index update counts as an extra row written.
 
 -- One row per Telegram user. Deleting or resetting a user must delete their rows in the other
--- per-user tables too: `sent` (docs/LESSONS.md, lesson 16), and since Step 15 `feedback`.
+-- per-user tables too: `sent` (docs/LESSONS.md, lesson 16), and since Step 15 `feedback` and `announcement_sends`.
 CREATE TABLE IF NOT EXISTS users (
   id             INTEGER PRIMARY KEY,               -- Telegram user id
   first_name     TEXT,
@@ -20,9 +20,17 @@ CREATE TABLE IF NOT EXISTS users (
   last_digest_at INTEGER,
   next_digest_at INTEGER,
   format         TEXT,                              -- unused since Step 5 (one format for everyone)
-  lang           TEXT NOT NULL DEFAULT 'en'         -- Step 9: the reader's language (config/languages.json). `language`
+  lang           TEXT NOT NULL DEFAULT 'en',        -- Step 9: the reader's language (config/languages.json). `language`
                                                     -- above is Telegram's code, refreshed on every /start and open;
                                                     -- `lang` is set once on creation and then only by the Mini App
+  -- Step 15: the welcome flow. A new user sees a 3-step setup on the first Mini App open until it is
+  -- done or skipped (onboarded_at, which also sends the one sample digest); one reminder the next
+  -- day if they never opened the app (reminded_at). Users imported from the old bot (imported = 1)
+  -- get no welcome, no setup and no reminder.
+  onboarded_at   INTEGER,
+  opened_at      INTEGER,                           -- the first Mini App open
+  reminded_at    INTEGER,
+  imported       INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_users_next ON users(next_digest_at);
 
@@ -150,6 +158,31 @@ CREATE TABLE IF NOT EXISTS feedback (
   forwarded INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_feedback_user ON feedback(user_id, at);
+
+-- Step 15: announcements from the owner (Admin). Written in English, translated by AI into every
+-- language the audience reads, edited and previewed by the owner, then sent in batches by the cron.
+-- status: draft -> previewed -> sending -> done (or cancelled). texts: JSON {lang: text}.
+CREATE TABLE IF NOT EXISTS announcements (
+  id           INTEGER PRIMARY KEY,
+  created_at   INTEGER NOT NULL,
+  status       TEXT NOT NULL DEFAULT 'draft',
+  audience     TEXT NOT NULL DEFAULT 'all',         -- 'all' or one language code
+  texts        TEXT NOT NULL,
+  notes        TEXT,                                -- JSON {lang: why the AI version was not used}
+  previewed_at INTEGER,
+  started_at   INTEGER,
+  finished_at  INTEGER
+);
+-- One row per announcement and user, written BEFORE the message is sent (ok NULL), so a retried
+-- tick never sends twice; ok 1 sent, 0 failed.
+CREATE TABLE IF NOT EXISTS announcement_sends (
+  announcement_id INTEGER NOT NULL,
+  user_id         INTEGER NOT NULL,
+  at              INTEGER NOT NULL,
+  ok              INTEGER,
+  error           TEXT,
+  PRIMARY KEY (announcement_id, user_id)
+) WITHOUT ROWID;
 
 -- One row per hourly job run (Admin tab stats).
 CREATE TABLE IF NOT EXISTS job_runs (

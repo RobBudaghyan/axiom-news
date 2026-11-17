@@ -13,7 +13,8 @@
     "quiet": "{hello}. Période calme : rien d'important sur vos sujets {since}.",
     "stories": {"one": "actualité", "other": "actualités"},
     "count_line": "{count} {stories} {since}",
-    "quiet_line": "Période calme : rien d'important sur vos sujets {since}."
+    "quiet_line": "Période calme : rien d'important sur vos sujets {since}.",
+    "sample_label": "Exemple de résumé : les actualités les plus importantes des dernières 24 heures sur vos sujets."
   },
   "topics": {
     "politics_conflicts": "Politique et conflits",
@@ -51,7 +52,10 @@
     "paysupport": "Un problème avec un pourboire ? Envoyez /paysupport suivi d'un court message, par exemple : /paysupport 500 étoiles par erreur. Le propriétaire d'Axiom le lit et peut rembourser un pourboire fait par erreur. Le support de Telegram ne peut pas aider pour les paiements aux bots.",
     "paysupport_sent": "Merci, votre message a été envoyé au propriétaire d'Axiom. Un pourboire fait par erreur est remboursé sur votre solde de Stars.",
     "terms": "Conditions des pourboires. Axiom News est gratuit. Un pourboire en Telegram Stars est volontaire et ne débloque rien ; il ne change ni vos résumés ni vos réglages. En règle générale, les pourboires ne sont pas remboursés, mais un pourboire fait par erreur est remboursé sur demande via /paysupport. Le support de Telegram ne peut pas aider pour les paiements aux bots. Nous gardons seulement qui a donné, le montant, l'identifiant de paiement Telegram et l'heure.",
-    "help_cmd": "Tout sur Axiom se trouve dans les réglages : ouvrez-les et touchez Aide. Vous pouvez aussi nous envoyer un avis."
+    "help_cmd": "Tout sur Axiom se trouve dans les réglages : ouvrez-les et touchez Aide. Vous pouvez aussi nous envoyer un avis.",
+    "welcome_setup": "Bienvenue sur Axiom News, {name} ! J'envoie plusieurs fois par jour un court résumé des actualités les plus importantes. Touchez Configurer pour choisir vos sujets et vos heures. Cela prend une minute.",
+    "setup_button": "Configurer",
+    "reminder": "Bonjour {name} ! Vos résumés arrivent à {times} ({zone}) sur les sujets principaux. Touchez Configurer pour choisir vos propres sujets et heures."
   },
   "commands": {
     "start": "Démarrer (ou redémarrer) vos résumés de l'actualité",
@@ -165,6 +169,15 @@
     "help_privacy": "Nous conservons votre identifiant Telegram, votre prénom et vos réglages. Le texte d'un sujet que vous ajoutez est envoyé à une IA pour vérification. Rien n'est vendu ni partagé.",
     "feedback_placeholder": "Votre message",
     "feedback_send": "Envoyer",
-    "feedback_thanks": "Merci !"
+    "feedback_thanks": "Merci !",
+    "setup_topics": "Vos sujets",
+    "setup_times": "Heures des résumés",
+    "setup_done": "C'est prêt",
+    "setup_step": "{n} sur 3",
+    "setup_next": "Suivant",
+    "setup_back": "Retour",
+    "setup_skip": "Passer",
+    "setup_finish": "Terminé",
+    "setup_sample": "Un exemple de résumé des dernières 24 heures arrive dans votre conversation."
   }
 }

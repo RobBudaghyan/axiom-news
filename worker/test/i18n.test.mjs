@@ -336,10 +336,9 @@ describe("language defaults and the language setting", () => {
     await worker.fetch(post("/start", { id: OWNER, first_name: "Rob", language_code: "ru" }), env(binding));
     assert.equal(langOf(sqlite), "ru");
     const [reply, ...setup] = fetchMock.calls;
-    assert.match(reply.body.text, /^Добро пожаловать в Axiom News, Rob!/);
-    assert.match(reply.body.text, /в 09:00, 14:00 и 20:00 \(часовой пояс: Ереван\)/);
-    assert.match(reply.body.text, /Темы: Политика и конфликты, Экономика и рынки, Армения, Россия, Война в Иране и Война на Украине\./);
-    assert.equal(reply.body.reply_markup.inline_keyboard[0][0].text, "Открыть настройки");
+    assert.match(reply.body.text, /^Добро пожаловать в Axiom News, Rob! Я присылаю короткую сводку/);
+    assert.match(reply.body.text, /Нажмите «Настроить», чтобы выбрать темы и время\./);
+    assert.equal(reply.body.reply_markup.inline_keyboard[0][0].text, "Настроить");
     const cmd = setup.find((c) => c.url.endsWith("/setMyCommands")).body;
     assert.deepEqual(cmd.scope, { type: "chat", chat_id: OWNER });
     assert.equal(cmd.commands[1].description, "Открыть настройки");

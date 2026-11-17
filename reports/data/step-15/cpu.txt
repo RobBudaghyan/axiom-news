@@ -1,0 +1,32 @@
+live layout: rich
+planDigest, 40 candidates, en: 328 microseconds
+planDigest, 40 candidates, ru: 300 microseconds
+cron tick: 8 due readers: 2.61 ms
+cron tick: 8 due readers + 8 reminders + an announcement batch of 25: 2.69 ms
+announcement batch of 25 alone: 31 microseconds
+/start from a new user (welcome, Russian): 11 microseconds
+POST /api/onboard: the sample digest (40 candidates): 344 microseconds
+POST /api/feedback: 5 microseconds
+---
+live layout: rich
+planDigest, 40 candidates, en: 309 microseconds
+planDigest, 40 candidates, ru: 300 microseconds
+cron tick: 8 due readers: 2.61 ms
+cron tick: 8 due readers + 8 reminders + an announcement batch of 25: 2.67 ms
+announcement batch of 25 alone: 32 microseconds
+/start from a new user (welcome, Russian): 10 microseconds
+POST /api/onboard: the sample digest (40 candidates): 337 microseconds
+POST /api/feedback: 5 microseconds
+---
+live layout: rich
+planDigest, 40 candidates, en: 316 microseconds
+planDigest, 40 candidates, ru: 300 microseconds
+cron tick: 8 due readers: 2.64 ms
+cron tick: 8 due readers + 8 reminders + an announcement batch of 25: 2.72 ms
+announcement batch of 25 alone: 32 microseconds
+/start from a new user (welcome, Russian): 10 microseconds
+POST /api/onboard: the sample digest (40 candidates): 329 microseconds
+POST /api/feedback: 5 microseconds
+---
+planDigest, 40 candidates, ru: 306 microseconds
+cron tick: 8 due readers (live layout rich): 2.55 ms

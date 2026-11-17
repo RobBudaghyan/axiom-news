@@ -44,6 +44,11 @@ MIGRATIONS = [
     "ALTER TABLE custom_follows ADD COLUMN enabled INTEGER NOT NULL DEFAULT 1",   # Step 13 fixes: the switch
     "ALTER TABLE custom_topics ADD COLUMN keywords TEXT",   # Step 14: match keywords (job/custom.py KeywordRule)
     "ALTER TABLE custom_topics ADD COLUMN keywords_at INTEGER",   # Step 15: weekly keyword refresh
+    # Step 15: the welcome flow (announcements are new tables, created above)
+    "ALTER TABLE users ADD COLUMN onboarded_at INTEGER",
+    "ALTER TABLE users ADD COLUMN opened_at INTEGER",
+    "ALTER TABLE users ADD COLUMN reminded_at INTEGER",
+    "ALTER TABLE users ADD COLUMN imported INTEGER NOT NULL DEFAULT 0",
 ]
 
 

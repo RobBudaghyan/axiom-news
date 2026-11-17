@@ -73,10 +73,13 @@ export function addUser(sqlite, fields = {}) {
     topics: JSON.stringify(ALL), created_at: 1, last_digest_at: null, next_digest_at: null, paused: 0, blocked: 0,
     ...fields,
   };
+  // Step 15: an existing user has done the setup and opened the app, unless a test says otherwise
   sqlite.prepare("INSERT INTO users (id, first_name, timezone, digest_times, topics, created_at, " +
-    "last_digest_at, next_digest_at, paused, blocked, lang) VALUES (?,?,?,?,?,?,?,?,?,?,?)")
+    "last_digest_at, next_digest_at, paused, blocked, lang, onboarded_at, opened_at, reminded_at, imported) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
     .run(u.id, u.first_name, u.timezone, u.digest_times, u.topics, u.created_at,
-      u.last_digest_at, u.next_digest_at, u.paused, u.blocked, u.lang ?? "en");
+      u.last_digest_at, u.next_digest_at, u.paused, u.blocked, u.lang ?? "en",
+      "onboarded_at" in fields ? fields.onboarded_at : 1, "opened_at" in fields ? fields.opened_at : 1,
+      fields.reminded_at ?? null, fields.imported ?? 0);
   return u;
 }
 

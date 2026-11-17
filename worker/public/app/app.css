@@ -262,6 +262,10 @@ button.row:active, .tap:active { background: var(--press); }
 .fb-input::placeholder { color: var(--text-2); }
 .fb-actions { margin-top: 16px; }
 .b.s6 { grid-column: span 6; }
+.b.s4 { grid-column: span 4; }
+.setup-nav { margin-top: 16px; }
+.ann-text { min-height: calc(var(--h) * 3); }
+.ann-actions { margin-top: var(--gap); }
 .b.primary { background: var(--accent); color: #fff; font-size: 17px; font-weight: 600; }
 .b.primary:disabled { opacity: 0.45; }
 .spinner.small { width: 18px; height: 18px; border-width: 2px; }

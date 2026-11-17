@@ -273,20 +273,21 @@ async function post(url, headers, body, timeoutMs) {
   }
 }
 
-// One call. Returns {ok, text, in, out, code, error}.
-async function callOne(p, env, prompt, timeoutMs) {
+// One call. Returns {ok, text, in, out, code, error}. Step 15: the JSON schema and the answer size
+// are options (the announcement translation uses the same chain).
+async function callOne(p, env, prompt, timeoutMs, schema = CHECK_SCHEMA, maxTokens = 2048, schemaName = "topic_check") {
   let res;
   try {
     res = p.name === "gemini"
       ? await post(`${GEMINI}/${p.model}:generateContent`, { "x-goog-api-key": env.GEMINI_API_KEY }, {
           contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.2, maxOutputTokens: 2048, responseMimeType: "application/json",
-            responseJsonSchema: CHECK_SCHEMA, thinkingConfig: { thinkingLevel: "low" } },
+          generationConfig: { temperature: 0.2, maxOutputTokens: maxTokens, responseMimeType: "application/json",
+            responseJsonSchema: schema, thinkingConfig: { thinkingLevel: "low" } },
         }, timeoutMs)
       : await post(GROQ, { authorization: `Bearer ${env.GROQ_API_KEY}` }, {
-          model: p.model, temperature: 0.2, max_completion_tokens: 2048, reasoning_effort: "low",
+          model: p.model, temperature: 0.2, max_completion_tokens: maxTokens, reasoning_effort: "low",
           messages: [{ role: "user", content: prompt }],
-          response_format: { type: "json_schema", json_schema: { name: "topic_check", schema: CHECK_SCHEMA } },
+          response_format: { type: "json_schema", json_schema: { name: schemaName, schema } },
         }, timeoutMs);
   } catch (e) {
     return { ok: false, code: null, error: `${p.name}: network error ${e.name === "AbortError" ? "timeout" : e.name}` };
@@ -317,16 +318,18 @@ function parseAnswer(text) {
 }
 
 // Asks each provider in turn until one gives a usable answer. Returns {answer, calls}: calls are
-// ai_calls rows to write (every attempt, kind topic_check).
+// ai_calls rows to write (every attempt). Step 15: opts.schema, opts.validate(data, lang),
+// opts.maxTokens and opts.schemaName let another caller (the announcement) use the same chain.
 export async function askAI(env, prompt, lang, now, opts = {}) {
   const calls = [];
   const timeoutMs = opts.timeoutMs ?? 12000;
+  const validate = opts.validate ?? validateAnswer;
   for (const p of providers(env)) {
     const t0 = Date.now();
-    const r = await callOne(p, env, prompt, timeoutMs);
+    const r = await callOne(p, env, prompt, timeoutMs, opts.schema ?? CHECK_SCHEMA, opts.maxTokens ?? 2048, opts.schemaName ?? "topic_check");
     let answer = null, error = r.error;
     if (r.ok) {
-      try { answer = validateAnswer(parseAnswer(r.text), lang); if (!answer) error = `${p.name}: unusable answer`; }
+      try { answer = validate(parseAnswer(r.text), lang); if (!answer) error = `${p.name}: unusable answer`; }
       catch { error = `${p.name}: invalid JSON`; }
     }
     calls.push({ at: now, provider: p.name, model: p.model, ok: answer ? 1 : 0, input_tokens: r.in ?? null,
@@ -336,11 +339,11 @@ export async function askAI(env, prompt, lang, now, opts = {}) {
   return { answer: null, calls };
 }
 
-export function aiCallStatements(calls) {
+export function aiCallStatements(calls, kind = "topic_check") {
   return calls.map((c) => ({
     sql: "INSERT INTO ai_calls (at, provider, model, ok, items, input_tokens, output_tokens, ms, error, kind, code) " +
-         "VALUES (?1, ?2, ?3, ?4, 1, ?5, ?6, ?7, ?8, 'topic_check', ?9)",
-    params: [c.at, c.provider, c.model, c.ok, c.input_tokens, c.output_tokens, c.ms, c.error ? String(c.error).slice(0, 500) : null, c.code],
+         "VALUES (?1, ?2, ?3, ?4, 1, ?5, ?6, ?7, ?8, ?10, ?9)",
+    params: [c.at, c.provider, c.model, c.ok, c.input_tokens, c.output_tokens, c.ms, c.error ? String(c.error).slice(0, 500) : null, c.code, kind],
   }));
 }
 

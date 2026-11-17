@@ -13,7 +13,8 @@
     "quiet": "{hello}. Quiet period: nothing important on your topics {since}.",
     "stories": {"one": "story", "other": "stories"},
     "count_line": "{count} {stories} {since}",
-    "quiet_line": "Quiet period: nothing important on your topics {since}."
+    "quiet_line": "Quiet period: nothing important on your topics {since}.",
+    "sample_label": "Sample digest: the most important news of the last 24 hours on your topics."
   },
   "topics": {
     "politics_conflicts": "Politics & Conflicts",
@@ -51,7 +52,10 @@
     "paysupport": "A problem with a tip? Send /paysupport followed by a short note, for example: /paysupport 500 Stars by mistake. The owner of Axiom reads it and can refund a tip made by mistake. Telegram support cannot help with payments to bots.",
     "paysupport_sent": "Thank you, your note was sent to the owner of Axiom. A tip made by mistake is refunded to your Stars balance.",
     "terms": "Terms for tips. Axiom News is free. A tip in Telegram Stars is voluntary and unlocks nothing; it does not change your digests or settings. As a rule tips are not refunded, but a tip made by mistake is refunded on request through /paysupport. Telegram support cannot help with payments to bots. We keep only who tipped, the amount, Telegram's payment id and the time.",
-    "help_cmd": "Everything about Axiom is in Settings: open it and tap Help. You can also send us feedback there."
+    "help_cmd": "Everything about Axiom is in Settings: open it and tap Help. You can also send us feedback there.",
+    "welcome_setup": "Welcome to Axiom News, {name}! I send a short digest of the most important news a few times a day. Tap Set up to choose your topics and times. It takes a minute.",
+    "setup_button": "Set up",
+    "reminder": "Hi {name}! Your digests come at {times} ({zone}) on the main topics. Tap Set up to choose your own topics and times."
   },
   "commands": {
     "start": "Start (or restart) your news digests",
@@ -165,6 +169,15 @@
     "help_privacy": "We store your Telegram id, your first name and your settings. The text of a topic you add is sent to an AI to check it. Nothing is sold or shared.",
     "feedback_placeholder": "Your message",
     "feedback_send": "Send",
-    "feedback_thanks": "Thank you!"
+    "feedback_thanks": "Thank you!",
+    "setup_topics": "Your topics",
+    "setup_times": "Digest times",
+    "setup_done": "All set",
+    "setup_step": "{n} of 3",
+    "setup_next": "Next",
+    "setup_back": "Back",
+    "setup_skip": "Skip",
+    "setup_finish": "Done",
+    "setup_sample": "A sample digest of the last 24 hours is on its way to your chat."
   }
 }
