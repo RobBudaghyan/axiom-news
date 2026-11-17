@@ -42,7 +42,7 @@
   const app = document.getElementById("app");
   const toastEl = document.getElementById("toast");
   const S = { st: null, admin: null, adminErr: null, adminLoading: false, tab: "settings", range: "24h",
-    allErrors: false, busy: {} };
+    allErrors: false, busy: {}, page: null, fbDraft: "" };
   const deviceTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || null; } catch { return null; } })();
   const nowS = () => Math.floor(Date.now() / 1000);
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -61,6 +61,9 @@
     bang: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5.5v8M12 18.5v.01"/></svg>',
     plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
     x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M7 7l10 10M17 7 7 17"/></svg>',
+    help: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(-0.1 -0.8)"><path d="M9.2 9a3 3 0 0 1 5.8 1c0 2-3 2.6-3 4.5"/><path d="M12 18.5v.01"/></g></svg>',
+    chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"><path transform="translate(0 -0.25)" d="M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4.5 3.5V16H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/></svg>',
+    chev: '<svg viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m1.5 1.5 5 5.5-5 5.5"/></svg>',
     okC: '<svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm3.7 5.3a.9.9 0 0 0-1.3.1l-3.3 4-1.6-1.6a.9.9 0 1 0-1.3 1.3l2.3 2.3c.4.4 1 .3 1.3-.1l4-4.7a.9.9 0 0 0-.1-1.3Z"/></svg>',
   };
 
@@ -207,7 +210,7 @@
 
   // ---------------------------------------------------------------- shell
   function renderShell() {
-    const owner = S.st.is_owner;
+    const owner = S.st.is_owner && !S.page;   // Step 15: a page (Help, Feedback) has no tabs
     app.removeAttribute("aria-busy");
     app.innerHTML = `<header class="top"><h1 class="title" id="title"></h1>${owner ? `
       <div class="seg" role="tablist" id="tabs">
@@ -218,7 +221,7 @@
     syncTabs();
   }
   function syncTabs() {
-    $("#title").textContent = S.tab === "admin" ? "Admin" : tr("app.title");
+    $("#title").textContent = S.page ? tr(PAGE_TITLES[S.page]) : S.tab === "admin" ? "Admin" : tr("app.title");
     const tabs = $("#tabs");
     if (!tabs) return;
     tabs.querySelectorAll("button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.value === S.tab)));
@@ -227,7 +230,7 @@
   function renderView(animate = false) {
     const v = $("#view");
     if (!v) return;
-    v.innerHTML = S.tab === "admin" ? adminHTML() : settingsHTML();
+    v.innerHTML = S.page ? PAGES[S.page]() : S.tab === "admin" ? adminHTML() : settingsHTML();
     if (animate) { v.classList.remove("view"); void v.offsetWidth; v.classList.add("view"); }
   }
 
@@ -495,7 +498,68 @@
       ${languagesHTML()}
       ${pauseHTML()}
       ${supportHTML()}
+      ${moreHTML()}
       <p class="tzline tnum" id="tz-line">${esc(zoneLine(S.st.user))}</p>`;
+  }
+
+  // ---------------------------------------------------------------- Step 15: Help and Send feedback
+  // Two rows near the bottom of Settings, each opening its own page with Telegram's back button.
+  // Settings itself keeps no helper text; the help text lives on its page.
+  const PAGE_TITLES = { help: "app.help", feedback: "app.feedback" };
+  const PAGES = { help: () => helpHTML(), feedback: () => feedbackHTML() };
+  const navRow = (action, icon, cls, label) => `<button class="row has-icon tap nav" data-action="${action}">` +
+    `<span class="sq solid ${cls}" aria-hidden="true">${icon}</span><span class="row-main row-title">${esc(label)}</span>` +
+    `<span class="chev" aria-hidden="true">${I.chev}</span></button>`;
+  function moreHTML() {
+    return sec("", card(navRow("open-help", I.help, "blue", tr("app.help")) + navRow("open-feedback", I.chat, "green", tr("app.feedback"))),
+      'id="more"');
+  }
+  const HELP = ["what", "stories", "topics", "times", "lang", "pause", "support", "privacy"];
+  function helpHTML() {
+    return HELP.map((k) => sec(tr(`app.help_${k}_h`), card(`<p class="help-p">${esc(tr(`app.help_${k}`))}</p>`), `id="help-${k}"`)).join("");
+  }
+  function feedbackHTML() {
+    const busy = !!S.busy.fb;
+    return sec("", card(`<textarea id="fb-input" class="fb-input" maxlength="1000" rows="5" placeholder="${esc(tr("app.feedback_placeholder"))}" ${busy ? "disabled" : ""}>${esc(S.fbDraft)}</textarea>`)) +
+      `<section class="section fb-actions">${grid(`<button class="b s6 primary" data-action="fb-send" ${busy || !S.fbDraft.trim() ? "disabled" : ""}>` +
+        `${busy ? '<span class="spinner small"></span>' : esc(tr("app.feedback_send"))}</button>`)}</section>`;
+  }
+  function onBack() { closePage(); }
+  function openPage(name) {
+    S.page = name;
+    haptic("select");
+    renderShell();
+    renderView(true);
+    window.scrollTo({ top: 0 });
+    try { if (tg && ver("6.1")) { tg.BackButton.onClick(onBack); tg.BackButton.show(); } } catch { /* old client */ }
+  }
+  function closePage() {
+    if (!S.page) return;
+    S.page = null;
+    try { if (tg && ver("6.1")) { tg.BackButton.offClick(onBack); tg.BackButton.hide(); } } catch { /* old client */ }
+    renderShell();
+    renderView(true);
+  }
+  async function sendFeedback() {
+    const input = $("#fb-input");
+    const text = (input ? input.value : S.fbDraft).trim();
+    if (!text) { haptic("warning"); return; }
+    S.fbDraft = input ? input.value : S.fbDraft;
+    S.busy.fb = true;
+    renderView();
+    try {
+      await api("/api/feedback", { text });
+      S.busy = {};
+      S.fbDraft = "";
+      haptic("success");
+      closePage();
+      toast(tr("app.feedback_thanks"), "ok", 1400);
+    } catch (e) {
+      S.busy = {};
+      renderView();
+      haptic("error");
+      toast(e.message, "err", 3200);
+    }
   }
 
   // "Support Axiom", a voluntary tip in Telegram Stars (Step 10). Step 12: the title and the three
@@ -735,6 +799,12 @@
         right: x.refunded_at ? badge("Refunded", "mute")
           : `<button class="link" data-action="refund" data-value="${x.id}" data-amount="${x.amount}" data-name="${esc(x.name)}" ${S.busy.refund ? "disabled" : ""}>Refund</button>` })).join("");
 
+    // Step 15: the latest feedback from readers (each is also forwarded to the owner's chat)
+    const FB = A.feedback || { total: 0, recent: [] };
+    const fbRows = FB.recent.map((x) => row({ title: `<span class="clamp">${esc(x.text)}</span>`,
+      sub: esc(`${x.name || "Someone"} (id ${x.user_id}${x.lang ? `, ${x.lang}` : ""}) · ${when(x.at, tz)}`),
+      right: x.forwarded ? "" : badge("Not forwarded", "warn") })).join("");
+
     // Step 13: custom topics and the AI budget guard (Admin stays English)
     const C = A.custom || { topics: [], checks_24h: {}, recent_checks: [], blocks: [], guard: { level: 0, reasons: [], models: [] } };
     const ctRows = C.topics.map((x) => row({ icon: `<span class="sq" aria-hidden="true">${esc(x.emoji && x.emoji !== "📌" ? x.emoji : "🗞️")}</span>`,
@@ -786,6 +856,7 @@
       ${section("Custom topics", (ctRows || row({ title: "No custom topics yet" })) + checkRows, C.topics.length ? "Delete removes it from its followers. Block also stops anyone creating it again. Both ask first." : "")}
       ${feeds}
       ${section("Users", tiles + userRows)}
+      ${section("Recent feedback", fbRows || row({ title: "No feedback yet" }), FB.total ? `${plural(FB.total, "message", "messages")} in all; the latest 20 here. Each one is also sent to your Telegram chat.` : "")}
       ${section("Tips", tipRows, T.last.length ? "Last 10 tips. Refund returns the Stars to the person (asks first)." : "No tips yet.")}
       ${section("Languages, last 24 h", langRowsA || row({ title: "No data" }), "A story with no translation yet is held: left out of the digest and sent in a later one once translated. A digest goes out fully in English only when none of its stories is translated; the badge counts those.")}
       ${section("Database today", d1, "Free limits per day, reset at 00:00 UTC. The news job's counts are exact; the bot server's are counted every 5 minutes and can be slightly low.")}
@@ -890,6 +961,9 @@
       case "digest-now": adminAction("digest"); break;
       case "run-job": adminAction("run"); break;
       case "retry": boot(); break;
+      case "open-help": openPage("help"); break;
+      case "open-feedback": openPage("feedback"); break;
+      case "fb-send": sendFeedback(); break;
       default: break;
     }
   });
@@ -899,6 +973,11 @@
     if (ev.target && ev.target.id === "add-topic") { ev.preventDefault(); addTopic(); }
   });
   document.addEventListener("input", (ev) => {
+    if (ev.target && ev.target.id === "fb-input") {
+      S.fbDraft = ev.target.value;
+      const b = $('[data-action="fb-send"]');
+      if (b && !S.busy.fb) b.disabled = !S.fbDraft.trim();
+    }
     if (ev.target && ev.target.id === "topic-input") {
       S.draft = ev.target.value;
       ev.target.closest("form").classList.toggle("has-text", !!S.draft.trim());

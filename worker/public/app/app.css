@@ -248,6 +248,24 @@ button.row:active, .tap:active { background: var(--press); }
 .row-right .link[data-action="topic-admin"] { min-height: 44px; padding: 0 4px; font-size: 15px; }
 .link.danger { color: var(--bad-text); }
 
+/* Step 15: Help and Send feedback rows (a solid colour square and a chevron) and their pages */
+.sq.solid.blue { background: #007aff; }
+.sq.solid.green { background: #34c759; }
+.sq.solid.blue svg, .sq.solid.green svg { width: 18px; height: 18px; }
+.chev { flex: 0 0 auto; display: grid; place-items: center; width: 8px; height: 14px; color: var(--text-2); opacity: 0.6; line-height: 0; }
+.chev svg { display: block; width: 8px; height: 14px; }
+.help-p { margin: 0; padding: 12px var(--pad); font-size: 15px; line-height: 21px; color: var(--text); }
+.fb-input {
+  display: block; width: 100%; min-height: calc(var(--h) * 4); padding: 13px var(--pad); border: 0; outline: 0; resize: none;
+  background: transparent; font: inherit; font-size: 17px; line-height: 22px; color: var(--text); -webkit-appearance: none; appearance: none;
+}
+.fb-input::placeholder { color: var(--text-2); }
+.fb-actions { margin-top: 16px; }
+.b.s6 { grid-column: span 6; }
+.b.primary { background: var(--accent); color: #fff; font-size: 17px; font-weight: 600; }
+.b.primary:disabled { opacity: 0.45; }
+.spinner.small { width: 18px; height: 18px; border-width: 2px; }
+
 /* The time zone, one quiet line at the very bottom */
 .tzline { margin: 32px 0 0; text-align: center; font-size: 13px; line-height: 18px; color: var(--text-2); }
 

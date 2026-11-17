@@ -3,8 +3,8 @@
 -- Times are INTEGER unix seconds (UTC). JSON lists are stored as TEXT.
 -- Indexes are kept to a minimum: on D1 every index update counts as an extra row written.
 
--- One row per Telegram user. `sent` is the only other per-user table: deleting or resetting
--- a user must delete their `sent` rows too (docs/LESSONS.md, lesson 16).
+-- One row per Telegram user. Deleting or resetting a user must delete their rows in the other
+-- per-user tables too: `sent` (docs/LESSONS.md, lesson 16), and since Step 15 `feedback`.
 CREATE TABLE IF NOT EXISTS users (
   id             INTEGER PRIMARY KEY,               -- Telegram user id
   first_name     TEXT,
@@ -139,6 +139,17 @@ CREATE TABLE IF NOT EXISTS tips (
   at          INTEGER NOT NULL,
   refunded_at INTEGER
 );
+
+-- Step 15: "Send feedback" in Settings. Up to 1,000 characters, at most 10 a reader in 24 h,
+-- forwarded to the owner on Telegram (forwarded = 0 if that failed). Kept until the user is deleted.
+CREATE TABLE IF NOT EXISTS feedback (
+  id        INTEGER PRIMARY KEY,
+  user_id   INTEGER NOT NULL,
+  at        INTEGER NOT NULL,
+  text      TEXT NOT NULL,
+  forwarded INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_feedback_user ON feedback(user_id, at);
 
 -- One row per hourly job run (Admin tab stats).
 CREATE TABLE IF NOT EXISTS job_runs (

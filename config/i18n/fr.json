@@ -50,7 +50,8 @@
     "tip_bad": "Ce montant n'est pas disponible. Utilisez les boutons sous /support.",
     "paysupport": "Un problème avec un pourboire ? Envoyez /paysupport suivi d'un court message, par exemple : /paysupport 500 étoiles par erreur. Le propriétaire d'Axiom le lit et peut rembourser un pourboire fait par erreur. Le support de Telegram ne peut pas aider pour les paiements aux bots.",
     "paysupport_sent": "Merci, votre message a été envoyé au propriétaire d'Axiom. Un pourboire fait par erreur est remboursé sur votre solde de Stars.",
-    "terms": "Conditions des pourboires. Axiom News est gratuit. Un pourboire en Telegram Stars est volontaire et ne débloque rien ; il ne change ni vos résumés ni vos réglages. En règle générale, les pourboires ne sont pas remboursés, mais un pourboire fait par erreur est remboursé sur demande via /paysupport. Le support de Telegram ne peut pas aider pour les paiements aux bots. Nous gardons seulement qui a donné, le montant, l'identifiant de paiement Telegram et l'heure."
+    "terms": "Conditions des pourboires. Axiom News est gratuit. Un pourboire en Telegram Stars est volontaire et ne débloque rien ; il ne change ni vos résumés ni vos réglages. En règle générale, les pourboires ne sont pas remboursés, mais un pourboire fait par erreur est remboursé sur demande via /paysupport. Le support de Telegram ne peut pas aider pour les paiements aux bots. Nous gardons seulement qui a donné, le montant, l'identifiant de paiement Telegram et l'heure.",
+    "help_cmd": "Tout sur Axiom se trouve dans les réglages : ouvrez-les et touchez Aide. Vous pouvez aussi nous envoyer un avis."
   },
   "commands": {
     "start": "Démarrer (ou redémarrer) vos résumés de l'actualité",
@@ -100,7 +101,10 @@
     "topic_reason_private_person": "Les sujets sur des particuliers ne peuvent pas être ajoutés.",
     "topic_reason_no_news": "Il y a trop peu d'actualités à ce sujet.",
     "topic_reason_too_broad": "C'est trop vaste. Essayez quelque chose de plus précis.",
-    "topic_reason_blocked": "Ce sujet ne peut pas être ajouté."
+    "topic_reason_blocked": "Ce sujet ne peut pas être ajouté.",
+    "feedback_empty": "Écrivez d'abord un message.",
+    "feedback_long": "{max} caractères au maximum.",
+    "feedback_limit": "{max} messages par jour au maximum. Réessayez demain."
   },
   "app": {
     "title": "Réglages",
@@ -140,6 +144,27 @@
     "tip_amount": "{amount} ⭐",
     "tip_thanks": "Merci pour votre pourboire !",
     "tip_failed": "Le paiement n'a pas abouti.",
-    "tip_unavailable": "Les pourboires demandent une version plus récente de Telegram."
+    "tip_unavailable": "Les pourboires demandent une version plus récente de Telegram.",
+    "help": "Aide",
+    "feedback": "Envoyer un avis",
+    "help_what_h": "Qu'est-ce qu'Axiom",
+    "help_what": "Un court résumé des actualités les plus importantes, envoyé ici dans Telegram aux heures que vous choisissez. C'est gratuit.",
+    "help_stories_h": "Comment les sujets sont choisis",
+    "help_stories": "Chaque heure, nous lisons environ 120 sources. Une IA regroupe les articles en sujets, évalue l'importance de chacun et rédige un court résumé. Votre résumé contient les nouvelles les plus importantes de vos sujets, et jamais deux fois la même.",
+    "help_topics_h": "Sujets et Mes sujets",
+    "help_topics": "Activez ou désactivez les sujets principaux. Dans Mes sujets, vous pouvez ajouter jusqu'à 3 sujets à vous, par exemple un pays ou un sport. Un sujet désactivé ne vous envoie rien.",
+    "help_times_h": "Heures des résumés",
+    "help_times": "Choisissez jusqu'à 5 heures par jour. Elles suivent le fuseau horaire de votre téléphone.",
+    "help_lang_h": "Langue",
+    "help_lang": "Les résumés et les réglages arrivent dans la langue choisie.",
+    "help_pause_h": "Pause",
+    "help_pause": "La pause arrête tous les résumés jusqu'à ce que vous la désactiviez. Vos réglages sont conservés.",
+    "help_support_h": "Soutenir Axiom",
+    "help_support": "Axiom est gratuit. Si vous l'aimez, vous pouvez laisser un pourboire en Telegram Stars. Un pourboire ne change rien d'autre.",
+    "help_privacy_h": "Confidentialité",
+    "help_privacy": "Nous conservons votre identifiant Telegram, votre prénom et vos réglages. Le texte d'un sujet que vous ajoutez est envoyé à une IA pour vérification. Rien n'est vendu ni partagé.",
+    "feedback_placeholder": "Votre message",
+    "feedback_send": "Envoyer",
+    "feedback_thanks": "Merci !"
   }
 }

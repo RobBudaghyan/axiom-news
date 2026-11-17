@@ -111,7 +111,7 @@ try {
   r = await b.run(`const s = document.querySelector('#support');
     return { head: text('#support .section-head'), parts: [...s.querySelectorAll('*')].filter((e) => !e.children.length && e.textContent.trim()).map((e) => e.textContent.trim()),
       chips: [...s.querySelectorAll('[data-action=tip]')].map((x) => x.dataset.value + '=' + x.textContent.trim()),
-      last: !s.nextElementSibling?.matches('.section') };`);
+      last: s.nextElementSibling?.id === 'more' && s.nextElementSibling.nextElementSibling?.id === 'tz-line' };`);
   check("Support Axiom: the title and 100, 500, 1000 Stars buttons, no text at all", r.head === "Support Axiom" && r.last &&
     JSON.stringify(r.chips) === JSON.stringify(["100=100 ⭐", "500=500 ⭐", "1000=1000 ⭐"]) && r.parts.length === 4, JSON.stringify(r));
   r = await b.run(`return [...document.querySelectorAll('[data-action=lang]')].map((x) => ({ t: [...x.children].map((c) => c.className + ':' + c.textContent).join(' '), on: x.getAttribute('aria-checked'),
@@ -290,6 +290,54 @@ try {
   await fetch(`${BASE}/__reset`, { method: "POST" });
   await b.open(`${BASE}/app/?theme=light&as=friend`);
 
+  // Step 15: Help and Send feedback, two rows near the bottom of Settings, each a page with Telegram's back button
+  r = await b.run(`const more = document.querySelector('#more'); const next = more.nextElementSibling;
+    const rows = [...more.querySelectorAll('.row')].map((x) => [x.dataset.action, x.innerText.trim(), Math.round(x.getBoundingClientRect().height),
+      !!x.querySelector('.sq.solid svg'), !!x.querySelector('.chev')]);
+    return { rows, next: next && next.id, before: more.previousElementSibling && more.previousElementSibling.id };`);
+  check("Settings: Help and Send feedback rows (48 px, coloured square, chevron) right above the time zone line, under Support",
+    JSON.stringify(r.rows) === JSON.stringify([["open-help", "Help", 48, true, true], ["open-feedback", "Send feedback", 48, true, true]]) &&
+    r.next === "tz-line" && r.before === "support", JSON.stringify(r));
+  r = await b.run(`${SERVER} const n = calls(); click('[data-action=open-help]'); await wait(400);
+    const heads = [...document.querySelectorAll('#view .section-head')].map((x) => x.textContent);
+    const paras = [...document.querySelectorAll('#view .help-p')].map((x) => x.textContent);
+    const out = { title: text('#title'), heads, paras: paras.length, privacy: paras[7] || '', back: since(n).filter((c) => c.startsWith('back')),
+      sideways: document.documentElement.scrollWidth > window.innerWidth, tabs: !!document.querySelector('#tabs') };
+    Telegram.WebApp.__back(); await wait(400);
+    out.after = { title: text('#title'), settings: !!document.querySelector('#topics'), back: since(n).filter((c) => c.startsWith('back')) };
+    return out;`);
+  check("Help: its own page (title Help, 8 short sections, the privacy note), Telegram's back button shows and goes back to Settings",
+    r.title === "Help" && r.heads.length === 8 && r.heads[0] === "What Axiom is" && r.heads[7] === "Privacy" && r.paras === 8 &&
+    /Telegram id, your first name and your settings/.test(r.privacy) && !r.sideways && JSON.stringify(r.back) === '["back show"]' &&
+    r.after.title === "Settings" && r.after.settings && r.after.back.join() === "back show,back hide", JSON.stringify(r));
+  r = await b.run(`${SERVER} const n = calls(), t0 = window.__toasts.length; click('[data-action=open-feedback]'); await wait(400);
+    const input = document.querySelector('#fb-input'), send = document.querySelector('[data-action=fb-send]');
+    const before = { title: text('#title'), disabled: send.disabled, font: getComputedStyle(input).fontSize, h: Math.round(send.getBoundingClientRect().height),
+      w: Math.round(send.getBoundingClientRect().width), page: Math.round(document.querySelector('#view .group').getBoundingClientRect().width), max: input.maxLength };
+    input.value = 'Please add more Armenia stories'; input.dispatchEvent(new Event('input', { bubbles: true }));
+    const enabled = !send.disabled; click('[data-action=fb-send]'); await wait(900);
+    return { before, enabled, title: text('#title'), toasts: window.__toasts.slice(t0), haptics: since(n).filter((c) => c.startsWith('haptic')),
+      back: since(n).filter((c) => c.startsWith('back')) };`);
+  check("Send feedback: a text field (17 px, 1,000 characters) and a full-width 48 px Send, off until something is typed",
+    r.before.title === "Send feedback" && r.before.disabled && r.before.font === "17px" && r.before.h === 48 && r.before.w === r.before.page &&
+    r.before.max === 1000 && r.enabled, JSON.stringify(r.before));
+  check("Send feedback: sent with a success haptic and a short Thank you, back to Settings",
+    r.title === "Settings" && JSON.stringify(r.toasts) === '["Thank you!"]' && r.haptics.includes("haptic success") &&
+    r.back.join() === "back show,back hide", JSON.stringify(r));
+  r = await b.run(`const h = { authorization: 'tma ' + Telegram.WebApp.initData, 'content-type': 'application/json' };
+    const out = [];
+    for (let i = 0; i < 10; i++) out.push((await fetch('/api/feedback', { method: 'POST', headers: h, body: JSON.stringify({ text: 'n' + i }) })).status);
+    const t0 = window.__toasts.length; click('[data-action=open-feedback]'); await wait(300);
+    const input = document.querySelector('#fb-input'); input.value = 'eleventh'; input.dispatchEvent(new Event('input', { bubbles: true }));
+    click('[data-action=fb-send]'); await wait(900);
+    const res = { statuses: out, toasts: window.__toasts.slice(t0), title: text('#title'), kept: document.querySelector('#fb-input')?.value };
+    Telegram.WebApp.__back(); await wait(300); return res;`);
+  check("Send feedback: the 11th message in a day shows the limit and keeps the text",
+    r.statuses.slice(0, 9).every((s) => s === 200) && r.statuses[9] === 400 && JSON.stringify(r.toasts) === '["Up to 10 messages a day. Try again tomorrow."]' &&
+    r.title === "Send feedback" && r.kept === "eleventh", JSON.stringify(r));
+  await fetch(`${BASE}/__reset`, { method: "POST" });
+  await b.open(`${BASE}/app/?theme=light&as=friend`);
+
   r = await b.run(ICON_OFFSETS);
   const worst = Math.max(...r.flatMap((x) => [x.dx, x.dy, x.boxDx, x.boxDy].map(Math.abs)));
   check("every icon is centred in its rounded square (within 0.5 px)", r.length >= 2 && worst <= 0.5,
@@ -382,6 +430,23 @@ for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
           const done = text('#my-topics [data-action=edit-topics]'); click('[data-action=edit-topics]'); await wait(200); return { L, done };`);
         check(`${width} px, ${ru ? "Russian" : "English"}, ${scheme}: edit mode keeps the layout rules ("${ru ? "Готово" : "Done"}")`,
           layoutOk(E.L) && E.done === (ru ? "Готово" : "Done"), JSON.stringify(E).slice(0, 600));
+        // Step 15: the Help and Send feedback pages at this size
+        const P = await w.run(`click('[data-action=open-help]'); await wait(350);
+          const v = document.querySelector('#view');
+          const help = { title: text('#title'), n: v.querySelectorAll('.help-p').length, first: text('#view .section-head'),
+            sideways: document.documentElement.scrollWidth > window.innerWidth,
+            out: [...v.querySelectorAll('.group')].filter((g) => g.getBoundingClientRect().right > window.innerWidth + 0.5).length };
+          Telegram.WebApp.__back(); await wait(300); click('[data-action=open-feedback]'); await wait(350);
+          const s = document.querySelector('[data-action=fb-send]');
+          const fb = { title: text('#title'), send: s.textContent, h: Math.round(s.getBoundingClientRect().height), r: getComputedStyle(s).borderTopLeftRadius,
+            sideways: document.documentElement.scrollWidth > window.innerWidth };
+          Telegram.WebApp.__back(); await wait(300);
+          const rows = [...document.querySelectorAll('#more .row')].map((x) => [x.innerText.trim(), Math.round(x.getBoundingClientRect().height)]);
+          return { help, fb, rows };`);
+        check(`${width} px, ${ru ? "Russian" : "English"}, ${scheme}: Help and Send feedback in the reader's language, 48 px rows, nothing wider than the screen`,
+          P.help.title === (ru ? "Помощь" : "Help") && P.help.n === 8 && P.help.first === (ru ? "Что такое Axiom" : "What Axiom is") && !P.help.sideways &&
+          !P.help.out && P.fb.title === (ru ? "Написать отзыв" : "Send feedback") && P.fb.send === (ru ? "Отправить" : "Send") && P.fb.h === 48 &&
+          P.fb.r === "12px" && !P.fb.sideways && P.rows.every((x) => x[1] === 48) && P.rows[0][0] === (ru ? "Помощь" : "Help"), JSON.stringify(P));
       }
     }
     await w.run(API({ lang: "en" }));

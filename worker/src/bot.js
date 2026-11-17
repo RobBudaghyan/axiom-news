@@ -144,6 +144,11 @@ export async function handleUpdate(update, ctx) {
     await ctx.reply(id, settingsText(lang), button(ctx, lang));
     return { handled: true, command: "settings", lang };
   }
+  // Step 15: help lives in Settings (Help and Send feedback); /help only points there.
+  if (/^\/help(@\w+)?(\s|$)/.test(text)) {
+    await ctx.reply(id, t(lang, "bot.help_cmd"), button(ctx, lang));
+    return { handled: true, command: "help", lang };
+  }
   if (/^\/support(@\w+)?(\s|$)/.test(text)) {
     await ctx.reply(id, t(lang, "bot.support"), supportKeyboard(lang));
     return { handled: true, command: "support", lang };

@@ -44,6 +44,33 @@ welcome and announcements, cleanup), then `reports/step-15-final-product.md`.
   B1 📈 / B2 💹 / B3 🏦). Until he answers: 🏛️ and 📈. To apply his pick, change `emoji:` in
   `config/topics.yaml`; the next hourly run syncs the topics table.
 
+## Part 2: done except the preview digest (2026-11-17, commit 6288d97, Worker 2f8e7cd1)
+- Fact guard: 166 texts dropped in 30 days (errors log). 62 of them were only ordinary words at a
+  sentence start (Recent, Severe, Hundreds, Analysis, Escalating, Investors...) or party names
+  (Republican, Party); those now pass. 30 number drops and 74 real name drops (Moscow, Kyiv,
+  Washington...) are still dropped, as they should be. How: `config/common_words.txt` (7,192 words the
+  pool writes in lower case, `scripts/make_common_words.py`), party names in `ALWAYS_OK`, and "West"
+  passes when the articles say "Western". 11 tests from the real cases (`tests/test_editor.py`).
+- Culture and sport below 6 on main topics: editor prompt line and examples (done in Part 1).
+- Keywords: `custom_topics.keywords_at` (applied live); the job refreshes keywords older than 7 days
+  (at most 5 a run, recent Google headlines), keeps the old ones if the new answer has fewer than 5;
+  Admin's "Keywords" button per custom topic marks it for the next run. Live: the existing topics have
+  no `keywords_at` yet, so the next run refreshes them once (one call each).
+- Replay (`worker/scripts/step15-replay.mjs`, `reports/data/step-15/replay.{json,txt}`, 48 h): all six
+  topics 105 stories (15 a digest), Armenia only 87 (12.4), the owner 22 (2.0), Economy off 105, before
+  and after the same: only 11 stories reached 7+ in 48 h, none whose only route was a switched-off main
+  topic, and no story had Economy as its main topic yet (the first run with the new prompts was still
+  running). Switched-off topics sent nothing in every "after" run.
+- Note for the owner: Armenia-only readers get about 12 stories a digest because the editor gives 167
+  Armenia stories in 48 h a topic score of 6+ (the Step 8 topic path). Not changed here.
+- The owner's main topics were all off (custom topics only); the migration switched Economy & Markets
+  on for him, as the brief says for every user.
+- Tests: Python 180, Worker 233, click-through 94 of 94. Mutations part 2: 13 of 13 caught.
+
+## Still to do in Part 2
+- Re-run `node worker/scripts/step15-replay.mjs` after the first editor run with the new prompts
+  (economy stories), then send the owner one labelled preview digest
+  (`node worker/scripts/digest-cli.mjs --preview --label "..."`).
+
 ## Next
-Part 2: the fact guard fix (real examples from `errors`), keyword refresh (`keywords_at`, weekly,
-Admin button), replays before and after, a labelled preview digest.
+Part 3: Help and Feedback rows in Settings.

@@ -13,6 +13,7 @@
 //   POST /api/topics/add      {name}    Step 13: add a custom topic (one AI check), return {state, result}
 //   POST /api/topics/remove   {id}      Step 13: stop following a custom topic (edit mode), return state
 //   POST /api/topics/switch   {id, on}  Step 13 fixes: switch a custom topic on or off, return state
+//   POST /api/feedback        {text}    Step 15: store a reader's feedback and forward it to the owner
 //   POST /api/admin/topic     {id, action}  Step 13: delete or block a custom topic; Step 15: "keywords" refreshes its keywords (owner only)
 import { verifyInitData } from "./auth.js";
 import { CONFIG, candidateStatement, hhmm, localParts, nextSlot, planDigest } from "./digest.js";
@@ -24,6 +25,7 @@ import { errorStatement } from "./db.js";
 import { LANGS, chooseLang, effectiveLang, t, topicLabel } from "./i18n.js";
 import { setChatLanguage } from "./bot.js";
 import { TIP_AMOUNTS, allowedAmount, invoiceFields, refundTip, tipsStatements, shapeTips } from "./tips.js";
+import { FEEDBACK_ADMIN_COUNT, feedbackStatements, sendFeedback, shapeFeedback } from "./feedback.js";
 import { CUSTOM_ADMIN_COUNT, TOPICS_CFG, addTopic, adminTopicStatements, asTopicRows, customAdminStatements, enabledOnly,
   followedStatement, publicCustom, removeStatements, shapeCustomAdmin, switchStatement, withCustomTopics } from "./custom.js";
 
@@ -276,6 +278,7 @@ export async function handleApi(request, env, db, now, io, cfg = CONFIG) {
       case "POST /api/topics/add": return await addCustom(db, env, tg, body, now, cfg, isOwner);
       case "POST /api/topics/remove": return await removeCustom(db, tg, body, now, cfg, isOwner);
       case "POST /api/topics/switch": return await switchCustom(db, tg, body, now, cfg, isOwner);
+      case "POST /api/feedback": return json(200, await sendFeedback(db, tg, body, now, io, env.OWNER_TELEGRAM_ID));
       case "GET /api/admin":
       case "POST /api/admin/digest":
       case "POST /api/admin/run-job":
@@ -283,11 +286,16 @@ export async function handleApi(request, env, db, now, io, cfg = CONFIG) {
       case "POST /api/admin/topic": {
         if (!isOwner) return fail(403, "owner_only");
         if (route === "GET /api/admin") {
-          const base = adminStatements(now), more = customAdminStatements(now);
-          const rows = await db.batch([...base, ...more, ...tipsStatements()]);
-          const out = shapeAdmin(rows.slice(0, base.length), now, cfg);
-          out.custom = shapeCustomAdmin(rows.slice(base.length, base.length + CUSTOM_ADMIN_COUNT), now);
-          out.tips = shapeTips(...rows.slice(-2));
+          // One batch, each block sliced by its own count (Step 15: no position taken from the end).
+          const blocks = [adminStatements(now), customAdminStatements(now), tipsStatements(), feedbackStatements()];
+          const rows = await db.batch(blocks.flat());
+          const parts = [];
+          let at = 0;
+          for (const b of blocks) { parts.push(rows.slice(at, at + b.length)); at += b.length; }
+          const out = shapeAdmin(parts[0], now, cfg);
+          out.custom = shapeCustomAdmin(parts[1].slice(0, CUSTOM_ADMIN_COUNT), now);
+          out.tips = shapeTips(...parts[2]);
+          out.feedback = shapeFeedback(...parts[3].slice(0, FEEDBACK_ADMIN_COUNT));
           return json(200, out);
         }
         if (route === "POST /api/admin/digest") return await digestNow(db, tg.id, now, cfg, io);

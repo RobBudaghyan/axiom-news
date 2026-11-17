@@ -50,7 +50,8 @@
     "tip_bad": "This tip amount is not available. Please use the buttons under /support.",
     "paysupport": "A problem with a tip? Send /paysupport followed by a short note, for example: /paysupport 500 Stars by mistake. The owner of Axiom reads it and can refund a tip made by mistake. Telegram support cannot help with payments to bots.",
     "paysupport_sent": "Thank you, your note was sent to the owner of Axiom. A tip made by mistake is refunded to your Stars balance.",
-    "terms": "Terms for tips. Axiom News is free. A tip in Telegram Stars is voluntary and unlocks nothing; it does not change your digests or settings. As a rule tips are not refunded, but a tip made by mistake is refunded on request through /paysupport. Telegram support cannot help with payments to bots. We keep only who tipped, the amount, Telegram's payment id and the time."
+    "terms": "Terms for tips. Axiom News is free. A tip in Telegram Stars is voluntary and unlocks nothing; it does not change your digests or settings. As a rule tips are not refunded, but a tip made by mistake is refunded on request through /paysupport. Telegram support cannot help with payments to bots. We keep only who tipped, the amount, Telegram's payment id and the time.",
+    "help_cmd": "Everything about Axiom is in Settings: open it and tap Help. You can also send us feedback there."
   },
   "commands": {
     "start": "Start (or restart) your news digests",
@@ -100,7 +101,10 @@
     "topic_reason_private_person": "Topics about private people cannot be added.",
     "topic_reason_no_news": "There is too little news about this.",
     "topic_reason_too_broad": "This is too broad. Try something more specific.",
-    "topic_reason_blocked": "This topic cannot be added."
+    "topic_reason_blocked": "This topic cannot be added.",
+    "feedback_empty": "Write a message first.",
+    "feedback_long": "Up to {max} characters.",
+    "feedback_limit": "Up to {max} messages a day. Try again tomorrow."
   },
   "app": {
     "title": "Settings",
@@ -140,6 +144,27 @@
     "tip_amount": "{amount} ⭐",
     "tip_thanks": "Thank you for your tip!",
     "tip_failed": "The payment did not go through.",
-    "tip_unavailable": "Tips need a newer version of Telegram."
+    "tip_unavailable": "Tips need a newer version of Telegram.",
+    "help": "Help",
+    "feedback": "Send feedback",
+    "help_what_h": "What Axiom is",
+    "help_what": "A short digest of the most important news, sent to you here in Telegram at the times you choose. It is free.",
+    "help_stories_h": "How stories are chosen",
+    "help_stories": "Every hour we read about 120 news sources. An AI groups the articles into stories, scores how important each one is and writes a short summary. Your digest has the stories that matter most on the topics you follow, and never the same story twice.",
+    "help_topics_h": "Topics and My topics",
+    "help_topics": "Switch the main topics on or off. Under My topics you can add up to 3 topics of your own, for example a country or a sport. A topic that is off sends you nothing.",
+    "help_times_h": "Digest times",
+    "help_times": "Pick up to 5 times a day. They follow your phone's time zone.",
+    "help_lang_h": "Language",
+    "help_lang": "Digests and Settings come in the language you pick.",
+    "help_pause_h": "Pause",
+    "help_pause": "Pause stops all digests until you switch it off again. Your settings stay.",
+    "help_support_h": "Support Axiom",
+    "help_support": "Axiom is free. If you like it, you can leave a tip in Telegram Stars. A tip changes nothing else.",
+    "help_privacy_h": "Privacy",
+    "help_privacy": "We store your Telegram id, your first name and your settings. The text of a topic you add is sent to an AI to check it. Nothing is sold or shared.",
+    "feedback_placeholder": "Your message",
+    "feedback_send": "Send",
+    "feedback_thanks": "Thank you!"
   }
 }
