@@ -62,8 +62,12 @@ bot @axiom_news_bot at the end.
   reader a day (owner unlimited); a main topic is refused; blocked names cannot come back. The
   hourly job searches Google News for topics with an active, unpaused follower (40 requests a run,
   8 new headlines a topic, no-AI dedupe against the pool); pass 1 and the editor know the custom
-  topics (sport and the like count as news for them); digests treat them like main topics, in
-  their own section. A topic with no follower for 7 days is deleted.
+  topics (sport and the like count as news for them); digests give them their own section. Each
+  custom row looks like a main topic row (its emoji, the name, a red switch); Edit / Done with a red
+  minus removes one (Step 13 fixes). Switched off: kept in the list and its slot, not searched or
+  sent for that reader. Digest rule for custom topics (owner): the editor's topic score ("how
+  important for someone who chose this topic") counts as it is against the bar of 6, no cap, no
+  "above the score" rule. A topic no reader has in their list (on or off) for 7 days is deleted.
 - **AI budget guard (Step 13):** calls and 429s per model since midnight Pacific time. A Gemini 429
   in the last hour or 80% of a soft limit (250 a day per model, `config/ai_budget.json`): new topic
   checks wait ("try again in a few minutes"). Every Gemini model refusing, or the limit reached:
@@ -171,6 +175,10 @@ bot @axiom_news_bot at the end.
 | 2026-11-16 | Google links of stories that could reach a digest are resolved to the outlet (10 a run, one try each); a failure keeps the Google link | Step 6 method; a Google link still works |
 | 2026-11-16 | `custom_topics.id` is AUTOINCREMENT | a deleted topic's tag (c12) must never be reused: old stories still carry it |
 | 2026-11-16 | AI budget guard: level 1 (a Gemini 429 in the last hour, or 80% of a soft limit) delays topic checks; level 2 (every Gemini model 429 in the last hour, or the soft limit) also delays translations; never pass 1 or the editor; one owner alert a Pacific day | owner: safety without hurting users; the Pacific day computed by the US rule (no tz database in the Worker) |
+| 2026-11-17 | Custom topics: a switch per reader (`custom_follows.enabled`); off keeps the slot and the list place, not searched or sent; deletion only when no reader has it, on or off (owner, after his test) | the owner wants to pause a topic without losing it |
+| 2026-11-17 | Custom topic digest rule: the topic score counts as it is (no cap, no "above the score"), bar 6; the 6 main topics keep Step 8 (owner) | the reader chose the subject; with the cap a race result (global 1) could never reach Formula 1 followers |
+| 2026-11-17 | Editor prompt for reader topics: "how important for someone who chose it", 4/6/8 examples, main topic only when mainly about it; pass 1 gives notable reader-topic items at least 3 | live, a looser version gave Japan 12 stories at 6+ in 13 h, some about China or Canada; this one halves it on the same stories |
+| 2026-11-17 | My topics redesign: emoji square tinted from the emoji itself (canvas, snapped to the iOS hues), switch, iOS Edit/Done with a red minus, slide-in with the switch turning on; no "x", no "Joined" bubble (owner) | "no proper emoji, no on/off switch, it did not look added" |
 | 2026-11-15 | pre_checkout_query is answered from the invoice payload alone (no database read) | Telegram cancels the payment after 10 s; measured a few microseconds |
 | 2026-11-15 | Table `tips`: user, amount, Telegram charge id (UNIQUE), time, refunded time; nothing else | the owner's rule; the charge id is needed for refunds, and UNIQUE makes a repeated update count once |
 | 2026-11-15 | /paysupport forwards the user's note to the owner; /terms states the tip terms; the owner refunds from Admin after a confirm (refundStarPayment) | Telegram's rules for bots that take Stars |
@@ -237,8 +245,11 @@ bot @axiom_news_bot at the end.
 - **Step 12 done (2026-11-16): the Mini App redesign.** Three Settings designs went live on the TEST bot
   with an owner-only switch; the owner chose design 1 (iOS Settings). The switch and the other two
   are removed; Admin uses the same style. Details in `reports/step-12-settings-design.md`.
-- **Step 13 done (2026-11-16): custom topics ("My topics") and the AI budget guard**, on the TEST bot.
-  Details in `reports/step-13-custom-topics.md`.
+- **Step 13 done (2026-11-16, fixes 2026-11-17): custom topics ("My topics") and the AI budget
+  guard**, on the TEST bot. After the owner's test: the card redesigned (emoji, switch, Edit), the
+  switch, the custom-topic digest rule and a tighter editor prompt; Worker `c1f8c148`. Live: Japan
+  and Australia searched hourly, about 3 to 6 stories a day each reach the owner. Waiting for the
+  owner's check on his phone (message and a labelled preview digest sent 2026-11-17). Details in `reports/step-13-custom-topics.md`.
 - Two users: the owner and one more (Russian).
 
 ## Next step
@@ -297,10 +308,13 @@ fold on an iPhone if any user has one.
 - **Tips (Step 10):** the per-chat command list of a reader who picked Russian before Step 10 keeps
   the old two commands until they change language again (none exist yet). Telegram may ask the bot
   to handle disputes; Stars received can be withdrawn only through Telegram's own rules (not set up).
-- **Custom topics (Step 13):** Google News may block us (then custom topics get only what our RSS
-  feeds have); its headlines have no text, so the editor's descriptions for them are short and the
-  fact guard has little to check against. A niche topic (Formula 1) reaches digests only with a
-  global score of 4+ (boost cap 2, owner's same-rules decision). Gemini answered 503 on about a
-  third of the test checks (the fallback model or Groq answered; up to 14 s).
+- **Custom topics (Step 13):** Google answers 429 to about one search a run from GitHub since there
+  are 2 topics (10 searches); the searches not yet started then wait an hour. Both topics still fill
+  their cap of 8 most runs; with more topics, try fewer parallel requests (`search_workers` 8). If
+  Google blocks us fully, custom topics get only what our RSS feeds have. Its headlines have no
+  text, so the editor's descriptions are short and the fact guard has little to check against. How
+  many custom stories a reader gets now rests on the editor's topic score alone (no cap): watch
+  Admin; the levers are the prompt, a per-digest limit or a bar of 7 (owner). Gemini answered 503
+  on about a third of the test checks (the fallback model or Groq answered; up to 14 s).
 - **Admin "D1 today" for the Worker is a slight undercount** (counts of short-lived Worker instances
   that end between ticks are lost). The job's numbers are exact and are most of the total.

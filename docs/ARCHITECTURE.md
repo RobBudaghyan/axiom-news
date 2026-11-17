@@ -467,18 +467,26 @@ the icon centring (28 checks since Step 5).
   Google News searches run after the RSS feeds: the topic searched longest ago first, at most 40
   requests a run, `when:Nh` since its last search (2-12 h), 8 at a time in a 20 s budget; a 429 or
   503 from Google stops the rest of that run. Each result is compared without AI with the pool's
-  titles of the last 24 h (Step 6 similarity, 0.5); at most 15 new items per topic. They are normal
+  titles of the last 24 h (Step 6 similarity, 0.5); at most 8 new items per topic. They are normal
   pending `items` (`source_key` gnews, tier 4 so a curated outlet always gives the link,
   `headline_only` = 1, shown to the AI as "[headline only]", `hint_topic`). Pass 1 may tag any item,
   also from our RSS feeds, with a custom tag; the editor may pick it as the main topic and give a
   topic score; its candidate floor is 3 (like Armenia). After the editor, stories that could reach a
   digest and still link to news.google.com get the outlet's URL (`gnews.resolve`, 10 a run); a
-  failure keeps the Google link (`stories.link_state` 1 or 2, one try each). A topic with no
-  follower for 7 days is deleted with its searches and stats (`orphan_since`).
-- **Digests:** the cron adds each due reader's custom tags to their topics and each topic's own cap
-  to `topic_boost_max` (`withCustomTopics`, `withCustomCaps`), so the two-score rule, the length cut
-  and "never twice" are the same as for the main topics. A custom topic is the most specific
-  section; its heading is the AI's emoji and the name in the reader's language.
+  failure keeps the Google link (`stories.link_state` 1 or 2, one try each). A topic that no
+  reader has in their list (on or off) for 7 days is deleted with its searches and stats
+  (`orphan_since`).
+- **The switch (Step 13 fixes):** `custom_follows.enabled`. Off keeps the topic in the reader's list
+  and its slot (it counts toward the 3); only followers with the switch on make a topic searched and
+  get it in digests (`POST /api/topics/switch`). Edit mode in the Mini App removes a follow.
+- **Digests:** the cron adds each due reader's switched-on custom tags to their topics
+  (`withCustomTopics`), so the length cut and "never twice" are the same as for the main topics. The
+  rule differs (Step 13 fixes, owner): for a custom main topic (c<id>) the editor's topic score
+  counts as it is against `topic_bar`, with no boost cap and no "above the score" rule
+  (`digest.js` CANDIDATE_SQL/topicScore/qualifies, twin in `job/translate.py`, checked on
+  `tests/fixtures/eligible_cases.json`). The editor scores it as "how important for someone who
+  chose this topic" (`job/editor.py` READER_BOOST). A custom topic is the most specific section; its
+  heading is the AI's emoji and the name in the reader's language.
 - **AI budget guard** (`job/guard.py`, `worker/src/guard.js`, kept identical by
   `tests/fixtures/guard_cases.json`; settings in `config/ai_budget.json`): `ai_calls` per model since
   midnight Pacific time (Gemini's free day; the US daylight rule, no tz database), and 429 answers

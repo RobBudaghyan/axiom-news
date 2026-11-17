@@ -109,18 +109,19 @@
  ],
  "pass1_calls": 2,
  "editor_rerun": true,
- "editor_calls": 2,
+ "editor_calls": 1,
  "editor_tokens": [
-  4343,
-  1388
+  4428,
+  1166
  ],
  "topics": {
   "c1": {
    "name": "Japan",
    "stories": 7,
    "edited": 7,
-   "main_topic": 6,
+   "main_topic": 7,
    "topic_score_counts": {
+    "4": 1,
     "5": 3,
     "6": 3
    },
@@ -128,40 +129,45 @@
    "old_rule": 3,
    "picked": [
     {
-     "headline": "Japan economy shrinks 0.1 percent in third quarter",
+     "headline": "Japan economy shrinks in third quarter",
      "score": 5,
      "topic_score": 6
     },
     {
-     "headline": "Bank of Japan board member urges interest rate hikes",
-     "score": 4,
+     "headline": "Bank of Japan board member urges raising interest rates",
+     "score": 5,
      "topic_score": 6
     },
     {
-     "headline": "Japan's Fugaku supercomputer suffers unauthorized access",
-     "score": 4,
+     "headline": "Japan Prime Minister Takaichi heads to Asia summits",
+     "score": 5,
      "topic_score": 6
     }
    ],
    "below_bar_examples": [
-    {
-     "headline": "Japan Prime Minister Takaichi travels to Asia summits",
-     "score": 5,
-     "topic_score": 5
-    },
     {
      "headline": "Colombia and Japan reactivate economic partnership dialogue",
      "score": 4,
      "topic_score": 5
     },
     {
-     "headline": "Japan to release defense AI guidelines",
+     "headline": "Japan Fugaku supercomputer hit by unauthorized access",
      "score": 4,
      "topic_score": 5
+    },
+    {
+     "headline": "Japan Defense Ministry to release defense AI guidelines",
+     "score": 4,
+     "topic_score": 5
+    },
+    {
+     "headline": "Japan expresses serious concern over West Bank violence",
+     "score": 4,
+     "topic_score": 4
     }
    ],
    "rss_pool_24h": {
-    "stories": 9,
+    "stories": 24,
     "score_7_plus": 0,
     "examples": [
      "Poll shows majority of Japanese oppose nuclear submarine navy",
@@ -179,40 +185,41 @@
    "edited": 6,
    "main_topic": 4,
    "topic_score_counts": {
-    "5": 1,
-    "6": 2,
-    "7": 1
+    "5": 3,
+    "6": 1
    },
-   "new_rule": 3,
-   "old_rule": 3,
+   "new_rule": 1,
+   "old_rule": 1,
    "picked": [
     {
-     "headline": "Colombia drops plan to tax basic food items",
-     "score": 5,
-     "topic_score": 7
-    },
-    {
-     "headline": "Colombia announces plan to counter drone attacks",
-     "score": 5,
-     "topic_score": 6
-    },
-    {
-     "headline": "Ecuador alleges assassination plot against Noboa originating in Colombia",
+     "headline": "Colombia rules out extending value-added tax to basic goods",
      "score": 5,
      "topic_score": 6
     }
    ],
    "below_bar_examples": [
     {
-     "headline": "United States may transfer C-130 aircraft to Colombia",
+     "headline": "Colombia announces shock plan to face drone attacks",
+     "score": 4,
+     "topic_score": 5
+    },
+    {
+     "headline": "Ecuador denounces alleged assassination plot against Noboa",
+     "score": 4,
+     "topic_score": 5
+    },
+    {
+     "headline": "United States could transfer C-130 aircraft to Colombia",
      "score": 4,
      "topic_score": 5
     }
    ],
    "rss_pool_24h": {
-    "stories": 0,
+    "stories": 1,
     "score_7_plus": 0,
-    "examples": []
+    "examples": [
+     "Colombian President Abelardo de la Espriella vows spending cuts"
+    ]
    }
   }
  }

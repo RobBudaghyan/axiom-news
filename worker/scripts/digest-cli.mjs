@@ -4,7 +4,9 @@
 //
 //   node scripts/digest-cli.mjs                    dry run: print the owner's next digest, write nothing
 //   node scripts/digest-cli.mjs --preview          send a labelled preview (last 24 h) to the owner, write nothing
-//                                                   (add --dry to print it without sending)
+//                                                   (add --dry to print it without sending; --since-last: the
+//                                                   digest the Worker would send now, since the last one;
+//                                                   --since-hours 9: a 9-hour window as if nothing was sent)
 //   node scripts/digest-cli.mjs --send             send for real and record it (as the Worker does)
 //   node scripts/digest-cli.mjs --windows          replay digests of the last 24 h (tuning the bars):
 //        --profile owner|dad|armenia3h|all6h|all, --hours 48, --bars "7,5;7,6", --limit 3500,
@@ -223,12 +225,19 @@ async function main() {
   }
 
   // A preview shows the last 24 h as if nothing had been sent yet (id 0 has no `sent` rows); it is
-  // labelled as a preview and writes nothing.
+  // labelled as a preview and writes nothing. With --since-last (Step 13 fixes) it is exactly the
+  // digest the Worker would send the owner now (since his last digest, never twice), still labelled
+  // and still not recorded. With --since-hours N: a digest window of the last N hours, as if nothing
+  // had been sent.
   const previewing = process.argv.includes("--preview");
-  const st = candidateStatement(previewing ? { ...user, id: 0, last_digest_at: null } : user, now, cfg);
+  const sinceLast = previewing && process.argv.includes("--since-last");
+  const sinceHours = previewing ? Number(arg("--since-hours", "0")) : 0;
+  const who = !previewing || sinceLast ? user
+    : { ...user, id: 0, last_digest_at: sinceHours > 0 ? now - Math.round(sinceHours * 3600) : null };
+  const st = candidateStatement(who, now, cfg);
   const cands = await db.query(st.sql, st.params);
   const label = previewing ? `<i>${arg("--label", "Preview of the digest (last 24 hours). Nothing is recorded.")}</i>` : undefined;
-  const plan = planDigest(previewing ? { ...user, last_digest_at: null } : user, cands, topics, now, cfg, { label });
+  const plan = planDigest(who, cands, topics, now, cfg, { label });
   console.log(plan.text);
   console.log(`\n[${plan.stories.length} stories from ${cands.length} candidates, ${plan.cut} cut for length, ` +
     `${plan.kind} message, length ${visibleLength(plan.text)} of ${cfg.message_char_limit} (as Telegram counts)]`);
