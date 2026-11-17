@@ -253,7 +253,7 @@ bot @axiom_news_bot at the end.
 - Two users: the owner and one more (Russian).
 
 ## Next step
-Watch the custom topics for a few days (Admin: Custom topics, AI budget). Then switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, which also sets
+Watch the custom topics for a few days (Admin: Custom topics, AI budget; owner's choice on 2026-11-17, no code check yet): how many custom stories reach a digest, off-topic stories under a custom section ("China and Canada slash tariffs" under Japan), and Google's 429s. If off-topic stories keep coming, the next fix is a code check (or a per-digest limit or a bar of 7 for custom sections, owner to choose). Then switch to the real bot @axiom_news_bot (new token and webhook, `setup-bot.mjs`, which also sets
 the Russian command list, then invite the first users). Watch the first real Russian reader's
 digests: the first hourly run after they choose Russian translates about 70 stories in one call;
 Admin's "Languages" section shows calls, tokens, stories held for translation and full English
