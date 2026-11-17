@@ -94,6 +94,44 @@ welcome and announcements, cleanup), then `reports/step-15-final-product.md`.
 ## Waiting on the owner (also)
 - His check of Help and Send feedback on his phone.
 
+## Part 4: done (2026-11-17, commit 23bb24d, Worker 9ba3f936)
+- /start from a new user: a short welcome in their Telegram language with a "Set up" button (opens the
+  Mini App). A user who has not finished the setup gets it again; onboarded and imported users get the
+  usual "welcome back".
+- First Mini App open (`state.setup`): 3 steps, "Your topics" (1 of 3), "Digest times" (2 of 3), "All
+  set" (3 of 3, the next digest and one line about the sample); Skip on step 1, Back on step 2. Every
+  tap saves at once. Done or Skip calls `POST /api/onboard` once (`onboarded_at`, claimed with
+  `UPDATE ... WHERE onboarded_at IS NULL RETURNING`), which sends the sample digest: the last 24 h,
+  labelled "Sample digest: ...", normal rules, stories marked sent. The time zone is saved on open as
+  before. The first open is recorded (`opened_at`).
+- One reminder (`reminded_at`, claimed before sending): users who never opened the app, 24 h after
+  /start, between 10:00 and 20:00 their time, 8 a tick; never for imported users.
+- `worker/scripts/import-users.mjs users.json [--dry]`: the old bot's readers with defaults,
+  `imported = 1`, `onboarded_at` set; an existing user is untouched; nothing is sent.
+- Announcement tool (Admin, owner only): write in English, choose all users or one language,
+  Translate (one AI call for every language the audience reads, kind `announce_translate`; each version
+  checked: no dash, same numbers, the alphabet, сводка, на Украине; a failing one is left empty with a
+  note), edit, Preview (each version to the owner), Send (only after a preview of exactly that text).
+  The cron sends 25 a tick; each user is claimed in `announcement_sends` before the message goes out,
+  so a retry or two overlapping ticks never send twice; 403 marks the user blocked.
+- Live: schema applied (users columns, `announcements`, `announcement_sends`); the two existing users
+  marked onboarded and opened (`migrate-onboarding.mjs`) BEFORE the deploy, so no reminder or setup.
+- Sent to the owner (TEST bot, labelled, nothing recorded): the welcome in English and Russian with Set
+  up, the three setup screenshots, a sample digest for a new reader (15 stories, 3,801 characters), and
+  the reminder.
+- Tests: Worker 261 (19 new in `test/welcome.test.mjs`), Python 180, click-through 136 of 136 (setup
+  flow, Russian and dark, all sizes; announcement tool). Mutations part 4: 20 of 20 caught (the first
+  run caught 16; four new tests close the gaps: reminder hours, overlapping announcement ticks, the
+  Russian setup texts, the first-open switch).
+- Fixed on the way: the Russian "в Украине" check (`` does not work with Cyrillic in JavaScript); the
+  emoji tint now retries a grey result (the emoji font not ready yet), which made a Step 13 check flaky.
+- CPU (`reports/data/step-15/cpu.txt`): tick with 8 digests 2.6 ms; plus 8 reminders and a batch of 25
+  announcements 2.7 ms; /start welcome 0.01 ms; sample digest 0.34 ms; feedback 0.005 ms.
+- Screenshots: `reports/data/step-15/screenshots/` (55 files).
+
+## Waiting on the owner (also)
+- His look at the simulated welcome, setup screenshots and sample digest.
+
 ## Next
-Part 4: welcome flow (new vs imported users, Set up button, 3-step setup, sample digest, one reminder),
-import script, announcement tool (translate, edit, preview, batched send, never twice).
+Part 5: cleanup (archive one-off scripts, remove the Google News shadow leftovers, delete D1 test data,
+docs), then the final report.
