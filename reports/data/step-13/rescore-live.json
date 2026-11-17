@@ -1,0 +1,60 @@
+{
+ "hours": 13,
+ "stories": 55,
+ "editor_tokens": [
+  8225,
+  5025
+ ],
+ "topics": {
+  "c2": {
+   "name": "Japan",
+   "live_6_plus": 12,
+   "rescored_6_plus": 6,
+   "per_day_live": 22.2,
+   "per_day_rescored": 11.1,
+   "live": [
+    "5/6 Japan re-evaluates defense strategy to prioritize wartime production",
+    "5/6 EU imposes 27.9 percent anti-dumping tariff on Japanese steel",
+    "5/6 Kumamoto earthquake damage estimated at over one trillion yen",
+    "6/7 US restricts China's remote access to advanced AI chips",
+    "4/6 Sanae Takaichi strengthens Japan-Philippines ties",
+    "4/6 Japan Defense Ministry to adopt new AI policy",
+    "5/6 China's naval presence near Japan remains normalized",
+    "5/6 Canadian Prime Minister Carney arrives in China for meetings",
+    "5/6 Putin and Japanese Prime Minister Takaiti may meet at APEC",
+    "5/6 Former BOJ Governor Kuroda flags potential rate hikes above neutral",
+    "5/6 China and Canada expand tariff relief on agriculture and steel",
+    "5/6 Senior Yakuza member files discrimination lawsuit against highway operators"
+   ],
+   "rescored": [
+    "5/6 Japan re-evaluates defense strategy to surge weapons production",
+    "5/6 EU imposes anti-dumping tariff on Japanese cold-rolled steel",
+    "5/6 Experts say China has normalized naval presence near Japan",
+    "5/6 Former BOJ chief Kuroda sees risk of rates rising above neutral",
+    "7/8 Japan lodges diplomatic protest after two Russian aircraft violate airspace",
+    "5/6 Japan reportedly delays floating-rate government bond launch"
+   ]
+  },
+  "c3": {
+   "name": "Australia",
+   "live_6_plus": 6,
+   "rescored_6_plus": 4,
+   "per_day_live": 11.1,
+   "per_day_rescored": 7.4,
+   "live": [
+    "3/6 Australian Coalition takes lead in two-party preferred poll",
+    "5/8 Melbourne skyscraper retrofitted with 1,391 solar panels",
+    "4/6 Police search Melbourne home after theft of Melbourne Cup trophies",
+    "5/7 Reserve Bank of Australia minutes show majority voted to raise rates",
+    "5/7 Australia increases third-year holiday maker visa cap for backpackers",
+    "5/6 Australian investors granted direct access to Anthropic IPO"
+   ],
+   "rescored": [
+    "6/7 Albanese confronts Laos Prime Minister over teenager deaths",
+    "5/6 Police search Melbourne home after theft of million-dollar trophies",
+    "6/8 Reserve Bank of Australia cites upside inflation risks in rate decision",
+    "5/6 Australia expands third-year holiday maker visa quota for backpackers"
+   ]
+  }
+ }
+}

@@ -143,25 +143,29 @@ READER_TOPICS = """
 READER_BOOST = """
    - reader topics ({tags}): the readers chose these subjects themselves, so for an event whose
      topic is a reader topic, ignore the boost rules above. Its topic_score answers only: how
-     important is this for someone who follows this subject closely? Do not copy the score: the
-     score is for a general world reader who does not follow this subject, so for a real
-     development the topic score is usually 1 to 3 points higher, and it may be far above the
-     score (a race result can have score 1 and topic score 8). 6 or more means a follower would
-     be sorry to miss it; routine items stay at 5 or less.
+     important is this for someone who follows this subject closely? The score is for a general
+     world reader, so a real development may be far above it (a race result can have score 1 and
+     topic score 8). But most items on a busy subject are routine and keep a topic score of 5 or
+     less, even when a follower might glance at them. 6 or more means a follower would be sorry
+     to miss it: about 2 to 5 events per reader topic on a normal day, rarely more.
+     Give a reader topic as the event's topic only when the event is mainly ABOUT that subject.
+     "Canada's prime minister visits China" or "the US limits China's access to AI chips" are
+     not Japan, even when a Japanese outlet reports them; a regional summit is not about each
+     country that attends.
      Examples (topic score):
      - a sport (Formula 1): 8 a Grand Prix result, a world title decided; 6 a driver signs for
        another team, a race-changing penalty, a big rule change; 4 practice or qualifying times,
        a team boss's comments, rumours, previews.
-     - a country (Japan, Colombia): 8 an election result, a new head of government, a disaster
+     - a country (Japan, Australia): 8 an election result, a new head of government, a disaster
        with deaths, a major law or central bank decision; 6 a new minister, official figures
-       that show a turn (the economy shrinks, inflation jumps), a notable government decision,
-       a leader's visit with an outcome, a big scandal or arrest of a known figure, a real step
-       with another country; 4 a minister's statement, a local crime, a festival, a poll, a
-       company result, a friendly match, aid or grants to another country.
+       that show a turn (the economy shrinks, inflation jumps), a major government decision, a
+       leader's visit with a concrete outcome, a scandal or arrest of a leading figure, a real
+       step with another country; 4 or 5 a minister's statement or plan, a poll, a crime or
+       lawsuit, a trade or tariff detail, a company result or product launch, a building,
+       visa or local rule, aid or grants, a festival, a royal visit, a friendly match.
      - a technology or field (AI regulation): 8 a major law passed or a ban; 6 a regulator opens
        a formal case, a big new rule is proposed; 4 a speech, a report, an opinion piece, a
-       product launch.
-     On a normal day an active reader topic has about 2 to 5 events at 6 or more."""
+       product launch."""
 
 
 def reader_blocks(custom: list[dict]) -> tuple[str, str]:

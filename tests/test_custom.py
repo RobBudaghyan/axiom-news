@@ -280,7 +280,8 @@ class TestAIPasses(unittest.TestCase):
         self.assertIn("reader topics (c1): the readers chose these subjects themselves", p)
         self.assertIn("ignore the boost rules above", p)
         self.assertIn("a sport (Formula 1): 8 a Grand Prix result", p)
-        self.assertIn("a country (Japan, Colombia): 8 an election result", p)
+        self.assertIn("a country (Japan, Australia): 8 an election result", p)
+        self.assertIn("only when the event is mainly ABOUT that subject", p)
         self.assertIn("a technology or field (AI regulation): 8 a major law passed", p)
         self.assertNotIn("up to the cap", p)
         self.assertIn(f"S{ids[0]} | c1", p)                     # importance 3 passes the custom floor
