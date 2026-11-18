@@ -39,7 +39,7 @@ describe("assessUsage", () => {
     assert.equal(a.alerts.length, 1);
     assert.equal(a.alerts[0].kind, "d1");
     assert.match(a.alerts[0].text, /rows read 4,000,000 \(80% of 5,000,000\)/);
-    assert.doesNotMatch(a.alerts[0].text, /[20132014]/);
+    assert.doesNotMatch(a.alerts[0].text, new RegExp(`[${String.fromCharCode(0x2013, 0x2014)}]`));   // no en or em dash
     const b = assessUsage({ r: 4_500_000, w: 90_000, over: [] }, a.state, NOW + 3600);
     assert.equal(b.alerts.length, 0);
     const c = assessUsage({ r: 4_500_000, w: 90_000, over: [] }, b.state, NOW + 86400);   // next UTC day
