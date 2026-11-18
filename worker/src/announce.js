@@ -6,7 +6,7 @@
 //            with a note, for the owner to write.
 //   preview  the owner's (edited) versions are saved and each is sent to the owner first.
 //   send     only after a preview of exactly these texts; the cron sends in batches.
-//   cron     each 5-minute tick claims up to `per_tick` users (a row in announcement_sends written
+//   cron     each tick (every minute since Step 16) claims up to `per_tick` users (a row in announcement_sends written
 //            BEFORE the message goes out, so a retried tick never sends twice), sends each user
 //            their language (English if theirs has no version), and marks the result.
 import { askAI, aiCallStatements } from "./custom.js";

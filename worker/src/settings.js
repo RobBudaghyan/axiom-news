@@ -2,7 +2,7 @@
 // Limits live in config/digest.json ("settings_limits"). Since Step 5 a user sets only topics,
 // digest times (on the hour, 06:00-23:00, 1 to 5) and pause; Step 9 adds the language. The time zone always follows the
 // phone (saved on every open, src/api.js); the story count and the format are no longer settings.
-import { CONFIG, nextSlot, parseList } from "./digest.js";
+import { CONFIG, FIXED_OFFSETS, nextSlot, parseList } from "./digest.js";
 import { LANGS, effectiveLang, t } from "./i18n.js";
 
 // users.tz_detected: 0 = never reported (default zone), 1 = set from the device.
@@ -51,6 +51,7 @@ export function roundTimes(times, cfg = CONFIG) {
 // reused later through its cache (Intl is the costly part on a cold Worker).
 export function validZone(tz) {
   if (typeof tz !== "string" || !tz || tz.length > 64 || !/^[A-Za-z0-9_+\-/]+$/.test(tz)) return false;
+  if (Object.hasOwn(FIXED_OFFSETS, tz)) return true;   // Step 16: a known fixed-offset zone needs no Intl (about 10 ms cold)
   try {
     new Intl.DateTimeFormat("en-US", { timeZone: tz });
     return true;
@@ -97,7 +98,7 @@ export function validatePatch(patch, topicTags, cfg = CONFIG, extra = {}) {
 }
 
 // The next digest after a settings change. A digest that is already due (its slot passed less
-// than 15 minutes ago and the 5-minute tick has not sent it yet) is kept, so saving a setting
+// than 15 minutes ago and the next tick has not sent it yet) is kept, so saving a setting
 // right after 14:00 does not swallow the 14:00 digest. Otherwise: the first slot after now.
 export function nextDigestAfterChange(before, after, now, cfg = CONFIG) {
   const wasDue = before.next_digest_at != null && before.next_digest_at <= now &&

@@ -37,14 +37,14 @@ describe("Step 16: production and staging switches", () => {
     assert.match(prod, /^name = "axiom-news"$/m);
     assert.match(prod, /database_id = "2a1eb212-95b8-4715-b628-2967cbcb0367"/);
     assert.match(prod, /ENV_NAME = "production"/);
-    assert.match(prod, /crons = \["\*\/5 \* \* \* \*", "7 \* \* \* \*"\]/);
+    assert.match(prod, /crons = \["\* \* \* \* \*", "7 \* \* \* \*"\]/);   // Step 16: every minute, 3 readers a tick
     assert.match(staging, /^name = "axiom-news-staging"$/m);
     assert.match(staging, /database_name = "axiom-d1-staging"/);
     assert.doesNotMatch(staging, /2a1eb212-95b8-4715-b628-2967cbcb0367/, "staging never touches the production D1");
     assert.match(staging, /ENV_NAME = "staging"/);
     assert.match(staging, /JOB_DISPATCH = "off"/);
     assert.match(staging, /HEALTH_ALERTS = "off"/);
-    assert.match(staging, /crons = \["\*\/5 \* \* \* \*"\]/);
+    assert.match(staging, /crons = \["\* \* \* \* \*"\]/);
     assert.match(staging, /APP_URL = "https:\/\/axiom-news-staging\./);
   });
 

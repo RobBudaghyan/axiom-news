@@ -210,7 +210,7 @@ async function announce(db, env, body, now, io) {
   if (r.error) return json(400, { ok: false, message: r.error });
   const message = act === "draft" ? (Object.keys(r.notes).length ? "Translated. Some versions need your text (see the notes)." : "Translated. Check each version, then send yourself a preview.")
     : act === "preview" ? `Preview sent to you: ${r.previews} ${r.previews === 1 ? "version" : "versions"}.`
-    : act === "send" ? "Sending now, a batch every 5 minutes. Progress shows here."
+    : act === "send" ? "Sending now, a batch every minute. Progress shows here."
     : "Cancelled.";
   return json(200, { ok: true, message, announcement: r });
 }

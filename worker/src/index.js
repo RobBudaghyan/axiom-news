@@ -1,4 +1,4 @@
-// Axiom News Worker: Telegram webhook, Mini App API (/api/*), digest cron (every 5 min), hourly
+// Axiom News Worker: Telegram webhook, Mini App API (/api/*), digest cron (every minute since Step 16), hourly
 // GitHub job trigger and job health alerts. The Mini App files (public/app/) are static assets,
 // served by Cloudflare before this code runs (wrangler.toml [assets]).
 import { CONFIG } from "./digest.js";
@@ -9,6 +9,7 @@ import { dispatchJob } from "./github.js";
 import { sendDigestMessage, sendPlain, tgCall } from "./telegram.js";
 import { handleApi, json } from "./api.js";
 import { t } from "./i18n.js";
+import "./warmup.js";   // Step 16: compiles the digest code while the Worker starts, not inside a cron tick
 
 export const HOURLY_CRON = "7 * * * *";
 

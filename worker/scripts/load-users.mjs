@@ -41,13 +41,18 @@ if (cmd === "add") {
 } else if (cmd === "open") {
   const toml = readFileSync(new URL("../wrangler.toml", import.meta.url), "utf8");
   const base = new URL(/^APP_URL\s*=\s*"([^"]+)"/m.exec(toml.split("[env.staging]")[1])[1]).origin;
-  const inits = await Promise.all(IDS.map((id, i) => signInitData({ query_id: `load${i}`,
-    user: JSON.stringify({ id, first_name: `Load ${i + 1}`, language_code: i % 2 ? "ru" : "en" }), auth_date: String(now) }, env.TELEGRAM_BOT_TOKEN)));
+  // The Worker refuses user ids <= 0 (good), so the 25 opens are signed as the owner on staging, with his
+  // stored name and zone: an open reads his settings and saves the same zone again, nothing changes.
+  const owner = Number(env.OWNER_TELEGRAM_ID);
+  const [me] = await db.query("SELECT first_name, timezone, lang FROM users WHERE id = ?1", [owner]);
+  if (!me) throw new Error("the owner has no row on staging");
+  const inits = await Promise.all(IDS.map((_, i) => signInitData({ query_id: `load${i}`,
+    user: JSON.stringify({ id: owner, first_name: me.first_name, language_code: me.lang || "en" }), auth_date: String(now) }, env.TELEGRAM_BOT_TOKEN)));
   const t0 = Date.now();
   const res = await Promise.all(inits.map(async (init) => {
     const s = Date.now();
     const r = await fetch(`${base}/api/open`, { method: "POST", headers: { authorization: `tma ${init}`, "content-type": "application/json" },
-      body: JSON.stringify({ tz: "Asia/Yerevan" }) });
+      body: JSON.stringify({ tz: me.timezone }) });
     return { status: r.status, ms: Date.now() - s };
   }));
   const ms = res.map((r) => r.ms).sort((a, b) => a - b);

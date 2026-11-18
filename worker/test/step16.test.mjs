@@ -9,7 +9,8 @@ import worker from "../src/index.js";
 import { signInitData } from "../src/auth.js";
 import { allTopicsOff, runTick } from "../src/cron.js";
 import { SettingsError, validatePatch } from "../src/settings.js";
-import { CONFIG, candidateStatement, qualifies } from "../src/digest.js";
+import { CONFIG, FIXED_OFFSETS, candidateStatement, localParts, nextSlot, qualifies } from "../src/digest.js";
+import { validZone } from "../src/settings.js";
 import { pauseStatements } from "../scripts/migrate-pause.mjs";
 import { ALL, OWNER, addStory, addUser, fakeD1, mockFetch, yerevan } from "./helpers.mjs";
 
@@ -59,7 +60,7 @@ describe("Step 16: no Pause, every topic may be off", () => {
     sqlite.prepare("INSERT INTO custom_follows (user_id, topic_id, at, enabled) VALUES (7, 1, 1, 1), (8, 1, 1, 0)").run();
     addStory(sqlite, "Big news", ["politics_conflicts"], 9, now - 600, { final_score: 8, main_topic: "politics_conflicts", headline: "Big news" });
     const outbox = [];
-    const out = await runTick(db, { send: async (id, text) => { outbox.push({ id, text }); }, alert: async () => {} }, now);
+    const out = await runTick(db, { send: async (id, text) => { outbox.push({ id, text }); }, alert: async () => {} }, now, {}, { ...CONFIG, max_users_per_tick: 8 });
     assert.deepEqual(outbox.map((m) => m.id).sort(), [6, 7]);
     assert.equal(out.all_off, 2);
     const row = (id) => sqlite.prepare("SELECT next_digest_at, last_digest_at FROM users WHERE id = ?").get(id);
@@ -191,5 +192,37 @@ describe("Step 16: texts are short, one idea a line, with emojis", () => {
     assert.doesNotMatch(s, /дайджест/i);
     assert.doesNotMatch(s, /(^|[^\p{L}])во? Украин/u);
     assert.match(DICTS.ru.app.help_what, /сводка/);
+  });
+});
+
+describe("Step 16: fixed-offset zones need no Intl (about 10 ms of CPU in a fresh Worker)", () => {
+  test("every fixed zone matches Intl every 6 hours over two years (no daylight saving hides in the list)", () => {
+    const start = Date.UTC(2026, 0, 1) / 1000;
+    for (const tz of Object.keys(FIXED_OFFSETS)) {
+      const f = new Intl.DateTimeFormat("en-US", { timeZone: tz, hourCycle: "h23", year: "numeric", month: "2-digit",
+        day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      for (let ts = start; ts < start + 2 * 365 * 86400; ts += 6 * 3600) {
+        const p = {};
+        for (const { type, value } of f.formatToParts(new Date(ts * 1000))) p[type] = value;
+        const want = { year: +p.year, month: +p.month, day: +p.day, hour: +p.hour % 24, minute: +p.minute, second: +p.second };
+        assert.deepEqual(localParts(ts, tz), want, `${tz} at ${new Date(ts * 1000).toISOString()}`);
+      }
+    }
+  });
+  test("a Yerevan reader's next slot and a zone check use no Intl at all; other zones still work", () => {
+    const real = Intl.DateTimeFormat;
+    let calls = 0;
+    Intl.DateTimeFormat = function (...a) { calls++; return new real(...a); };
+    try {
+      const now = Date.UTC(2026, 10, 18, 9, 0) / 1000;   // 13:00 in Yerevan
+      assert.equal(nextSlot(now, "Asia/Yerevan", ["09:00", "14:00", "20:00"]), Date.UTC(2026, 10, 18, 10, 0) / 1000);
+      assert.equal(validZone("Asia/Yerevan"), true);
+      assert.equal(calls, 0);
+      assert.equal(validZone("toString"), false, "only real table entries, never the object's own methods");
+      assert.equal(nextSlot(now, "Europe/Paris", ["14:00"]), Date.UTC(2026, 10, 18, 13, 0) / 1000);
+      assert.ok(calls > 0, "a zone with daylight saving still goes through Intl");
+    } finally {
+      Intl.DateTimeFormat = real;
+    }
   });
 });

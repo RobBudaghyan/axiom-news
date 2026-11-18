@@ -359,8 +359,10 @@ the first live reminder and sample digest, and D1 reads (about 57% of the free l
   ceremonies by 1-2 points (capped at 2 in code). Readers of all six topics get long digests
   (about 12 stories) on busy days. Watch the first week; the bars, caps and examples are config
   and prompt changes.
-- **Fold limit checked on Android only.** iPhone and Telegram Desktop were not tested; the limit
-  (3,900) is under the hard 4,096 anyway.
+- **Not checked on an iPhone (accepted risk, owner, Step 16).** The owner decided not to do the iPhone
+  check: rich-message digests, the fold limit and the Mini App were seen only on his Android phone
+  and in headless Edge. If an iPhone reader reports a problem, the fixes are the Mini App CSS or
+  `LAYOUT` in `worker/src/digest.js`. The limit (3,900) is under the hard 4,096 anyway.
 - **Rich messages (Step 11) are new (Bot API 10.1, June 2026)** and were seen only on the owner's
   Android phone. Telegram documents no per-platform support; it says outdated apps show an "update
   the app" placeholder for new features. A reader on an old app version would see that instead of

@@ -301,10 +301,10 @@ function firstMatch(tokens, list) {
   return null;
 }
 
-let lists = null;
+// Step 16: built when the Worker starts (top level), not inside the first digest of a cron tick.
+const lists = [buildList(LINE_EMOJI.actors, false), buildList(LINE_EMOJI.subjects, true)];
 
 export function lineEmoji(headline, fallback = "") {
-  lists ??= [buildList(LINE_EMOJI.actors, false), buildList(LINE_EMOJI.subjects, true)];
   const tokens = String(headline ?? "").match(WORDS_RE) ?? [];
   for (const l of lists) {
     const hit = firstMatch(tokens, l);
@@ -538,13 +538,18 @@ export function planDigest(user, candidates, topics, now, cfg = CONFIG, opts = {
            heldIds: chosen.held.map((s) => s.id) };
 }
 
+// Step 16 (load test): ONE statement per digest for its rows (the story ids as a JSON list), not one
+// statement per story: a tick of 3 readers had about 30 statements, each prepared and sent apart,
+// which cost Worker CPU. Same rows as before. ("WHERE true" lets SQLite read the upsert after a SELECT.)
+
 // Step 10: one digest_holds row per held story (the last digest that held it wins).
 export function holdStatements(user, heldIds, lang, now) {
-  return heldIds.map((sid) => ({
-    sql: "INSERT INTO digest_holds (user_id, story_id, lang, at) VALUES (?1, ?2, ?3, ?4) " +
+  if (!heldIds.length) return [];
+  return [{
+    sql: "INSERT INTO digest_holds (user_id, story_id, lang, at) SELECT ?1, value, ?3, ?4 FROM json_each(?2) WHERE true " +
          "ON CONFLICT(user_id, story_id) DO UPDATE SET lang = excluded.lang, at = excluded.at",
-    params: [user.id, sid, lang, now],
-  }));
+    params: [user.id, JSON.stringify(heldIds), lang, now],
+  }];
 }
 
 // D1 writes after a successful send: never-twice rows, the digest time, the next slot.
@@ -552,10 +557,11 @@ export function holdStatements(user, heldIds, lang, now) {
 export function afterSendStatements(user, storyIds, now, nextAt) {
   const slot = user.next_digest_at && user.next_digest_at <= now ? user.next_digest_at : now;
   return [
-    ...storyIds.map((sid) => ({
-      sql: "INSERT INTO sent (user_id, story_id, sent_at) VALUES (?1, ?2, ?3) ON CONFLICT(user_id, story_id) DO NOTHING",
-      params: [user.id, sid, now],
-    })),
+    ...(storyIds.length ? [{
+      sql: "INSERT INTO sent (user_id, story_id, sent_at) SELECT ?1, value, ?3 FROM json_each(?2) WHERE true " +
+           "ON CONFLICT(user_id, story_id) DO NOTHING",
+      params: [user.id, JSON.stringify(storyIds), now],
+    }] : []),
     { sql: "UPDATE users SET last_digest_at = ?1, next_digest_at = ?2 WHERE id = ?3", params: [slot, nextAt, user.id] },
   ];
 }
@@ -573,7 +579,28 @@ function fmt(tz) {
   return fmtCache.get(tz);
 }
 
+// Step 16 (load test): the first Intl time-zone format in a fresh Worker costs about 10 ms of CPU
+// (ICU start-up; every later zone about 0.1 ms), and every cron tick runs in a fresh Worker, so a
+// tick with one reader used 12 ms against the 10 ms limit. Zones with one fixed offset all year
+// (no daylight saving: almost every reader) are computed by hand; others still use Intl.
+// test/step16.test.mjs compares each of these with Intl every 6 hours over two years.
+export const FIXED_OFFSETS = {   // minutes east of UTC
+  "UTC": 0, "Etc/UTC": 0,
+  "Asia/Yerevan": 240, "Asia/Dubai": 240, "Asia/Tbilisi": 240, "Asia/Baku": 240, "Asia/Muscat": 240, "Europe/Samara": 240,
+  "Europe/Moscow": 180, "Europe/Minsk": 180, "Europe/Istanbul": 180, "Europe/Volgograd": 180, "Asia/Qatar": 180,
+  "Asia/Riyadh": 180, "Asia/Kuwait": 180, "Asia/Bahrain": 180, "Asia/Baghdad": 180,
+  "Asia/Tehran": 210, "Asia/Almaty": 300, "Asia/Tashkent": 300, "Asia/Yekaterinburg": 300, "Asia/Bishkek": 360,
+  "Asia/Kolkata": 330, "Asia/Calcutta": 330, "Asia/Bangkok": 420, "Asia/Novosibirsk": 420,
+  "Asia/Shanghai": 480, "Asia/Hong_Kong": 480, "Asia/Singapore": 480, "Asia/Tokyo": 540, "Asia/Seoul": 540,
+};
+
 export function localParts(ts, tz) {
+  const fixed = Object.hasOwn(FIXED_OFFSETS, tz) ? FIXED_OFFSETS[tz] : undefined;
+  if (fixed !== undefined) {
+    const d = new Date((ts + fixed * 60) * 1000);
+    return { year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, day: d.getUTCDate(), hour: d.getUTCHours(),
+      minute: d.getUTCMinutes(), second: d.getUTCSeconds() };
+  }
   const p = {};
   for (const { type, value } of fmt(tz).formatToParts(new Date(ts * 1000))) p[type] = value;
   return { year: +p.year, month: +p.month, day: +p.day, hour: +p.hour % 24, minute: +p.minute, second: +p.second };
