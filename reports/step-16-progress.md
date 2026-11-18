@@ -84,3 +84,18 @@ check), Part 1 (staging), Part 2 (load test on staging), Part 3 (iPhone check), 
   `idx_items_story` added to `db/schema.sql` and applied to staging only: the same lookup reads 153
   rows. Production needs the owner's "ship it" (then `venv/Scripts/python scripts/apply_schema.py`).
 - Second run: started 2026-11-18 09:32 UTC with the safe stub and a working capture.
+
+- Load test results, before and after the CPU fix: see `reports/step-16-fixes-staging-safety.md`.
+
+## Owner decisions (2026-11-18)
+- Part 3 (iPhone check) skipped: accepted risk.
+- "Ship it" for the items index and the CPU fix.
+
+## Shipped (2026-11-18)
+- Index applied to production; CPU fix deployed (code c71a7f93c649969c, version ebe43cdb). Production
+  health: ticks 2 to 7 ms, 12:07 job ok (130k rows read, first run with the index). USER_SENDS still off.
+- Staging clean: fake readers removed, SEND_STUB off, the three users' next digests normal.
+
+## Step 16 is complete
+Final report: `reports/step-16-fixes-staging-safety.md`. Next: the launch, and a staging-first fix of
+the job's remaining full scans.

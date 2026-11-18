@@ -1,3 +1,4 @@
+// Step 16: CPU profile of a warm digest build with 60 candidates (node --cpu-prof scripts/archive/step16-profile.mjs).
 import { planDigest, CONFIG } from "../../src/digest.js";
 import { TOPIC_ROWS } from "../../test/helpers.mjs";
 const NOW = 1_800_000_000 + 12 * 3600;

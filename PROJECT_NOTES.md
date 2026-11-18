@@ -237,6 +237,9 @@ bot @axiom_news_bot at the end.
 | 2026-11-17 | Staging stories come from a copy of production's rows every 3 hours (end of the hourly job, self-paced by staging `meta.sync_at`), not from its own job | no extra AI calls; measured: hourly copying ~4,600 story rows a day, every 3 hours ~2,900 |
 | 2026-11-17 | Staging-made ids start high (custom topics 1,000,000, stories above a placeholder at 1,000,000,000) | a copy from production never overwrites what a local job test or a staging reader made |
 | 2026-11-17 | The TEST bot's webhook now takes `callback_query` and `pre_checkout_query` too (Step 16) | it had only `message`, so the /support buttons and Stars tips could not work on it |
+| 2026-11-18 | Worker CPU fix (shipped): fixed offsets for zones without daylight saving, a start-up warm-up digest, one statement per digest, cron every minute with 3 readers a tick (was every 5 min, 8) (owner approved, Step 16) | load test: ticks 12-24 ms -> typical 6-9 ms (worst 15); 25 readers due at once all served in about 9 min (was about 20); first Intl zone in a fresh Worker cost about 10 ms |
+| 2026-11-18 | Index `idx_items_story` on items(story_id) (shipped, owner approved) | the editor's article lookup read the whole items table (16,918 rows for 50 stories), now 155; the job read 3.6M rows a day (73%) |
+| 2026-11-18 | The send stub only ever answers for fake readers (negative ids) | a stub left on overnight swallowed 5 real TEST-bot digests (undone on staging) |
 | 2026-11-15 | pre_checkout_query is answered from the invoice payload alone (no database read) | Telegram cancels the payment after 10 s; measured a few microseconds |
 | 2026-11-15 | Table `tips`: user, amount, Telegram charge id (UNIQUE), time, refunded time; nothing else | the owner's rule; the charge id is needed for refunds, and UNIQUE makes a repeated update count once |
 | 2026-11-15 | /paysupport forwards the user's note to the owner; /terms states the tip terms; the owner refunds from Admin after a confirm (refundStarPayment) | Telegram's rules for bots that take Stars |
@@ -320,7 +323,12 @@ bot @axiom_news_bot at the end.
   cleanup (one-off scripts archived, the shadow experiment removed, D1 test data deleted). Python 164
   tests, Worker 261, click-through 136; 52 rules broken on purpose, all caught. Details in
   `reports/step-15-final-product.md`.
-- Two users: the owner and one more (Russian).
+- **Step 16 done (2026-11-18): owner fixes, staging, CPU and D1 fixes.** Language step in setup, short
+  texts with emojis, red Help and Feedback icons, the topic hint, no Pause (all topics may be off),
+  main-topic bar 7; staging copy with the TEST bot and the "ship it" rule (`CLAUDE.md`); load test;
+  the CPU fix and the items index shipped to production (still silent to users). iPhone check skipped
+  (accepted risk). Details in `reports/step-16-fixes-staging-safety.md`.
+- Three test users (the owner and two more), now on staging.
 
 ## Next step
 Step 16 (in progress, `reports/step-16-progress.md`): load test on staging, iPhone check. Then the
@@ -330,7 +338,9 @@ in wrangler.toml, deployed only after the owner says "ship it"), then import the
 (`worker/scripts/import-users.mjs users.json --dry`, then without `--dry`, on production) and send them
 an announcement from production's Admin. Staging keeps the TEST bot. Watch: Economy & Markets volume,
 digest sizes after the Step 16 bar (all six topics about 10, Armenia only about 6), keyword refreshes,
-the first live reminder and sample digest, and D1 reads (about 57% of the free limit, mostly the job).
+the first live reminder and sample digest, D1 reads after the items index (before it the job read about
+3.6M rows a day, 73%; a follow-up should remove the job's other full scans of the story pool), and
+Worker CPU per tick in Cloudflare's metrics (typical 6 to 9 ms, worst seen 15 ms, never flagged).
 
 ## Known issues / open questions
 - **Translations (Step 9):** the code checks catch numbers, names, alphabets and accents, not a
@@ -343,11 +353,15 @@ the first live reminder and sample digest, and D1 reads (about 57% of the free l
   chunk/min).
 - **AI grouping is the weakest part:** some over-merged stories and near-duplicates. Guarded by
   prompt and code, but it needs watching.
-- **D1 reads (Step 16 measurement):** the hourly job reads about 2.65M rows a day (53% of the free
-  5M); production's Worker about 0.1M; the staging sync about 0.05M. Writes: job 40k, sync about 7k,
-  Workers about 1k: about 48% of 100k. Reads are the limit to watch; the job's reads (about 100k a
-  run) were never optimised. A follow-up should find which job queries scan the whole pool.
+- **D1 reads (Step 16):** before the items index the hourly job read about 3.6M rows a day (73% of the
+  free 5M; 2.65M a day earlier), production's Worker about 0.1M, the staging sync about 0.05M. Writes
+  about 52k a day (52%). The index removes the biggest scan (16,918 -> 155 rows per lookup); several
+  job queries still scan the whole story pool (about 5,300 rows each) and one items query per custom
+  topic (hint_topic) has no index. Next: a staging-first fix of those.
 - **Staging Admin's "D1 today" job numbers are production's** (job runs are copied with the stories).
+- **Worker CPU (Step 16):** after the fix, digest ticks use typically 6 to 9 ms, the worst seen 15 ms;
+  Cloudflare flagged none (41 load-test ticks, some at 24 ms before the fix). The leftover spread did
+  not follow the amount of work.
 - **Worker CPU is the tightest free limit** (10 ms). Watch Cloudflare's Metrics > Errors for
   `exceededCpu` once there are ~20 users.
 - **Duplicates:** the word-based check misses some; the editor now merges most of the rest

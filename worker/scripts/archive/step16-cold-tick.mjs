@@ -1,3 +1,5 @@
+// Step 16: CPU of a cold cron tick (first run in a fresh process) and a second one, stand-in data:
+//   node scripts/archive/step16-cold-tick.mjs <readers>
 // Step 15: CPU of the new Worker paths on this PC (Node), stand-in data only, no I/O:
 // the digest build and a normal cron tick (as Step 14), /start for a new user (the welcome), the
 // setup's sample digest (POST /api/onboard), a feedback message, a tick with 8 reminders, and a
