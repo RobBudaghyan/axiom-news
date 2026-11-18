@@ -84,13 +84,15 @@ describe("Step 16: production and staging switches", () => {
     assert.equal(alerts.length, 1);
   });
 
-  test("SEND_STUB on (load test): the digest is recorded as sent but Telegram is never called", async () => {
-    const { binding, sqlite, now } = dueSetup();
-    fetchMock = mockFetch(() => undefined);
+  test("SEND_STUB on (load test): a fake reader's digest is recorded but Telegram is never called; a real reader is still sent for real", async () => {
+    const { binding, sqlite, now } = dueSetup();   // the owner (a real, positive id) is due
+    addUser(sqlite, { id: -1001, first_name: "Load 01", next_digest_at: now - 60 });
+    fetchMock = mockFetch((url) => (url.includes("api.telegram.org") ? { status: 200, body: { ok: true, result: { message_id: 1 } } } : undefined));
     await worker.scheduled({ cron: "*/5 * * * *", scheduledTime: now * 1000 }, base(binding, { ...STAGING, SEND_STUB: "on" }));
-    assert.equal(fetchMock.calls.filter((c) => c.url.includes("api.telegram.org")).length, 0);
-    assert.equal(sqlite.prepare("SELECT count(*) AS n FROM sent").get().n, 1);
-    assert.ok(sqlite.prepare("SELECT last_digest_at FROM users").get().last_digest_at != null);
+    const tg = tgSends();
+    assert.deepEqual(tg.map((c) => c.body.chat_id), [OWNER], "only the real reader reaches Telegram");
+    assert.equal(sqlite.prepare("SELECT count(*) AS n FROM sent WHERE user_id = -1001").get().n, 1, "the fake reader's digest counts as delivered");
+    assert.ok(sqlite.prepare("SELECT last_digest_at FROM users WHERE id = -1001").get().last_digest_at != null);
   });
 
   test("Admin says which copy it is", async () => {

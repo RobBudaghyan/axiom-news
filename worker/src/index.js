@@ -16,7 +16,8 @@ export const HOURLY_CRON = "7 * * * *";
 //   ENV_NAME       "production" or "staging" (Admin shows it in big letters)
 //   USER_SENDS     "off": no digests, reminders or announcements go out (production until launch)
 //   JOB_DISPATCH   "off": never start the hourly GitHub job (staging: the job runs for production only)
-//   SEND_STUB      "on": Telegram is never called for a user message, it counts as delivered (load test)
+//   SEND_STUB      "on": for the load test's fake readers (negative ids) Telegram is never called and the
+//                  message counts as delivered; real readers are always sent for real
 //   HEALTH_ALERTS  "off": no job-health or AI-guard alerts to the owner (staging)
 export const envName = (env) => (env.ENV_NAME === "staging" ? "staging" : "production");
 const on = (v, dflt = true) => (v == null ? dflt : String(v) !== "off");
@@ -25,9 +26,13 @@ export const switches = (env) => ({
 });
 let stubId = 0;
 // The function that sends one user message: the real one, or (SEND_STUB) a stand-in that never
-// calls Telegram and answers like a delivered message.
+// calls Telegram and answers like a delivered message. The stand-in only ever answers for a fake
+// reader (a negative id; Telegram user ids are positive): in Step 16 the stub was left on overnight
+// and swallowed five real TEST-bot digests, so a forgotten stub can no longer touch a real reader.
+export const isFakeReader = (chatId) => Number(chatId) < 0;
 export function userSender(env, real) {
-  return switches(env).stub ? async () => ({ message_id: ++stubId, stub: true }) : real;
+  if (!switches(env).stub) return real;
+  return (chatId, ...rest) => (isFakeReader(chatId) ? Promise.resolve({ message_id: ++stubId, stub: true }) : real(chatId, ...rest));
 }
 
 function sameSecret(a, b) {

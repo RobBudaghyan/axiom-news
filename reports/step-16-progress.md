@@ -70,5 +70,17 @@ check), Part 1 (staging), Part 2 (load test on staging), Part 3 (iPhone check), 
 - Tests: Worker 294 (new `test/staging.test.mjs`), Python 164, click-through 140 of 140, live
   `api-check.mjs` on both copies.
 
-## Next
-Part 2: the load test on staging.
+## Part 2: in progress
+- First run (2026-11-17 19:56 UTC): the 25 fake readers were all served, but the CPU capture was
+  empty (wrangler under `timeout`/npx recorded nothing) and the session stopped on a usage limit
+  with SEND_STUB still on. **Incident:** the stub then also answered for real readers, so 5 real
+  TEST-bot digests were recorded as sent but never delivered (the owner at 02:00, 05:00 and
+  08:00 UTC; the two other users at 05:00). Fixed on 2026-11-18 09:30 UTC: stub off, those sent and
+  hold rows deleted on staging and each user's last digest time put back, so their next digest
+  (10:00 UTC; the owner 14:00 UTC) brings the missed stories. Safety fix: the stub now only ever
+  answers for fake readers (negative ids); a real reader is always sent for real (test added).
+- D1 finding: the editor's article lookup (`items WHERE story_id IN ...`) read the whole items table
+  each time (16,918 rows for 50 stories, measured on production with one read-only query). Index
+  `idx_items_story` added to `db/schema.sql` and applied to staging only: the same lookup reads 153
+  rows. Production needs the owner's "ship it" (then `venv/Scripts/python scripts/apply_schema.py`).
+- Second run: started 2026-11-18 09:32 UTC with the safe stub and a working capture.

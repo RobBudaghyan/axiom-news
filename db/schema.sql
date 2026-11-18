@@ -67,6 +67,9 @@ CREATE TABLE IF NOT EXISTS items (
   hint_topic   TEXT                                 -- the custom tag whose search found it
 );
 CREATE INDEX IF NOT EXISTS idx_items_status ON items(status);
+-- Step 16: the editor reads the articles of its candidates (story_id IN ...); without this index each
+-- lookup read the whole table (16,918 rows for 50 stories, measured), about half the job's D1 reads.
+CREATE INDEX IF NOT EXISTS idx_items_story ON items(story_id);
 
 -- The story pool. best_* is the link shown to users: lowest tier wins, then earliest.
 CREATE TABLE IF NOT EXISTS stories (
