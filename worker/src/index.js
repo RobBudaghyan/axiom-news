@@ -5,6 +5,7 @@ import { CONFIG } from "./digest.js";
 import { d1Binding, logError } from "./db.js";
 import { handleUpdate } from "./bot.js";
 import { runTick } from "./cron.js";
+import { checkUsage } from "./usage.js";
 import { dispatchJob } from "./github.js";
 import { sendDigestMessage, sendPlain, tgCall } from "./telegram.js";
 import { handleApi, json } from "./api.js";
@@ -104,7 +105,19 @@ export default {
         appUrl: env.APP_URL,
         alert: (text) => sendPlain(env.TELEGRAM_BOT_TOKEN, Number(env.OWNER_TELEGRAM_ID), text),
       }, now, { digests: !hourly && sw.userSends, guard: hourly && sw.alerts, health: sw.alerts, extraProblems });
-      console.log(JSON.stringify({ tick: event.cron, env: envName(env), hourly, ...out }));
+      // Step 17: the account's free limits (D1 rows, Worker CPU), production only, once an hour
+      let usage = {};
+      if (hourly && sw.alerts) {
+        try {
+          usage = await checkUsage(db, env, now, {
+            fetch: (u, o) => fetch(u, o),
+            alert: (text) => sendPlain(env.TELEGRAM_BOT_TOKEN, Number(env.OWNER_TELEGRAM_ID), text),
+          });
+        } catch (e) {
+          await logError(db, `usage check: ${e.message}`, now);
+        }
+      }
+      console.log(JSON.stringify({ tick: event.cron, env: envName(env), hourly, ...out, ...usage }));
     } catch (e) {
       await logError(db, `cron ${event.cron}: ${e.message}`, now);
       throw e;

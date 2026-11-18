@@ -66,10 +66,16 @@ CREATE TABLE IF NOT EXISTS items (
   headline_only INTEGER NOT NULL DEFAULT 0,         -- 1 = Google gives the headline only, no snippet
   hint_topic   TEXT                                 -- the custom tag whose search found it
 );
-CREATE INDEX IF NOT EXISTS idx_items_status ON items(status);
--- Step 16: the editor reads the articles of its candidates (story_id IN ...); without this index each
+-- Step 16: the editor reads the articles of its candidates (story_id IN ...); without an index each
 -- lookup read the whole table (16,918 rows for 50 stories, measured), about half the job's D1 reads.
-CREATE INDEX IF NOT EXISTS idx_items_story ON items(story_id);
+-- Step 17 (D1 writes): both item indexes are partial. Every index entry costs a row written, and
+-- most items are written twice (insert, then done/dropped), so only the rows a query looks up are
+-- indexed: pending items (load_pending, expire_old_pending) and items that belong to a story.
+-- `story_id IN (...)` and `status = 'pending'` let SQLite use them. About 2 writes less per item.
+DROP INDEX IF EXISTS idx_items_status;
+DROP INDEX IF EXISTS idx_items_story;
+CREATE INDEX IF NOT EXISTS idx_items_pending ON items(fetched_at) WHERE status = 'pending';
+CREATE INDEX IF NOT EXISTS idx_items_story_nn ON items(story_id) WHERE story_id IS NOT NULL;
 
 -- The story pool. best_* is the link shown to users: lowest tier wins, then earliest.
 CREATE TABLE IF NOT EXISTS stories (
@@ -100,6 +106,13 @@ CREATE TABLE IF NOT EXISTS stories (
   link_state        INTEGER                         -- Google link: NULL not tried, 1 resolved to the outlet, 2 failed (Google link kept)
 );
 CREATE INDEX IF NOT EXISTS idx_stories_updated ON stories(updated_at);
+-- Step 17 (D1 reads): "new since" is updated_at OR scored_at, written as two indexable terms, so the
+-- digest, translation and keyword queries read only the window instead of the whole pool. Partial:
+-- a story with no score yet costs no index write.
+CREATE INDEX IF NOT EXISTS idx_stories_scored ON stories(scored_at) WHERE scored_at IS NOT NULL;
+-- Step 17: the editor's merge moves earlier children (UPDATE ... WHERE merged_into = ?); without
+-- this it read the whole pool once per merge (about 760k rows a day, the biggest reader).
+CREATE INDEX IF NOT EXISTS idx_stories_merged ON stories(merged_into) WHERE merged_into IS NOT NULL;
 
 -- Step 9: a story's headline and description in a reader language, written by the hourly job
 -- (job/translate.py) for stories that could reach a digest, in the languages active users read.
@@ -126,6 +139,8 @@ CREATE TABLE IF NOT EXISTS sent (
   sent_at  INTEGER NOT NULL,
   PRIMARY KEY (user_id, story_id)
 ) WITHOUT ROWID;
+-- Step 17: a merge copies a story's sent rows (WHERE story_id = ?) and the prune deletes by story.
+CREATE INDEX IF NOT EXISTS idx_sent_story ON sent(story_id);
 
 -- Step 10: a story left out of a reader's digest because it had no translation into the reader's
 -- language yet. It is NOT in `sent`, so it can still go out once translated: the digest query

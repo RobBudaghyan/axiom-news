@@ -36,6 +36,9 @@ const DAY = 86400;
 // it was made from an older English text: `src` must equal the current one, compared here in SQL).
 // Step 10: a story held back from an earlier digest for want of a translation (digest_holds) stays
 // a candidate after its window passed, while it is inside the 24 h floor ?11.
+// Step 17 (D1 reads): the window is three indexed terms (updated_at, scored_at, the reader's holds)
+// so SQLite reads only those rows; with max(updated_at, scored_at) it read the whole pool (about
+// 13k rows a digest). Same rule: ?3 >= ?11, so "new since ?3, or held and inside the 24 h floor".
 // Step 15: ?12 the six main topic tags; a story whose main topic is one of them and not in the
 // reader's topics ?2 is never a candidate (off means off).
 export const CANDIDATE_SQL = `
@@ -51,9 +54,9 @@ FROM (
   FROM stories s
   LEFT JOIN story_translations tr ON tr.story_id = s.id AND tr.lang = ?10 AND tr.ok = 1
        AND tr.src = coalesce(s.headline, s.summary) || char(10) || coalesce(s.description, '')
-  WHERE (max(s.updated_at, coalesce(s.scored_at, 0)) >= ?3
-         OR (max(s.updated_at, coalesce(s.scored_at, 0)) >= ?11
-             AND EXISTS (SELECT 1 FROM digest_holds h WHERE h.user_id = ?1 AND h.story_id = s.id)))
+  WHERE (s.updated_at >= ?3 OR s.scored_at >= ?3
+         OR s.id IN (SELECT h.story_id FROM digest_holds h WHERE h.user_id = ?1))
+    AND max(s.updated_at, coalesce(s.scored_at, 0)) >= ?11
     AND s.merged_into IS NULL
     AND EXISTS (SELECT 1 FROM json_each(s.topics) x WHERE x.value IN (SELECT u.value FROM json_each(?2) u))
     AND NOT (coalesce(s.main_topic, '') IN (SELECT m.value FROM json_each(?12) m)

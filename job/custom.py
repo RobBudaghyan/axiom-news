@@ -498,7 +498,8 @@ class KeywordRule:
 
 
 ENFORCE_SQL = ("SELECT id, topics, main_topic, final_score, topic_score, headline, summary, description FROM stories "
-               "WHERE max(updated_at, coalesce(scored_at, 0)) >= ? AND merged_into IS NULL AND topics GLOB '*\"c[0-9]*'")
+               "WHERE (updated_at >= ?1 OR scored_at >= ?1) AND merged_into IS NULL AND topics GLOB '*\"c[0-9]*'")
+# Step 17: "updated_at >= ? OR scored_at >= ?" (both indexed) instead of max(...), which read the whole pool
 
 
 def enforce(db, rule: KeywordRule, now: int, hours: int = 26) -> list[dict]:

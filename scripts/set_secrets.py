@@ -29,8 +29,12 @@ ROOT = Path(__file__).resolve().parent.parent
 ENV = ROOT / ".env"
 GITHUB = ("GEMINI_API_KEY", "GROQ_API_KEY", "CLOUDFLARE_ACCOUNT_ID", "D1_DATABASE_ID", "CLOUDFLARE_D1_TOKEN")
 WORKER = ("TELEGRAM_BOT_TOKEN", "TELEGRAM_WEBHOOK_SECRET", "OWNER_TELEGRAM_ID", "GITHUB_DISPATCH_TOKEN",
-          "GEMINI_API_KEY", "GROQ_API_KEY")   # Step 13: the custom-topic check
-WORKER_STAGING = tuple(k for k in WORKER if k != "GITHUB_DISPATCH_TOKEN")
+          "GEMINI_API_KEY", "GROQ_API_KEY",   # Step 13: the custom-topic check
+          # Step 17: the hourly check of the account's free limits (D1 rows, Worker CPU); a token with
+          # Account Analytics Read only. Production only: the limits are per account, one check is enough.
+          "CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_ANALYTICS_TOKEN")
+WORKER_STAGING = tuple(k for k in WORKER if k not in ("GITHUB_DISPATCH_TOKEN", "CLOUDFLARE_ACCOUNT_ID",
+                                                      "CLOUDFLARE_ANALYTICS_TOKEN"))
 REPO = os.environ.get("AXIOM_REPO", "")   # owner/name; read from git remote if empty
 
 

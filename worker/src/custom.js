@@ -511,7 +511,7 @@ export function customAdminStatements(now) {
   d.searches, d.fetched, d.dup_dropped, d.new_items
 FROM custom_topics t LEFT JOIN custom_topic_days d ON d.topic_id = t.id AND d.day = ?1 ORDER BY t.id`, params: [day] },
     { sql: "SELECT x.value AS tag, count(*) AS stories, sum(s.main_topic = x.value) AS main FROM stories s, json_each(s.topics) x " +
-           "WHERE s.created_at >= ?1 AND s.merged_into IS NULL AND x.value GLOB 'c[0-9]*' GROUP BY x.value", params: [now - DAY] },
+           "WHERE s.updated_at >= ?1 AND s.created_at >= ?1 AND s.merged_into IS NULL AND x.value GLOB 'c[0-9]*' GROUP BY x.value", params: [now - DAY] },
     { sql: "SELECT j.value AS tag, count(*) AS sent FROM sent x JOIN stories s ON s.id = x.story_id, json_each(s.topics) j " +
            "WHERE x.sent_at >= ?1 AND j.value GLOB 'c[0-9]*' GROUP BY j.value", params: [now - DAY] },
     { sql: "SELECT outcome, count(*) AS n FROM topic_checks WHERE at >= ?1 GROUP BY outcome", params: [now - DAY] },

@@ -57,7 +57,9 @@
     "help_cmd": "❓ Tout est dans les réglages : touchez Aide.\n💬 Vous pouvez aussi nous envoyer un avis.",
     "welcome_setup": "👋 Bienvenue sur Axiom News, {name} !\n📰 Un court résumé de l'essentiel, plusieurs fois par jour.\n⚙️ Touchez Configurer pour choisir sujets et heures.\n⏱️ Cela prend une minute.",
     "setup_button": "Configurer",
-    "reminder": "👋 Bonjour {name} !\n🕘 Vos résumés arrivent à {times} ({zone}).\n⚙️ Touchez Configurer pour choisir vos sujets et vos heures."
+    "reminder": "👋 Bonjour {name} !\n🕘 Vos résumés arrivent à {times} ({zone}).\n⚙️ Touchez Configurer pour choisir vos sujets et vos heures.",
+    "description": "📰 Axiom News : l'essentiel de l'actualité mondiale en un court résumé, plusieurs fois par jour.\n🌍 Politique, économie, Arménie, Russie, les guerres en Iran et en Ukraine, et jusqu'à 3 sujets à vous.\n🕘 Vous choisissez les sujets et les heures.\n✅ Gratuit, sans publicité.\n👇 Touchez Démarrer pour tout régler en une minute.",
+    "short_description": "📰 De courts résumés de l'actualité aux heures de votre choix. Gratuit, sans publicité."
   },
   "commands": {
     "start": "Démarrer (ou redémarrer) vos résumés de l'actualité",

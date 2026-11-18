@@ -61,7 +61,7 @@ SELECT id, summary, headline, description, g FROM (
               ELSE s.final_score + min(max(coalesce(s.topic_score, s.final_score) - s.final_score, 0),
                                        coalesce(json_extract(?3, '$.' || s.main_topic), 10)) END AS t
   FROM stories s
-  WHERE max(s.updated_at, coalesce(s.scored_at, 0)) >= ?1
+  WHERE (s.updated_at >= ?1 OR s.scored_at >= ?1)   -- Step 17: two indexed terms, not max(): no full scan
     AND s.merged_into IS NULL
     AND EXISTS (SELECT 1 FROM json_each(s.topics) x WHERE x.value IN (SELECT u.value FROM json_each(?7) u))
     AND NOT (coalesce(s.main_topic, '') IN (SELECT m.value FROM json_each(?8) m)

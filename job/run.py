@@ -679,6 +679,9 @@ class Job:
             self.log(self.summary(status, stats, stats_ms))
             self.log(f"D1: {getattr(self.db, 'calls', 0)} calls, rows read {getattr(self.db, 'rows_read', 0)}, "
                      f"rows written {getattr(self.db, 'rows_written', 0)}")
+            if hasattr(self.db, "top_reads"):   # Step 17: where the reads go (GitHub log only)
+                for shape, times, rows in self.db.top_reads():
+                    self.log(f"  D1 read {rows:>7} rows in {times:>3}x: {shape}")
         return stats
 
     def _finish(self, run_id: int, now: int, status: str, error: str | None, stats: RunStats) -> None:

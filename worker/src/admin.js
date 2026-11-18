@@ -35,7 +35,7 @@ export function adminStatements(now) {
     { sql: RUN_STATS_SQL, params: [now - DAY] },
     { sql: RUN_STATS_SQL, params: [now - 7 * DAY] },
     { sql: MODELS_SQL, params: [now - DAY, now - 7 * DAY] },
-    { sql: "SELECT key, value FROM meta WHERE key IN ('feed_health', 'last_alert_at', 'last_alert_text', 'd1_worker')", params: [] },
+    { sql: "SELECT key, value FROM meta WHERE key IN ('feed_health', 'last_alert_at', 'last_alert_text', 'd1_worker', 'cf_usage')", params: [] },
     { sql: "SELECT id, first_name, timezone, digest_times, blocked, last_digest_at, next_digest_at, created_at, lang, " +
            // Step 16: no Pause; "all off" = no main topic and no custom topic switched on
            "(coalesce(topics, '[]') = '[]' AND NOT EXISTS (SELECT 1 FROM custom_follows f WHERE f.user_id = users.id AND f.enabled = 1)) AS all_off " +
@@ -186,6 +186,12 @@ export function shapeAdmin(rows, now, cfg = CONFIG) {
     d1: {
       day_start: today * DAY, job, worker,
       rows_read: job.r + worker.r, rows_written: job.w + worker.w, limits: D1_FREE,
+      // Step 17: Cloudflare's own numbers for the whole account (both copies), checked hourly
+      account: (() => {
+        const u = jsonOr(meta.cf_usage, null);
+        return u && u.day === new Date(now * 1000).toISOString().slice(0, 10)
+          ? { r: num(u.r), w: num(u.w), cpu: num(u.cpu), at: num(u.at) } : null;
+      })(),
     },
   };
 }

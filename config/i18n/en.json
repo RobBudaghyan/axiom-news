@@ -57,7 +57,9 @@
     "help_cmd": "❓ Everything is in Settings: tap Help.\n💬 You can send us feedback there too.",
     "welcome_setup": "👋 Welcome to Axiom News, {name}!\n📰 A short digest of the top news, a few times a day.\n⚙️ Tap Set up to choose topics and times.\n⏱️ It takes a minute.",
     "setup_button": "Set up",
-    "reminder": "👋 Hi {name}!\n🕘 Your digests come at {times} ({zone}).\n⚙️ Tap Set up to choose your own topics and times."
+    "reminder": "👋 Hi {name}!\n🕘 Your digests come at {times} ({zone}).\n⚙️ Tap Set up to choose your own topics and times.",
+    "description": "📰 Axiom News: the top world news in one short digest, a few times a day.\n🌍 Politics, economy, Armenia, Russia, the wars in Iran and Ukraine, plus up to 3 topics of your own.\n🕘 You choose the topics and the times.\n✅ Free, no ads.\n👇 Tap Start to set it up in a minute.",
+    "short_description": "📰 Short news digests at the times you choose. Free, no ads."
   },
   "commands": {
     "start": "Start (or restart) your news digests",

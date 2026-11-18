@@ -11,6 +11,7 @@ statement, 100 KB per statement, the whole call must finish within 30 s.
 """
 from __future__ import annotations
 
+import re
 import sqlite3
 import time
 from pathlib import Path
@@ -38,6 +39,17 @@ class D1:
         self.calls = 0          # REST calls made (for stats)
         self.rows_written = 0
         self.rows_read = 0
+        self.profile: dict[str, list[int]] = {}   # Step 17: statement shape -> [runs, rows read]
+
+    def _note(self, sql: str, rows_read: int) -> None:
+        entry = self.profile.setdefault(profile_key(sql), [0, 0])
+        entry[0] += 1
+        entry[1] += rows_read
+
+    def top_reads(self, n: int = 12) -> list[tuple[str, int, int]]:
+        """The statement shapes that read the most rows: (shape, times run, rows read)."""
+        rows = sorted(self.profile.items(), key=lambda kv: -kv[1][1])[:n]
+        return [(k, v[0], v[1]) for k, v in rows]
 
     def _post(self, body: dict) -> list[dict]:
         last = None
@@ -54,10 +66,12 @@ class D1:
                         msg = "; ".join(e.get("message", str(e)) for e in data.get("errors") or [])
                         raise D1Error(f"D1 HTTP {resp.status_code}: {msg or resp.text[:300]}")
                     results = data["result"]
-                    for r in results:
+                    sqls = [b["sql"] for b in body["batch"]] if "batch" in body else [body["sql"]]
+                    for i, r in enumerate(results):
                         meta = r.get("meta") or {}
                         self.rows_written += meta.get("rows_written") or 0
                         self.rows_read += meta.get("rows_read") or 0
+                        self._note(sqls[min(i, len(sqls) - 1)], meta.get("rows_read") or 0)
                     return results
                 last = f"HTTP {resp.status_code}: {resp.text[:200]}"
             time.sleep(2 * (attempt + 1))
@@ -115,6 +129,14 @@ class SqliteDB:
 
     def executescript(self, sql: str) -> None:
         self.conn.executescript(sql)
+
+
+def profile_key(sql: str) -> str:
+    """A statement's shape for the read profile: IN-lists and VALUES lists folded, 110 characters."""
+    s = re.sub(r"\s+", " ", sql).strip()
+    s = re.sub(r"\((\?,\s*)+\?\)", "(?..)", s)
+    s = re.sub(r"(\(\?\.\.\),\s*)+\(\?\.\.\)", "(?..)", s)
+    return s[:110]
 
 
 def chunked(seq: Sequence, size: int) -> list[Sequence]:

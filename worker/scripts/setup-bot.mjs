@@ -3,7 +3,9 @@
 //  - the command list shows /start, /settings and (Step 10) /support, /paysupport and /terms (Telegram's
 //    rule for bots that take Stars), in English by default and (Step 9) in every
 //    other enabled language for people whose Telegram app is in that language
-//    (setMyCommands with language_code; a language hidden from the picker gets its list removed).
+//    (setMyCommands with language_code; a language hidden from the picker gets its list removed);
+//  - Step 17: the description (the empty chat, before Start) and the short description (the bot's
+//    profile and shared links), the same way per language (bot.description, bot.short_description).
 // A user who picks a language in the Mini App also gets a per-chat menu label and command list
 // (src/bot.js setChatLanguage). Then it reads everything back to confirm. Run again after
 // switching to the real bot, and after enabling or hiding a language.
@@ -32,7 +34,14 @@ if (!process.argv.includes("--check")) {
     if (LANGS.enabled.includes(lang)) await tgCall(token, "setMyCommands", { commands: commandList(lang), language_code: lang });
     else await tgCall(token, "deleteMyCommands", { language_code: lang });
   }
-  console.log(`set: menu button and commands (en, ${others.filter((l) => LANGS.enabled.includes(l)).join(", ") || "no other language"})`);
+  await tgCall(token, "setMyDescription", { description: t("en", "bot.description") });
+  await tgCall(token, "setMyShortDescription", { short_description: t("en", "bot.short_description") });
+  for (const lang of others) {
+    const on = LANGS.enabled.includes(lang);   // "" removes a hidden language's own text (English shows)
+    await tgCall(token, "setMyDescription", { description: on ? t(lang, "bot.description") : "", language_code: lang });
+    await tgCall(token, "setMyShortDescription", { short_description: on ? t(lang, "bot.short_description") : "", language_code: lang });
+  }
+  console.log(`set: menu button, descriptions and commands (en, ${others.filter((l) => LANGS.enabled.includes(l)).join(", ") || "no other language"})`);
 }
 const me = await tgCall(token, "getMe", {});
 const menu = await tgCall(token, "getChatMenuButton", {});
@@ -45,6 +54,14 @@ for (const lang of others) {
   const list = await tgCall(token, "getMyCommands", { language_code: lang });
   console.log(`commands (${lang}): ${list.map((c) => `/${c.command} (${c.description})`).join(", ") || "none, falls back to English"}`);
   if (LANGS.enabled.includes(lang) ? list.length !== COMMANDS.length : list.length !== 0) ok = false;
+}
+for (const lang of ["en", ...others]) {
+  const code = lang === "en" ? {} : { language_code: lang };
+  const d = (await tgCall(token, "getMyDescription", code)).description;
+  const sd = (await tgCall(token, "getMyShortDescription", code)).short_description;
+  const want = lang === "en" || LANGS.enabled.includes(lang);
+  console.log(`description (${lang}): ${d ? d.split("\n")[0] : "none, falls back to English"}`);
+  if (want ? d !== t(lang, "bot.description") || sd !== t(lang, "bot.short_description") : d || sd) ok = false;
 }
 console.log(ok ? "OK: the menu button opens the Mini App" : "NOT as expected");
 process.exit(ok ? 0 : 1);

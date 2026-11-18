@@ -895,7 +895,9 @@
       return `<div class="meter"><div class="meter-top"><span>${label}</span><span>${n(used)} of ${compact(limit)}</span></div>
         <div class="bar ${pct > 80 ? "bad" : pct > 50 ? "warn" : ""}"><i style="width:${pct.toFixed(2)}%"></i></div></div>`;
     };
-    const d1 = meter("Rows read", D.rows_read, D.limits.rows_read) + meter("Rows written", D.rows_written, D.limits.rows_written);
+    const d1 = meter("Rows read", D.rows_read, D.limits.rows_read) + meter("Rows written", D.rows_written, D.limits.rows_written)
+      + (D.account ? meter("Account, rows read", D.account.r, D.limits.rows_read) + meter("Account, rows written", D.account.w, D.limits.rows_written)
+        + row({ title: "Runs over the CPU limit today", right: D.account.cpu ? badge(String(D.account.cpu), "bad") : badge("None", "ok") }) : "");
 
     const errs = S.allErrors ? A.errors : A.errors.slice(0, 8);
     const errRows = errs.map((e) => row({ title: `<span class="clamp" style="font-size:15px;line-height:20px">${esc(e.message)}</span>`,
@@ -919,7 +921,8 @@
       ${section("Recent feedback", fbRows || row({ title: "No feedback yet" }), FB.total ? `${plural(FB.total, "message", "messages")} in all; the latest 20 here. Each one is also sent to your Telegram chat.` : "")}
       ${section("Tips", tipRows, T.last.length ? "Last 10 tips. Refund returns the Stars to the person (asks first)." : "No tips yet.")}
       ${section("Languages, last 24 h", langRowsA || row({ title: "No data" }), "A story with no translation yet is held: left out of the digest and sent in a later one once translated. A digest goes out fully in English only when none of its stories is translated; the badge counts those.")}
-      ${section("Database today", d1, "Free limits per day, reset at 00:00 UTC. The news job's counts are exact; the bot server's are counted every 5 minutes and can be slightly low.")}
+      ${section("Database today", d1, (D.account ? `"Account" is Cloudflare's own count for both copies together (checked hourly, last ${hm(D.account.at, tz)}); the limits are for the whole account. ` : "")
+        + "Free limits per day, reset at 00:00 UTC. You get an alert at 80%.")}
       ${section("Recent errors", errRows || row({ title: "No errors" }), A.errors.length ? "Newest first. Notes from the news job about skipped items are normal." : "")}`;
   }
 
