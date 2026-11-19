@@ -87,10 +87,38 @@ Writes are now the tighter limit on busy news days. Not changed yet (owner to de
 6 h instead of 3 h (about 4k writes a day less); translate eligible read once a run instead of twice
 (about 130k reads a day less).
 
-### Next (Part 1)
-Wait for the owner's "ship it". Then: production `apply_schema.py` (early in a UTC day), production
-secrets (`set_secrets.py worker-prod`, adds the analytics token), push the job to main,
-`SHIP_IT=yes npm run deploy:prod`, `setup-bot.mjs` stays for the switch; watch 2 hourly runs.
+### Shipped (owner's "ship it", 2026-11-19)
+- 05:15 to 05:21 UTC: staging redeployed and checked (api-check 9 PASS); production `apply_schema.py`
+  (indexes confirmed); `set_secrets.py worker-prod` (adds the analytics token); job pushed to main;
+  `SHIP_IT=yes npm run deploy:prod` (guard passed). Ticks after: 2 to 4 ms CPU.
+- The two savings (staging sync every 6 h; translate eligible read once a run) ran on staging first
+  (32.1k read, 632 written; eligible read once, 11 Russian translations ok), then pushed to main
+  (job only, no Worker deploy).
+- `setup-bot.mjs` on production stays for the switch.
+
+### Two hourly runs on production after the ship
+
+| Run | Start (UTC) | New items | Editor candidates / merges | Rows read | Rows written | Written per item |
+|---|---|---|---|---|---|---|
+| 128 to 131 (before) | 01:07 to 04:07 | 95 to 124 | | 84k to 163k | 1,028 to 1,554 | 10.3 to 12.5 |
+| 132 (before, old code) | 05:07 | 132 | 62 / 2 | 68,114 | 1,224 | 9.3 |
+| **133** | 06:07 | 180 | 105 / 5 | **35,321** | 1,495 | 8.3 |
+| **134** | 07:07 | 242 | 153 / 8 | **35,114** | 1,895 | 7.8 |
+
+- Reads per run are about a third of before, with more news and more merges. Writes per new item are
+  about a quarter lower; total writes per run follow the news volume.
+- The hourly usage check works: meta `cf_usage` was written at 07:07 UTC (account today: 1.52M read,
+  57.7k written, no runs over the CPU limit, no alert sent).
+- Today is not a normal day: the account totals at 07:11 UTC (production 1.13M read, 37.1k written;
+  staging 0.42M read, 22.5k written) include one-offs (index builds on both copies, the catch-up run
+  at 00:07 with 569 items, two staging job runs). If the evening is as busy as yesterday's (about
+  300 items an hour), today's writes could reach 90k to 100k: the 80% alert would fire, and the
+  limit itself could be hit late in the UTC day. From tomorrow, without one-offs: about 45k to 80k
+  writes a day (production job 24 runs x 1.2k to 2.4k, plus Workers and the staging sync).
+  Writes stay the limit to watch.
+
+### Next
+Owner (2026-11-19): STOP before Part 2; a branding step comes first (Step 17b below).
 
 ## Part 2 prep (done while waiting)
 - Production health (2026-11-18 ~17:00 UTC): last 24 h 20 runs ok, 4 partial (AI fallbacks), none failed;
