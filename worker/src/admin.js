@@ -190,7 +190,10 @@ export function shapeAdmin(rows, now, cfg = CONFIG) {
       account: (() => {
         const u = jsonOr(meta.cf_usage, null);
         return u && u.day === new Date(now * 1000).toISOString().slice(0, 10)
-          ? { r: num(u.r), w: num(u.w), cpu: num(u.cpu), at: num(u.at) } : null;
+          ? { r: num(u.r), w: num(u.w), cpu: num(u.cpu), at: num(u.at),
+              // Step 17c: yesterday's totals, for the summary line
+              y: u.y && u.y.day === new Date((now - DAY) * 1000).toISOString().slice(0, 10) ? { r: num(u.y.r), w: num(u.y.w) } : null }
+          : null;
       })(),
     },
   };

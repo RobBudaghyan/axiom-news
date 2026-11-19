@@ -41,7 +41,7 @@ from typing import Callable
 
 from job import gnews
 from job.config import ROOT
-from job.d1 import in_list_statements, insert_statements
+from job.d1 import in_list_statements, insert_statements, seen_hashes
 from job.fetch import url_hash
 
 CONFIG = ROOT / "config" / "custom_topics.json"
@@ -171,8 +171,14 @@ Fetcher = Callable[[dict, str], gnews.Fetched]
 
 class Searcher:
     def __init__(self, db, *, cfg: dict | None = None, fetcher: Fetcher | None = None,
-                 clock: Callable[[], float] = time.time, log: Callable[[str], None] = print):
+                 clock: Callable[[], float] = time.time, log: Callable[[str], None] = print,
+                 hold: Callable[[dict], None] | None = None, held: dict[str, str] | None = None):
         self.db = db
+        # Step 17c: the hourly job passes `hold` (new items go to it and are written once, after the
+        # AI pass) and `held` (url hash -> title of the items it holds, not in D1 yet). Without them
+        # (tools, old tests) new items are stored as 'pending' at once, as before.
+        self.hold = hold
+        self.held = held or {}
         self.cfg = cfg if cfg is not None else load_config()
         timeout = float(self.cfg.get("search_timeout_s", 8))
         self.fetcher = fetcher or (lambda q, w: gnews.fetch(q, w, timeout=timeout))
@@ -215,7 +221,10 @@ class Searcher:
         rows = self.db.query(
             "SELECT id, title FROM items WHERE id > (SELECT coalesce(max(id), 0) FROM items) - ? "
             "AND fetched_at >= ?", [LIVE_SCAN, now - COMPARE_H * 3600])
-        return gnews.TitleIndex([(r["id"], r["title"]) for r in rows])
+        index = gnews.TitleIndex([(r["id"], r["title"]) for r in rows])
+        for h, title in self.held.items():     # this run's feed items, not written yet
+            index.add(f"held:{h}", title)
+        return index
 
     def run(self, topics: list[CustomTopic], now: int) -> SearchStats:
         t0 = self.clock()
@@ -236,10 +245,7 @@ class Searcher:
             stats.fetched += len(f.items)
             for it in f.items:
                 found.setdefault(url_hash(it.link), (it, tag))
-        seen: set[str] = set()
-        for rows in self.db.batch(in_list_statements("SELECT url_hash FROM items WHERE url_hash IN ({qs})",
-                                                     list(found))):
-            seen.update(r["url_hash"] for r in rows)
+        seen = seen_hashes(self.db, list(found)) | (set(found) & set(self.held))
         stats.seen_before = len(seen)
         index = self.pool_index(now)
         threshold = float(self.cfg.get("title_dup_threshold", 0.5))
@@ -263,7 +269,12 @@ class Searcher:
             per[tag]["new_items"] += 1
             rows.append((h, GOOGLE_SOURCE_KEY, (it.source or "Google News")[:120], GOOGLE_TIER, it.link, it.title,
                          None, it.published_at, now, "pending", 1, tag))
-        stmts = insert_statements("items", ITEM_COLUMNS, rows, suffix="ON CONFLICT(url_hash) DO NOTHING")
+        if self.hold:
+            for r in rows:
+                self.hold(dict(zip(ITEM_COLUMNS, r)))
+            stmts = []
+        else:
+            stmts = insert_statements("items", ITEM_COLUMNS, rows, suffix="ON CONFLICT(url_hash) DO NOTHING")
         day = utc_day(now)
         for tag, t in searched.items():
             p = per[tag]

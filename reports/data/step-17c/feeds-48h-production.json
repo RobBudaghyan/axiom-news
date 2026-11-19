@@ -1,0 +1,1113 @@
+[
+  {
+    "results": [
+      {
+        "k": "gnews",
+        "n": 859,
+        "dr": 668,
+        "dn": 191,
+        "hi": 11,
+        "hs": 9,
+        "solo": 126
+      },
+      {
+        "k": "am168",
+        "n": 402,
+        "dr": 77,
+        "dn": 325,
+        "hi": 26,
+        "hs": 20,
+        "solo": 117
+      },
+      {
+        "k": "news_am_ru",
+        "n": 375,
+        "dr": 45,
+        "dn": 330,
+        "hi": 25,
+        "hs": 20,
+        "solo": 89
+      },
+      {
+        "k": "tass_ru",
+        "n": 336,
+        "dr": 133,
+        "dn": 203,
+        "hi": 6,
+        "hs": 5,
+        "solo": 87
+      },
+      {
+        "k": "ria",
+        "n": 336,
+        "dr": 163,
+        "dn": 173,
+        "hi": 9,
+        "hs": 5,
+        "solo": 57
+      },
+      {
+        "k": "rg",
+        "n": 336,
+        "dr": 229,
+        "dn": 107,
+        "hi": 7,
+        "hs": 5,
+        "solo": 45
+      },
+      {
+        "k": "izvestia",
+        "n": 336,
+        "dr": 153,
+        "dn": 183,
+        "hi": 12,
+        "hs": 9,
+        "solo": 51
+      },
+      {
+        "k": "interfax",
+        "n": 305,
+        "dr": 47,
+        "dn": 258,
+        "hi": 23,
+        "hs": 16,
+        "solo": 78
+      },
+      {
+        "k": "kommersant",
+        "n": 271,
+        "dr": 58,
+        "dn": 213,
+        "hi": 17,
+        "hs": 14,
+        "solo": 75
+      },
+      {
+        "k": "anadolu",
+        "n": 267,
+        "dr": 60,
+        "dn": 207,
+        "hi": 17,
+        "hs": 15,
+        "solo": 95
+      },
+      {
+        "k": "rbc",
+        "n": 247,
+        "dr": 76,
+        "dn": 171,
+        "hi": 12,
+        "hs": 10,
+        "solo": 44
+      },
+      {
+        "k": "tass_en",
+        "n": 244,
+        "dr": 19,
+        "dn": 225,
+        "hi": 11,
+        "hs": 8,
+        "solo": 87
+      },
+      {
+        "k": "vedomosti",
+        "n": 236,
+        "dr": 44,
+        "dn": 192,
+        "hi": 14,
+        "hs": 10,
+        "solo": 61
+      },
+      {
+        "k": "bloomberg_markets",
+        "n": 216,
+        "dr": 47,
+        "dn": 169,
+        "hi": 27,
+        "hs": 16,
+        "solo": 117
+      },
+      {
+        "k": "trend_az",
+        "n": 211,
+        "dr": 94,
+        "dn": 117,
+        "hi": 2,
+        "hs": 1,
+        "solo": 80
+      },
+      {
+        "k": "aravot",
+        "n": 209,
+        "dr": 33,
+        "dn": 176,
+        "hi": 7,
+        "hs": 5,
+        "solo": 75
+      },
+      {
+        "k": "factor_am",
+        "n": 196,
+        "dr": 33,
+        "dn": 163,
+        "hi": 16,
+        "hs": 14,
+        "solo": 55
+      },
+      {
+        "k": "al_jazeera",
+        "n": 187,
+        "dr": 48,
+        "dn": 139,
+        "hi": 12,
+        "hs": 10,
+        "solo": 59
+      },
+      {
+        "k": "a1plus",
+        "n": 187,
+        "dr": 43,
+        "dn": 144,
+        "hi": 18,
+        "hs": 9,
+        "solo": 62
+      },
+      {
+        "k": "scmp_world",
+        "n": 170,
+        "dr": 66,
+        "dn": 104,
+        "hi": 11,
+        "hs": 10,
+        "solo": 50
+      },
+      {
+        "k": "the_hill",
+        "n": 167,
+        "dr": 34,
+        "dn": 133,
+        "hi": 4,
+        "hs": 4,
+        "solo": 61
+      },
+      {
+        "k": "guardian_world",
+        "n": 148,
+        "dr": 54,
+        "dn": 94,
+        "hi": 14,
+        "hs": 11,
+        "solo": 39
+      },
+      {
+        "k": "bloomberg_politics",
+        "n": 148,
+        "dr": 16,
+        "dn": 132,
+        "hi": 13,
+        "hs": 13,
+        "solo": 51
+      },
+      {
+        "k": "the_national",
+        "n": 141,
+        "dr": 75,
+        "dn": 66,
+        "hi": 8,
+        "hs": 8,
+        "solo": 30
+      },
+      {
+        "k": "jpost",
+        "n": 141,
+        "dr": 29,
+        "dn": 112,
+        "hi": 11,
+        "hs": 9,
+        "solo": 59
+      },
+      {
+        "k": "azertag",
+        "n": 130,
+        "dr": 61,
+        "dn": 69,
+        "hi": 1,
+        "hs": 1,
+        "solo": 38
+      },
+      {
+        "k": "independent_world",
+        "n": 127,
+        "dr": 41,
+        "dn": 86,
+        "hi": 11,
+        "hs": 8,
+        "solo": 31
+      },
+      {
+        "k": "ukrinform_en",
+        "n": 125,
+        "dr": 4,
+        "dn": 121,
+        "hi": 15,
+        "hs": 10,
+        "solo": 52
+      },
+      {
+        "k": "nv_en",
+        "n": 114,
+        "dr": 5,
+        "dn": 109,
+        "hi": 14,
+        "hs": 9,
+        "solo": 44
+      },
+      {
+        "k": "sputnik_armenia",
+        "n": 111,
+        "dr": 23,
+        "dn": 88,
+        "hi": 10,
+        "hs": 9,
+        "solo": 20
+      },
+      {
+        "k": "france24_en",
+        "n": 111,
+        "dr": 20,
+        "dn": 91,
+        "hi": 13,
+        "hs": 9,
+        "solo": 22
+      },
+      {
+        "k": "aawsat",
+        "n": 106,
+        "dr": 37,
+        "dn": 69,
+        "hi": 7,
+        "hs": 7,
+        "solo": 34
+      },
+      {
+        "k": "radio_svoboda_ua",
+        "n": 104,
+        "dr": 3,
+        "dn": 101,
+        "hi": 16,
+        "hs": 12,
+        "solo": 32
+      },
+      {
+        "k": "kyiv_post",
+        "n": 98,
+        "dr": 5,
+        "dn": 93,
+        "hi": 11,
+        "hs": 9,
+        "solo": 30
+      },
+      {
+        "k": "ft_world",
+        "n": 97,
+        "dr": 22,
+        "dn": 75,
+        "hi": 14,
+        "hs": 9,
+        "solo": 32
+      },
+      {
+        "k": "ukrainska_pravda_en",
+        "n": 90,
+        "dr": 1,
+        "dn": 89,
+        "hi": 13,
+        "hs": 11,
+        "solo": 21
+      },
+      {
+        "k": "tvrain",
+        "n": 85,
+        "dr": 18,
+        "dn": 67,
+        "hi": 10,
+        "hs": 9,
+        "solo": 13
+      },
+      {
+        "k": "meduza_ru",
+        "n": 79,
+        "dr": 19,
+        "dn": 60,
+        "hi": 15,
+        "hs": 11,
+        "solo": 7
+      },
+      {
+        "k": "the_insider",
+        "n": 77,
+        "dr": 21,
+        "dn": 56,
+        "hi": 10,
+        "hs": 9,
+        "solo": 24
+      },
+      {
+        "k": "nyt_world",
+        "n": 74,
+        "dr": 29,
+        "dn": 45,
+        "hi": 3,
+        "hs": 3,
+        "solo": 24
+      },
+      {
+        "k": "arminfo_en",
+        "n": 72,
+        "dr": 5,
+        "dn": 67,
+        "hi": 4,
+        "hs": 4,
+        "solo": 24
+      },
+      {
+        "k": "azatutyun",
+        "n": 69,
+        "dr": 2,
+        "dn": 67,
+        "hi": 11,
+        "hs": 11,
+        "solo": 10
+      },
+      {
+        "k": "dw_russian",
+        "n": 67,
+        "dr": 15,
+        "dn": 52,
+        "hi": 14,
+        "hs": 12,
+        "solo": 15
+      },
+      {
+        "k": "haaretz",
+        "n": 66,
+        "dr": 20,
+        "dn": 46,
+        "hi": 5,
+        "hs": 4,
+        "solo": 26
+      },
+      {
+        "k": "cnbc_world",
+        "n": 64,
+        "dr": 11,
+        "dn": 53,
+        "hi": 4,
+        "hs": 4,
+        "solo": 23
+      },
+      {
+        "k": "wsj_markets",
+        "n": 62,
+        "dr": 22,
+        "dn": 40,
+        "hi": 11,
+        "hs": 3,
+        "solo": 20
+      },
+      {
+        "k": "rt_en",
+        "n": 62,
+        "dr": 17,
+        "dn": 45,
+        "hi": 2,
+        "hs": 2,
+        "solo": 25
+      },
+      {
+        "k": "hetq_hy",
+        "n": 59,
+        "dr": 10,
+        "dn": 49,
+        "hi": 1,
+        "hs": 1,
+        "solo": 19
+      },
+      {
+        "k": "bloomberg_economics",
+        "n": 59,
+        "dr": 4,
+        "dn": 55,
+        "hi": 9,
+        "hs": 9,
+        "solo": 39
+      },
+      {
+        "k": "marketwatch",
+        "n": 58,
+        "dr": 35,
+        "dn": 23,
+        "hi": 2,
+        "hs": 1,
+        "solo": 16
+      },
+      {
+        "k": "civilnet_hy",
+        "n": 57,
+        "dr": 6,
+        "dn": 51,
+        "hi": 4,
+        "hs": 4,
+        "solo": 23
+      },
+      {
+        "k": "al_monitor",
+        "n": 56,
+        "dr": 4,
+        "dn": 52,
+        "hi": 7,
+        "hs": 6,
+        "solo": 16
+      },
+      {
+        "k": "mehr_en",
+        "n": 54,
+        "dr": 11,
+        "dn": 43,
+        "hi": 6,
+        "hs": 5,
+        "solo": 21
+      },
+      {
+        "k": "kyiv_independent",
+        "n": 54,
+        "dr": 7,
+        "dn": 47,
+        "hi": 10,
+        "hs": 6,
+        "solo": 12
+      },
+      {
+        "k": "irna_en",
+        "n": 54,
+        "dr": 6,
+        "dn": 48,
+        "hi": 5,
+        "hs": 4,
+        "solo": 22
+      },
+      {
+        "k": "tehran_times",
+        "n": 53,
+        "dr": 20,
+        "dn": 33,
+        "hi": 4,
+        "hs": 4,
+        "solo": 23
+      },
+      {
+        "k": "meduza_en",
+        "n": 53,
+        "dr": 4,
+        "dn": 49,
+        "hi": 6,
+        "hs": 6,
+        "solo": 15
+      },
+      {
+        "k": "le_monde_en",
+        "n": 53,
+        "dr": 14,
+        "dn": 39,
+        "hi": 7,
+        "hs": 7,
+        "solo": 14
+      },
+      {
+        "k": "novaya_europe",
+        "n": 52,
+        "dr": 3,
+        "dn": 49,
+        "hi": 8,
+        "hs": 7,
+        "solo": 18
+      },
+      {
+        "k": "euronews",
+        "n": 48,
+        "dr": 12,
+        "dn": 36,
+        "hi": 3,
+        "hs": 2,
+        "solo": 13
+      },
+      {
+        "k": "politico_eu",
+        "n": 47,
+        "dr": 12,
+        "dn": 35,
+        "hi": 0,
+        "hs": 0,
+        "solo": 21
+      },
+      {
+        "k": "currenttime",
+        "n": 44,
+        "dr": 2,
+        "dn": 42,
+        "hi": 8,
+        "hs": 8,
+        "solo": 11
+      },
+      {
+        "k": "bbc_world",
+        "n": 44,
+        "dr": 16,
+        "dn": 28,
+        "hi": 6,
+        "hs": 4,
+        "solo": 8
+      },
+      {
+        "k": "nyt_politics",
+        "n": 43,
+        "dr": 9,
+        "dn": 34,
+        "hi": 3,
+        "hs": 3,
+        "solo": 15
+      },
+      {
+        "k": "wsj_world",
+        "n": 41,
+        "dr": 11,
+        "dn": 30,
+        "hi": 5,
+        "hs": 5,
+        "solo": 16
+      },
+      {
+        "k": "news_am_en",
+        "n": 38,
+        "dr": 6,
+        "dn": 32,
+        "hi": 3,
+        "hs": 3,
+        "solo": 2
+      },
+      {
+        "k": "mediazona",
+        "n": 38,
+        "dr": 3,
+        "dn": 35,
+        "hi": 5,
+        "hs": 4,
+        "solo": 19
+      },
+      {
+        "k": "abc_us_intl",
+        "n": 38,
+        "dr": 9,
+        "dn": 29,
+        "hi": 6,
+        "hs": 6,
+        "solo": 10
+      },
+      {
+        "k": "axios",
+        "n": 37,
+        "dr": 10,
+        "dn": 27,
+        "hi": 3,
+        "hs": 2,
+        "solo": 8
+      },
+      {
+        "k": "cbc_world",
+        "n": 34,
+        "dr": 13,
+        "dn": 21,
+        "hi": 3,
+        "hs": 3,
+        "solo": 3
+      },
+      {
+        "k": "iranwire",
+        "n": 32,
+        "dr": 3,
+        "dn": 29,
+        "hi": 3,
+        "hs": 2,
+        "solo": 22
+      },
+      {
+        "k": "euromaidan_press",
+        "n": 32,
+        "dr": 2,
+        "dn": 30,
+        "hi": 10,
+        "hs": 6,
+        "solo": 17
+      },
+      {
+        "k": "wapo_politics",
+        "n": 31,
+        "dr": 5,
+        "dn": 26,
+        "hi": 0,
+        "hs": 0,
+        "solo": 12
+      },
+      {
+        "k": "radio_farda",
+        "n": 30,
+        "dr": 10,
+        "dn": 20,
+        "hi": 2,
+        "hs": 2,
+        "solo": 15
+      },
+      {
+        "k": "iran_international",
+        "n": 24,
+        "dr": 4,
+        "dn": 20,
+        "hi": 0,
+        "hs": 0,
+        "solo": 12
+      },
+      {
+        "k": "cbs_world",
+        "n": 24,
+        "dr": 9,
+        "dn": 15,
+        "hi": 4,
+        "hs": 4,
+        "solo": 5
+      },
+      {
+        "k": "bbc_russian",
+        "n": 24,
+        "dr": 8,
+        "dn": 16,
+        "hi": 4,
+        "hs": 4,
+        "solo": 4
+      },
+      {
+        "k": "agentstvo",
+        "n": 24,
+        "dr": 1,
+        "dn": 23,
+        "hi": 4,
+        "hs": 3,
+        "solo": 6
+      },
+      {
+        "k": "moscow_times",
+        "n": 23,
+        "dr": 1,
+        "dn": 22,
+        "hi": 4,
+        "hs": 4,
+        "solo": 8
+      },
+      {
+        "k": "bbc_persian",
+        "n": 22,
+        "dr": 5,
+        "dn": 17,
+        "hi": 3,
+        "hs": 3,
+        "solo": 8
+      },
+      {
+        "k": "oc_media",
+        "n": 21,
+        "dr": 6,
+        "dn": 15,
+        "hi": 1,
+        "hs": 1,
+        "solo": 10
+      },
+      {
+        "k": "svoboda",
+        "n": 20,
+        "dr": 1,
+        "dn": 19,
+        "hi": 6,
+        "hs": 6,
+        "solo": 1
+      },
+      {
+        "k": "nbc_world",
+        "n": 20,
+        "dr": 3,
+        "dn": 17,
+        "hi": 1,
+        "hs": 1,
+        "solo": 4
+      },
+      {
+        "k": "public_radio_am",
+        "n": 19,
+        "dr": 1,
+        "dn": 18,
+        "hi": 5,
+        "hs": 4,
+        "solo": 1
+      },
+      {
+        "k": "dw_en",
+        "n": 19,
+        "dr": 2,
+        "dn": 17,
+        "hi": 2,
+        "hs": 2,
+        "solo": 8
+      },
+      {
+        "k": "foreign_policy",
+        "n": 18,
+        "dr": 6,
+        "dn": 12,
+        "hi": 0,
+        "hs": 0,
+        "solo": 8
+      },
+      {
+        "k": "breaking_defense",
+        "n": 18,
+        "dr": 4,
+        "dn": 14,
+        "hi": 0,
+        "hs": 0,
+        "solo": 9
+      },
+      {
+        "k": "defense_news",
+        "n": 16,
+        "dr": 0,
+        "dn": 16,
+        "hi": 1,
+        "hs": 1,
+        "solo": 11
+      },
+      {
+        "k": "verstka",
+        "n": 14,
+        "dr": 1,
+        "dn": 13,
+        "hi": 2,
+        "hs": 2,
+        "solo": 6
+      },
+      {
+        "k": "wapo_world",
+        "n": 13,
+        "dr": 3,
+        "dn": 10,
+        "hi": 0,
+        "hs": 0,
+        "solo": 5
+      },
+      {
+        "k": "npr_world",
+        "n": 13,
+        "dr": 2,
+        "dn": 11,
+        "hi": 3,
+        "hs": 3,
+        "solo": 3
+      },
+      {
+        "k": "massis_post",
+        "n": 13,
+        "dr": 1,
+        "dn": 12,
+        "hi": 3,
+        "hs": 3,
+        "solo": 10
+      },
+      {
+        "k": "politico_us",
+        "n": 11,
+        "dr": 1,
+        "dn": 10,
+        "hi": 0,
+        "hs": 0,
+        "solo": 9
+      },
+      {
+        "k": "twz",
+        "n": 10,
+        "dr": 1,
+        "dn": 9,
+        "hi": 4,
+        "hs": 3,
+        "solo": 6
+      },
+      {
+        "k": "guardian_ukraine",
+        "n": 10,
+        "dr": 1,
+        "dn": 9,
+        "hi": 2,
+        "hs": 2,
+        "solo": 3
+      },
+      {
+        "k": "mirror_spectator",
+        "n": 9,
+        "dr": 5,
+        "dn": 4,
+        "hi": 0,
+        "hs": 0,
+        "solo": 3
+      },
+      {
+        "k": "ft_europe",
+        "n": 9,
+        "dr": 5,
+        "dn": 4,
+        "hi": 0,
+        "hs": 0,
+        "solo": 2
+      },
+      {
+        "k": "civilnet",
+        "n": 9,
+        "dr": 0,
+        "dn": 9,
+        "hi": 3,
+        "hs": 3,
+        "solo": 5
+      },
+      {
+        "k": "armenian_weekly",
+        "n": 9,
+        "dr": 5,
+        "dn": 4,
+        "hi": 0,
+        "hs": 0,
+        "solo": 4
+      },
+      {
+        "k": "kremlin",
+        "n": 8,
+        "dr": 0,
+        "dn": 8,
+        "hi": 1,
+        "hs": 1,
+        "solo": 0
+      },
+      {
+        "k": "jamnews",
+        "n": 8,
+        "dr": 0,
+        "dn": 8,
+        "hi": 1,
+        "hs": 1,
+        "solo": 6
+      },
+      {
+        "k": "hetq",
+        "n": 8,
+        "dr": 2,
+        "dn": 6,
+        "hi": 1,
+        "hs": 1,
+        "solo": 1
+      },
+      {
+        "k": "civil_ge",
+        "n": 8,
+        "dr": 2,
+        "dn": 6,
+        "hi": 0,
+        "hs": 0,
+        "solo": 5
+      },
+      {
+        "k": "rferl_news",
+        "n": 7,
+        "dr": 0,
+        "dn": 7,
+        "hi": 2,
+        "hs": 2,
+        "solo": 4
+      },
+      {
+        "k": "ft_markets",
+        "n": 7,
+        "dr": 3,
+        "dn": 4,
+        "hi": 1,
+        "hs": 1,
+        "solo": 1
+      },
+      {
+        "k": "sky_world",
+        "n": 6,
+        "dr": 2,
+        "dn": 4,
+        "hi": 1,
+        "hs": 1,
+        "solo": 0
+      },
+      {
+        "k": "economist_finance",
+        "n": 6,
+        "dr": 1,
+        "dn": 5,
+        "hi": 0,
+        "hs": 0,
+        "solo": 5
+      },
+      {
+        "k": "war_on_the_rocks",
+        "n": 5,
+        "dr": 2,
+        "dn": 3,
+        "hi": 0,
+        "hs": 0,
+        "solo": 2
+      },
+      {
+        "k": "foreign_affairs",
+        "n": 5,
+        "dr": 0,
+        "dn": 5,
+        "hi": 0,
+        "hs": 0,
+        "solo": 5
+      },
+      {
+        "k": "bbc_europe",
+        "n": 5,
+        "dr": 2,
+        "dn": 3,
+        "hi": 0,
+        "hs": 0,
+        "solo": 1
+      },
+      {
+        "k": "rferl_ukraine",
+        "n": 4,
+        "dr": 0,
+        "dn": 4,
+        "hi": 1,
+        "hs": 1,
+        "solo": 1
+      },
+      {
+        "k": "nyt_europe",
+        "n": 4,
+        "dr": 1,
+        "dn": 3,
+        "hi": 0,
+        "hs": 0,
+        "solo": 0
+      },
+      {
+        "k": "long_war_journal",
+        "n": 3,
+        "dr": 2,
+        "dn": 1,
+        "hi": null,
+        "hs": 0,
+        "solo": 0
+      },
+      {
+        "k": "economist_mea",
+        "n": 3,
+        "dr": 2,
+        "dn": 1,
+        "hi": 0,
+        "hs": 0,
+        "solo": 1
+      },
+      {
+        "k": "economist_leaders",
+        "n": 3,
+        "dr": 1,
+        "dn": 2,
+        "hi": 0,
+        "hs": 0,
+        "solo": 2
+      },
+      {
+        "k": "nyt_middle_east",
+        "n": 2,
+        "dr": 2,
+        "dn": 0,
+        "hi": null,
+        "hs": 0,
+        "solo": null
+      },
+      {
+        "k": "guardian_russia",
+        "n": 2,
+        "dr": 0,
+        "dn": 2,
+        "hi": 0,
+        "hs": 0,
+        "solo": 0
+      },
+      {
+        "k": "amwaj",
+        "n": 2,
+        "dr": 0,
+        "dn": 2,
+        "hi": 0,
+        "hs": 0,
+        "solo": 2
+      },
+      {
+        "k": "guardian_iran",
+        "n": 1,
+        "dr": 0,
+        "dn": 1,
+        "hi": 0,
+        "hs": 0,
+        "solo": 0
+      },
+      {
+        "k": "economist_europe",
+        "n": 1,
+        "dr": 0,
+        "dn": 1,
+        "hi": null,
+        "hs": 0,
+        "solo": 0
+      },
+      {
+        "k": "bbc_middle_east",
+        "n": 1,
+        "dr": 0,
+        "dn": 1,
+        "hi": 1,
+        "hs": 1,
+        "solo": 0
+      }
+    ],
+    "success": true,
+    "meta": {
+      "served_by": "v3-prod",
+      "served_by_region": "WEUR",
+      "served_by_colo": "LHR",
+      "served_by_primary": true,
+      "timings": {
+        "sql_duration_ms": 134.6573
+      },
+      "duration": 134.6573,
+      "changes": 0,
+      "last_row_id": 0,
+      "changed_db": false,
+      "size_after": 22368256,
+      "rows_read": 43783,
+      "rows_written": 0,
+      "total_attempts": 1
+    }
+  }
+]

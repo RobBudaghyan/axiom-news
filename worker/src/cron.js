@@ -4,7 +4,7 @@
 // (measured on Cloudflare, see reports/step-03-automation.md).
 import { CONFIG, afterSendStatements, candidateStatement, holdStatements, nextSlot, parseList, planDigest } from "./digest.js";
 import { HEALTH_STATEMENTS, assessHealth } from "./health.js";
-import { errorStatement, takeUsage, usageStatement } from "./db.js";
+import { errorStatement, shouldFlushUsage, takeUsage, usageStatement } from "./db.js";
 import { asTopicRows, guardAlert, withCustomTopics } from "./custom.js";
 import { countStatement } from "./guard.js";
 import { reminderStatement, runReminders } from "./onboard.js";
@@ -167,9 +167,13 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
     }
   }
   // D1 rows this isolate used so far (this tick's reads plus any Mini App calls it served), for the
-  // Admin tab. Written every tick, about 288 rows a day; the write batch itself is counted next time.
-  const used = takeUsage();
-  if (used.r || used.w) writes.push(usageStatement(used, now));
+  // Admin tab. Step 17c: written once an hour (the tick at minute 0), not every tick: 24 rows a day
+  // instead of 1,440 per copy. The isolate keeps counting in between; counts of an isolate that is
+  // evicted before minute 0 are lost (Admin's account numbers come from Cloudflare's analytics anyway).
+  if (shouldFlushUsage(now)) {
+    const used = takeUsage();
+    if (used.r || used.w) writes.push(usageStatement(used, now));
+  }
   if (writes.length) await db.batch(writes);
   return out;
 }

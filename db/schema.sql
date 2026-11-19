@@ -76,6 +76,16 @@ DROP INDEX IF EXISTS idx_items_status;
 DROP INDEX IF EXISTS idx_items_story;
 CREATE INDEX IF NOT EXISTS idx_items_pending ON items(fetched_at) WHERE status = 'pending';
 CREATE INDEX IF NOT EXISTS idx_items_story_nn ON items(story_id) WHERE story_id IS NOT NULL;
+-- Step 17c (D1 writes): the job writes a new item ONCE, after the AI pass, in its final state (a
+-- story item: 3 rows written with its two index entries; it was 3 for the 'pending' insert plus about
+-- 2.4 for the update). An item the AI judged not news is not kept in `items` at all: only its URL
+-- hash goes here, so it is never fetched again (1 row written, and 1 when the prune deletes it).
+-- `items` keeps 'pending' only for items whose AI call failed (retried next run).
+CREATE TABLE IF NOT EXISTS items_seen (
+  url_hash   TEXT PRIMARY KEY,
+  source_key TEXT,                                  -- for per-feed counts (stored vs useful)
+  at         INTEGER NOT NULL                       -- when it was judged not news (the prune cut)
+) WITHOUT ROWID;
 
 -- The story pool. best_* is the link shown to users: lowest tier wins, then earliest.
 CREATE TABLE IF NOT EXISTS stories (

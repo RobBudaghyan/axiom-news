@@ -15,6 +15,12 @@ same pool as production. Old rows (7 days, like production) are removed from sta
 
 Production comes from .env (or the job's environment); the staging database id from
 STAGING_D1_DATABASE_ID (GitHub secret) or D1_DATABASE_ID in .env.staging. Prints row counts only.
+
+Step 17c (D1 writes): D1's free limits are per Cloudflare ACCOUNT. Staging moves to its own free
+account: its account id and D1 token come from STAGING_CLOUDFLARE_ACCOUNT_ID and STAGING_D1_TOKEN
+(GitHub secrets) or CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_D1_TOKEN in .env.staging. While staging still
+shares production's account, `--auto` does nothing (the sync is on demand only), so the hourly job
+never spends production's daily writes on staging.
 A custom topic added on staging gets an id from 1,000,000 up, so it never clashes with production's.
 """
 from __future__ import annotations
@@ -51,6 +57,14 @@ USER_TABLES = {
     "sent": ("sent_at >= ?", 1),
     "digest_holds": ("1 = 1 OR ? = 0", 1),
 }
+
+
+def staging_account(env: dict) -> tuple[str, str]:
+    """(account id, D1 token) of the staging copy; production's when staging has no account of its own."""
+    st = _read_env_file(ROOT / ".env.staging")
+    acc = os.environ.get("STAGING_CLOUDFLARE_ACCOUNT_ID") or st.get("CLOUDFLARE_ACCOUNT_ID") or env["CLOUDFLARE_ACCOUNT_ID"]
+    tok = os.environ.get("STAGING_D1_TOKEN") or st.get("CLOUDFLARE_D1_TOKEN") or env["CLOUDFLARE_D1_TOKEN"]
+    return acc, tok
 
 
 def staging_id() -> str:
@@ -93,8 +107,12 @@ def main() -> int:
     sid = staging_id()
     if sid == PROD_ID:
         raise SystemExit("refusing: the staging id is the production D1")
+    acc, tok = staging_account(env)
+    if a.auto and acc == env["CLOUDFLARE_ACCOUNT_ID"]:
+        print("staging shares production's Cloudflare account: no automatic sync (on demand only)")
+        return 0
     prod = D1(env["CLOUDFLARE_ACCOUNT_ID"], PROD_ID, env["CLOUDFLARE_D1_TOKEN"])
-    staging = D1(env["CLOUDFLARE_ACCOUNT_ID"], sid, env["CLOUDFLARE_D1_TOKEN"])
+    staging = D1(acc, sid, tok)
     now = int(time.time())
     since = int(now - a.hours * 3600)
     if a.auto:   # measured (Step 16): every 3 hours writes about 40% fewer rows than every hour
@@ -126,6 +144,8 @@ def main() -> int:
         counts.update(copy(prod, staging, USER_TABLES, now - RETENTION_DAYS * 86400))
     if a.items:
         counts.update(copy(prod, staging, {"items": ("fetched_at >= ?", 1)}, since))
+        if prod.query("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'items_seen'"):   # Step 17c
+            counts.update(copy(prod, staging, {"items_seen": ("at >= ?", 1)}, since))
         staging.batch([("DELETE FROM items WHERE fetched_at < ?", [now - RETENTION_DAYS * 86400])])
     cut = now - RETENTION_DAYS * 86400
     staging.batch([

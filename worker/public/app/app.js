@@ -897,7 +897,15 @@
       return `<div class="meter"><div class="meter-top"><span>${label}</span><span>${n(used)} of ${compact(limit)}</span></div>
         <div class="bar ${pct > 80 ? "bad" : pct > 50 ? "warn" : ""}"><i style="width:${pct.toFixed(2)}%"></i></div></div>`;
     };
-    const d1 = meter("Rows read", D.rows_read, D.limits.rows_read) + meter("Rows written", D.rows_written, D.limits.rows_written)
+    // Step 17c: one summary line, the account's reads and writes as % of the free limit, today and yesterday
+    const pc = (v, lim) => `${Math.round((100 * v) / lim)}%`;
+    const usageLine = D.account ? row({ title: "Free limit used",
+      sub: esc(`Today: reads ${pc(D.account.r, D.limits.rows_read)}, writes ${pc(D.account.w, D.limits.rows_written)}`
+        + (D.account.y ? `. Yesterday: reads ${pc(D.account.y.r, D.limits.rows_read)}, writes ${pc(D.account.y.w, D.limits.rows_written)}` : "")),
+      right: badge(pc(Math.max(D.account.r / D.limits.rows_read, D.account.w / D.limits.rows_written), 1),
+        Math.max(D.account.r / D.limits.rows_read, D.account.w / D.limits.rows_written) >= 0.8 ? "bad"
+          : Math.max(D.account.r / D.limits.rows_read, D.account.w / D.limits.rows_written) >= 0.5 ? "warn" : "ok") }) : "";
+    const d1 = usageLine + meter("Rows read", D.rows_read, D.limits.rows_read) + meter("Rows written", D.rows_written, D.limits.rows_written)
       + (D.account ? meter("Account, rows read", D.account.r, D.limits.rows_read) + meter("Account, rows written", D.account.w, D.limits.rows_written)
         + row({ title: "Runs over the CPU limit today", right: D.account.cpu ? badge(String(D.account.cpu), "bad") : badge("None", "ok") }) : "");
 

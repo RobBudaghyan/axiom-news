@@ -154,6 +154,19 @@ def in_list_statements(sql_template: str, values: Sequence, extra_params: Sequen
     return out
 
 
+def seen_hashes(db, hashes: Sequence[str]) -> set[str]:
+    """Step 17c: URL hashes the job already has: an item in `items` or a not-news hash in
+    `items_seen`. Two indexed lookups per chunk."""
+    seen: set[str] = set()
+    if not hashes:
+        return seen
+    stmts = (in_list_statements("SELECT url_hash FROM items WHERE url_hash IN ({qs})", hashes)
+             + in_list_statements("SELECT url_hash FROM items_seen WHERE url_hash IN ({qs})", hashes))
+    for rows in db.batch(stmts):
+        seen.update(r["url_hash"] for r in rows)
+    return seen
+
+
 def insert_statements(table: str, columns: Sequence[str], rows: Sequence[Sequence],
                       suffix: str = "") -> list[Statement]:
     """Multi-row INSERTs, each under the 100-parameter limit."""

@@ -2,10 +2,12 @@
 
     venv/Scripts/python -m job.run
 
-Steps: sync topics -> fetch feeds -> store new items as 'pending' -> expire pending items
-older than 24 h -> AI pass over every pending item (Gemini, then Groq for whatever is left)
--> write stories -> daily prune -> log the run. Items whose AI call failed stay 'pending'
-and are retried next run (docs/ARCHITECTURE.md section 7).
+Steps: sync topics -> fetch feeds -> hold new items in memory -> expire pending items
+older than 24 h -> AI pass over every pending and held item (Gemini, then Groq for whatever is
+left) -> write stories and each held item once, in its final state -> daily prune -> log the run.
+Step 17c: a story item is written once (no 'pending' insert and later update); a not-news item
+leaves only its URL hash in `items_seen`. Items whose AI call failed are stored as 'pending' and
+retried next run (docs/ARCHITECTURE.md section 7).
 """
 from __future__ import annotations
 
@@ -22,7 +24,7 @@ from typing import Callable
 
 from job import ai, custom, dupes, editor, guard, translate
 from job.config import Prompt, Settings, load_env, load_prompt, load_sources, load_topics
-from job.d1 import D1, in_list_statements, insert_statements
+from job.d1 import D1, in_list_statements, insert_statements, seen_hashes
 from job.fetch import (Entry, FeedResult, candidates, feed_caps, feed_health, fetch_all, select_new,
                        url_hash)
 
@@ -35,8 +37,12 @@ MIN_PLACED_SHARE = 0.10
 # Answers to very large chunks sometimes stop early (190 of 516 items covered). Up to 10% of
 # items left out counts as "not news"; more than that, the skipped items are sent again.
 MAX_SKIPPED_SHARE = 0.10
-ITEM_COLUMNS = ("url_hash", "source_key", "source_name", "tier", "url", "title", "snippet",
-                "published_at", "fetched_at", "status")
+# Step 17c: every item is written with its id (taken after the highest in D1), so the AI pass can
+# use held items before they are stored.
+ITEM_COLUMNS = ("id", "url_hash", "source_key", "source_name", "tier", "url", "title", "snippet",
+                "published_at", "fetched_at", "status", "story_id", "headline_only", "hint_topic")
+PENDING_COLUMNS = ("id", "source_name", "tier", "url", "title", "snippet", "published_at", "fetched_at",
+                   "headline_only")
 HTTP_CODE = re.compile(r"HTTP (\d{3})")
 
 
@@ -157,6 +163,9 @@ class Job:
         self.calls_log: list[tuple] = []
         self.feed_health: dict | None = None   # written to meta.feed_health with the run log
         self.cap_cut: dict[str, int] = {}
+        self.held: dict[int, dict] = {}        # Step 17c: new items of this run, not in D1 yet (id -> row)
+        self.held_hashes: set[str] = set()
+        self.next_id: int | None = None
         self.debug_dir = Path(debug_dir) if debug_dir else None   # saves raw prompts/answers
         self.editor_enabled = editor_enabled   # tests of the first pass alone switch it off
         self.translate_enabled = translate_enabled
@@ -198,18 +207,42 @@ class Job:
         return int(now - hours * 3600)
 
     def store_new(self, entries: list[Entry], now: int) -> int:
-        hashes = [e.url_hash for e in entries]
-        seen: set[str] = set()
-        for rows in self.db.batch(in_list_statements(
-                "SELECT url_hash FROM items WHERE url_hash IN ({qs})", hashes)):
-            seen.update(r["url_hash"] for r in rows)
+        """Takes the new entries (not in items or items_seen, under the per-feed caps) and holds
+        them in memory; they are written once the AI pass has placed or dropped them."""
+        seen = seen_hashes(self.db, [e.url_hash for e in entries])
         self.cap_cut = {}
         new = select_new(entries, seen, self.s.max_items_per_feed, feed_caps(self.sources), self.cap_cut)
-        rows = [(e.url_hash, e.source_key, e.source_name, e.tier, e.url, e.title, e.snippet,
-                 e.published_at, now, "pending") for e in new]
-        self.db.batch(insert_statements("items", ITEM_COLUMNS, rows,
-                                        suffix="ON CONFLICT(url_hash) DO NOTHING"))
+        for e in new:
+            self.hold({"url_hash": e.url_hash, "source_key": e.source_key, "source_name": e.source_name,
+                       "tier": e.tier, "url": e.url, "title": e.title, "snippet": e.snippet,
+                       "published_at": e.published_at, "fetched_at": now, "headline_only": 0, "hint_topic": None})
         return len(new)
+
+    def hold(self, row: dict) -> None:
+        """Step 17c: a new item gets its id now (after the highest in D1) and waits in memory."""
+        if self.next_id is None:
+            got = self.db.query("SELECT coalesce(max(id), 0) AS m FROM items")
+            self.next_id = int(got[0]["m"]) + 1 if got else 1
+        if row["url_hash"] in self.held_hashes:
+            return
+        r = {**row, "id": self.next_id, "status": "pending", "story_id": None}
+        r.setdefault("headline_only", 0)
+        r.setdefault("hint_topic", None)
+        self.held[self.next_id] = r
+        self.held_hashes.add(row["url_hash"])
+        self.next_id += 1
+
+    def item_insert_statements(self, rows: list[dict]) -> list:
+        return insert_statements("items", ITEM_COLUMNS, [tuple(r[c] for c in ITEM_COLUMNS) for r in rows],
+                                 suffix="ON CONFLICT DO NOTHING")
+
+    def flush_held(self) -> int:
+        """Held items the AI pass did not settle (provider failures) are stored as 'pending'."""
+        rows = list(self.held.values())
+        self.held = {}
+        if rows:
+            self.db.batch(self.item_insert_statements(rows))
+        return len(rows)
 
     def expire_old_pending(self, now: int) -> int:
         cutoff = int(now - self.s.pending_max_age_h * 3600)
@@ -218,10 +251,14 @@ class Job:
         return len(rows)
 
     def load_pending(self) -> list[dict]:
-        return self.db.query(
+        """Pending items in D1 (earlier runs' failures) and this run's held items."""
+        rows = self.db.query(
             "SELECT id, source_name, tier, url, title, snippet, published_at, fetched_at, headline_only "
             "FROM items "
             "WHERE status = 'pending' ORDER BY coalesce(published_at, fetched_at), id")
+        rows += [{c: h[c] for c in PENDING_COLUMNS} for h in self.held.values()]
+        rows.sort(key=lambda r: (r["published_at"] if r["published_at"] is not None else r["fetched_at"], r["id"]))
+        return rows
 
     def load_existing(self, now: int, limit: int) -> list[dict]:
         if limit <= 0:
@@ -411,11 +448,27 @@ class Job:
 
         placed = {i for _, ids in item_updates for i in ids}
         dropped = [i for i in by_id if i not in placed]
-        stmts = []
+        # Step 17c: held items are written once, in their final state; items already in D1
+        # (pending from an earlier run) are updated as before.
+        stmts, new_rows = [], []
         for story_id, ids in item_updates:
+            stored = []
+            for i in ids:
+                h = self.held.pop(i, None)
+                if h is not None:
+                    new_rows.append({**h, "status": "done", "story_id": story_id})
+                elif not any(r["id"] == i for r in new_rows):
+                    stored.append(i)
             stmts += in_list_statements("UPDATE items SET status='done', story_id=? WHERE id IN ({qs})",
-                                        ids, [story_id])
-        stmts += in_list_statements("UPDATE items SET status='dropped' WHERE id IN ({qs})", dropped)
+                                        stored, [story_id])
+        stmts += self.item_insert_statements(new_rows)
+        gone = [self.held.pop(i) for i in dropped if i in self.held]
+        stmts += insert_statements("items_seen", ("url_hash", "source_key", "at"),
+                                   [(h["url_hash"], h["source_key"], now) for h in gone],
+                                   suffix="ON CONFLICT DO NOTHING")
+        gone_ids = {h["id"] for h in gone}
+        stmts += in_list_statements("UPDATE items SET status='dropped' WHERE id IN ({qs})",
+                                    [i for i in dropped if i not in gone_ids])
         self.db.batch(stmts)
         stats.stories_created += len(new_stories)
         stats.stories_merged += len(merges)
@@ -534,7 +587,9 @@ class Job:
             return
         try:
             res = custom.Searcher(self.db, cfg=self._custom_cfg(), fetcher=self.gnews_fetcher,
-                                  clock=self.clock, log=self.log).run(self.custom_topics, now)
+                                  clock=self.clock, log=self.log, hold=self.hold,
+                                  held={h["url_hash"]: h["title"] for h in self.held.values()}
+                                  ).run(self.custom_topics, now)
             stats.custom = res
             self.log(res.line())
             if res.stopped:
@@ -602,6 +657,7 @@ class Job:
              "RETURNING story_id", [cut]),
             ("DELETE FROM stories WHERE updated_at < ? RETURNING id", [cut]),
             ("DELETE FROM items WHERE fetched_at < ? RETURNING id", [cut]),
+            ("DELETE FROM items_seen WHERE at < ? RETURNING url_hash", [cut]),   # Step 17c
             ("DELETE FROM job_runs WHERE started_at < ? RETURNING id", [log_cut]),
             ("DELETE FROM ai_calls WHERE at < ? RETURNING id", [log_cut]),
             ("DELETE FROM errors WHERE at < ? RETURNING id", [log_cut]),
@@ -615,6 +671,7 @@ class Job:
         t0 = self.clock()
         now = int(t0)
         stats = RunStats()
+        self.held, self.held_hashes, self.next_id = {}, set(), None
         run_id = self.db.query("INSERT INTO job_runs (started_at, status) VALUES (?, 'running') "
                                "RETURNING id", [now])[0]["id"]
         status, error = "error", None
@@ -642,6 +699,7 @@ class Job:
             pending = self.load_pending()
             stats.items_pending_in = len(pending)
             left = self.run_ai(pending, now, stats)
+            self.flush_held()
             stats.items_left_pending = len(left)
             stats.ai_calls = len(self.calls_log)
             try:   # a grouping failure must not fail the run; digests then just skip dedupe
@@ -675,6 +733,10 @@ class Job:
             self.log(traceback.format_exc())
             raise
         finally:
+            try:   # a crash before the AI pass ended: keep what was fetched as 'pending'
+                self.flush_held()
+            except Exception as exc:
+                self.log(f"could not store the held items: {exc}")
             self._finish(run_id, now, status, error, stats)
             stats_ms = int((self.clock() - t0) * 1000)
             self.log(self.summary(status, stats, stats_ms))

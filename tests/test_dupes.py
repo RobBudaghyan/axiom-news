@@ -86,10 +86,15 @@ class UpdateGroups(unittest.TestCase):
         high = add(SAME[1][0], 7, now - 3600)       # more important: leads the group
         old = add(SAME[1][0], 7, now - 2 * 86400)   # outside 24 h: untouched
         cfg = {"max_lookback_hours": 24, "min_importance": 4, "dedupe_threshold": 0.45}
-        self.assertEqual(dupes.update_groups(db, now, cfg), 2)
+        # Step 17c: only the copy is written; the leader of its own group stays NULL ("its own group")
+        self.assertEqual(dupes.update_groups(db, now, cfg), 1)
         g = {r["id"]: r["dup_group"] for r in db.query("SELECT id, dup_group FROM stories")}
-        self.assertEqual((g[high], g[low], g[old]), (high, high, None))
+        self.assertEqual((g[high], g[low], g[old]), (None, high, None))
         self.assertEqual(dupes.update_groups(db, now, cfg), 0)   # nothing changed, nothing written
+        # a story that led a group of others and then joins one is written; one that leaves a group too
+        db.query("UPDATE stories SET dup_group = ? WHERE id = ?", [low, high])
+        self.assertEqual(dupes.update_groups(db, now, cfg), 1)
+        self.assertEqual(db.query("SELECT dup_group FROM stories WHERE id = ?", [high])[0]["dup_group"], high)
 
 
 if __name__ == "__main__":

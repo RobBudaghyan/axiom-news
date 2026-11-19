@@ -1,0 +1,32 @@
+custom topics: 1 active, 1 searched, 2 requests (1 failed, stopped: Google answered 429), 1 results, 0 seen before, 0 same as the pool, 0 over the per-topic cap, 1 new items, 1.8s
+near-duplicate groups: 170 stories changed group
+editor: ok, provider gemini+gemini-fallback, 2 round(s), 210 candidates, 104 events written, 9 merged away, 50 left out, 0 texts dropped by the fact guard, calls 4, tokens in 60021 out 28348
+translate: ok, 77 eligible stories; ru 18 ok of 18 to do, 0 rejected, 0 unanswered, 1 calls via gemini, tokens in 1807 out 1396
+status ok in 599.8s | feeds ok 123, failed 0
+items: in window 916, new 255, sent to AI 256, expired 0, left pending 0
+stories: created 45, merged into existing 23; items dropped 136 (of which unaccounted 3)
+AI: provider gemini+gemini-fallback, calls 10, tokens in 111276 out 46150 | pruned None
+editor: ok, provider gemini+gemini-fallback, 2 round(s), 210 candidates, 104 events written, 9 merged away, 50 left out, 0 texts dropped by the fact guard, calls 4, tokens in 60021 out 28348
+translate: ok, 77 eligible stories; ru 18 ok of 18 to do, 0 rejected, 0 unanswered, 1 calls via gemini, tokens in 1807 out 1396
+custom topics: 1 active, 1 searched, 2 requests (1 failed, stopped: Google answered 429), 1 results, 0 seen before, 0 same as the pool, 0 over the per-topic cap, 1 new items, 1.8s
+custom: custom topics: Google answered 429; the other searches wait for the next run
+cap cut (new items left out by the per-feed cap): anadolu 14, interfax 9, izvestia 34, kommersant 7, rbc 12, rg 58, ria 70, tass_en 3, tass_ru 85, trend_az 4, vedomosti 6
+AI error: gemini: HTTP 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+AI error: gemini: output truncated at 32752 tokens
+AI error: editor: answer left out 47 of 105 candidates
+AI error: gemini: editor: answer covers only 49 of 105 candidates
+AI error: gemini: editor: answer covers only 48 of 105 candidates
+AI error: editor: answer left out 50 of 105 candidates
+D1: 53 calls, rows read 31675, rows written 1195
+  D1 read    6871 rows in   2x: SELECT id, summary, topics, importance, best_url, best_source, best_tier, best_published_at, source_count, cre
+  D1 read    5773 rows in   1x: SELECT id, title FROM items WHERE id > (SELECT coalesce(max(id), 0) FROM items) - ? AND fetched_at >= ?
+  D1 read    5350 rows in   1x: SELECT id, summary, headline, description, g FROM ( SELECT s.*, coalesce(s.final_score, s.importance - ?2) AS 
+  D1 read    3774 rows in   1x: SELECT id, topics, main_topic, final_score, topic_score, headline, summary, description FROM stories WHERE (up
+  D1 read    3181 rows in   1x: SELECT id, summary, dup_group FROM stories WHERE updated_at >= ? AND importance >= ? AND merged_into IS NULL O
+  D1 read    1828 rows in   7x: SELECT id, summary, topics, importance, best_url, best_source, best_tier, best_published_at, headline, descrip
+  D1 read    1591 rows in   6x: SELECT story_id, source_name, tier, title, snippet, published_at, headline_only FROM items WHERE story_id IN (
+  D1 read    1275 rows in  10x: SELECT url_hash FROM items WHERE url_hash IN (?..)
+  D1 read     916 rows in  10x: SELECT url_hash FROM items_seen WHERE url_hash IN (?..)
+  D1 read     170 rows in 170x: UPDATE stories SET dup_group = ? WHERE id = ?
+  D1 read     154 rows in   1x: SELECT id, best_url FROM stories WHERE coalesce(link_state, 0) <> 2 AND best_url LIKE ? AND id IN (?..)
+  D1 read     152 rows in   1x: SELECT story_id, ok, src, note FROM story_translations WHERE lang = ? AND story_id IN (?..)

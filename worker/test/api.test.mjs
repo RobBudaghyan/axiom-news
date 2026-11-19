@@ -8,7 +8,7 @@ import { signInitData, verifyInitData, dataCheckString } from "../src/auth.js";
 import { SettingsError, TZ_AUTO, TZ_MANUAL, allowedTimes, nextDigestAfterChange, roundTimes, validatePatch } from "../src/settings.js";
 import { feedReport, shapeAdmin, adminStatements } from "../src/admin.js";
 import { CONFIG, nextSlot } from "../src/digest.js";
-import { takeUsage, usageStatement } from "../src/db.js";
+import { shouldFlushUsage, takeUsage, usageStatement } from "../src/db.js";
 import { runTick } from "../src/cron.js";
 import { ALL, OWNER, TZ, addStory, addUser, fakeD1, mockFetch, yerevan } from "./helpers.mjs";
 
@@ -398,16 +398,22 @@ describe("bot: Open settings button", () => {
 });
 
 describe("D1 usage counter", () => {
-  test("every cron tick records the rows D1 reported, even in a fresh isolate", async () => {
+  test("Step 17c: the tick of minute 0 writes the rows D1 reported (all ticks since), other ticks write nothing", async () => {
     const { binding, sqlite } = fakeD1();
     const withMeta = { ...binding, batch: async (list) => (await binding.batch(list)).map((r) => ({ ...r, meta: { rows_read: 4, rows_written: 1 } })) };
     const { d1Binding } = await import("../src/db.js");
     takeUsage();
-    const now = 20000 * 86400 + 600;
-    await runTick(d1Binding(withMeta), { send: async () => {}, alert: async () => {} }, now, { digests: false });
-    const v = JSON.parse(sqlite.prepare("SELECT value FROM meta WHERE key = 'd1_worker'").get().value);
+    const hour = 20000 * 86400 + 3600;
+    const row = () => sqlite.prepare("SELECT value FROM meta WHERE key = 'd1_worker'").get();
+    await runTick(d1Binding(withMeta), { send: async () => {}, alert: async () => {} }, hour + 60 * 59, { digests: false });
+    assert.equal(row(), undefined, "minute 59: no usage row yet");
+    await runTick(d1Binding(withMeta), { send: async () => {}, alert: async () => {} }, hour + 3600, { digests: false });
+    const v = JSON.parse(row().value);
     assert.equal(v.day, 20000);
-    assert.ok(v.r >= 12, `rows read ${v.r}`);   // three health reads reported 4 each
+    assert.ok(v.r >= 24, `rows read ${v.r}`);   // two ticks, three health reads reported 4 each
+    assert.equal(shouldFlushUsage(hour), true);
+    assert.equal(shouldFlushUsage(hour + 60), false);
+    assert.equal(shouldFlushUsage(hour + 59), true);
   });
 
   test("the cron tick flushes the isolate's D1 rows into meta, per UTC day", async () => {

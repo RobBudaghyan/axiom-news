@@ -111,8 +111,10 @@ def update_groups(db, now: int, cfg: dict | None = None) -> int:
     cfg = cfg or digest_config()
     pool = db.query(POOL_SQL, [now - int(cfg["max_lookback_hours"]) * 3600, cfg["min_importance"]])
     groups, _ = group(pool, float(cfg["dedupe_threshold"]))
+    # Step 17c: NULL means "its own group" (the Worker reads it so), so a story that leads its own
+    # group is not written: about one row written less per new story.
     changed = [(groups[s["id"]], s["id"]) for s in pool
-               if s.get("dup_group") is None or int(s["dup_group"]) != groups[s["id"]]]
+               if int(s["dup_group"] if s.get("dup_group") is not None else s["id"]) != groups[s["id"]]]
     db.batch([("UPDATE stories SET dup_group = ? WHERE id = ?", [g, sid]) for g, sid in changed])
     return len(changed)
 

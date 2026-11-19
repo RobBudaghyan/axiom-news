@@ -61,3 +61,6 @@ export async function logError(db, message, now) {
     console.error("could not log error", String(e), String(message));
   }
 }
+
+// Step 17c: the usage row is written at most once an hour, by the tick of minute 0 (UTC).
+export const shouldFlushUsage = (now) => Math.floor(now / 60) % 60 === 0;

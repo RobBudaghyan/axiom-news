@@ -3,12 +3,13 @@ import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import { fakeD1 } from "./helpers.mjs";
 import { d1Binding } from "../src/db.js";
-import { STATE_KEY, assessUsage, checkUsage, readAnswer, utcDay } from "../src/usage.js";
+import { STATE_KEY, USAGE_QUERY, assessUsage, checkUsage, readAnswer, utcDay } from "../src/usage.js";
 
 const NOW = 1_800_000_000;   // 2027-01-15 08:00 UTC
-const answer = ({ d1 = [[1000, 10]], workers = [] } = {}) => ({
+const answer = ({ d1 = [[1000, 10]], workers = [], d1y } = {}) => ({
   data: { viewer: { accounts: [{
     d1: d1.map(([r, w], i) => ({ sum: { rowsRead: r, rowsWritten: w }, dimensions: { databaseId: `db${i}` } })),
+    ...(d1y ? { d1y: d1y.map(([r, w], i) => ({ sum: { rowsRead: r, rowsWritten: w }, dimensions: { databaseId: `db${i}` } })) } : {}),
     workers: workers.map(([script, status, n]) => ({ sum: { requests: n }, dimensions: { scriptName: script, status } })),
   }] } },
 });
@@ -25,6 +26,24 @@ describe("readAnswer", () => {
   test("an API error is an error, not zero use", () => {
     assert.throws(() => readAnswer({ errors: [{ message: "not authorized for that account" }] }), /not authorized/);
     assert.throws(() => readAnswer({ data: { viewer: { accounts: [] } } }), /no account/);
+  });
+});
+
+describe("Step 17c: yesterday's totals for the Admin summary line", () => {
+  test("the query asks for yesterday too; the answer adds both copies; the state keeps them", () => {
+    assert.ok(USAGE_QUERY.includes("d1y: d1AnalyticsAdaptiveGroups(limit: 50, filter: {date: $yday})"));
+    const got = readAnswer(answer({ d1: [[100, 1]], d1y: [[3_000_000, 60_000], [1_000_000, 20_000]] }));
+    assert.deepEqual([got.yr, got.yw], [4_000_000, 80_000]);
+    const { state } = assessUsage(got, null, NOW);
+    assert.deepEqual(state.y, { day: "2027-01-14", r: 4_000_000, w: 80_000 });
+  });
+  test("an answer without yesterday keeps the stored one, or takes the last check of yesterday", () => {
+    const got = readAnswer(answer({ d1: [[100, 1]] }));
+    assert.equal(got.yr, null);
+    const prevDay = { day: "2027-01-14", r: 900, w: 9 };
+    assert.deepEqual(assessUsage(got, prevDay, NOW).state.y, { day: "2027-01-14", r: 900, w: 9 });
+    const kept = { day: "2027-01-15", r: 50, w: 1, y: { day: "2027-01-14", r: 7, w: 7 } };
+    assert.deepEqual(assessUsage(got, kept, NOW).state.y, { day: "2027-01-14", r: 7, w: 7 });
   });
 });
 
@@ -84,6 +103,7 @@ describe("checkUsage", () => {
     const sent = [];
     const first = await run(db, answer({ d1: [[4_200_000, 1]] }), NOW, async (t) => sent.push(t));
     assert.equal(first.calls[0].body.variables.day, "2027-01-15");
+    assert.equal(first.calls[0].body.variables.yday, "2027-01-14");
     assert.equal(first.calls[0].body.variables.since, new Date((NOW - 7200) * 1000).toISOString());
     assert.equal(sent.length, 1);
     const stored = JSON.parse(sqlite.prepare("SELECT value FROM meta WHERE key = ?").get(STATE_KEY).value);

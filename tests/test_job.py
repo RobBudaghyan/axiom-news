@@ -57,7 +57,11 @@ class HappyPath(Base):
         self.assertIn("alpha.test", iran["best_url"])
         self.assertEqual(iran["source_count"], 2)
         self.assertEqual(json.loads(iran["topics"]), ["politics_conflicts", "iran_war"])  # lesson 8
-        self.assertEqual(item_statuses(self.db)["OFF: football result"], "dropped")
+        # Step 17c: a not-news item leaves only its URL hash; story items are written once, done
+        self.assertNotIn("OFF: football result", item_statuses(self.db))
+        self.assertEqual(set(item_statuses(self.db).values()), {"done"})
+        seen = self.db.query("SELECT source_key FROM items_seen")
+        self.assertEqual(seen, [{"source_key": "beta"}])
         self.assertEqual(stats.items_unaccounted, 0)
         run = last_run(self.db)
         self.assertEqual((run["status"], run["provider"], run["stories_created"]), ("ok", "gemini", 2))
@@ -256,6 +260,73 @@ class PendingAndRetry(Base):
         run = last_run(self.db)
         self.assertEqual((run["status"], run["provider"], run["stories_created"]), ("ok", "gemini+groq", 3))
         self.assertEqual((len(gem.prompts), len(groq.prompts)), (3, 1))
+
+
+class OneWritePerItem(Base):
+    """Step 17c (D1 writes): a new item is written once, after the AI pass, in its final state."""
+
+    def recording(self):
+        sqls: list[str] = []
+        real = self.db.batch
+
+        def batch(stmts):
+            stmts = list(stmts)
+            sqls.extend(sql for sql, _ in stmts)
+            return real(stmts)
+        self.db.batch = batch
+        return sqls
+
+    def test_story_items_inserted_once_never_updated(self):
+        sqls = self.recording()
+        make_job(self.db, FakeProvider("gemini", [self.responder]), FakeProvider("groq", []),
+                 self.feeds, self.clock).run()
+        self.assertFalse([q for q in sqls if q.startswith("UPDATE items")], "no status update for a new item")
+        self.assertEqual(sum(q.startswith("INSERT INTO items ") for q in sqls), 1)
+        rows = self.db.query("SELECT title, status, story_id FROM items ORDER BY id")
+        self.assertEqual(len(rows), 3)
+        self.assertTrue(all(r["status"] == "done" and r["story_id"] for r in rows))
+
+    def test_not_news_item_is_never_fetched_again(self):
+        make_job(self.db, FakeProvider("gemini", [self.responder]), FakeProvider("groq", []),
+                 self.feeds, self.clock).run()
+        self.clock.advance(1)
+        gem = FakeProvider("gemini", [])        # nothing new: no AI call at all
+        make_job(self.db, gem, FakeProvider("groq", []), self.feeds, self.clock).run()
+        run2 = last_run(self.db)
+        self.assertEqual((run2["items_new"], run2["items_pending_in"]), (0, 0))
+        self.assertEqual(gem.prompts, [])
+
+    def test_ids_follow_the_highest_stored_id(self):
+        self.db.query("INSERT INTO items (id, url_hash, source_key, source_name, tier, url, title, fetched_at, status) "
+                      "VALUES (500, 'old', 'alpha', 'Alpha Times', 1, 'https://x.test/old', 'old', ?, 'done')",
+                      [int(self.clock()) - 3600])
+        make_job(self.db, FakeProvider("gemini", [self.responder]), FakeProvider("groq", []),
+                 self.feeds, self.clock).run()
+        ids = [r["id"] for r in self.db.query("SELECT id FROM items WHERE id <> 500 ORDER BY id")]
+        self.assertEqual(len(ids), 3)                       # four held as 501..504, one was not news
+        self.assertTrue(all(501 <= i <= 504 for i in ids), ids)
+        seen = self.db.query("SELECT count(*) AS n FROM items_seen")[0]["n"]
+        self.assertEqual(seen, 1)
+
+    def test_a_crash_after_the_fetch_keeps_the_items_as_pending(self):
+        class Boom(Exception):
+            pass
+        job = make_job(self.db, FakeProvider("gemini", []), FakeProvider("groq", []), self.feeds, self.clock)
+
+        def broken():
+            raise Boom()
+        job.load_pending = broken
+        with self.assertRaises(Boom):
+            job.run()
+        self.assertEqual(sorted(item_statuses(self.db).values()), ["pending"] * 4)
+
+    def test_prune_deletes_old_not_news_hashes(self):
+        now = int(self.clock())
+        self.db.batch([("INSERT INTO items_seen (url_hash, source_key, at) VALUES ('a', 'x', ?), ('b', 'x', ?)",
+                        [now - 8 * 86400, now - 3600])])
+        job = make_job(self.db, FakeProvider("gemini", []), FakeProvider("groq", []), self.feeds, self.clock)
+        self.assertGreaterEqual(job.prune_daily(now), 1)
+        self.assertEqual(self.db.query("SELECT url_hash FROM items_seen"), [{"url_hash": "b"}])
 
 
 class Merge(Base):
