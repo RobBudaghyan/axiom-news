@@ -1,0 +1,84 @@
+editor pool: 1761 rows returned, 3806 rows read
+    SEARCH stories USING INDEX idx_stories_updated (updated_at>?)
+    USE TEMP B-TREE FOR ORDER BY
+editor items: 65 rows returned, 143 rows read
+    SEARCH items USING INDEX idx_items_story_nn (story_id=?)
+dupes pool: 1761 rows returned, 3806 rows read
+    SEARCH stories USING INDEX idx_stories_updated (updated_at>?)
+    USE TEMP B-TREE FOR ORDER BY
+translate eligible: 40 rows returned, 5442 rows read
+    MULTI-INDEX OR
+    INDEX 1
+    SEARCH s USING INDEX idx_stories_updated (updated_at>?)
+    INDEX 2
+    SEARCH s USING INDEX idx_stories_scored (scored_at>?)
+    LIST SUBQUERY 3
+    SCAN m VIRTUAL TABLE INDEX 1:
+    CREATE BLOOM FILTER
+    LIST SUBQUERY 4
+    SCAN u VIRTUAL TABLE INDEX 1:
+    CREATE BLOOM FILTER
+    LIST SUBQUERY 6
+    SCAN u VIRTUAL TABLE INDEX 1:
+    CREATE BLOOM FILTER
+    SCAN x EXISTS VIRTUAL TABLE INDEX 1:
+    LIST SUBQUERY 1
+    SCAN u VIRTUAL TABLE INDEX 1:
+    CREATE BLOOM FILTER
+    USE TEMP B-TREE FOR ORDER BY
+enforce: 41 rows returned, 3717 rows read
+    MULTI-INDEX OR
+    INDEX 1
+    SEARCH stories USING INDEX idx_stories_updated (updated_at>?)
+    INDEX 2
+    SEARCH stories USING INDEX idx_stories_scored (scored_at>?)
+worker digest: 8 rows returned, 1304 rows read
+    MULTI-INDEX OR
+    INDEX 1
+    LIST SUBQUERY 1
+    SCAN u VIRTUAL TABLE INDEX 1:
+    CREATE BLOOM FILTER
+    SEARCH s USING INDEX idx_stories_updated (updated_at>?)
+    INDEX 2
+    REUSE LIST SUBQUERY 1
+    SEARCH s USING INDEX idx_stories_scored (scored_at>?)
+    INDEX 3
+    LIST SUBQUERY 2
+    SEARCH h USING PRIMARY KEY (user_id=?)
+    REUSE LIST SUBQUERY 1
+    SEARCH s USING INTEGER PRIMARY KEY (rowid=?)
+    REUSE LIST SUBQUERY 2
+    LIST SUBQUERY 5
+    SCAN m VIRTUAL TABLE INDEX 1:
+    CREATE BLOOM FILTER
+    LIST SUBQUERY 6
+    SCAN u VIRTUAL TABLE INDEX 1:
+    CREATE BLOOM FILTER
+    LIST SUBQUERY 1
+    SCAN u VIRTUAL TABLE INDEX 1:
+    CREATE BLOOM FILTER
+    CORRELATED SCALAR SUBQUERY 7
+    SEARCH x USING PRIMARY KEY (user_id=? AND story_id=?)
+    SEARCH tr USING PRIMARY KEY (story_id=? AND lang=?) LEFT-JOIN
+    SCAN x EXISTS VIRTUAL TABLE INDEX 1:
+    LIST SUBQUERY 3
+    SCAN u VIRTUAL TABLE INDEX 1:
+    CREATE BLOOM FILTER
+    LIST SUBQUERY 1
+    SCAN u VIRTUAL TABLE INDEX 1:
+    CREATE BLOOM FILTER
+    USE TEMP B-TREE FOR ORDER BY
+merge children: 0 rows returned, 0 rows read
+    SEARCH stories USING COVERING INDEX idx_stories_merged (merged_into=?)
+sent by story: 0 rows returned, 0 rows read
+    SEARCH sent USING COVERING INDEX idx_sent_story (story_id=?)
+pending: 0 rows returned, 2 rows read
+    SCAN items USING INDEX idx_items_pending
+    USE TEMP B-TREE FOR ORDER BY
+expire pending: 0 rows returned, 1 rows read
+    SEARCH items USING COVERING INDEX idx_items_pending (fetched_at<?)
+custom admin: 3 rows returned, 4653 rows read
+    SEARCH s USING INDEX idx_stories_updated (updated_at>?)
+    SCAN x VIRTUAL TABLE INDEX 1:
+    USE TEMP B-TREE FOR GROUP BY
+full scans: 0

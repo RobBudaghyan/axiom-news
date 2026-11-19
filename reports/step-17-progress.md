@@ -53,28 +53,55 @@ message; they go through the normal welcome and setup.
   caught; 2 digest-window mutations caught by the existing hold tests.
 - Staging Worker deployed (c57b22df, code 1e264b9860245b75); api-check passes on staging.
 
-### Why the staging measurement waits
-D1's free limits are per account (both copies). Today (UTC) production's job had written about 34k rows
-by 16:00 and my 48 h staging sync wrote 52k, so the account is near 100k writes. Creating the new
-indexes on staging writes about 15k more. If the account passes 100k today, D1 refuses writes until
-00:00 UTC: production's job fails for those hours (production is silent to users; the next run's
-lookback picks the missed items up, busy feeds may lose some over their per-feed cap). So: indexes on
-staging and the one staging job run right after 00:00 UTC. Lesson: a 48 h sync with `--items` costs
-about 50k writes; use `--hours 6` for a job test.
+### What happened on 2026-11-18 evening (UTC)
+The account passed the free **read** limit (5M) at about 17:44 UTC (Cloudflare's own count for the day:
+5.63M rows read, 120k written, both copies). From then until 00:00 UTC every D1 call failed: production
+missed 6 hourly job runs (18:07 to 23:07; the 00:07 run caught up 569 new items), staging's ticks and
+Mini App opens failed (358 tick errors). Nobody outside the test users was affected (production is
+silent). My 48 h staging sync with items (52k writes, 56k reads) added to it. Lesson: syncs for a job test
+use `--hours 6`.
+
+### After (staging, 2026-11-19 05:00 UTC, pool the same size as production's: 2,016 stories in 24 h)
+- Indexes applied on staging (`apply_schema` content, staging only): one-off 47k reads, 13k writes.
+  Production will cost about the same plus its larger items table: do it early in a UTC day.
+- `d1_plan.py` on staging: 0 full scans. Rows read per query, before (yesterday) -> after:
+  editor merge 5,080 per merge -> 0; Worker digest 13.5k (production) -> 2.0k; translate eligible 7.1k
+  -> 5.4k; keyword enforce 5.1k -> 3.7k; sent copy 334 -> 0. Saved in `reports/data/step-17/`.
+- One job run on staging (134 new items, 65 editor candidates, 4 merges): **38.5k rows read, 1,066
+  written**. Comparable production runs before: 84k to 122k read (runs 128 to 131); busy runs with
+  30+ merges read 230k to 330k, mostly the merge scan, now gone. Top readers now: translate eligible
+  2x (10.9k), Google title index (7.7k), editor pool 2x (7.6k), enforce (3.7k), dupes pool (3.5k).
+- Analytics token works (live query: today's and yesterday's totals; yesterday would have alerted).
+
+| Per day | Before | After (projected) |
+|---|---|---|
+| Production job reads | 2.8M (11-17), 3.6M busy | 1.0M to 1.2M (24 runs x 40k to 50k) |
+| Production Worker reads, 20 readers | 0.1M with no readers | about 0.25M (digests about 2k each) |
+| Staging reads (sync every 3 h, its Worker) | 0.3M to 2.5M (load test) | about 0.2M |
+| **Reads, both copies** | **4.0M (80%), 5.6M (113%)** | **about 1.5M to 1.7M (30% to 34%)** |
+| Production job writes | 41k to 58k | 30k to 45k (3 writes less per item) |
+| Other writes (Workers, staging sync) | 6k to 10k | about 14k |
+| **Writes, both copies** | **47k to 120k** | **about 45k to 60k (45% to 60%)** |
+
+Writes are now the tighter limit on busy news days. Not changed yet (owner to decide): staging sync every
+6 h instead of 3 h (about 4k writes a day less); translate eligible read once a run instead of twice
+(about 130k reads a day less).
 
 ### Next (Part 1)
-1. After 00:00 UTC: `AXIOM_ENV=staging venv/Scripts/python scripts/apply_schema.py`, then
-   `AXIOM_ENV=staging venv/Scripts/python scripts/d1_plan.py` (real rows read), then one job run
-   `AXIOM_ENV=staging venv/Scripts/python -m job.run --min-gap-minutes 0` (log shows the top readers).
-2. Report rows read a run before and after and the projected day; ask the owner for "ship it".
-3. Ship: production `apply_schema.py`, push the job to main, `SHIP_IT=yes npm run deploy:prod`; watch 2
-   hourly runs.
+Wait for the owner's "ship it". Then: production `apply_schema.py` (early in a UTC day), production
+secrets (`set_secrets.py worker-prod`, adds the analytics token), push the job to main,
+`SHIP_IT=yes npm run deploy:prod`, `setup-bot.mjs` stays for the switch; watch 2 hourly runs.
 
 ## Part 2 prep (done while waiting)
 - Production health (2026-11-18 ~17:00 UTC): last 24 h 20 runs ok, 4 partial (AI fallbacks), none failed;
   ticks 3 to 5 ms CPU (wrangler tail, 3 ticks); errors are normal job notes (translation retries) and 2
   Google 429s.
-- Production users: 3 (first names Rob, Ashot, and one shown as a flag). Owner to say which stay.
+- Production users: 3 (first names Rob, Ashot, and one shown as a flag). **Owner (2026-11-19): keep only
+  Rob**; the other two are removed from production at the switch (staging keeps its own copy).
 - Bot texts: `bot.description` and `bot.short_description` in en, ru (and hidden hy, fr);
   `setup-bot.mjs` now sets and checks them per language. Set on the TEST bot.
 - Invite drafts: in the chat message to the owner (English and Russian).
+
+## Part 4: Fly.io (done by the owner)
+The owner deleted the whole Fly.io account himself (2026-11-19). Nothing left to clean up; note it in the
+docs and the final report.
