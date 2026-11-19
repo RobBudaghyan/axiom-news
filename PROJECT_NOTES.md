@@ -247,7 +247,8 @@ bot @axiom_news_bot at the end.
 | 2026-11-15 | pre_checkout_query is answered from the invoice payload alone (no database read) | Telegram cancels the payment after 10 s; measured a few microseconds |
 | 2026-11-15 | Table `tips`: user, amount, Telegram charge id (UNIQUE), time, refunded time; nothing else | the owner's rule; the charge id is needed for refunds, and UNIQUE makes a repeated update count once |
 | 2026-11-15 | /paysupport forwards the user's note to the owner; /terms states the tip terms; the owner refunds from Admin after a confirm (refundStarPayment) | Telegram's rules for bots that take Stars |
-| 2026-11-19 | Description and Help say "about 100 outlets", not "120+ sources" (Step 17b) | 123 enabled feeds come from 98 outlets; readers read "sources" as outlets |
+| 2026-11-19 | The description names reputable outlets without a count; Help says "about 100 outlets"; no "a few times a day", "English or Russian", News.am or RFE/RL in user texts (owner, Step 17b) | 123 enabled feeds come from 98 outlets, so "120+ sources" overstated; the bot sends at the times the reader chooses, and more languages may come |
+| 2026-11-19 | BotFather splash icon is one SVG path (`branding/out/splash-icon.svg`, boolean-flattened logo, evenodd) (Step 17b) | BotFather refused an SVG with several shapes |
 | 2026-11-19 | Branding visuals built in code (HTML/SVG/CSS, headless Edge, ffmpeg), the logo as outlines from Montserrat ExtraBold fitted to the old 320 px photo (Step 17b) | no AI images or stock art (owner); the old logo existed only as a soft JPEG |
 
 ## Current status

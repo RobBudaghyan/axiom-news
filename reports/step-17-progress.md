@@ -113,3 +113,6 @@ and share cards in `branding/out/`. Sent to the owner on the TEST bot with the B
 **Waiting on the owner:** his OK after checking on his phone, and the BotFather steps on the TEST bot.
 At the launch switch: `setup-bot.mjs` on production plus BotFather steps A to D for @axiom_news_bot
 (listed in the 17b report). Production not touched.
+Round 2 (owner remarks, same day): new description, about and welcome line; "a few times a day",
+"English or Russian", News.am and RFE/RL removed; single-path splash icon; previews and cards re-made;
+the production BotFather list with file paths is in the 17b report. On staging and the TEST bot.

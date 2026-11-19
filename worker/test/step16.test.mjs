@@ -180,8 +180,8 @@ describe("Step 16: texts are short, one idea a line, with emojis", () => {
         const lines = DICTS[l].bot[k].split("\n");
         assert.ok(lines.length >= 2, `${l} bot.${k} has one line`);
         assert.match(lines[0], EMOJI, `${l} bot.${k}`);
-        // Step 17b: 80, the owner's approved English welcome has a 77-character line
-        for (const line of lines) assert.ok(line.length <= 80, `${l} bot.${k}: "${line}" is long`);
+        // Step 17b: 90, the owner's approved English welcome has an 83-character line
+        for (const line of lines) assert.ok(line.length <= 90, `${l} bot.${k}: "${line}" is long`);
       }
     });
     test(`${l}: no em or en dash in any string`, () => {

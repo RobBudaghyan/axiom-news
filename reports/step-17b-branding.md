@@ -1,7 +1,7 @@
 # Step 17b: branding before launch
 
-Status: live on staging and the TEST bot (Worker version 2114e5d1, code 24c7ae46184fe720). Waiting for
-the owner's OK on his phone. Production is untouched; it gets this at the launch switch.
+Status: round 2 (owner remarks) live on staging and the TEST bot (Worker version c497a9e0, code
+72bd0511bc080f86). Waiting for the owner's OK on his phone. Production is untouched; it gets this at the launch switch.
 
 ## What changed in one look
 - The existing Axiom News logo rebuilt as a sharp vector (it existed only as Telegram's 320 px JPEG).
@@ -12,14 +12,27 @@ the owner's OK on his phone. Production is untouched; it gets this at the launch
 - Calmer wording everywhere else (list below).
 - Files for BotFather (description animation, profile photo, loading icon, profile previews) and share cards.
 
-## One correction to the approved description
-"120+ sources" counts feeds: `config/sources.yaml` has 123 enabled feeds, but they come from **98
-outlets** (the FT alone has 3 feeds). A reader takes "sources" to mean outlets, so I changed only those
-words: en "About 100 news outlets", ru "Около 100 изданий" (hy and fr the same). Help in Settings said
-"We read 120 news sources every hour"; it now says "about 100 outlets" too. Every named outlet is an
-enabled feed: Financial Times (3 feeds), The Economist (4), Bloomberg (3), The Wall Street Journal (2),
-Al Jazeera, RFE/RL (2; in Russian «Радио Свобода», 2 feeds) and News.am (en and ru). If the owner prefers
-"120+ sources", it is one line per language in `config/i18n/*.json`.
+## Round 2 (owner remarks, 2026-11-19)
+- New description and about in the owner's words (en, ru; hy and fr in the same tone). No count of
+  sources any more; the named outlets are all enabled feeds: Financial Times (3 feeds), The Economist
+  (4), Bloomberg (3), The Wall Street Journal (2), Al Jazeera (1).
+- Welcome, second line: "...at the times you choose" / "...в выбранное вами время".
+- Gone from every user-facing text, Help included: "a few times a day" (also in `bot.help_new`, the
+  preview and share-card lines), "English or Russian", News.am, RFE/RL. Help keeps "We read about 100
+  outlets every hour" (123 feeds from 98 outlets).
+- Lengths (Telegram: description 512, about 120): description en 356, ru 346, hy 357, fr 361; about
+  en 87, ru 85, hy 84, fr 102.
+- Splash icon: BotFather refused `loading-icon.svg` (it wants a single path). New
+  `branding/out/splash-icon.svg`, made by `branding/source/build_splash.py`: one `<path>` and nothing
+  else (no rect, group, text, transform or stroke), one colour (#b1161c), `fill-rule="evenodd"`, square
+  viewBox 0 0 1024 1024, integer coordinates, 1,807 bytes. The script checks the element list is exactly
+  svg + path. The logo is flattened with boolean operations (skia-pathops): the rounded square, minus
+  the bar, plus the AXIOM letters, minus the NEWS letters, so the white parts are holes. Rendered check
+  below: on the light splash it looks like the logo; on the dark splash the holes show the dark
+  background, so the bar and NEWS look black (a one-colour icon cannot have white).
+- Test rule: bot reply lines may be 90 characters (the new English welcome line is 83).
+
+![splash icon on light and dark](../branding/out/frames/splash-check.png)
 
 ## Assets
 | Asset | Path | Where it shows | Spec |
@@ -29,7 +42,7 @@ Al Jazeera, RFE/RL (2; in Russian «Радио Свобода», 2 feeds) and Ne
 | Description animation | `branding/out/description-640x360.mp4` (`-320x180.mp4`, still `-640x360.png`) | empty chat, before Start | 3 s, H.264, no sound, 32 KB |
 | Welcome animation | `worker/public/media/welcome.mp4` (= `branding/out/welcome-1280x720.mp4`) | with the welcome message | 2 s, 1280x720, no sound, 49 KB |
 | Loading screen | `worker/public/app/index.html` + `app.css` | every Mini App open, until settings load | inline SVG, 2.6 KB |
-| Loading icon for BotFather | `branding/out/loading-icon.svg`, `-512.png` | Telegram's own Mini App splash (if offered) | |
+| Splash icon for BotFather | `branding/out/splash-icon.svg` (PNG check `splash-icon-512.png`) | Telegram's own Mini App loading screen | one path, 1.8 KB |
 | Profile previews | `branding/out/preview-{en,ru}-{setup,settings,digest}.png` | bot profile, under Launch app | 1080x1920 PNG |
 | Share cards | `branding/out/share-{en,ru}-1080x1080.png`, `-1080x1920.png` | for the owner to post | PNG |
 
@@ -72,7 +85,7 @@ New (owner's wording): `bot.short_description` (about), `bot.description`, `bot.
 Changed for tone (en and ru, the same in hy and fr):
 | Key | Before | Now |
 |---|---|---|
-| `bot.help_new` | 👋 Hi! Send /start to begin. / 📰 I send short news digests... | 👋 Send /start to begin. / 📰 Axiom News sends a short news digest a few times a day. |
+| `bot.help_new` | 👋 Hi! Send /start to begin. / 📰 I send short news digests... | 👋 Send /start to begin. / 📰 Axiom News sends a short digest of the important news at the times you choose. |
 | `bot.welcome_back`, `welcome_new` | ... {name}! | ... {name}. |
 | `bot.support` | ...it stays free. ⭐ Like it? You can leave a tip... 🔓 Nothing is locked. | ...will remain free. ⭐ You can leave a voluntary tip... 🔓 A tip unlocks nothing and changes nothing. |
 | `bot.tip_thanks` | Thank you for your tip of 250 ⭐! | Thank you for your tip of 250 ⭐. |
@@ -106,8 +119,10 @@ your topics"), feedback and error texts that were already short and plain. No em
 - `AXIOM_ENV=staging node scripts/api-check.mjs`: pass. `AXIOM_ENV=staging node scripts/setup-bot.mjs`:
   the TEST bot shows the new description and about in en and ru.
 - Staging serves `/media/welcome.mp4` (200, video/mp4); the TEST bot sent it by URL to the owner.
-- One line test rule changed: bot reply lines may be 80 characters (was 75), because the owner's
-  approved English welcome has a 77-character line.
+- One line test rule changed: bot reply lines may be 90 characters (was 75), because the owner's
+  approved English welcome has an 83-character line.
+- Round 2: Worker tests 307 pass; api-check on staging 9 pass, 0 fail; setup-bot reads back the new
+  description in en and ru. The Mini App itself did not change in round 2 (stamps unchanged).
 
 ## Waiting on the owner
 1. Check on his phone (message on the TEST bot): empty chat, welcome, reminder, loading screen, texts.
@@ -115,33 +130,45 @@ your topics"), feedback and error texts that were already short and plain. No em
    Main Mini App with the staging address, previews.
 3. Say OK (or what to change). Then this goes into the launch switch.
 
-## Launch switch: the same for @axiom_news_bot (prepared, not applied)
-With the real bot's token as production's secret, after `SHIP_IT=yes npm run deploy:prod` (which
-carries the texts, the welcome animation and the loading screen):
-1. `node scripts/point-bot.mjs` and `node scripts/setup-bot.mjs` (no AXIOM_ENV): menu button, commands,
-   description and about in en and ru, read back and checked.
-2. BotFather, for @axiom_news_bot (the owner):
-   - **A. Description animation**: /mybots, @axiom_news_bot, Edit Bot, Edit Description Picture, send
-     `description-640x360.mp4` (if it asks for 320x180: `description-320x180.mp4`; if only a picture:
-     `description-640x360.png`).
-   - **B. Profile photo**: Edit Bot, Edit Botpic, send `profile-photo-1280.png` as a photo.
-   - **C. Main Mini App**: Bot Settings, Configure Mini App, Enable Mini App, address
-     `https://axiom-news.axiom-news-worker.workers.dev/app/`. Loading screen if offered: `loading-icon.svg`
-     (or `-512.png`), light #f2f2f7, dark #000000.
-   - **D. Previews**: the bot's profile, Add preview: the three English pictures (setup, settings,
-     digest), then Russian and the three Russian ones.
-3. Check from another account: the empty chat (description and animation), Start, the welcome with the
-   animation.
+## Launch switch: production is @axiom_news_bot (prepared, not applied)
+Order: the real bot's token as production's secret, `SHIP_IT=yes npm run deploy:prod` (carries the
+texts, the welcome animation and the loading screen), then `node scripts/point-bot.mjs` and
+`node scripts/setup-bot.mjs` in `worker/` without AXIOM_ENV (menu button, commands, description and
+about in en and ru, read back and checked). The description and about texts come from setup-bot.mjs,
+so nobody types them into BotFather.
+
+### What the advisor sets in BotFather for @axiom_news_bot
+All files are on the owner's PC under `C:\Users\budag\VS_Code_Projects\Axiom News v2\branding\out\`
+(also in the GitHub repo, same path).
+
+| # | BotFather (/mybots, @axiom_news_bot, then) | Set to | File on this PC |
+|---|---|---|---|
+| 1 | Edit Bot > Edit Description Picture | the 3 s description animation (640x360 MP4, no sound, 32 KB). If it asks for 320x180, the small one; if it takes only a picture, the PNG | `C:\Users\budag\VS_Code_Projects\Axiom News v2\branding\out\description-640x360.mp4`; fallbacks `...\branding\out\description-320x180.mp4`, `...\branding\out\description-640x360.png` |
+| 2 | Edit Bot > Edit Botpic | the profile photo, sent as a photo | `C:\Users\budag\VS_Code_Projects\Axiom News v2\branding\out\profile-photo-1280.png` |
+| 3 | Bot Settings > Configure Mini App > Enable Mini App | Main Mini App address `https://axiom-news.axiom-news-worker.workers.dev/app/` | |
+| 4 | Configure Mini App > launch / display mode | **Full size** (not compact, not fullscreen) | |
+| 5 | Configure Mini App > loading screen: icon | the single-path splash icon | `C:\Users\budag\VS_Code_Projects\Axiom News v2\branding\out\splash-icon.svg` |
+| 6 | Configure Mini App > loading screen: colours | light background `#f2f2f7`, dark background `#000000` (the Mini App's own backgrounds, so there is no flash when it opens) | |
+| 7 | Bot profile in Telegram > Add preview (default language) | 3 previews in this order | `C:\Users\budag\VS_Code_Projects\Axiom News v2\branding\out\preview-en-setup.png`, `...\preview-en-settings.png`, `...\preview-en-digest.png` |
+| 8 | Same place, language Russian | 3 previews in this order | `C:\Users\budag\VS_Code_Projects\Axiom News v2\branding\out\preview-ru-setup.png`, `...\preview-ru-settings.png`, `...\preview-ru-digest.png` |
+
+Not in BotFather: the welcome animation is served by the Worker
+(`C:\Users\budag\VS_Code_Projects\Axiom News v2\worker\public\media\welcome.mp4`, at
+`https://axiom-news.axiom-news-worker.workers.dev/media/welcome.mp4` after the production deploy).
+
+Then check from another account: the empty chat (description and animation), the profile (photo,
+about, Open app, previews), Start, the welcome with the animation, and opening the Mini App (splash,
+then the logo fade).
 
 ## Invite for the owner (not sent)
 English:
-> 📰 I have launched Axiom News, a Telegram bot that sends a short digest of the important news a few times a day.
-> 🗂 You choose the topics and the times.
-> 🇬🇧 🇷🇺 English or Russian.
+> 📰 I have launched Axiom News, a Telegram bot that sends a short digest of the important news at the times you choose.
+> 🗂 You pick the topics, including your own.
+> 🌐 Available in several languages.
 > 👉 t.me/axiom_news_bot
 
 Russian:
-> 📰 Я запустил Axiom News: это Telegram-бот, который несколько раз в день присылает короткую сводку важных новостей.
-> 🗂 Темы и время выбираете вы.
-> 🇬🇧 🇷🇺 На русском или английском.
+> 📰 Я запустил Axiom News: это Telegram-бот, который присылает короткую сводку важных новостей в выбранное вами время.
+> 🗂 Темы выбираете вы, включая свои собственные.
+> 🌐 Доступно на нескольких языках.
 > 👉 t.me/axiom_news_bot

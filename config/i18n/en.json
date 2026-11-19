@@ -34,7 +34,7 @@
     "welcome_times": "🕘 Your digests: {times} ({zone}).",
     "welcome_topics": "📰 Topics: {topics}.",
     "welcome_next": "⏭️ Next one: {when}.\n⚙️ Tap {button} to change anything.",
-    "help_new": "👋 Send /start to begin.\n📰 Axiom News sends a short news digest a few times a day.",
+    "help_new": "👋 Send /start to begin.\n📰 Axiom News sends a short digest of the important news at the times you choose.",
     "help": "🕘 Your digests: {times} ({zone}).\n⏭️ Next one: {when}.\n⚙️ To change them: /settings",
     "settings": "⚙️ Choose your topics, times and language.\n✅ Every change saves at once.",
     "button": "Open settings",
@@ -55,11 +55,11 @@
     "paysupport_sent": "✅ Thank you. Your note has been sent.\n↩️ A tip made by mistake goes back to your Stars.",
     "terms": "📄 Terms for tips\n❤️ Axiom News is free.\n⭐ A tip is voluntary and unlocks nothing.\n↩️ Tips are not refunded, except one made by mistake (ask with /paysupport).\nℹ️ Telegram support cannot help with payments to bots.\n🔒 We keep only who tipped, the amount, the payment id and the time.",
     "help_cmd": "❓ Everything is in Settings: tap Help.\n💬 You can send us feedback there too.",
-    "welcome_setup": "👋 Welcome to Axiom News.\n\n📰 You will receive a short digest of the important news, a few times a day.\n⚙️ Setup takes about 20 seconds: language, topics and delivery times.\n\n👇 Tap <b>Set up</b> to begin.",
+    "welcome_setup": "👋 Welcome to Axiom News.\n\n📰 You will receive a short digest of the important news at the times you choose.\n⚙️ Setup takes about 20 seconds: language, topics and delivery times.\n\n👇 Tap <b>Set up</b> to begin.",
     "setup_button": "⚙️ Set up",
     "reminder": "👋 Your digest is not set up yet.\n⚙️ It takes about 20 seconds.\n👇 Tap <b>Set up</b> to begin.",
-    "description": "📰 Axiom News sends you a short digest of the important news, a few times a day.\n\n🌍 About 100 news outlets, including the Financial Times, The Economist, Bloomberg, the WSJ, Al Jazeera, RFE/RL and News.am\n🗂 Topics you choose: politics, economy, Armenia, Russia, Iran, Ukraine, or your own\n🕘 Delivered at the times you set\n🇬🇧 🇷🇺 English or Russian\n\n🆓 Free, no ads",
-    "short_description": "📰 Short digests of important news, at times you choose. English and Russian."
+    "description": "📰 A short digest of the important news, delivered at the times you choose.\n\n🌍 Built on reputable sources, including the Financial Times, The Economist, Bloomberg, The Wall Street Journal and Al Jazeera\n🗂 Politics, Economy, Armenia, Russia, Iran, Ukraine, plus custom topics of your own (e.g. Formula 1)\n🌐 Available in several languages\n\n🆓 Free, no ads",
+    "short_description": "📰 Short digests of the important news from reputable sources, at the times you choose."
   },
   "commands": {
     "start": "Start (or restart) your news digests",

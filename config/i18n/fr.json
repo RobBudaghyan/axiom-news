@@ -34,7 +34,7 @@
     "welcome_times": "🕘 Vos résumés : {times} ({zone}).",
     "welcome_topics": "📰 Sujets : {topics}.",
     "welcome_next": "⏭️ Le prochain : {when}.\n⚙️ Touchez « {button} » pour tout changer.",
-    "help_new": "👋 Envoyez /start pour commencer.\n📰 Un court résumé de l'actualité, plusieurs fois par jour.",
+    "help_new": "👋 Envoyez /start pour commencer.\n📰 Un court résumé de l'actualité, aux heures de votre choix.",
     "help": "🕘 Vos résumés : {times} ({zone}).\n⏭️ Le prochain : {when}.\n⚙️ Pour les changer : /settings",
     "settings": "⚙️ Choisissez vos sujets, vos heures et votre langue.\n✅ Tout est enregistré aussitôt.",
     "button": "Ouvrir les réglages",
@@ -55,11 +55,11 @@
     "paysupport_sent": "✅ Merci. Votre message a été envoyé.\n↩️ Un pourboire fait par erreur revient sur votre solde Stars.",
     "terms": "📄 Conditions des pourboires\n❤️ Axiom News est gratuit.\n⭐ Un pourboire est volontaire et ne débloque rien.\n↩️ Pas de remboursement, sauf pour un pourboire fait par erreur (via /paysupport).\nℹ️ Le support de Telegram ne peut pas aider pour les paiements aux bots.\n🔒 Nous gardons seulement qui a donné, le montant, l'identifiant de paiement et l'heure.",
     "help_cmd": "❓ Tout est dans les réglages : touchez Aide.\n💬 Vous pouvez aussi nous envoyer un avis.",
-    "welcome_setup": "👋 Bienvenue sur Axiom News.\n\n📰 Un court résumé de l'actualité importante, plusieurs fois par jour.\n⚙️ Configuration en 20 secondes environ : langue, sujets, heures.\n\n👇 Touchez <b>Configurer</b> pour commencer.",
+    "welcome_setup": "👋 Bienvenue sur Axiom News.\n\n📰 Un court résumé de l'actualité importante, aux heures de votre choix.\n⚙️ Configuration en 20 secondes environ : langue, sujets, heures.\n\n👇 Touchez <b>Configurer</b> pour commencer.",
     "setup_button": "⚙️ Configurer",
     "reminder": "👋 Votre résumé n'est pas encore configuré.\n⚙️ Cela prend environ 20 secondes.\n👇 Touchez <b>Configurer</b> pour commencer.",
-    "description": "📰 Axiom News vous envoie un court résumé de l'actualité importante, plusieurs fois par jour.\n\n🌍 Une centaine de médias, dont le Financial Times, The Economist, Bloomberg, le WSJ, Al Jazeera, RFE/RL et News.am\n🗂 Les sujets de votre choix : politique, économie, Arménie, Russie, Iran, Ukraine, ou les vôtres\n🕘 Aux heures que vous fixez\n🇫🇷 🇬🇧 🇷🇺 En français, en anglais ou en russe\n\n🆓 Gratuit, sans publicité",
-    "short_description": "📰 De courts résumés de l'actualité importante, aux heures de votre choix. En anglais, en russe et en français."
+    "description": "📰 Un court résumé de l'actualité importante, aux heures de votre choix.\n\n🌍 Des sources reconnues, dont le Financial Times, The Economist, Bloomberg, The Wall Street Journal et Al Jazeera\n🗂 Politique, Économie, Arménie, Russie, Iran, Ukraine, ainsi que vos propres sujets (par exemple, Formule 1)\n🌐 Disponible en plusieurs langues\n\n🆓 Gratuit, sans publicité",
+    "short_description": "📰 De courts résumés de l'actualité importante, issus de sources reconnues, aux heures de votre choix."
   },
   "commands": {
     "start": "Démarrer (ou redémarrer) vos résumés de l'actualité",
