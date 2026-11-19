@@ -382,11 +382,11 @@ describe("bot: Open settings button", () => {
     await worker.fetch(post("/start"), { ...env(binding), APP_URL: "https://w.test/app/" });
     await worker.fetch(post("/settings"), { ...env(binding), APP_URL: "https://w.test/app/" });
     // Step 15: a new user's /start carries "Set up" (the setup opens in the Mini App), /settings "Open settings"
-    assert.deepEqual(fetchMock.calls[0].body.reply_markup, { inline_keyboard: [[{ text: "Set up", web_app: { url: "https://w.test/app/" } }]] });
+    assert.deepEqual(fetchMock.calls[0].body.reply_markup, { inline_keyboard: [[{ text: "⚙️ Set up", web_app: { url: "https://w.test/app/" } }]] });
     assert.deepEqual(fetchMock.calls[1].body.reply_markup, { inline_keyboard: [[{ text: "Open settings", web_app: { url: "https://w.test/app/" } }]] });
-    assert.match(fetchMock.calls[0].body.text, /Tap Set up/);
+    assert.match(fetchMock.calls[0].body.caption, /Tap <b>Set up<\/b>/);   // Step 17b: the welcome is an animation's caption
     assert.match(fetchMock.calls[1].body.text, /^⚙️ Choose your topics, times and language/);
-    assert.doesNotMatch(fetchMock.calls.map((c) => c.body.text).join(), /[—–]/);
+    assert.doesNotMatch(fetchMock.calls.map((c) => c.body.text ?? c.body.caption).join(), /[—–]/);
   });
 
   test("without APP_URL the button points at this Worker's /app/", async () => {

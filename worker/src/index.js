@@ -46,6 +46,8 @@ function sameSecret(a, b) {
 
 const nowS = () => Math.floor(Date.now() / 1000);
 export const appUrl = (env, url) => env.APP_URL || `${url.origin}/app/`;
+// Step 17b: the welcome animation, a static file next to the Mini App (public/media/welcome.mp4)
+export const welcomeAnimationUrl = (env, url) => new URL("../media/welcome.mp4", appUrl(env, url)).href;
 
 export default {
   async fetch(request, env) {
@@ -62,6 +64,7 @@ export default {
       try {
         await handleUpdate(update, {
           db, now, cfg: CONFIG, appUrl: appUrl(env, url), ownerId: env.OWNER_TELEGRAM_ID,
+          welcomeAnimation: welcomeAnimationUrl(env, url),
           reply: (chatId, text, extra) => sendPlain(env.TELEGRAM_BOT_TOKEN, chatId, text, extra),
           tg: (method, body) => tgCall(env.TELEGRAM_BOT_TOKEN, method, body),
         });

@@ -7,10 +7,10 @@
 //     sent, the translation hold).
 //   - A user who never opened the Mini App gets exactly one gentle reminder the next day, between
 //     10:00 and 20:00 their time; defaults (Asia/Yerevan, 09/14/20, all main topics) apply meanwhile.
-import { CONFIG, candidateStatement, escapeHtml, localParts, parseList, planDigest } from "./digest.js";
+import { CONFIG, candidateStatement, escapeHtml, localParts, planDigest } from "./digest.js";
 import { allTopicsOff, digestWrites, sendDigest } from "./cron.js";
 import { asTopicRows, enabledOnly, followedStatement, withCustomTopics } from "./custom.js";
-import { effectiveLang, listJoin, t, zoneName } from "./i18n.js";
+import { effectiveLang, t } from "./i18n.js";
 import { errorStatement } from "./db.js";
 
 const DAY = 86400;
@@ -71,10 +71,9 @@ export const reminderStatement = (now) => ({
   params: [now - REMINDER.after_s, REMINDER.per_tick * 3],
 });
 
+// Step 17b: the same short HTML text for everyone ("Set up" in bold), no name or times.
 export function reminderText(user, lang = effectiveLang(user)) {
-  return t(lang, "bot.reminder", { name: user.first_name || t(lang, "bot.friend"),
-    times: listJoin(lang, parseList(user.digest_times, CONFIG.default_times)),
-    zone: t(lang, "bot.zone", { zone: zoneName(lang, user.timezone || CONFIG.default_timezone) }) });
+  return t(lang, "bot.reminder");
 }
 
 export const inReminderHours = (user, now) => {
@@ -96,7 +95,7 @@ export async function runReminders(db, io, rows, now) {
     const u = due[i];
     const lang = effectiveLang(u);
     try {
-      await io.send(u.id, escapeHtml(reminderText(u, lang)), setupButton(io.appUrl, lang));
+      await io.send(u.id, reminderText(u, lang), setupButton(io.appUrl, lang));
       out.sent++;
     } catch (e) {
       out.failed++;

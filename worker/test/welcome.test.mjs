@@ -29,7 +29,7 @@ const hook = (binding, text, id, lang = "en") => worker.fetch(new Request("https
   method: "POST", headers: { "x-telegram-bot-api-secret-token": SECRET },
   body: JSON.stringify({ update_id: 1, message: { message_id: 5, from: { id, first_name: "Nora", language_code: lang }, chat: { id, type: "private" }, text } }) }), env(binding));
 const telegram = () => mockFetch((url) => (url.includes("api.telegram.org") ? { status: 200, body: { ok: true, result: { message_id: 1 } } } : undefined));
-const sends = () => fetchMock.calls.filter((c) => /\/send(Message|RichMessage)$/.test(c.url));
+const sends = () => fetchMock.calls.filter((c) => /\/send(Message|RichMessage|Animation)$/.test(c.url));
 const userRow = (sqlite, id) => ({ ...sqlite.prepare("SELECT * FROM users WHERE id = ?").get(id) });
 const NEW = 300;
 
@@ -39,8 +39,12 @@ describe("Step 15: welcome, new vs returning vs imported", () => {
     fetchMock = telegram();
     await hook(binding, "/start", NEW, "ru");
     const m = sends()[0].body;
-    assert.equal(m.text, t("ru", "bot.welcome_setup", { name: "Nora" }));
-    assert.equal(m.reply_markup.inline_keyboard[0][0].text, "Настроить");
+    // Step 17b: one message, the logo animation with the welcome as its HTML caption and the button
+    assert.match(sends()[0].url, /\/sendAnimation$/);
+    assert.equal(m.animation, "https://w.test/media/welcome.mp4");
+    assert.equal(m.caption, t("ru", "bot.welcome_setup"));
+    assert.equal(m.parse_mode, "HTML");
+    assert.equal(m.reply_markup.inline_keyboard[0][0].text, "⚙️ Настроить");
     assert.equal(userRow(sqlite, NEW).opened_at, null);
     const r = await api(binding, "/api/open", NEW, { tz: "Asia/Yerevan" }, "ru");
     assert.equal(r.body.setup, true);
@@ -52,7 +56,7 @@ describe("Step 15: welcome, new vs returning vs imported", () => {
     addUser(sqlite, { id: NEW, first_name: "Nora" });
     fetchMock = telegram();
     await hook(binding, "/start", NEW);
-    assert.match(sends()[0].body.text, /^👋 Welcome back, Nora!/);
+    assert.match(sends()[0].body.text, /^👋 Welcome back, Nora\./);
     assert.equal((await api(binding, "/api/open", NEW, {})).body.setup, false);
   });
 
@@ -61,8 +65,8 @@ describe("Step 15: welcome, new vs returning vs imported", () => {
     addUser(sqlite, { id: NEW, first_name: "Nora", imported: 1, onboarded_at: null, opened_at: null, created_at: 1 });
     fetchMock = telegram();
     await hook(binding, "/start", NEW);
-    assert.match(sends()[0].body.text, /^👋 Welcome back, Nora!/);
-    assert.notEqual(sends()[0].body.reply_markup.inline_keyboard[0][0].text, "Set up");
+    assert.match(sends()[0].body.text, /^👋 Welcome back, Nora\./);
+    assert.notEqual(sends()[0].body.reply_markup.inline_keyboard[0][0].text, "⚙️ Set up");
     assert.equal(needsSetup(userRow(sqlite, NEW)), false);
     const [due] = await (fakeD1Like(binding)).batch([reminderStatement(yerevan(12, 0, 20))]);
     assert.equal(due.length, 0);
@@ -73,7 +77,29 @@ describe("Step 15: welcome, new vs returning vs imported", () => {
     fetchMock = telegram();
     await hook(binding, "/start", NEW);
     await hook(binding, "/start", NEW);
-    assert.equal(sends()[1].body.reply_markup.inline_keyboard[0][0].text, "Set up");
+    assert.equal(sends()[1].body.reply_markup.inline_keyboard[0][0].text, "⚙️ Set up");
+  });
+
+  test("Step 17b: if Telegram refuses the animation, the same welcome goes as text, and the failure is logged", async () => {
+    const { binding, sqlite } = fakeD1();
+    fetchMock = mockFetch((url) => (url.endsWith("/sendAnimation") ? { status: 400, body: { ok: false, description: "Bad Request: wrong file" } }
+      : url.includes("api.telegram.org") ? { status: 200, body: { ok: true, result: { message_id: 1 } } } : undefined));
+    await hook(binding, "/start", NEW);
+    const [anim, text] = sends();
+    assert.match(anim.url, /\/sendAnimation$/);
+    assert.match(text.url, /\/sendMessage$/);
+    assert.equal(text.body.text, t("en", "bot.welcome_setup"));
+    assert.equal(text.body.parse_mode, "HTML");
+    assert.equal(text.body.reply_markup.inline_keyboard[0][0].text, "⚙️ Set up");
+    assert.match(sqlite.prepare("SELECT message FROM errors").all().map((r) => r.message).join(), /welcome animation for 300: Telegram sendAnimation HTTP 400/);
+  });
+
+  test("Step 17b: a reader who blocked the bot gets no second try", async () => {
+    const { binding } = fakeD1();
+    fetchMock = mockFetch((url) => (url.endsWith("/sendAnimation") ? { status: 403, body: { ok: false, description: "Forbidden: bot was blocked by the user" } }
+      : url.includes("api.telegram.org") ? { status: 200, body: { ok: true, result: { message_id: 1 } } } : undefined));
+    await hook(binding, "/start", NEW);
+    assert.deepEqual(sends().map((c) => c.url.split("/").pop()), ["sendAnimation"]);
   });
 });
 
@@ -97,7 +123,7 @@ describe("Step 15: the setup and the sample digest", () => {
     const digest = sends().filter((c) => c.body.chat_id === NEW);
     assert.equal(digest.length, 1);
     const html = digest[0].body.rich_message?.html ?? digest[0].body.text;
-    assert.match(html, /^<p><i>🧪 Sample digest: the top news of the last 24 hours<\/i><\/p>/);
+    assert.match(html, /^<p><i>🧪 Sample digest: the important news of the last 24 hours<\/i><\/p>/);
     assert.match(html, /Armenia and Turkey open the border/);
     assert.doesNotMatch(html, /Old news/);
     assert.equal(sqlite.prepare("SELECT count(*) AS n FROM sent WHERE user_id = ? AND story_id = ?").get(NEW, a).n, 1);
@@ -176,13 +202,14 @@ describe("Step 15: exactly one reminder", () => {
     await runTick(db, io, yerevan(21, 0, 13));  // 15 h: not a day yet
     assert.equal(outbox.filter((m) => m.text.includes("Настроить") || m.text.includes("Set up")).length, 0);
     await runTick(db, io, yerevan(12, 0, 14));
-    const rem = outbox.filter((m) => /Нажмите «Настроить»|Tap Set up/.test(m.text));
+    const rem = outbox.filter((m) => /Нажмите <b>Настроить<\/b>|Tap <b>Set up<\/b>/.test(m.text));
     assert.deepEqual(rem.map((m) => m.id), [NEW]);
-    assert.equal(rem[0].text, reminderText({ first_name: "Nora", lang: "ru", digest_times: '["09:00","14:00","20:00"]', timezone: "Asia/Yerevan" }));
-    assert.equal(rem[0].extra.reply_markup.inline_keyboard[0][0].text, "Настроить");
+    assert.equal(rem[0].text, reminderText({ first_name: "Nora", lang: "ru" }));
+    assert.equal(rem[0].text, "👋 Ваша сводка ещё не настроена.\n⚙️ Это займёт около 20 секунд.\n👇 Нажмите <b>Настроить</b>, чтобы начать.");
+    assert.equal(rem[0].extra.reply_markup.inline_keyboard[0][0].text, "⚙️ Настроить");
     await runTick(db, io, yerevan(13, 0, 14));
     await runTick(db, io, yerevan(12, 0, 16));
-    assert.equal(outbox.filter((m) => /Нажмите «Настроить»/.test(m.text)).length, 1, "never a second one");
+    assert.equal(outbox.filter((m) => /Нажмите <b>Настроить<\/b>/.test(m.text)).length, 1, "never a second one");
   });
 
   test("the reminder is claimed before it is sent: a failed send is not repeated, two overlapping ticks send once", async () => {
@@ -204,7 +231,7 @@ describe("Step 15: setup texts and the first open", () => {
     assert.deepEqual(["setup_topics", "setup_times", "setup_done", "setup_next", "setup_back", "setup_skip", "setup_finish"].map((k) => t("ru", `app.${k}`)),
       ["📰 Ваши темы", "🕘 Время сводок", "✅ Всё готово", "Далее", "Назад", "Пропустить", "Готово"]);
     assert.equal(t("ru", "app.setup_step", { n: 2, of: 4 }), "2 из 4");
-    assert.equal(t("ru", "bot.setup_button"), "Настроить");
+    assert.equal(t("ru", "bot.setup_button"), "⚙️ Настроить");
     assert.match(t("ru", "digest.sample_label"), /^🧪 Пример сводки/);
     for (const lang of ["en", "ru", "hy", "fr"]) {
       for (const k of ["bot.welcome_setup", "bot.setup_button", "bot.reminder", "digest.sample_label", "app.setup_topics", "app.setup_times",

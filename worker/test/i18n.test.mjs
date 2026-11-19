@@ -335,9 +335,9 @@ describe("language defaults and the language setting", () => {
     await worker.fetch(post("/start", { id: OWNER, first_name: "Rob", language_code: "ru" }), env(binding));
     assert.equal(langOf(sqlite), "ru");
     const [reply, ...setup] = fetchMock.calls;
-    assert.match(reply.body.text, /^👋 Добро пожаловать в Axiom News, Rob!\n📰 Короткая сводка/);
-    assert.match(reply.body.text, /Нажмите «Настроить», чтобы выбрать темы и время\./);
-    assert.equal(reply.body.reply_markup.inline_keyboard[0][0].text, "Настроить");
+    assert.match(reply.body.caption, /^👋 Добро пожаловать в Axiom News\.\n\n📰 Вы будете получать короткую сводку/);
+    assert.match(reply.body.caption, /Нажмите <b>Настроить<\/b>, чтобы начать\.$/);
+    assert.equal(reply.body.reply_markup.inline_keyboard[0][0].text, "⚙️ Настроить");
     const cmd = setup.find((c) => c.url.endsWith("/setMyCommands")).body;
     assert.deepEqual(cmd.scope, { type: "chat", chat_id: OWNER });
     assert.equal(cmd.commands[1].description, "Открыть настройки");
@@ -361,11 +361,11 @@ describe("language defaults and the language setting", () => {
     fetchMock = mockFetch(() => undefined);
     await worker.fetch(post("/start", { id: OWNER, first_name: "Rob", language_code: "ru" }), env(binding));
     assert.equal(langOf(sqlite), "en");
-    assert.match(fetchMock.calls[0].body.text, /^👋 Welcome back, Rob!/);
+    assert.match(fetchMock.calls[0].body.text, /^👋 Welcome back, Rob\./);
     sqlite.prepare("UPDATE users SET lang = 'ru'").run();
     await worker.fetch(post("/start", { id: OWNER, first_name: "Rob", language_code: "en" }), env(binding));
     assert.equal(langOf(sqlite), "ru");
-    assert.match(fetchMock.calls[1].body.text, /^👋 С возвращением, Rob!/);
+    assert.match(fetchMock.calls[1].body.text, /^👋 С возвращением, Rob\./);
     await worker.fetch(post("hello", { id: OWNER, first_name: "Rob", language_code: "en" }), env(binding));
     assert.match(fetchMock.calls[2].body.text, /^🕘 Ваши сводки: 09:00, 14:00 и 20:00/);
   });

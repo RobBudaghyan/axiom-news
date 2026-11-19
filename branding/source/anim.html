@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Axiom News animation</title>
+<!-- The description animation (3 s) and, with setup({short: true}), the welcome animation (2 s).
+     One motion: the white bar draws from its left edge, AXIOM rises inside it, NEWS settles below.
+     window.frame(t) draws the exact state at t seconds (render.mjs captures frame by frame). -->
+<style>
+  html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #b1161c; }
+  svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+</style>
+<script src="logo-paths.js"></script>
+</head>
+<body>
+<svg id="s" viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">
+  <defs><clipPath id="barclip"><rect id="clip" /></clipPath></defs>
+  <g id="lockup">
+    <rect id="bar" fill="#fff" />
+    <g clip-path="url(#barclip)"><path id="axiom" fill="#b1161c" /></g>
+    <path id="news" fill="#fff" />
+  </g>
+</svg>
+<script>
+  const L = window.LOGO;
+  const [bx, by, bw, bh] = L.bar;
+  const newsBottom = 220 * 1024 / 320;
+  // the lockup (bar top to NEWS bottom) centred, 47% of the frame width
+  const k = (640 * 0.47) / bw;
+  const lockH = (newsBottom - by) * k;
+  const ox = 320 - (bx + bw / 2) * k, oy = 180 - lockH / 2 - by * k;
+  const $ = (id) => document.getElementById(id);
+  $("lockup").setAttribute("transform", `translate(${ox} ${oy}) scale(${k})`);
+  $("axiom").setAttribute("d", L.axiom.d);
+  $("news").setAttribute("d", L.news.d);
+  const clip = $("clip");
+  clip.setAttribute("x", bx); clip.setAttribute("y", by); clip.setAttribute("width", bw); clip.setAttribute("height", bh);
+
+  // timings in seconds: [start, end]
+  let T = { bar: [0.30, 1.05], axiom: [0.62, 1.30], news: [1.00, 1.70] };
+  window.setup = (q) => { if (q && q.short) T = { bar: [0.12, 0.70], axiom: [0.34, 0.88], news: [0.62, 1.16] }; };
+
+  const clamp = (x) => Math.max(0, Math.min(1, x));
+  const p = (t, [a, b]) => clamp((t - a) / (b - a));
+  const outQuart = (x) => 1 - Math.pow(1 - x, 4);
+  const inOutCubic = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+
+  window.frame = (t) => {
+    const b = inOutCubic(p(t, T.bar));
+    const bar = $("bar");
+    bar.setAttribute("x", bx); bar.setAttribute("y", by); bar.setAttribute("height", bh);
+    bar.setAttribute("width", Math.max(0, bw * b));
+    const a = outQuart(p(t, T.axiom));
+    $("axiom").setAttribute("transform", `translate(0 ${(1 - a) * bh * 0.9}) ${L.axiom.transform}`);
+    const n = outQuart(p(t, T.news));
+    const news = $("news");
+    news.setAttribute("opacity", n);
+    news.setAttribute("transform", `translate(0 ${(1 - n) * bh * 0.35}) ${L.news.transform}`);
+  };
+  window.frame(99);
+</script>
+</body>
+</html>

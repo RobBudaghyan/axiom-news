@@ -324,7 +324,13 @@ button.row:active, .tap:active { background: var(--press); }
 .spin-sm { width: 18px; height: 18px; border-width: 2px; }
 
 /* ------------------------------------------------------------------ loading, empty, toast */
-.loading { min-height: 60vh; display: grid; place-items: center; }
+.loading { min-height: 70vh; display: grid; place-items: center; }
+/* Step 17b: the logo appears softly, then breathes slowly until the settings are drawn (no spinner).
+   The same red square in light and dark; corners like an app icon. */
+.loader-logo { display: block; width: 72px; height: 72px; opacity: 0;
+  animation: logo-in 0.5s ease-out 0.1s forwards, logo-breathe 1.8s ease-in-out 0.6s infinite alternate; }
+@keyframes logo-in { to { opacity: 1; } }
+@keyframes logo-breathe { from { opacity: 1; } to { opacity: 0.5; } }
 .spinner {
   display: inline-block; width: 26px; height: 26px; border-radius: 50%; border: 2.5px solid var(--fill-2);
   border-top-color: var(--accent); animation: spin 0.8s linear infinite;
@@ -367,4 +373,5 @@ button.row:active, .tap:active { background: var(--press); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  .loader-logo { animation: none !important; opacity: 1; }   /* still, not a flicker */
 }

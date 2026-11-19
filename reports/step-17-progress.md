@@ -105,3 +105,11 @@ secrets (`set_secrets.py worker-prod`, adds the analytics token), push the job t
 ## Part 4: Fly.io (done by the owner)
 The owner deleted the whole Fly.io account himself (2026-11-19). Nothing left to clean up; note it in the
 docs and the final report.
+
+## Step 17b: branding (2026-11-19)
+Done on staging and the TEST bot; details in `reports/step-17b-branding.md`. New texts (about, description,
+welcome, reminder, calmer wording), the welcome animation, the Mini App loading screen, BotFather files
+and share cards in `branding/out/`. Sent to the owner on the TEST bot with the BotFather taps.
+**Waiting on the owner:** his OK after checking on his phone, and the BotFather steps on the TEST bot.
+At the launch switch: `setup-bot.mjs` on production plus BotFather steps A to D for @axiom_news_bot
+(listed in the 17b report). Production not touched.

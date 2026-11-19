@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
+<title>Loading screen check</title>
+<!-- Checking only: the Mini App's real loading markup (from worker/public/app/index.html) with the
+     real app.css, frozen at 1 s of its fade. -->
+<link rel="stylesheet" href="../../worker/public/app/app.css">
+</head>
+<body>
+<div id="app" class="app"></div>
+<script>
+  window.ready = (async () => {
+    const html = await (await fetch("../../worker/public/app/index.html")).text();
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    document.getElementById("app").innerHTML = doc.querySelector(".loading").outerHTML;
+    await new Promise((r) => setTimeout(r, 50));
+    document.getAnimations().forEach((a) => { a.pause(); a.currentTime = 1000; });
+  })();
+  window.setup = () => window.ready;
+</script>
+</body>
+</html>

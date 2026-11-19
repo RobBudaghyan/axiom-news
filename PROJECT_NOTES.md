@@ -105,6 +105,10 @@ bot @axiom_news_bot at the end.
   the normal rules. One reminder the next day (10:00 to 20:00 their time) for someone who never
   opened the app. Readers imported from the old bot (`import-users.mjs`, `imported = 1`) get none
   of it; they get the announcement.
+- **Branding (Step 17b):** the Axiom News logo rebuilt as a vector (`branding/`); the welcome is one
+  message: a 2 s logo animation (`worker/public/media/welcome.mp4`, sent by URL), the text as caption,
+  and "⚙️ Set up" (text fallback if the animation fails). The reminder: the same short text for everyone.
+  The Mini App loads with the logo fading in (no spinner). Tone: calm and factual, emojis at line starts.
 - **Announcements (Step 15):** Admin, owner only. Written in English; AI translates into every
   language the audience reads (all users or one language); checked, editable, previewed to the
   owner, then sent 25 per 5-minute tick, each user claimed before sending (never twice).
@@ -243,6 +247,8 @@ bot @axiom_news_bot at the end.
 | 2026-11-15 | pre_checkout_query is answered from the invoice payload alone (no database read) | Telegram cancels the payment after 10 s; measured a few microseconds |
 | 2026-11-15 | Table `tips`: user, amount, Telegram charge id (UNIQUE), time, refunded time; nothing else | the owner's rule; the charge id is needed for refunds, and UNIQUE makes a repeated update count once |
 | 2026-11-15 | /paysupport forwards the user's note to the owner; /terms states the tip terms; the owner refunds from Admin after a confirm (refundStarPayment) | Telegram's rules for bots that take Stars |
+| 2026-11-19 | Description and Help say "about 100 outlets", not "120+ sources" (Step 17b) | 123 enabled feeds come from 98 outlets; readers read "sources" as outlets |
+| 2026-11-19 | Branding visuals built in code (HTML/SVG/CSS, headless Edge, ffmpeg), the logo as outlines from Montserrat ExtraBold fitted to the old 320 px photo (Step 17b) | no AI images or stock art (owner); the old logo existed only as a soft JPEG |
 
 ## Current status
 - **Step 1 done:** repo, docs, topics, prompt, lessons, 116 verified feeds.

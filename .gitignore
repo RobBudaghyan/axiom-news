@@ -13,6 +13,7 @@
 data/
 # report data files (CSV) are committed
 !reports/data/
+!branding/source/data/
 
 # Python
 venv/

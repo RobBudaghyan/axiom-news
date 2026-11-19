@@ -148,7 +148,7 @@ describe("successful_payment", () => {
       ["id", "user_id", "amount", "charge_id", "at", "refunded_at"]);
     const thanks = fetchMock.calls.filter((c) => methodOf(c) === "sendMessage");
     assert.equal(thanks.length, 1);
-    assert.equal(thanks[0].body.text, "❤️ Спасибо за чаевые, 250 ⭐!\n✅ Ваши сводки остаются такими же.");
+    assert.equal(thanks[0].body.text, "❤️ Спасибо за чаевые, 250 ⭐.\n✅ Ваши сводки остаются прежними.");
     // a tip changes nothing else for the user
     assert.deepEqual(sqlite.prepare("SELECT * FROM users WHERE id = ?").get(FRIEND), before);
     await hook(binding, paid(50, "ch_B"));
@@ -237,12 +237,12 @@ describe("/paysupport, /terms, commands and texts", () => {
     fetchMock = telegram();
     await hook(binding, msg({ text: "/paysupport" }));
     assert.match(fetchMock.calls[0].body.text, /^💬 A problem with a tip\?\n✍️ Send \/paysupport/);
-    assert.match(fetchMock.calls[0].body.text, /Telegram support can't help/);
+    assert.match(fetchMock.calls[0].body.text, /Telegram support cannot help/);
     fetchMock.calls.length = 0;
     await hook(binding, msg({ text: "/paysupport I sent 500 by mistake" }));
     assert.deepEqual(fetchMock.calls.map((c) => c.body.chat_id), [OWNER, FRIEND]);
     assert.match(fetchMock.calls[0].body.text, /^Payment support request from Ann \(id 777, @ann\):\nI sent 500 by mistake/);
-    assert.match(fetchMock.calls[1].body.text, /^✅ Thank you! Your note was sent/);
+    assert.match(fetchMock.calls[1].body.text, /^✅ Thank you\. Your note has been sent/);
     fetchMock.calls.length = 0;
     await hook(binding, msg({ text: "/terms" }));
     assert.match(fetchMock.calls[0].body.text, /^📄 Terms for tips\n/);

@@ -336,7 +336,7 @@ try {
     r.before.title === "Send feedback" && r.before.disabled && r.before.font === "17px" && r.before.h === 48 && r.before.w === r.before.page &&
     r.before.max === 1000 && r.enabled, JSON.stringify(r.before));
   check("Send feedback: sent with a success haptic and a short Thank you, back to Settings",
-    r.title === "Settings" && JSON.stringify(r.toasts) === '["✅ Thank you!"]' && r.haptics.includes("haptic success") &&
+    r.title === "Settings" && JSON.stringify(r.toasts) === '["✅ Sent. Thank you."]' && r.haptics.includes("haptic success") &&
     r.back.join() === "back show,back hide", JSON.stringify(r));
   r = await b.run(`const h = { authorization: 'tma ' + Telegram.WebApp.initData, 'content-type': 'application/json' };
     const out = [];
@@ -527,7 +527,7 @@ const SETUP_LAYOUT = `const v = document.querySelector('#view');
       r.on2.join() === "09:00,14:00,20:00" && r.s2.nav.join() === "Back,Next" && r.s2.navOk && r.s2.heights.join() === "48" &&
       r.savedTimes.join() === "09:00,14:00" && r.back === "📰 Your topics", JSON.stringify(r).slice(0, 700));
     check("setup step 4: '✅ All set', 4 of 4, the next digest and two short lines about the sample, one Done button",
-      r.s3.title === "✅ All set" && r.s3.head === "4 of 4" && r.hero && /sample digest is on its way\.It has the top news of the last 24 hours/.test(r.sample) && r.s3.nav.join() === "Done" &&
+      r.s3.title === "✅ All set" && r.s3.head === "4 of 4" && r.hero && /sample digest will arrive shortly\.It covers the important news of the last 24 hours/.test(r.sample) && r.s3.nav.join() === "Done" &&
       r.s3.navOk && !r.s3.sideways, JSON.stringify(r.s3));
     r = await n.run(`${SERVER} const k = calls(); click('[data-action=setup-finish]'); await until(() => text('#title') === 'Settings', 6000); await wait(300);
       const st = await (await fetch('/api/open', { method: 'POST', headers: { authorization: 'tma ' + Telegram.WebApp.initData, 'content-type': 'application/json' }, body: '{}' })).json();

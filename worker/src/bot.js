@@ -32,8 +32,28 @@ export function welcomeText(user, topics, now, isNew, lang = effectiveLang(user)
     t(lang, "bot.welcome_next", { when: describeSlot(user.next_digest_at, now, tz, lang), button: t(lang, "bot.button") });
 }
 
-export const welcomeSetupText = (user, lang = effectiveLang(user)) =>
-  t(lang, "bot.welcome_setup", { name: user.first_name || t(lang, "bot.friend") });
+// Step 17b: the welcome for a new reader (HTML: "Set up" in bold), the same for everyone.
+export const welcomeSetupText = (user, lang = effectiveLang(user)) => t(lang, "bot.welcome_setup");
+
+// Step 17b: the welcome is ONE message: the short logo animation (public/media/welcome.mp4, sent by
+// URL) with the text as its caption and the Set up button. If Telegram refuses the animation, the
+// same text and button go as a plain message, so a new reader always gets the welcome.
+export async function sendWelcome(ctx, chatId, user, lang) {
+  const text = welcomeSetupText(user, lang);
+  const extra = { parse_mode: "HTML", ...setupButton(ctx.appUrl, lang) };
+  if (ctx.tg && ctx.welcomeAnimation) {
+    try {
+      await ctx.tg("sendAnimation", { chat_id: chatId, animation: ctx.welcomeAnimation, caption: text,
+        width: 1280, height: 720, duration: 2, ...extra });
+      return "animation";
+    } catch (e) {
+      if (e.status === 403) throw e;   // blocked: nothing else would arrive either
+      await ctx.db.batch([errorStatement(`welcome animation for ${chatId}: ${e.message}`, ctx.now)]);
+    }
+  }
+  await ctx.reply(chatId, text, extra);
+  return "text";
+}
 
 export function helpText(user, now, lang = effectiveLang(user)) {
   if (!user) return t(lang, "bot.help_new");
@@ -137,7 +157,7 @@ export async function handleUpdate(update, ctx) {
     // Step 15: a new user (or one who has not finished the setup yet) gets a short welcome and the
     // "Set up" button; a returning or imported user gets the usual "welcome back" with settings.
     if (isNew || needsSetup(user)) {
-      await ctx.reply(id, welcomeSetupText(user, lang), setupButton(ctx.appUrl, lang));
+      await sendWelcome(ctx, id, user, lang);
     } else {
       await ctx.reply(id, welcomeText(user, topics, now, false, lang), button(ctx, lang));
     }

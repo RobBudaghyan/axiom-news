@@ -40,6 +40,8 @@
   const zoneName = (tz) => { const c = city(tz); const v = look(L10N.dicts[LANG], `zones.${c}`); return typeof v === "string" ? v : c; };
   const cap = (s) => (s ? s.charAt(0).toLocaleUpperCase(locale()) + s.slice(1) : s);
   const app = document.getElementById("app");
+  // Step 17b: the loading screen from index.html (the logo with a slow fade), reused on a retry
+  const LOADER = (app.querySelector(".loading") || {}).outerHTML || '<div class="loading" role="status"></div>';
   const toastEl = document.getElementById("toast");
   const S = { st: null, admin: null, adminErr: null, adminLoading: false, tab: "settings", range: "24h",
     allErrors: false, busy: {}, page: null, fbDraft: "" };
@@ -1110,7 +1112,9 @@
       fatal(tr("app.open_in_telegram_title"), tr("app.open_in_telegram"));
       return;
     }
-    app.innerHTML = `<div class="loading"><span class="spinner" aria-label="${esc(tr("app.loading"))}"></span></div>`;
+    if (!app.querySelector(".loading")) app.innerHTML = LOADER;
+    app.setAttribute("aria-busy", "true");
+    app.querySelector(".loading").setAttribute("aria-label", tr("app.loading"));
     try {
       S.st = await api("/api/open", { tz: deviceTz });
     } catch (e) {

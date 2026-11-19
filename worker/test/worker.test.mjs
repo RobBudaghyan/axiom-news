@@ -44,16 +44,16 @@ describe("webhook", () => {
     assert.deepEqual(JSON.parse(u.topics), ALL);
     assert.ok(u.next_digest_at > Date.now() / 1000);
     const reply = fetchMock.calls[0];
-    assert.match(reply.url, /\/sendMessage$/);
+    assert.match(reply.url, /\/sendAnimation$/);   // Step 17b: the logo animation with the welcome as caption
     assert.equal(reply.body.chat_id, OWNER);
-    assert.match(reply.body.text, /^👋 Welcome to Axiom News, Ruben!/);
-    assert.match(reply.body.text, /Tap Set up to choose topics and times\.\n⏱️ It takes a minute\.$/);
-    assert.equal(reply.body.reply_markup.inline_keyboard[0][0].text, "Set up");
+    assert.match(reply.body.caption, /^👋 Welcome to Axiom News\.\n\n📰 You will receive a short digest/);
+    assert.match(reply.body.caption, /⚙️ Setup takes about 20 seconds: language, topics and delivery times\.\n\n👇 Tap <b>Set up<\/b> to begin\.$/);
+    assert.equal(reply.body.reply_markup.inline_keyboard[0][0].text, "⚙️ Set up");
     assert.ok(reply.body.reply_markup.inline_keyboard[0][0].web_app.url);
     assert.equal(u.onboarded_at, null);
     assert.equal(u.opened_at, null);
     assert.equal(u.imported, 0);
-    assert.doesNotMatch(reply.body.text, /[—–]/);
+    assert.doesNotMatch(reply.body.caption, /[—–]/);
   });
 
   test("/start again keeps settings, unblocks, and says welcome back", async () => {
@@ -64,7 +64,7 @@ describe("webhook", () => {
     const u = sqlite.prepare("SELECT * FROM users WHERE id = ?").get(OWNER);
     assert.equal(u.topics, '["armenia"]');
     assert.equal(u.blocked, 0);
-    assert.match(fetchMock.calls[0].body.text, /^👋 Welcome back, Ruben!/);
+    assert.match(fetchMock.calls[0].body.text, /^👋 Welcome back, Ruben\./);
     assert.match(fetchMock.calls[0].body.text, /Your digests: 08:00 \(Yerevan time\)/);
   });
 
@@ -82,7 +82,10 @@ describe("webhook", () => {
     const { binding, sqlite } = fakeD1();
     fetchMock = mockFetch(() => ({ status: 500, body: { ok: false, description: "boom" } }));
     assert.equal((await worker.fetch(post(update("/start")), env(binding))).status, 200);
-    assert.match(sqlite.prepare("SELECT message FROM errors").get().message, /webhook: Telegram sendMessage HTTP 500/);
+    // Step 17b: the animation fails first (logged), then the text fallback fails too (the webhook error)
+    const errs = sqlite.prepare("SELECT message FROM errors ORDER BY id").all().map((r) => r.message).join("\n");
+    assert.match(errs, /welcome animation for \d+: Telegram sendAnimation HTTP 500/);
+    assert.match(errs, /webhook: Telegram sendMessage HTTP 500/);
   });
 });
 

@@ -1,0 +1,36 @@
+/* Shared by the branding pages: Inter (SIL OFL, fonts/), the brand red, and the digest as Telegram
+   shows a rich message (the real HTML from data/digest-*.html, styled, not retyped). Emoji are
+   Twemoji images (emoji/, CC BY 4.0), as Chrome on Windows has no colour flag emoji. */
+@font-face { font-family: Inter; font-weight: 400; src: url(fonts/inter-latin-400-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+2000-206F, U+20AC; }
+@font-face { font-family: Inter; font-weight: 500; src: url(fonts/inter-latin-500-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+2000-206F, U+20AC; }
+@font-face { font-family: Inter; font-weight: 600; src: url(fonts/inter-latin-600-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+2000-206F, U+20AC; }
+@font-face { font-family: Inter; font-weight: 700; src: url(fonts/inter-latin-700-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+2000-206F, U+20AC; }
+@font-face { font-family: Inter; font-weight: 400; src: url(fonts/inter-cyrillic-400-normal.woff2) format("woff2"); unicode-range: U+0400-04FF; }
+@font-face { font-family: Inter; font-weight: 500; src: url(fonts/inter-cyrillic-500-normal.woff2) format("woff2"); unicode-range: U+0400-04FF; }
+@font-face { font-family: Inter; font-weight: 600; src: url(fonts/inter-cyrillic-600-normal.woff2) format("woff2"); unicode-range: U+0400-04FF; }
+@font-face { font-family: Inter; font-weight: 700; src: url(fonts/inter-cyrillic-700-normal.woff2) format("woff2"); unicode-range: U+0400-04FF; }
+
+:root { --red: #b1161c; --ink: #1d1d1f; --ink-2: #6e6e73; --paper: #f5f5f7; --link: #b1161c; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+body { font-family: Inter, sans-serif; color: var(--ink);
+  -webkit-font-smoothing: antialiased; font-feature-settings: "cv11", "ss01"; }
+
+/* the digest message */
+.msg { background: #fff; border-radius: 22px; padding: 18px 20px 6px; font-size: 15px; line-height: 1.42;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 18px 50px rgba(0, 0, 0, 0.10); overflow: hidden; position: relative; }
+.msg p { margin: 0 0 10px; }
+.msg p:first-child b { font-weight: 700; }
+.msg a { color: var(--link); text-decoration: none; }
+.msg i { color: var(--ink-2); }
+.msg i a { font-style: italic; }
+.msg b { font-weight: 600; }
+.msg table { width: 100%; border-collapse: collapse; margin: 4px 0 12px; }
+.msg th { border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 8px; padding: 7px 10px; font-weight: 600; font-size: 14.5px;
+  background: rgba(177, 22, 28, 0.05); }
+.msg blockquote { margin: -4px 0 12px; padding: 7px 10px 7px 12px; border-left: 3px solid var(--red);
+  background: rgba(177, 22, 28, 0.06); border-radius: 4px 8px 8px 4px; color: #2c2c2e; font-size: 14px; }
+.msg hr { border: 0; border-top: 1px solid rgba(0, 0, 0, 0.08); margin: 14px 0; }
+.msg .time { position: absolute; right: 16px; bottom: 8px; font-size: 12px; color: #8e8e93; }
+.fade::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 120px;
+  background: linear-gradient(rgba(255, 255, 255, 0), #fff 85%); }
+.emo { height: 1.15em; width: auto; vertical-align: -0.2em; margin: 0 0.04em; }

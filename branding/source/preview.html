@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mini App preview</title>
+<!-- The bot profile's Main Mini App previews, 1080 x 1920 (540 x 960 at 2x): a short factual caption
+     and one real screen (shots/*.png from capture-app.mjs, or the real digest). setup({lang, shot}). -->
+<link rel="stylesheet" href="shared.css">
+<style>
+  body { background: var(--paper); }
+  .page { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; }
+  .head { padding: 64px 40px 0; text-align: center; }
+  .mark { width: 44px; height: 44px; display: block; margin: 0 auto 22px; }
+  h1 { margin: 0; text-wrap: balance; font-size: 31px; line-height: 1.15; font-weight: 700; letter-spacing: -0.022em; }
+  .sub { margin: 10px 0 0; font-size: 17px; line-height: 1.35; color: var(--ink-2); letter-spacing: -0.01em; }
+  .frame { margin-top: 40px; width: 430px; border-radius: 34px; overflow: hidden; background: #f2f2f7;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 30px 70px rgba(0, 0, 0, 0.13); position: relative; }
+  .frame img { display: block; width: 100%; }
+  .stack { display: flex; flex-direction: column; align-items: center; gap: 22px; margin-top: 40px; }
+  .stack .frame { margin-top: 0; }
+  .chat { width: 452px; margin-top: 40px; flex: 1 1 auto; position: relative; overflow: hidden; }
+  .chat .msg { margin: 0 6px; }
+  .chat::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 160px;
+    background: linear-gradient(rgba(245, 245, 247, 0), var(--paper) 80%); }
+</style>
+<script src="digest.js"></script>
+</head>
+<body>
+<div class="page">
+  <div class="head">
+    <img class="mark" src="logo-icon.svg" alt="">
+    <h1 id="h"></h1>
+    <p class="sub" id="sub"></p>
+  </div>
+  <div id="body"></div>
+</div>
+<script>
+  const TEXT = {
+    en: { setup: ["Set up in about 20 seconds", "Language, topics and delivery times"],
+          settings: ["Your topics and times", "Every change is saved at once"],
+          digest: ["A short digest of the important news", "A few times a day, in Telegram"] },
+    ru: { setup: ["Настройка за 20 секунд", "Язык, темы и время доставки"],
+          settings: ["Ваши темы и время", "Всё сохраняется сразу"],
+          digest: ["Короткая сводка важных новостей", "Несколько раз в день, в Telegram"] },
+  };
+  // how much of each screenshot to show (CSS px of the 390 x 844 screen, from the top)
+  const CROP = { setup: 228, topics: 395, settings: 690 };
+  window.setup = async ({ lang, shot }) => {
+    document.documentElement.lang = lang;
+    const [h, sub] = TEXT[lang][shot];
+    document.getElementById("h").textContent = h;
+    document.getElementById("sub").textContent = sub;
+    const body = document.getElementById("body");
+    if (shot === "digest") {
+      body.className = "chat";
+      body.innerHTML = '<div class="msg"></div>';
+      await loadDigest(body.firstChild, lang, 6);
+    } else {
+      // the setup shows its first two real steps (Language, then Topics) as two cards
+      const cards = shot === "setup" ? [["setup", CROP.setup], ["topics", CROP.topics]] : [[shot, CROP[shot]]];
+      const w = shot === "setup" ? 400 : 430;
+      body.className = "stack";
+      body.innerHTML = cards.map(([name, crop]) =>
+        `<div class="frame" style="width:${w}px;height:${crop * w / 390}px"><img src="shots/${name}-${lang}.png" alt=""></div>`).join("");
+      await Promise.all([...body.querySelectorAll("img")].map((i) => new Promise((r) => (i.complete ? r() : (i.onload = r)))));
+    }
+    await document.fonts.ready;
+  };
+</script>
+</body>
+</html>
