@@ -4,7 +4,7 @@ Stories (the default): the stories, their translations, the topics, the custom t
 and the feed health that changed in the last N hours, so the staging Worker builds digests from the
 same pool as production. Old rows (7 days, like production) are removed from staging too.
 
-    venv/Scripts/python scripts/sync_staging.py --auto          # what the hourly job runs: every 3 hours,
+    venv/Scripts/python scripts/sync_staging.py --auto          # what the hourly job runs: every 6 hours,
                                                                 # since the last sync (staging meta 'sync_at')
     venv/Scripts/python scripts/sync_staging.py --hours 3       # the last 3 hours, now
     venv/Scripts/python scripts/sync_staging.py --hours 48      # on demand: a full pool
@@ -34,7 +34,7 @@ from job.d1 import D1  # noqa: E402
 PROD_ID = "2a1eb212-95b8-4715-b628-2967cbcb0367"
 STAGING_SEQ_START = 1_000_000
 RETENTION_DAYS = 7
-AUTO_EVERY_S = 3 * 3600
+AUTO_EVERY_S = 6 * 3600   # Step 17 (owner): was 3 h; about 4k fewer staging writes a day
 STAGING_STORY_ID = 1_000_000_000
 
 # table -> (WHERE for "changed since ?", the same parameter repeated n times)
@@ -81,7 +81,7 @@ def copy(prod: D1, staging: D1, tables: dict, since: int) -> dict[str, int]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--hours", type=float, default=3)
-    ap.add_argument("--auto", action="store_true", help="every 3 hours, from the last sync (for the hourly job)")
+    ap.add_argument("--auto", action="store_true", help="every 6 hours, from the last sync (for the hourly job)")
     ap.add_argument("--users", action="store_true", help="also copy users, custom follows, sent and holds (one-off)")
     ap.add_argument("--items", action="store_true", help="also copy the feed items of the window (before a job test)")
     a = ap.parse_args()

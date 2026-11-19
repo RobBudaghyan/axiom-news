@@ -1,0 +1,20 @@
+  D1 read      86 rows in   2x: UPDATE items SET status='dropped' WHERE id IN (?..)
+  D1 read     154 rows in   1x: SELECT story_id, ok, src, note FROM story_translations WHERE lang = ? AND story_id IN (?..)
+  D1 read     156 rows in   1x: SELECT id, best_url FROM stories WHERE coalesce(link_state, 0) <> 2 AND best_url LIKE ? AND id IN (?..)
+  D1 read     180 rows in   1x: SELECT id, source_name, tier, url, title, snippet, published_at, fetched_at, headline_only FROM items WHERE st
+  D1 read     840 rows in   3x: SELECT id, summary, topics, importance, best_url, best_source, best_tier, best_published_at, headline, descrip
+  D1 read    1048 rows in   9x: SELECT url_hash FROM items WHERE url_hash IN (?..)
+  D1 read    1437 rows in   4x: SELECT story_id, source_name, tier, title, snippet, published_at, headline_only FROM items WHERE story_id IN (
+  D1 read    3449 rows in   1x: SELECT id, summary, dup_group FROM stories WHERE updated_at >= ? AND importance >= ? AND merged_into IS NULL O
+  D1 read    3683 rows in   1x: SELECT id, topics, main_topic, final_score, topic_score, headline, summary, description FROM stories WHERE (up
+  D1 read    5420 rows in   1x: SELECT id, summary, headline, description, g FROM ( SELECT s.*, coalesce(s.final_score, s.importance - ?2) AS 
+  D1 read    7561 rows in   2x: SELECT id, summary, topics, importance, best_url, best_source, best_tier, best_published_at, source_count, cre
+  D1 read    7678 rows in   1x: SELECT id, title FROM items WHERE id > (SELECT coalesce(max(id), 0) FROM items) - ? AND fetched_at >= ?
+AI: provider gemini, calls 9, tokens in 89630 out 26229 | pruned None
+D1: 41 calls, rows read 32136, rows written 632
+custom topics: 4 active, 4 searched, 12 requests (0 failed), 338 results, 31 seen before, 65 same as the pool, 209 over the per-topic cap, 19 new items, 3.1s
+editor: ok, provider gemini, 1 round(s), 59 candidates, 27 events written, 3 merged away, 29 left out, 0 texts dropped by the fact guard, calls 6, tokens in 59657 out 20910
+items: in window 463, new 71, sent to AI 90, expired 0, left pending 0
+status ok in 129.9s | feeds ok 121, failed 2
+stories: created 22, merged into existing 9; items dropped 43 (of which unaccounted 0)
+translate: ok, 78 eligible stories; ru 11 ok of 11 to do, 0 rejected, 0 unanswered, 1 calls via gemini, tokens in 1426 out 1123

@@ -496,12 +496,14 @@ class Translator:
 
     # ------------------------------------------------------------ the run
 
-    def run(self, now: int) -> TranslateResult:
+    def run(self, now: int, eligible: list[dict] | None = None) -> TranslateResult:
+        """eligible: the ELIGIBLE_SQL rows if the caller already read them this run (Step 17: the job
+        reads them once for the Google links and passes them here; nothing changes those columns between)."""
         out = TranslateResult()
         langs = self.reader_languages()
         if not langs:
             return out
-        stories = self.eligible(now)
+        stories = self.eligible(now) if eligible is None else eligible
         out.eligible = len(stories)
         left = False
         for lang in langs:

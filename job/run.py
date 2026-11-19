@@ -472,7 +472,7 @@ class Job:
             on_call=lambda p, ok, n, res, err, kind: self._log_call(p, ok, n, res, err, kind=kind),
             debug_dir=self.debug_dir)
         try:
-            res = tr.run(now)
+            res = tr.run(now, getattr(self, "eligible_rows", None))
         except Exception as exc:
             res = translate.TranslateResult(status="failed", errors=[f"translate: {type(exc).__name__}: {exc}"])
         stats.input_tokens += res.input_tokens
@@ -546,6 +546,7 @@ class Job:
         try:
             cfg = self.merged_digest_cfg()
             rows = self.db.query(translate.ELIGIBLE_SQL, translate.eligible_params(now, cfg, self.topic_order))
+            self.eligible_rows = rows   # Step 17: the translation step reuses them (one read a run, not two)
             res = custom.resolve_links(self.db, [int(r["id"]) for r in rows], cfg=self._custom_cfg(),
                                        resolver=self.link_resolver, clock=self.clock)
             stats.links = res

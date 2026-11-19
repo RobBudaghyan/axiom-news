@@ -587,3 +587,28 @@ class TestNeverFails(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestEligibleReadOnce(unittest.TestCase):
+    """Step 17 (owner): the translation step reuses the eligible rows the Google-link step read, so a run
+    reads ELIGIBLE_SQL once, not twice."""
+
+    def test_one_eligible_read_per_run(self):
+        db = new_db()
+        add_user(db, 1, lang="ru")
+        feeds = Feeds()
+        feeds.entries = [entry("alpha", "POL: Parliament votes", 10, T0)]
+        j, _ = job_with(db, feeds=feeds)
+        j.translate_enabled = True
+        seen = []
+        real = db.query
+
+        def query(sql, params=()):
+            if sql == translate.ELIGIBLE_SQL:
+                seen.append(1)
+            return real(sql, params)
+
+        db.query = query
+        st = j.run()
+        self.assertIsNotNone(st.translate, "the translation step ran")
+        self.assertEqual(len(seen), 1)
