@@ -59,7 +59,8 @@ bot @axiom_news_bot at the end.
   `axiom-d1`, the hourly job, the real bot at launch (until then it sends nothing to users,
   `USER_SENDS = "off"`). Staging: Worker `axiom-news-staging`, its own D1 `axiom-d1-staging`, the TEST
   bot @justatia_bot, never starts the job, no job alerts; its stories are copied from production
-  every 3 hours by `scripts/sync_staging.py` (no AI). **Rules (also in `CLAUDE.md`): every change goes
+  by `scripts/sync_staging.py` (no AI): on demand only while staging shares production's Cloudflare
+  account (Step 17c), every 6 hours once it has its own. **Rules (also in `CLAUDE.md`): every change goes
   to staging first; production only after the owner says "ship it"
   (`SHIP_IT=yes npm run deploy:prod`, guarded by `ship-check.mjs`); never test on production; job
   changes run locally against staging (`AXIOM_ENV=staging venv/Scripts/python -m job.run
@@ -247,6 +248,9 @@ bot @axiom_news_bot at the end.
 | 2026-11-15 | pre_checkout_query is answered from the invoice payload alone (no database read) | Telegram cancels the payment after 10 s; measured a few microseconds |
 | 2026-11-15 | Table `tips`: user, amount, Telegram charge id (UNIQUE), time, refunded time; nothing else | the owner's rule; the charge id is needed for refunds, and UNIQUE makes a repeated update count once |
 | 2026-11-15 | /paysupport forwards the user's note to the owner; /terms states the tip terms; the owner refunds from Admin after a confirm (refundStarPayment) | Telegram's rules for bots that take Stars |
+| 2026-11-19 | Step 17c (D1 writes): the job writes each new item once, after the AI pass, in its final state; a not-news item leaves only its URL hash (`items_seen`); `dup_group` NULL = its own group; the Worker's usage row once an hour | measured on staging: an insert is 3 rows, a status update 1 to 2, a delete 1; a story item 6 -> 4 rows over its life, a not-news item 5 -> 2; production runs 2.35k -> 1.1k to 1.4k writes |
+| 2026-11-19 | Staging sync on demand only until staging has its own free Cloudflare account (owner: account later) | D1 limits are per account; the sync and staging tests used 10k to 30k of production's writes a day |
+| 2026-11-19 | Feeds: trend_az, azertag, rt_en, marketwatch, politico_eu, wapo_politics off; tass_ru, ria, rg, izvestia 8 -> 4 a run; hetq_hy kept (owner, Step 17c; on staging first) | 48 h: 0 to 2 stories scored 7+ each for many writes; hetq_hy is an Armenian source for the topic path |
 | 2026-11-19 | The description names reputable outlets without a count; Help says "about 100 outlets"; no "a few times a day", "English or Russian", News.am or RFE/RL in user texts (owner, Step 17b) | 123 enabled feeds come from 98 outlets, so "120+ sources" overstated; the bot sends at the times the reader chooses, and more languages may come |
 | 2026-11-19 | BotFather splash icon is one SVG path (`branding/out/splash-icon.svg`, boolean-flattened logo, evenodd) (Step 17b) | BotFather refused an SVG with several shapes |
 | 2026-11-19 | Branding visuals built in code (HTML/SVG/CSS, headless Edge, ffmpeg), the logo as outlines from Montserrat ExtraBold fitted to the old 320 px photo (Step 17b) | no AI images or stock art (owner); the old logo existed only as a soft JPEG |
@@ -335,6 +339,11 @@ bot @axiom_news_bot at the end.
   main-topic bar 7; staging copy with the TEST bot and the "ship it" rule (`CLAUDE.md`); load test;
   the CPU fix and the items index shipped to production (still silent to users). iPhone check skipped
   (accepted risk). Details in `reports/step-16-fixes-staging-safety.md`.
+- **Step 17c done (2026-11-19): D1 writes.** Items written once, not-news as hashes, fewer small writes,
+  staging sync on demand, Admin "Free limit used" line (today and yesterday). Shipped 15:19 UTC;
+  production runs 1,209 and 1,062 writes (2.3k to 2.4k before). Projected: normal day about 34k writes
+  (34%), busy day about 42k, reads 20% to 24%. Feed change waits for its staging run and "ship it".
+  Details in `reports/step-17c-database-writes.md`.
 - Three test users (the owner and two more), now on staging.
 
 ## Next step
@@ -360,11 +369,10 @@ Worker CPU per tick in Cloudflare's metrics (typical 6 to 9 ms, worst seen 15 ms
   chunk/min).
 - **AI grouping is the weakest part:** some over-merged stories and near-duplicates. Guarded by
   prompt and code, but it needs watching.
-- **D1 reads (Step 16):** before the items index the hourly job read about 3.6M rows a day (73% of the
-  free 5M; 2.65M a day earlier), production's Worker about 0.1M, the staging sync about 0.05M. Writes
-  about 52k a day (52%). The index removes the biggest scan (16,918 -> 155 rows per lookup); several
-  job queries still scan the whole story pool (about 5,300 rows each) and one items query per custom
-  topic (hint_topic) has no index. Next: a staging-first fix of those.
+- **D1 use (Step 17c):** after Steps 17 and 17c a normal day is about 34k writes and 1.0M to 1.2M reads
+  for the account, a busy day about 42k writes. The daily prune (from 2026-11-20) is about 8k to 10k of
+  that. Staging tests still count against production's limits until staging has its own account
+  (guide in `reports/step-17c-database-writes.md`).
 - **Staging Admin's "D1 today" job numbers are production's** (job runs are copied with the stories).
 - **Worker CPU (Step 16):** after the fix, digest ticks use typically 6 to 9 ms, the worst seen 15 ms;
   Cloudflare flagged none (41 load-test ticks, some at 24 ms before the fix). The leftover spread did

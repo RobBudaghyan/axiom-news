@@ -144,3 +144,10 @@ At the launch switch: `setup-bot.mjs` on production plus BotFather steps A to D 
 Round 2 (owner remarks, same day): new description, about and welcome line; "a few times a day",
 "English or Russian", News.am and RFE/RL removed; single-path splash icon; previews and cards re-made;
 the production BotFather list with file paths is in the 17b report. On staging and the TEST bot.
+
+## Step 17c: D1 writes (2026-11-19)
+Owner got Cloudflare's 76% alert. Items written once, not-news as hashes, fewer small writes, staging
+sync on demand, Admin "Free limit used" line. Shipped 15:19 UTC (owner's "ship it"); production runs
+143 and 144: 1,209 and 1,062 writes (2.3k to 2.4k before). Details in `reports/step-17c-database-writes.md`.
+**Waiting on the owner:** the feed change (6 feeds off, 4 caps at 4) is made locally, not pushed: it needs
+one staging job run after 00:00 UTC (today's writes end near 98k), then his "ship it". Staging account: later.

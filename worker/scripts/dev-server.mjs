@@ -101,6 +101,11 @@ function seed() {
   feeds.feed_42 = { n: "Iran International", ok: now - 1200, item: now - 3 * 86400, err: null, since: null, fails: 0 };
   sqlite.prepare("INSERT INTO meta (key, value) VALUES ('feed_health', ?), ('d1_worker', ?)")
     .run(JSON.stringify({ at: now - 1200, feeds }), JSON.stringify({ day: Math.floor(now / 86400), r: 6120, w: 214 }));
+  // Step 17c: the hourly account check (Admin's "Free limit used" line), with yesterday's totals
+  const utc = (t) => new Date(t * 1000).toISOString().slice(0, 10);
+  sqlite.prepare("INSERT INTO meta (key, value) VALUES ('cf_usage', ?)").run(JSON.stringify({
+    day: utc(now), at: now - 1500, r: 1_120_000, w: 38_400, cpu: 0, checked_at: now - 1500,
+    y: { day: utc(now - 86400), r: 2_100_000, w: 87_600 } }));
   // a few stories, so "Send me a digest now" has something to send
   const S = [["Ukraine and Russia agree to a new prisoner exchange", ["ukraine_war", "politics_conflicts"], 8],
     ["Armenian parliament passes the 2027 budget", ["armenia", "politics_conflicts"], 6],
