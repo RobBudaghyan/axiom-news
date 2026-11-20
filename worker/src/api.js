@@ -22,7 +22,7 @@
 import { verifyInitData } from "./auth.js";
 import { CONFIG, candidateStatement, hhmm, localParts, nextSlot, planDigest } from "./digest.js";
 import { SettingsError, TZ_AUTO, TZ_DEFAULT, nextDigestAfterChange, publicUser, validZone, validatePatch } from "./settings.js";
-import { adminStatements, shapeAdmin } from "./admin.js";
+import { adminStatements, adminSummary, shapeAdmin } from "./admin.js";
 import { dispatchJob } from "./github.js";
 import { digestWrites, sendDigest } from "./cron.js";
 import { errorStatement } from "./db.js";
@@ -124,24 +124,38 @@ async function saveSettings(db, tg, body, now, cfg, isOwner, io) {
     followedStatement(tg.id)]);
   const user = rows[0];
   if (!user) return fail(404, "reopen_simple");
-  // Step 13: with a custom topic switched on, every main topic may be off
-  const clean = validatePatch(body, topics.map((t) => t.tag), cfg, { custom: enabledOnly(custom).length });
+  // Step 18: a refused change answers with the saved state too, so the Mini App rolls back to it
+  const refuse = (code, vars = {}) => json(400, { error: t("en", `errors.${code}`, vars), code, vars,
+    state: state(user, topics, isOwner, cfg, custom) });
+  let clean;
+  try {
+    clean = validatePatch(body, topics.map((t) => t.tag), cfg, { custom: enabledOnly(custom).length });
+  } catch (e) {
+    if (e instanceof SettingsError) return refuse(e.code, e.vars);
+    throw e;
+  }
   const cols = {};
   for (const [k, v] of Object.entries(clean)) cols[k] = Array.isArray(v) ? JSON.stringify(v) : v;
   const after = { ...user, ...cols };
   cols.next_digest_at = nextDigestAfterChange(user, after, now, cfg);
-  after.next_digest_at = cols.next_digest_at;
   const keys = Object.keys(cols);
-  await db.batch([{
-    sql: `UPDATE users SET ${keys.map((k, i) => `${k} = ?${i + 1}`).join(", ")} WHERE id = ?${keys.length + 1}`,
+  // Step 18 (the digest times bug): one statement writes and returns the saved row, and the database
+  // itself refuses an empty or too long times list (an answer can never say what was not saved).
+  const L = cfg.settings_limits;
+  const guard = "digest_times" in cols
+    ? ` AND json_array_length(?${keys.indexOf("digest_times") + 1}) BETWEEN 1 AND ${Number(L.max_times)}` : "";
+  const [saved] = await db.batch([{
+    sql: `UPDATE users SET ${keys.map((k, i) => `${k} = ?${i + 1}`).join(", ")} WHERE id = ?${keys.length + 1}${guard} RETURNING *`,
     params: [...keys.map((k) => cols[k]), user.id],
   }]);
+  if (!saved?.length) return refuse("keep_time");
+  const row = saved[0];
   // Step 9: the chat's menu button and command list follow the new language.
   if (clean.lang && clean.lang !== user.lang) {
     const problems = await setChatLanguage(io?.tg, user.id, clean.lang, io?.appUrl);
     if (problems.length) await db.batch(problems.map((p) => errorStatement(p, now)));
   }
-  return json(200, state(after, topics, isOwner, cfg, custom));
+  return json(200, state(row, topics, isOwner, cfg, custom));
 }
 
 // ------------------------------------------------------------------ custom topics (Step 13)
@@ -339,9 +353,14 @@ export async function handleApi(request, env, db, now, io, cfg = CONFIG) {
           // Step 17: the owner's own row has no Delete button
           out.users.list = out.users.list.map((u) => ({ ...u, owner: String(u.id) === String(env.OWNER_TELEGRAM_ID ?? "") }));
           out.custom = shapeCustomAdmin(parts[1].slice(0, CUSTOM_ADMIN_COUNT), now);
+          // Step 18 (owner): only active custom topics (a follower with it switched on); the rest is a count
+          const allCustom = out.custom.topics;
+          out.custom.topics = allCustom.filter((x) => x.active > 0);
+          out.custom.hidden = allCustom.length - out.custom.topics.length;
           out.tips = shapeTips(...parts[2]);
           out.feedback = shapeFeedback(...parts[3].slice(0, FEEDBACK_ADMIN_COUNT));
           out.announce = shapeAnnounce(...parts[4].slice(0, ANNOUNCE_ADMIN_COUNT));
+          out.summary = adminSummary(out, now);   // Step 18: one health line, key numbers, limits
           return json(200, out);
         }
         if (route === "POST /api/admin/digest") return await digestNow(db, tg.id, now, cfg, io);

@@ -71,7 +71,8 @@ database_id = "aa4a473a-72fe-4f4a-a9e0-e15f4426d24b"
 
 [env.staging.vars]
 ENV_NAME = "staging"
-USER_SENDS = "on"
+# Step 18 (owner): staging is silent (no digests, reminders or announcements) except during a test
+USER_SENDS = "off"
 JOB_DISPATCH = "off"
 # "on" only during a load test: Telegram is never called, every send counts as delivered.
 SEND_STUB = "off"

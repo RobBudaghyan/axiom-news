@@ -91,7 +91,7 @@ describe("admin gating", () => {
       const body = method === "POST" ? {} : undefined;
       const denied = await call(binding, path, { init: await initFor(FRIEND), body, method });
       assert.equal(denied.status, 403);
-      assert.match(denied.body.error, /only for the bot's owner/);
+      assert.match(denied.body.error, /only for the admin/);   // Step 18: no "owner" wording
       assert.equal(fetchMock.calls.length, 0);  // no Telegram message, no GitHub dispatch
       const allowed = await call(binding, path, { init: await initFor(OWNER), body, method });
       assert.equal(allowed.status, 200, JSON.stringify(allowed.body));

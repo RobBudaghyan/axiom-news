@@ -399,13 +399,19 @@
       const res = r.result || {};
       delete r.result;
       const before = new Set((S.st.custom || []).map((c) => c.id));
-      S.st = r;
+      // Step 18: this answer is not in the save queue (the AI check takes seconds), so only its topic
+      // list is taken; the settings stay as the queue has them.
+      S.st.custom = r.custom;
+      if (r.limits) S.st.limits = r.limits;
+      if (S.server) S.server.custom = copy(r.custom);
+      for (const c of S.st.custom || []) if (pendingCustom.has(c.id)) c.on = pendingCustom.get(c.id);
       S.busy.addTopic = false;
       if (res.kind === "added" || res.kind === "joined") {   // joined (someone had made it) looks the same
         S.draft = "";
         const fresh = (S.st.custom || []).find((c) => !before.has(c.id));
         S.justAdded = fresh ? fresh.id : null;
         renderMyTopics();
+        updateHero();
         haptic("impact", "light");
       } else {   // rejected, a main topic, or "try again in a few minutes": the text stays to edit
         renderMyTopics();
@@ -424,20 +430,19 @@
     const id = Number(el.dataset.value);
     const c = (S.st.custom || []).find((x) => x.id === id);
     if (!c) return;
-    const on = !!c.on;
-    c.on = !on;
-    el.setAttribute("aria-checked", String(!on));
-    updateHero();
-    chain = chain.then(async () => {
+    c.on = !c.on;
+    pendingCustom.set(id, c.on);
+    syncControls();
+    queue(async () => {   // Step 18: one request at a time, the latest wish, rolled back on an error
+      if (!pendingCustom.has(id)) return;
+      const on = pendingCustom.get(id);
+      pendingCustom.delete(id);
       try {
-        S.st = await api("/api/topics/switch", { id, on: !on });
-        updateHero();
+        adopt(await api("/api/topics/switch", { id, on }));
+        syncControls();
         haptic("impact", "light");
       } catch (e) {
-        c.on = on;
-        renderMyTopics();
-        haptic("error");
-        toast(e.message, "err", 3200);
+        rollback(e);
       }
     });
   }
@@ -446,20 +451,17 @@
     const id = Number(el.dataset.value);
     const list = S.st.custom || [];
     const row = el.closest(".row");
-    const before = list;
     S.st.custom = list.filter((c) => c.id !== id);
+    pendingCustom.delete(id);
     haptic("impact", "light");
     row.classList.add("gone");   // collapses, then the card is drawn again
     setTimeout(() => renderMyTopics(), 220);
-    chain = chain.then(async () => {
+    queue(async () => {
       try {
-        S.st = await api("/api/topics/remove", { id });
-        updateHero();
+        adopt(await api("/api/topics/remove", { id }));
+        setTimeout(() => syncControls(), 240);   // after the row has closed
       } catch (e) {
-        S.st.custom = before;
-        renderMyTopics();
-        haptic("error");
-        toast(e.message, "err", 3200);
+        rollback(e);
       }
     });
   }
@@ -513,17 +515,32 @@
     const head = tr("app.setup_step", { n: step, of: steps.length });
     const first = step === 1 ? "skip" : "back";
     if (kind === "lang") return sec(head, langGrid(), 'id="language" role="radiogroup"') + setupNav(first, "next");
-    if (kind === "topics") return sec(head, topicsHTML(), 'id="topics"') + setupNav(first, "next");
+    // Step 18 (owner): every topic starts off here; Next waits for one, with one short hint line
+    if (kind === "topics") {
+      const none = !S.st.user.topics.length;
+      return sec(head, topicsHTML() + `<p class="section-foot hint" id="setup-hint"${none ? "" : " hidden"}>${esc(tr("app.setup_pick_topic"))}</p>`, 'id="topics"') +
+        setupNav(first, "next", none);
+    }
     if (kind === "times") return sec(head, timesHTML(), 'id="times"') + setupNav(first, "next");
     return `<section class="section"><h2 class="section-head">${esc(head)}</h2>${heroHTML()}</section>` +
       sec("", card(`<p class="help-p lines">${lines(tr("app.setup_sample"))}</p>`)) + setupNav(null, "finish");
   }
-  const setupNav = (left, right) => `<section class="section setup-nav">${grid(
+  const setupNav = (left, right, blocked = false) => `<section class="section setup-nav">${grid(
     (left ? `<button class="b s2" data-action="setup-${left}" ${S.busy.setup ? "disabled" : ""}>${esc(tr(`app.setup_${left}`))}</button>` : "") +
-    `<button class="b ${left ? "s4" : "s6"} primary" data-action="setup-${right}" ${S.busy.setup ? "disabled" : ""}>` +
+    `<button class="b ${left ? "s4" : "s6"} primary" data-action="setup-${right}" ${S.busy.setup || blocked ? "disabled" : ""}>` +
     `${S.busy.setup && right === "finish" ? '<span class="spinner small"></span>' : esc(tr(`app.setup_${right}`))}</button>`)}</section>`;
+  // The topics step: Next and the hint follow the switches at once
+  function updateSetupNav() {
+    if (S.page !== "setup" || setupSteps()[(S.step || 1) - 1] !== "topics") return;
+    const none = !S.st.user.topics.length;
+    const next = $('[data-action="setup-next"]'), hint = $("#setup-hint");
+    if (next) next.disabled = none || !!S.busy.setup;
+    if (hint) hint.hidden = !none;
+  }
   function setupStep(delta) {
-    S.step = Math.min(setupSteps().length, Math.max(1, (S.step || 1) + delta));
+    const steps = setupSteps();
+    if (delta > 0 && steps[(S.step || 1) - 1] === "topics" && !S.st.user.topics.length) { haptic("warning"); return; }
+    S.step = Math.min(steps.length, Math.max(1, (S.step || 1) + delta));
     haptic("select");
     syncTabs();
     renderView(true);
@@ -535,10 +552,11 @@
     renderView();
     try {
       await chain;   // the last topic or time tap is saved first, so the sample follows it
-      S.st = await api("/api/onboard", { skipped });
+      const r = await api("/api/onboard", { skipped });   // Skip: the server puts the six main topics back on
       S.busy = {};
       haptic("success");
       S.page = null;
+      adopt(r);
       renderShell();
       renderView(true);
       window.scrollTo({ top: 0 });
@@ -562,22 +580,42 @@
   function helpHTML() {
     return HELP.map((k) => sec(tr(`app.help_${k}_h`), card(`<p class="help-p lines">${lines(tr(`app.help_${k}`))}</p>`), `id="help-${k}"`)).join("")
       // Step 17: under the privacy section, one small row (confirm step, then everything about the reader goes)
-      + sec("", card(`<button class="row action danger tap" data-action="delete-me" id="delete-me" ${S.busy.del ? "disabled" : ""}>` +
-        `<span class="row-main row-title">${S.busy.del ? '<span class="spinner small"></span>' : esc(tr("app.delete_row"))}</span></button>`), 'id="help-delete"');
+      + sec("", deleteHTML(), 'id="help-delete"');
   }
-  // Step 17: "Delete my data". One confirm (two for the owner); afterwards one short line, then the app closes
-  // and nothing more is called (an /api/open would create the reader again).
-  async function deleteMe() {
+  // Step 18 (owner): the row and its confirm button in the brand red (never the orange of Admin's
+  // failures). The question shows in place, under the row: the text, Cancel and a solid red Delete.
+  function deleteHTML() {
+    const row = `<button class="row action danger tap" data-action="delete-me" id="delete-me" ${S.busy.del || S.delAsk ? "disabled" : ""}>` +
+      `<span class="row-main row-title">${esc(tr("app.delete_row"))}</span></button>`;
+    if (!S.delAsk) return card(row);
+    const text = tr(S.delAsk === 2 ? "app.delete_owner_confirm" : "app.delete_confirm");
+    return card(row + `<p class="help-p del-q" id="delete-q">${esc(text)}</p>`) +
+      `<div class="grid del-actions"><button class="b s2" data-action="delete-cancel" ${S.busy.del ? "disabled" : ""}>${esc(tr("app.delete_cancel"))}</button>` +
+      `<button class="b s4 primary" data-action="delete-yes" id="delete-yes" ${S.busy.del ? "disabled" : ""}>` +
+      `${S.busy.del ? '<span class="spinner small"></span>' : esc(tr("app.delete_yes"))}</button></div>`;
+  }
+  function deleteAsk() {
     haptic("impact", "medium");
-    if (!(await confirmBox(tr("app.delete_confirm")))) return;
+    S.delAsk = 1;
+    renderView();
+    const q = $("#help-delete");
+    if (q) q.scrollIntoView({ block: "end", behavior: "smooth" });
+  }
+  function deleteCancel() { S.delAsk = 0; haptic("select"); renderView(); }
+  // Step 17: "Delete my data". One confirm (tr("app.delete_confirm")), a second for the owner
+  // (tr("app.delete_owner_confirm")); afterwards one short line, then the app closes and nothing more is
+  // called (an /api/open would create the reader again).
+  async function deleteMe() {
+    if (S.busy.del) return;
     const owner = !!S.st.is_owner;
-    if (owner && !(await confirmBox(tr("app.delete_owner_confirm")))) return;
+    if (owner && S.delAsk === 1) { S.delAsk = 2; haptic("impact", "medium"); renderView(); return; }
     S.busy.del = true;
     renderView();
     try {
       await api("/api/account/delete", owner ? { confirm: true, owner_confirm: true } : { confirm: true });
     } catch (e) {
       S.busy = {};
+      S.delAsk = 0;
       renderView();
       haptic("error");
       toast(e.message, "err", 4200);
@@ -598,6 +636,7 @@
   function onBack() { closePage(); }
   function openPage(name) {
     S.page = name;
+    S.delAsk = 0;
     haptic("select");
     renderShell();
     renderView(true);
@@ -662,24 +701,80 @@
     renderView();
   }
 
-  // Saves go one after another, so a quick series of taps arrives in order. A saved change is a
+  // Step 18 (the digest times bug): one request at a time. Taps made while a request is on its way
+  // are merged into the next one (pending), and an answer never overwrites a tap the server has not
+  // seen yet. The controls are always drawn from S.st (syncControls), so the screen and the data
+  // cannot part (before, an older answer replaced the data while the buttons kept the newer taps, and
+  // a later tap could switch off the last time on screen). Any error rolls back to the server's own
+  // state (sent with the error, else its last answer) and drops the unsent taps. A saved change is a
   // light haptic tap (Step 12, owner: never a "Saved" toast); an error still shows, briefly.
   let chain = Promise.resolve();
-  function save(patch, revert) {
-    chain = chain.then(async () => {
+  let pending = {};                   // settings taps not sent yet (topics, digest_times, lang)
+  const pendingCustom = new Map();    // custom topic switches not sent yet: id -> on
+  const copy = (x) => JSON.parse(JSON.stringify(x));
+  function queue(job) {
+    chain = chain.then(job).catch(() => { /* every job handles its own errors */ });
+    return chain;
+  }
+  // The setup's topics step starts with every topic off (Step 18), until the reader taps one there.
+  const setupBlank = () => S.page === "setup" && !S.setupTouched;
+  function adopt(r) {
+    const keep = {};
+    for (const k of Object.keys(pending)) keep[k] = S.st.user[k];
+    const customKeep = new Map(pendingCustom);
+    S.server = copy(r);
+    S.st = r;
+    Object.assign(S.st.user, keep);
+    for (const c of S.st.custom || []) if (customKeep.has(c.id)) c.on = customKeep.get(c.id);
+    if (setupBlank()) S.st.user.topics = [];
+  }
+  function rollback(e) {
+    pending = {};
+    pendingCustom.clear();
+    const st = e && e.data && e.data.state && e.data.state.user ? e.data.state : S.server;
+    if (st) {
+      const langBefore = LANG;
+      S.server = copy(st);
+      S.st = copy(st);
+      if (setupBlank()) S.st.user.topics = [];
+      if (S.st.user.lang !== langBefore) { setLang(S.st.user.lang); renderShell(); }
+    }
+    haptic("error");
+    renderView();
+    toast(e.message, "err", 3200);
+  }
+  // Every control from the data, in place (so a switch still slides): times, topics, custom switches,
+  // the next digest card and the setup's Next.
+  function syncControls() {
+    const u = S.st.user;
+    document.querySelectorAll("[data-action=time]").forEach((b) => b.setAttribute("aria-pressed", String(u.digest_times.includes(b.dataset.value))));
+    document.querySelectorAll("[data-action=topic]").forEach((b) => b.setAttribute("aria-checked", String(u.topics.includes(b.dataset.value))));
+    const custom = S.st.custom || [];
+    const rows = [...document.querySelectorAll("#my-topics .ct")];
+    if (rows.length !== custom.length || rows.some((r, i) => Number(r.dataset.value || r.dataset.id) !== custom[i].id)) renderMyTopics();
+    else document.querySelectorAll("[data-action=custom-switch]").forEach((b) => {
+      const c = custom.find((x) => x.id === Number(b.dataset.value));
+      if (c) b.setAttribute("aria-checked", String(!!c.on));
+    });
+    updateHero();
+    updateSetupNav();
+  }
+  function save(patch) {
+    Object.assign(pending, patch);
+    return queue(async () => {
+      if (!Object.keys(pending).length) return;   // already sent with an earlier request, or rolled back
+      const send = pending;
+      pending = {};
       try {
-        S.st = await api("/api/settings", patch);
-        if ("lang" in patch) { setLang(S.st.user.lang); renderShell(); renderView(); }   // topic names come back translated
-        else updateHero();
+        const r = await api("/api/settings", send);
+        adopt(r);
+        if ("lang" in send) { setLang(S.st.user.lang); renderShell(); renderView(); }   // topic names come back translated
+        else syncControls();
         haptic("impact", "light");
       } catch (e) {
-        if (revert) revert();
-        haptic("error");
-        renderView();
-        toast(e.message, "err", 3200);
+        rollback(e);
       }
     });
-    return chain;
   }
 
   function shake(el) {
@@ -690,19 +785,19 @@
     const u = S.st.user;
     const tag = el.dataset.value;
     const on = u.topics.includes(tag);
-    const before = [...u.topics];
+    if (S.page === "setup") S.setupTouched = true;   // from now on the setup shows the saved topics
     u.topics = on ? u.topics.filter((t) => t !== tag) : S.st.topics.map((t) => t.tag).filter((t) => t === tag || u.topics.includes(t));
-    el.setAttribute("aria-checked", String(!on));
-    updateHero();
-    save({ topics: u.topics }, () => { S.st.user.topics = before; });
+    syncControls();
+    save({ topics: [...u.topics] });
   }
 
-  // Tap an hour to choose it (red), tap again to remove it. 1 to max_times.
+  // Tap an hour to choose it (red), tap again to remove it. 1 to max_times. The checks use the data the
+  // buttons are drawn from, so the last time can never go (Step 18).
   function toggleTime(el) {
     const u = S.st.user, L = S.st.limits;
     const t = el.dataset.value;
     const on = u.digest_times.includes(t);
-    if (on && u.digest_times.length === 1) {
+    if (on && u.digest_times.length <= 1) {
       haptic("warning");
       shake(el);
       toast(tr("app.keep_time"), "err");
@@ -714,10 +809,9 @@
       toast(tr("app.max_times", { max: L.max_times }), "err", 2600);
       return;
     }
-    const before = [...u.digest_times];
     u.digest_times = on ? u.digest_times.filter((x) => x !== t) : [...u.digest_times, t].sort();
-    el.setAttribute("aria-pressed", String(!on));
-    save({ digest_times: u.digest_times }, () => { S.st.user.digest_times = before; });
+    syncControls();
+    save({ digest_times: [...u.digest_times] });
   }
 
   // Step 9: a new language applies to the whole page at once; saved instantly like every setting.
@@ -725,12 +819,11 @@
     const u = S.st.user;
     const code = el.dataset.value;
     if (!code || code === u.lang) return;
-    const before = u.lang;
     u.lang = code;
     setLang(code);
     renderShell();
     renderView();
-    save({ lang: code }, () => { S.st.user.lang = before; setLang(before); renderShell(); });
+    save({ lang: code });
   }
 
   // ---------------------------------------------------------------- admin
@@ -767,6 +860,39 @@
     if (S.tab === "admin") renderView();
   }
 
+  // Step 18 (owner): a dashboard that is easy to oversee on a phone. On top: one health line (green,
+  // amber or red) with the reason, the key numbers, the actions and the free limits. Below: sections
+  // that open with a tap (closed by default), each a 48 px row with its emoji square and a short
+  // summary; colour only where something needs attention.
+  const ADM = [["pipeline", "⚙️", "Pipeline", "88, 86, 214"], ["ai", "🤖", "AI", "0, 122, 255"], ["feeds", "📡", "Feeds", "48, 176, 199"],
+    ["users", "👥", "Users", "52, 199, 89"], ["custom", "🗂️", "Custom topics", "255, 149, 0"], ["announce", "📣", "Announcement", "255, 204, 0"],
+    ["feedback", "💬", "Feedback", "175, 82, 222"], ["tips", "⭐", "Tips", "255, 204, 0"], ["errors", "⚠️", "Errors", "142, 142, 147"]];
+  // Notes the job writes on a normal day (a skipped item is resent, an overloaded model falls back):
+  // hidden behind "Show all" in Errors.
+  const ROUTINE = /answer skipped|answer left out|fact guard dropped|rejected by the checks|^language fallback|^warm-up|HTTP 503|high demand|resending/i;
+  const pctTxt = (x) => `${Math.round(x * 100)}%`;
+  const lvlOf = (x, warn = 0.7, bad = 0.9) => (x >= bad ? "bad" : x >= warn ? "warn" : "");
+  function errorGroups(list) {
+    const by = new Map();
+    for (const e of list) {
+      const key = `${e.component}|${String(e.message).replace(/\d+/g, "#")}`;
+      const g = by.get(key);
+      if (g) { g.count++; g.first = Math.min(g.first, e.at); } else by.set(key, { ...e, count: 1, first: e.at, routine: ROUTINE.test(e.message) });
+    }
+    return [...by.values()].sort((a, b) => b.at - a.at);   // newest first
+  }
+  function admSection(key, summary, body) {
+    const [, emoji, title, rgb] = ADM.find((x) => x[0] === key);
+    const open = !!(S.admOpen && S.admOpen[key]);
+    return `<section class="section adm-sec" id="adm-${key}"><div class="group"><button class="row has-icon tap adm-head" data-action="adm-sec" ` +
+      `data-value="${key}" aria-expanded="${open}"><span class="sq" style="--tint: rgba(${rgb}, 0.18)" aria-hidden="true">${emoji}</span>` +
+      `<span class="row-main row-title">${esc(title)}</span><span class="row-right adm-sum">${summary}</span>` +
+      `<span class="chev" aria-hidden="true">${I.chev}</span></button></div>${open ? `<div class="adm-body">${body()}</div>` : ""}</section>`;
+  }
+  const sub = (head, body, foot) => `<div class="adm-part">${head ? `<h3 class="section-head">${head}</h3>` : ""}<div class="group">${body}</div>${
+    foot ? `<p class="section-foot">${foot}</p>` : ""}</div>`;
+  const mute = (t) => `<span class="adm-mute">${esc(t)}</span>`;
+
   function adminHTML() {
     const A = S.admin;
     if (!A) {
@@ -774,197 +900,247 @@
         return section("", row({ title: "Could not load", sub: esc(S.adminErr), right: '<button class="link" data-action="refresh">Retry</button>' }));
       }
       const sk = '<div class="skeleton"><i></i></div>';
-      return `${section("", sk + sk)}${section("Today", sk + sk + sk)}${section("Feeds", sk)}`;
+      return `${section("", sk + sk)}${section("", sk + sk + sk)}${section("", sk)}`;
     }
     const tz = S.st.user.timezone;
-    const h = A.health;
+    const h = A.health, Z = A.summary;
     const lr = h.last_run;
-    const lvl = { ok: ["All systems normal", ""], warn: ["Needs a look", "warn"], bad: ["Something is wrong", "bad"] }[h.level];
-    const status = `<div class="status ${lvl[1]}"><span class="dot" aria-hidden="true">${h.level === "ok" ? I.tick : I.bang}</span><div class="row-main"><div class="status-title">${lvl[0]}</div>
-      <div class="status-sub">${h.problems.length ? esc(h.problems.join(" ")) : "The news job, digests and alerts are working."}</div></div></div>`;
+    const N = Z.numbers;
+
+    // ---------------------------------------------------------- the health line and the key numbers
+    const lvl = { ok: ["All good", ""], warn: ["Needs a look", "warn"], bad: ["Something is wrong", "bad"] }[Z.level];
+    const status = `<div class="status ${lvl[1]}" id="health"><span class="dot" aria-hidden="true">${Z.level === "ok" ? I.tick : I.bang}</span>` +
+      `<div class="row-main"><div class="status-title">${lvl[0]}</div><div class="status-sub">${esc(Z.reason)}</div></div></div>`;
     const st = lr ? STATUS[lr.status] || [lr.status, "mute"] : null;
-    const runRow = lr ? row({ title: "Last news job", sub: esc([duration(lr.duration_s), providerLabel(lr.provider)].filter(Boolean).join(" · ")),
-      right: `<span class="tnum">${esc(when(lr.started_at, tz))}</span>${badge(st[0], st[1])}` }) : row({ title: "Last news job", right: "None yet" });
-    const okRow = row({ title: "Last successful run", sub: h.last_ok_at ? ago(h.last_ok_at) : "", right: `<span class="tnum">${esc(when(h.last_ok_at, tz))}</span>` });
-    const trigRow = row({ title: "Hourly trigger", sub: h.trigger.on_time ? "Runs at about :07 every hour" : "No run started in the last 70 minutes",
-      right: h.trigger.on_time ? badge("On time") : badge("Late", "warn") });
-    const alertRow = row({ title: "Alerts, last 24 h", sub: h.alert ? `<span class="clamp">${esc(h.alert.text)}</span>` : "",
-      right: h.alert ? `<span class="tnum">${esc(when(h.alert.at, tz))}</span>` : "None" });
+    const kpi = (value, label, cls = "") => `<div class="kpi ${cls}"><b class="tnum">${esc(value)}</b><span>${esc(label)}</span></div>`;
+    const tries = N.digests_today + N.failed_today;
+    const kpis = `<div class="kpis" id="kpis">${
+      kpi(n(N.active_users), "Active users") +
+      kpi(n(N.digests_today), "Digests today") +
+      kpi(tries ? pctTxt(N.delivery) : "None yet", "Delivered", tries && N.failed_today ? (N.delivery < 0.8 ? "bad" : "warn") : "") +
+      kpi(n(N.stories_today), "Stories today") +
+      kpi(N.last_run ? hm(N.last_run.at, tz) : "None", N.last_run ? `Last run · ${st[0]}` : "Last run", N.last_run && st[1] !== "mute" ? st[1] : "") +
+      kpi(N.next_run_at ? `~${hm(N.next_run_at, tz)}` : A.env === "staging" ? "No job" : "None", "Next run")}</div>`;
+    const top = `<section class="section"><div class="group">${status}${kpis}</div></section>`;
 
     const actions = row({ icon: I.send, tile: true, title: "Send me a digest now", sub: "A real digest from the current pool", tag: "button",
       cls: "action tap", attrs: `data-action="digest-now" ${S.busy.digest ? "disabled" : ""}`, right: S.busy.digest ? '<span class="spinner spin-sm"></span>' : "" })
       + row({ icon: I.play, tile: true, title: "Run news job now", sub: "Collect feeds and run the AI pass", tag: "button",
         cls: "action tap", attrs: `data-action="run-job" ${S.busy.run ? "disabled" : ""}`, right: S.busy.run ? '<span class="spinner spin-sm"></span>' : "" });
 
+    // ---------------------------------------------------------- free limits
+    const Lm = Z.limits;
+    const D = A.d1;
+    const limRow = (title, key, count, limit) => {
+      const v = Lm.today[key], y = Lm.yesterday ? Lm.yesterday[key] : null, l = lvlOf(v);
+      return row({ title, sub: esc(`${compact(count)} of ${compact(limit)}${y != null ? ` · yesterday ${pctTxt(y)}` : ""}`),
+        right: l ? badge(pctTxt(v), l) : `<span class="kv-num">${pctTxt(v)}</span>`, cls: `lim${l ? ` ${l}` : ""}`, attrs: `data-lim="${key}"` });
+    };
+    const cpuRow = row({ title: "Worker CPU", sub: "Runs over the 10 ms limit today", cls: "lim", attrs: 'data-lim="cpu"',
+      right: Lm.cpu_over ? badge(n(Lm.cpu_over), "bad") : '<span class="kv-num">None</span>' });
+    const aiRows = Z.ai.map((m) => {
+      const bad = m.calls >= 4 && m.failed / m.calls >= 0.5;
+      const kinds = (m.kinds || []).map(kindLabel).join(", ");
+      return row({ title: `<span class="ellipsis">${esc(m.model)}</span>`, cls: "lim", attrs: 'data-lim="ai"',
+        sub: esc([PROVIDER[m.provider] || m.provider, kinds, m.soft_limit ? `today ${n(m.today)} of ${n(m.soft_limit)}` : ""].filter(Boolean).join(" · ")),
+        right: `<span class="kv-num">${plural(m.calls, "call", "calls")}</span>` +
+          (m.failed ? (bad ? badge(`${m.failed} errors`, "warn") : mute(`${m.failed} ${m.failed === 1 ? "error" : "errors"}`)) : "") });
+    }).join("");
+    const limits = section("Free limits, today", limRow("D1 reads", "reads", Lm.counts.r, D.limits.rows_read) +
+      limRow("D1 writes", "writes", Lm.counts.w, D.limits.rows_written) + cpuRow + (aiRows || row({ title: "No AI calls in 24 hours" })),
+      (Lm.source === "account" ? `D1 and CPU: Cloudflare's own count for the whole account (both copies), checked ${hm(Lm.checked_at, tz)}. `
+        : "D1: this copy's count (Cloudflare's account numbers are not in yet). ") + "AI: calls in the last 24 hours. Limits reset at 00:00 UTC.",
+      'id="limits"');
+
+    // ---------------------------------------------------------- sections
     const s = A.stats[S.range];
     const seg = `<div class="seg small" role="tablist"><span class="seg-thumb" style="width:calc(50% - 2px);transform:${S.range === "7d" ? "translateX(100%)" : "none"}"></span>
       <button role="tab" aria-selected="${S.range === "24h"}" data-action="range" data-value="24h">Last 24 hours</button>
       <button role="tab" aria-selected="${S.range === "7d"}" data-action="range" data-value="7d">Last 7 days</button></div>`;
-    const runsSub = [s.failed ? `${s.failed} failed` : "", s.partial ? `${s.partial} partly done` : ""].filter(Boolean).join(" · ") || "none failed";
-    const stats = kv("News job runs", n(s.runs), runsSub) + kv("Articles collected", n(s.items_fetched), `${n(s.items_new)} new`)
-      + kv("Stories created", n(s.stories_created), `${n(s.stories_merged)} merged into existing stories`)
-      + kv("Dropped as not news", n(s.items_dropped))
-      + kv("Editor pass", `${n(s.editor_ok)} of ${n(s.runs)}`, `runs edited the news${s.editor_failed ? ` · ${s.editor_failed} failed` : ""} · ${plural(s.editor_merged, "duplicate", "duplicates")} merged`)
-      + kv("AI calls", n(s.ai_calls), s.fallback_runs ? `${plural(s.fallback_runs, "run", "runs")} needed a backup model` : "No backup model needed")
-      + kv("AI tokens", `${compact(s.input_tokens)} in · ${compact(s.output_tokens)} out`);
-    const models = A.stats.models.filter((m) => m[S.range].calls).map((m) => {
-      const x = m[S.range];
-      const failed = x.calls - x.ok;
-      return row({ title: `<span class="ellipsis">${esc(m.model || m.provider)}</span>`, sub: `${esc(PROVIDER[m.provider] || m.provider)} · ${kindLabel(m.kind)} · ${compact(x.input_tokens)} in, ${compact(x.output_tokens)} out`,
-        right: `<span class="kv-num">${plural(x.calls, "call", "calls")}</span>${failed ? badge(`${failed} failed`, "bad") : ""}` });
-    }).join("") || row({ title: "No AI calls in this period" });
+    const s24 = A.stats["24h"];
+
+    const pipeline = () => {
+      const runRow = lr ? row({ title: "Last news job", sub: esc([duration(lr.duration_s), providerLabel(lr.provider)].filter(Boolean).join(" · ")),
+        right: `<span class="tnum">${esc(when(lr.started_at, tz))}</span>${st[1] && st[1] !== "mute" ? badge(st[0], st[1]) : mute(st[0])}` })
+        : row({ title: "Last news job", right: "None yet" });
+      const okRow = row({ title: "Last successful run", sub: h.last_ok_at ? ago(h.last_ok_at) : "", right: `<span class="tnum">${esc(when(h.last_ok_at, tz))}</span>` });
+      const trigRow = row({ title: "Hourly trigger", sub: h.trigger.on_time ? "Runs at about :07 every hour" : "No run started in the last 70 minutes",
+        right: h.trigger.on_time ? mute("On time") : badge("Late", "warn") });
+      const alertRow = row({ title: "Alerts, last 24 h", sub: h.alert ? `<span class="clamp">${esc(h.alert.text)}</span>` : "",
+        right: h.alert ? `<span class="tnum">${esc(when(h.alert.at, tz))}</span>` : "None" });
+      const runsSub = [s.failed ? `${s.failed} failed` : "", s.partial ? `${s.partial} partly done` : ""].filter(Boolean).join(" · ") || "none failed";
+      const stats = kv("News job runs", n(s.runs), runsSub) + kv("Articles collected", n(s.items_fetched), `${n(s.items_new)} new`)
+        + kv("Stories created", n(s.stories_created), `${n(s.stories_merged)} merged into existing stories`)
+        + kv("Dropped as not news", n(s.items_dropped))
+        + kv("Editor pass", `${n(s.editor_ok)} of ${n(s.runs)}`, `runs edited the news${s.editor_failed ? ` · ${s.editor_failed} failed` : ""} · ${plural(s.editor_merged, "duplicate", "duplicates")} merged`)
+        + kv("AI tokens", `${compact(s.input_tokens)} in · ${compact(s.output_tokens)} out`);
+      const dl = A.today.deliveries;
+      const deliv = kv("Digests sent", n(dl.sent), `${plural(dl.stories, "story", "stories")} · ${plural(dl.quiet, "quiet note", "quiet notes")}`)
+        + kv("Failed tries", n(dl.failed), "Retried at the next tick, for up to an hour") + kv("Readers who blocked the bot", n(dl.blocked));
+      const db = kv("News job", `${compact(D.job.r)} read · ${compact(D.job.w)} written`, plural(D.job.runs, "run", "runs"))
+        + kv("Bot server", `${compact(D.worker.r)} read · ${compact(D.worker.w)} written`, "Digests, settings, Admin");
+      return sub("", runRow + okRow + trigRow + alertRow) + `<div class="adm-part">${seg}<div class="group">${stats}</div></div>` +
+        sub("Deliveries today (UTC)", deliv) + sub("Database rows today, this copy", db);
+    };
+
+    const C = A.custom;
+    const ai = () => {
+      const models = A.stats.models.filter((m) => m[S.range].calls).map((m) => {
+        const x = m[S.range];
+        const failed = x.calls - x.ok;
+        return row({ title: `<span class="ellipsis">${esc(m.model || m.provider)}</span>`, sub: `${esc(PROVIDER[m.provider] || m.provider)} · ${kindLabel(m.kind)} · ${compact(x.input_tokens)} in, ${compact(x.output_tokens)} out`,
+          right: `<span class="kv-num">${plural(x.calls, "call", "calls")}</span>${failed ? mute(`${failed} failed`) : ""}` });
+      }).join("") || row({ title: "No AI calls in this period" });
+      const G = C.guard;
+      const glvl = [["Normal", ""], ["Topic checks delayed", "warn"], ["Topic checks and translations delayed", "bad"]][Math.max(G.level, G.job_level || 0)] || ["?", "mute"];
+      const guardRows = row({ title: "AI budget", sub: esc(G.reasons.length ? G.reasons.join("; ") : "Calls are counted per model since midnight Pacific time."),
+        right: glvl[1] ? badge(glvl[0], glvl[1]) : mute(glvl[0]) })
+        + G.models.map((m) => row({ title: `<span class="ellipsis">${esc(m.model)}</span>`,
+          sub: esc(`${plural(m.r429, "answer", "answers")} 429 today${m.recent429 ? `, ${m.recent429} in the last hour` : ""}`),
+          right: `<span class="kv-num">${n(m.calls)}${m.soft_limit ? ` of ${n(m.soft_limit)}` : ""}</span>` })).join("")
+        + (G.translate_delayed ? row({ title: "Translations", right: badge("Delayed by the last run", "bad") }) : "")
+        + (G.alerted_day ? row({ title: "Last AI budget alert", right: `<span class="tnum">${esc(G.alerted_day)}</span>` }) : "");
+      const langRows = (A.languages || []).map((l) => row({
+        title: `${esc(l.name)} ${l.enabled ? "" : badge("Hidden", "mute")}`,
+        sub: esc(l.code === "en" ? `${plural(l.active, "active reader", "active readers")} · no translation needed`
+          : `${plural(l.active, "active reader", "active readers")} · ${plural(l.translated_24h, "story", "stories")} translated` +
+            `${l.rejected_24h ? ` (${l.rejected_24h} rejected by checks)` : ""} · ${plural(l.calls_24h, "call", "calls")}` +
+            ` · ${plural(l.held_24h, "story", "stories")} held` + `${l.held_holds_24h ? ` (${l.held_released_24h} of ${l.held_holds_24h} sent later)` : ""}`),
+        right: l.code === "en" ? "" : l.fallbacks_24h ? badge(`${l.fallbacks_24h} in English`, "warn") : "" })).join("");
+      return `<div class="adm-part">${seg}<div class="group">${models}</div></div>` +
+        sub("AI budget, today", guardRows, "Over 80% of a soft limit, or a 429 from Gemini in the last hour: new topic checks wait. Over the limit: translations wait too. The first pass and the editor never wait.") +
+        sub("Languages, last 24 h", langRows || row({ title: "No data" }), "A story with no translation yet is held and sent later; a digest goes out in English only when none of its stories is translated.");
+    };
+    const aiLook = Z.ai.some((m) => m.calls >= 4 && m.failed / m.calls >= 0.5) || Math.max(C.guard.level, C.guard.job_level || 0) > 0;
 
     const F = A.feeds;
-    let feeds;
-    if (!F.total) feeds = section("Feeds", row({ title: "No feed data yet", sub: "It appears after the next hourly run." }));
-    else {
-      const okCount = F.total - F.failing.length;
-      const rows = [kv("Feeds working", `${n(okCount)} of ${n(F.total)}`, F.checked_at ? `Checked ${when(F.checked_at, tz)}` : "")]
+    const feeds = () => {
+      if (!F.total) return sub("", row({ title: "No feed data yet", sub: "It appears after the next hourly run." }));
+      const okCount = F.total - F.failing.length - F.silent.length;
+      const rows = [kv("Working", `${n(okCount)} of ${n(F.total)}`, F.checked_at ? `Checked ${when(F.checked_at, tz)}` : "")]
         .concat(F.failing.map((f) => row({ icon: '<span class="sdot"></span>', title: esc(f.name),
           sub: esc(`${feedError(f.error)} · since ${when(f.since, tz)}${f.fails > 1 ? ` · ${f.fails} runs in a row` : ""}`) })))
         .concat(F.silent.map((f) => row({ icon: '<span class="sdot warn"></span>', title: esc(f.name),
           sub: f.last_item_at ? `Silent: newest item ${ago(f.last_item_at)}` : "Silent: no items seen yet" })));
-      feeds = section("Feeds", rows.join(""), F.failing.length || F.silent.length
-        ? `Red: the feed could not be read. Amber: no new items for ${F.silent_hours} hours.` : "Every feed answered and has recent items.");
-    }
+      return sub("", rows.join(""), F.failing.length || F.silent.length
+        ? `Only the feeds that need a look are listed. Red: could not be read. Amber: no new items for ${F.silent_hours} hours.` : "Every feed answered and has recent items.");
+    };
+    const feedSum = !F.total ? "" : F.failing.length ? (F.failing.length / F.total >= 0.1 ? badge(`${F.failing.length} failing`, "warn") : mute(`${F.failing.length} failing`))
+      : F.silent.length ? mute(`${F.silent.length} silent`) : mute("All working");
 
     const U = A.users;
-    const tiles = `<div class="stats">${[["Total", U.count], ["Active", U.active], ["All off", U.all_off], ["Blocked", U.blocked]]
-      .map(([k, v]) => `<div class="stat"><b>${n(v)}</b><span>${k}</span></div>`).join("")}</div>`;
-    const userRows = U.list.map((x) => row({ icon: `<span class="avatar">${esc((x.name || "?").trim().charAt(0).toUpperCase())}</span>`,
-      title: `${esc(x.name)} ${x.blocked ? badge("Blocked", "bad") : x.all_off ? badge("All off", "mute") : ""}`,
-      sub: esc(`${(x.lang || "en").toUpperCase()} · ${city(x.timezone)} · ${x.times.join(", ")}` +
-        (x.digests_24h ? ` · avg ${x.avg_stories_24h} stories (${x.digests_24h} ${x.digests_24h === 1 ? "digest" : "digests"}, 24 h)` : "")),
-      right: `<span class="tnum" style="font-size:15px">${x.last_digest_at ? esc(ago(x.last_digest_at)) : "No digest yet"}</span>`
+    const users = () => {
+      const tiles = `<div class="stats">${[["Total", U.count], ["Active", U.active], ["All off", U.all_off], ["Blocked", U.blocked]]
+        .map(([k, v]) => `<div class="stat"><b>${n(v)}</b><span>${k}</span></div>`).join("")}</div>`;
+      const userRows = U.list.map((x) => row({ icon: `<span class="avatar">${esc((x.name || "?").trim().charAt(0).toUpperCase())}</span>`,
+        title: `${esc(x.name)} ${x.blocked ? badge("Blocked", "mute") : x.all_off ? badge("All off", "mute") : ""}`,
+        sub: esc(`${(x.lang || "en").toUpperCase()} · ${city(x.timezone)} · ${x.times.join(", ")}` +
+          (x.last_digest_at ? ` · last digest ${ago(x.last_digest_at)}` : " · no digest yet") +
+          (x.digests_24h ? ` · avg ${x.avg_stories_24h} stories (${x.digests_24h} ${x.digests_24h === 1 ? "digest" : "digests"}, 24 h)` : "")),
         // Step 17: Delete (asks first); never on the owner's own row
-        + (x.owner ? "" : `<button class="link danger user-del" data-action="user-delete" data-value="${x.id}" data-name="${esc(x.name)}" ${S.busy.userDel ? "disabled" : ""}>Delete</button>`) })).join("");
+        right: x.owner ? "" : `<button class="link danger user-del" data-action="user-delete" data-value="${x.id}" data-name="${esc(x.name)}" ${S.busy.userDel ? "disabled" : ""}>Delete</button>` })).join("");
+      return sub("", tiles + userRows, "Delete asks first and removes everything about the person.");
+    };
 
-    // Step 9: reader languages (Admin stays English).
-    const langRowsA = (A.languages || []).map((l) => row({
-      title: `${esc(l.name)} ${l.enabled ? "" : badge("Hidden", "mute")}`,
-      sub: esc(l.code === "en" ? `${plural(l.active, "active reader", "active readers")} · no translation needed`
-        : `${plural(l.active, "active reader", "active readers")} · ${plural(l.translated_24h, "story", "stories")} translated` +
-          `${l.rejected_24h ? ` (${l.rejected_24h} rejected by checks)` : ""} · ${plural(l.calls_24h, "call", "calls")}, ` +
-          `${compact(l.input_tokens_24h)} in, ${compact(l.output_tokens_24h)} out` +
-          ` · ${plural(l.held_24h, "story", "stories")} held for translation` +
-          `${l.held_holds_24h ? ` (${l.held_released_24h} of ${l.held_holds_24h} sent later)` : ""}`),
-      right: l.code === "en" ? "" : l.fallbacks_24h ? badge(`${plural(l.fallbacks_24h, "digest", "digests")} fully in English`, "warn")
-        : badge("No English fallback") })).join("");
-
-    // Step 10: tips (Telegram Stars), the last 10 with a refund button each.
-    const T = A.tips || { stars: 0, tips: 0, refunded: 0, last: [] };
-    const tipRows = kv("Stars received", `${n(T.stars)} ⭐`, `${plural(T.tips, "tip", "tips")}` +
-        (T.refunded ? ` · ${plural(T.refunded, "refund", "refunds")} (${n(T.refunded_stars)} ⭐) not counted` : ""))
-      + T.last.map((x) => row({ title: `${esc(x.name)} · ${n(x.amount)} ⭐`, sub: esc(when(x.at, tz)),
-        right: x.refunded_at ? badge("Refunded", "mute")
-          : `<button class="link" data-action="refund" data-value="${x.id}" data-amount="${x.amount}" data-name="${esc(x.name)}" ${S.busy.refund ? "disabled" : ""}>Refund</button>` })).join("");
+    const custom = () => {
+      const ctRows = C.topics.map((x) => row({ icon: `<span class="sq" aria-hidden="true">${esc(x.emoji && x.emoji !== "📌" ? x.emoji : "🗞️")}</span>`,
+        title: `<span class="ellipsis">${esc(x.name)}</span>`,
+        sub: esc(`${plural(x.active, "active follower", "active followers")} · today ${n(x.today.searches)} searches, ${n(x.today.new_items)} new items · 24 h: ` +
+          `${plural(x.stories_24h, "story", "stories")}, ${n(x.sent_24h)} sent`),
+        right: `<button class="link" data-action="topic-admin" data-act="keywords" data-value="${x.id}" data-name="${esc(x.name)}" ${S.busy.topicAdmin ? "disabled" : ""}>Keywords</button>` +
+          `<button class="link" data-action="topic-admin" data-act="delete" data-value="${x.id}" data-name="${esc(x.name)}" ${S.busy.topicAdmin ? "disabled" : ""}>Delete</button>` +
+          `<button class="link danger" data-action="topic-admin" data-act="block" data-value="${x.id}" data-name="${esc(x.name)}" ${S.busy.topicAdmin ? "disabled" : ""}>Block</button>` })).join("");
+      const outcomes = Object.entries(C.checks_24h).map(([k, v]) => `${v} ${k.replace("_", " ")}`).join(", ");
+      const checkRows = kv("Topic checks, 24 h", n(Object.values(C.checks_24h).reduce((a, b) => a + b, 0)), outcomes || "none")
+        + C.recent_checks.slice(0, 5).map((c) => row({ title: `<span class="ellipsis">${esc(c.input)}</span> ${badge(c.outcome.replace("_", " "),
+          c.outcome === "delayed" || c.outcome === "failed" ? "warn" : "mute")}`,
+          sub: esc(`${c.name || "?"} · ${when(c.at, tz)}${c.reason ? ` · ${c.reason}` : ""}`) })).join("")
+        + (C.blocks.length ? row({ title: "Blocked names", sub: esc(C.blocks.map((b) => b.norm).join(", ")) }) : "");
+      const foot = [C.topics.length ? "Keywords refreshes the match words. Delete removes it from its followers; Block also stops anyone creating it again. Both ask first." : "",
+        C.hidden ? `<span id="custom-hidden">${n(C.hidden)} hidden (no follower has it switched on).</span>` : ""].filter(Boolean).join(" ");
+      return sub("", ctRows || row({ title: "No active custom topics" }), foot) + sub("Topic checks", checkRows);
+    };
 
     // Step 15: the announcement tool (write in English, AI translates, edit, preview to yourself, send)
     const AN = A.announce || { recent: [], languages: ["en"], enabled: ["en"] };
     const LNAME = { en: "English", ru: "Russian", hy: "Armenian", fr: "French" };
     const cur = AN.recent.find((x) => x.status === "draft" || x.status === "previewed");
-    const aud = S.annAudience || "all";
-    let annBody;
-    if (cur) {
-      const edits = S.annEdit || {};
-      annBody = card(Object.keys(cur.texts).map((l) => row({ title: `${esc(LNAME[l] || l)}${cur.audience !== "all" && l === "en" && cur.audience !== "en" ? " (fallback)" : ""}`,
-          sub: cur.notes[l] ? esc(`The AI version was not used: ${cur.notes[l]}. Please write it.`) : "" }) +
-        `<textarea class="fb-input ann-text" data-lang="${esc(l)}" rows="4">${esc(edits[l] ?? cur.texts[l])}</textarea>`).join("")) +
-        `<div class="grid ann-actions">` +
-        `<button class="b s2" data-action="ann-preview" data-value="${cur.id}" ${S.busy.ann ? "disabled" : ""}>Preview</button>` +
-        `<button class="b s2 primary" data-action="ann-send" data-value="${cur.id}" ${S.busy.ann || cur.status !== "previewed" || S.annDirty ? "disabled" : ""}>Send</button>` +
-        `<button class="b s2" data-action="ann-cancel" data-value="${cur.id}" ${S.busy.ann ? "disabled" : ""}>Cancel</button></div>`;
-    } else {
-      const choices = ["all", ...AN.enabled];
-      annBody = card(`<textarea class="fb-input" id="ann-en" rows="5" maxlength="2000" placeholder="Write the announcement in English">${esc(S.annDraft || "")}</textarea>`) +
-        `<div class="grid ann-actions">${choices.map((c) => `<button class="b ${choices.length > 3 ? "s2" : "s3"}" data-action="ann-audience" data-value="${c}" aria-pressed="${aud === c}">${c === "all" ? "All users" : esc(LNAME[c] || c)}</button>`).join("")}` +
-        `<button class="b s6 primary" data-action="ann-translate" ${S.busy.ann ? "disabled" : ""}>${S.busy.ann ? '<span class="spinner small"></span>' : "Translate"}</button></div>`;
-    }
-    const annRows = AN.recent.filter((x) => x !== cur).map((x) => row({ title: `<span class="clamp">${esc(x.texts.en || "")}</span>`,
-      sub: esc(`#${x.id} · ${x.audience === "all" ? "all users" : LNAME[x.audience] || x.audience} · ${when(x.created_at, tz)}` +
-        (x.sent || x.failed ? ` · ${x.sent} sent${x.failed ? `, ${x.failed} failed` : ""}` : "")),
-      right: badge(x.status, x.status === "done" ? "ok" : x.status === "sending" ? "warn" : "mute") })).join("");
-    const annFoot = cur ? (cur.status === "previewed" && !S.annDirty ? "Previewed. Send goes to every user in their language, a batch every 5 minutes, never twice."
-      : "Check or edit each version, then Preview (it comes to you first). Send unlocks after a preview of exactly this text.")
-      : `Languages your users read: ${AN.languages.map((l) => LNAME[l] || l).join(", ")}. Translate makes one version for each.`;
-
-    // Step 15: the latest feedback from readers (each is also forwarded to the owner's chat)
-    const FB = A.feedback || { total: 0, recent: [] };
-    const fbRows = FB.recent.map((x) => row({ title: `<span class="clamp">${esc(x.text)}</span>`,
-      sub: esc(`${x.name || "Someone"} (id ${x.user_id}${x.lang ? `, ${x.lang}` : ""}) · ${when(x.at, tz)}`),
-      right: x.forwarded ? "" : badge("Not forwarded", "warn") })).join("");
-
-    // Step 13: custom topics and the AI budget guard (Admin stays English)
-    const C = A.custom || { topics: [], checks_24h: {}, recent_checks: [], blocks: [], guard: { level: 0, reasons: [], models: [] } };
-    const ctRows = C.topics.map((x) => row({ icon: `<span class="sq" aria-hidden="true">${esc(x.emoji && x.emoji !== "📌" ? x.emoji : "🗞️")}</span>`,
-      title: `<span class="ellipsis">${esc(x.name)}</span> ${x.orphan_since ? badge("No followers", "mute") : ""}`,
-      sub: esc(`${plural(x.followers, "follower", "followers")}${x.active !== x.followers ? ` (${x.active} active)` : ""} · ` +
-        `${plural(x.queries.length, "search", "searches")}, +${x.boost_max} cap · today ${n(x.today.searches)} requests, ` +
-        `${n(x.today.new_items)} new items (${n(x.today.dup_dropped)} already in the pool) · 24 h: ` +
-        `${plural(x.stories_24h, "story", "stories")} (${x.main_24h} as main topic), ${n(x.sent_24h)} sent` +
-        (x.orphan_since ? ` · deleted 7 days after ${when(x.orphan_since, tz)}` : "")),
-      right: `<button class="link" data-action="topic-admin" data-act="keywords" data-value="${x.id}" data-name="${esc(x.name)}" ${S.busy.topicAdmin ? "disabled" : ""}>Keywords</button>` +
-        `<button class="link" data-action="topic-admin" data-act="delete" data-value="${x.id}" data-name="${esc(x.name)}" ${S.busy.topicAdmin ? "disabled" : ""}>Delete</button>` +
-        `<button class="link danger" data-action="topic-admin" data-act="block" data-value="${x.id}" data-name="${esc(x.name)}" ${S.busy.topicAdmin ? "disabled" : ""}>Block</button>` })).join("");
-    const outcomes = Object.entries(C.checks_24h).map(([k, v]) => `${v} ${k.replace("_", " ")}`).join(", ");
-    const checkRows = kv("Topic checks, 24 h", n(Object.values(C.checks_24h).reduce((a, b) => a + b, 0)), outcomes || "none")
-      + C.recent_checks.map((c) => row({ title: `<span class="ellipsis">${esc(c.input)}</span> ${badge(c.outcome.replace("_", " "),
-        c.outcome === "accepted" || c.outcome === "joined" ? "" : c.outcome === "delayed" || c.outcome === "failed" ? "warn" : "mute")}`,
-        sub: esc(`${c.name || "?"} · ${when(c.at, tz)}${c.reason ? ` · ${c.reason}` : ""}`) })).join("")
-      + (C.blocks.length ? row({ title: "Blocked names", sub: esc(C.blocks.map((b) => b.norm).join(", ")) }) : "");
-    const G = C.guard;
-    const glvl = [["Normal", ""], ["Topic checks delayed", "warn"], ["Topic checks and translations delayed", "bad"]][Math.max(G.level, G.job_level || 0)] || ["?", "mute"];
-    const guardRows = row({ title: "AI budget", sub: esc(G.reasons.length ? G.reasons.join("; ") : "Calls are counted per model since midnight Pacific time."),
-      right: badge(glvl[0], glvl[1]) })
-      + G.models.map((m) => row({ title: `<span class="ellipsis">${esc(m.model)}</span>`,
-        sub: esc(`${plural(m.r429, "answer", "answers")} 429 today${m.recent429 ? `, ${m.recent429} in the last hour` : ""}`),
-        right: `<span class="kv-num">${n(m.calls)}${m.soft_limit ? ` of ${n(m.soft_limit)}` : ""}</span>` })).join("")
-      + (G.translate_delayed ? row({ title: "Translations", right: badge("Delayed by the last run", "bad") }) : "")
-      + (G.alerted_day ? row({ title: "Last AI budget alert", right: `<span class="tnum">${esc(G.alerted_day)}</span>` }) : "");
-
-    const D = A.d1;
-    const meter = (label, used, limit) => {
-      const pct = Math.min(100, (used / limit) * 100);
-      return `<div class="meter"><div class="meter-top"><span>${label}</span><span>${n(used)} of ${compact(limit)}</span></div>
-        <div class="bar ${pct > 80 ? "bad" : pct > 50 ? "warn" : ""}"><i style="width:${pct.toFixed(2)}%"></i></div></div>`;
+    const announce = () => {
+      const aud = S.annAudience || "all";
+      let annBody;
+      if (cur) {
+        const edits = S.annEdit || {};
+        annBody = card(Object.keys(cur.texts).map((l) => row({ title: `${esc(LNAME[l] || l)}${cur.audience !== "all" && l === "en" && cur.audience !== "en" ? " (fallback)" : ""}`,
+            sub: cur.notes[l] ? esc(`The AI version was not used: ${cur.notes[l]}. Please write it.`) : "" }) +
+          `<textarea class="fb-input ann-text" data-lang="${esc(l)}" rows="4">${esc(edits[l] ?? cur.texts[l])}</textarea>`).join("")) +
+          `<div class="grid ann-actions">` +
+          `<button class="b s2" data-action="ann-preview" data-value="${cur.id}" ${S.busy.ann ? "disabled" : ""}>Preview</button>` +
+          `<button class="b s2 primary" data-action="ann-send" data-value="${cur.id}" ${S.busy.ann || cur.status !== "previewed" || S.annDirty ? "disabled" : ""}>Send</button>` +
+          `<button class="b s2" data-action="ann-cancel" data-value="${cur.id}" ${S.busy.ann ? "disabled" : ""}>Cancel</button></div>`;
+      } else {
+        const choices = ["all", ...AN.enabled];
+        annBody = card(`<textarea class="fb-input" id="ann-en" rows="5" maxlength="2000" placeholder="Write the announcement in English">${esc(S.annDraft || "")}</textarea>`) +
+          `<div class="grid ann-actions">${choices.map((c) => `<button class="b ${choices.length > 3 ? "s2" : "s3"}" data-action="ann-audience" data-value="${c}" aria-pressed="${aud === c}">${c === "all" ? "All users" : esc(LNAME[c] || c)}</button>`).join("")}` +
+          `<button class="b s6 primary" data-action="ann-translate" ${S.busy.ann ? "disabled" : ""}>${S.busy.ann ? '<span class="spinner small"></span>' : "Translate"}</button></div>`;
+      }
+      const annRows = AN.recent.filter((x) => x !== cur).map((x) => row({ title: `<span class="clamp">${esc(x.texts.en || "")}</span>`,
+        sub: esc(`#${x.id} · ${x.audience === "all" ? "all users" : LNAME[x.audience] || x.audience} · ${when(x.created_at, tz)}` +
+          (x.sent || x.failed ? ` · ${x.sent} sent${x.failed ? `, ${x.failed} failed` : ""}` : "")),
+        right: x.status === "sending" ? badge(x.status, "warn") : mute(x.status) })).join("");
+      const annFoot = cur ? (cur.status === "previewed" && !S.annDirty ? "Previewed. Send goes to every user in their language, a batch every 5 minutes, never twice."
+        : "Check or edit each version, then Preview (it comes to you first). Send unlocks after a preview of exactly this text.")
+        : `Languages your users read: ${AN.languages.map((l) => LNAME[l] || l).join(", ")}. Translate makes one version for each.`;
+      return `<div class="adm-part" id="announce">${annBody}<p class="section-foot">${esc(annFoot)}</p></div>` + (annRows ? sub("Recent", annRows) : "");
     };
-    // Step 17c: one summary line, the account's reads and writes as % of the free limit, today and yesterday
-    const pc = (v, lim) => `${Math.round((100 * v) / lim)}%`;
-    const usageLine = D.account ? row({ title: "Free limit used",
-      sub: esc(`Today: reads ${pc(D.account.r, D.limits.rows_read)}, writes ${pc(D.account.w, D.limits.rows_written)}`
-        + (D.account.y ? `. Yesterday: reads ${pc(D.account.y.r, D.limits.rows_read)}, writes ${pc(D.account.y.w, D.limits.rows_written)}` : "")),
-      right: badge(pc(Math.max(D.account.r / D.limits.rows_read, D.account.w / D.limits.rows_written), 1),
-        Math.max(D.account.r / D.limits.rows_read, D.account.w / D.limits.rows_written) >= 0.8 ? "bad"
-          : Math.max(D.account.r / D.limits.rows_read, D.account.w / D.limits.rows_written) >= 0.5 ? "warn" : "ok") }) : "";
-    const d1 = usageLine + meter("Rows read", D.rows_read, D.limits.rows_read) + meter("Rows written", D.rows_written, D.limits.rows_written)
-      + (D.account ? meter("Account, rows read", D.account.r, D.limits.rows_read) + meter("Account, rows written", D.account.w, D.limits.rows_written)
-        + row({ title: "Runs over the CPU limit today", right: D.account.cpu ? badge(String(D.account.cpu), "bad") : badge("None", "ok") }) : "");
+    const annSum = cur ? badge(cur.status === "previewed" ? "Previewed" : "Draft", "warn") : AN.recent.some((x) => x.status === "sending") ? badge("Sending", "warn") : "";
 
-    const errs = S.allErrors ? A.errors : A.errors.slice(0, 8);
-    const errRows = errs.map((e) => row({ title: `<span class="clamp" style="font-size:15px;line-height:20px">${esc(e.message)}</span>`,
-      sub: esc(`${when(e.at, tz)} · ${e.component === "job" ? "News job" : e.component === "worker" ? "Bot server" : e.component}`) })).join("")
-      + (!S.allErrors && A.errors.length > 8 ? row({ title: `Show all ${A.errors.length}`, tag: "button", cls: "action tap", attrs: 'data-action="all-errors"' }) : "");
+    const FB = A.feedback || { total: 0, recent: [] };
+    const feedback = () => sub("", FB.recent.map((x) => row({ title: `<span class="clamp">${esc(x.text)}</span>`,
+      sub: esc(`${x.name || "Someone"} (id ${x.user_id}${x.lang ? `, ${x.lang}` : ""}) · ${when(x.at, tz)}`),
+      right: x.forwarded ? "" : badge("Not forwarded", "warn") })).join("") || row({ title: "No feedback yet" }),
+      FB.total ? `${plural(FB.total, "message", "messages")} in all; the latest 20 here. Each one is also sent to your Telegram chat.` : "");
+    const fbNew = FB.recent.filter((x) => A.now - x.at < 86400).length;
+
+    const T = A.tips || { stars: 0, tips: 0, refunded: 0, last: [] };
+    const tips = () => sub("", kv("Stars received", `${n(T.stars)} ⭐`, `${plural(T.tips, "tip", "tips")}` +
+        (T.refunded ? ` · ${plural(T.refunded, "refund", "refunds")} (${n(T.refunded_stars)} ⭐) not counted` : ""))
+      + T.last.map((x) => row({ title: `${esc(x.name)} · ${n(x.amount)} ⭐`, sub: esc(when(x.at, tz)),
+        right: x.refunded_at ? mute("Refunded")
+          : `<button class="link" data-action="refund" data-value="${x.id}" data-amount="${x.amount}" data-name="${esc(x.name)}" ${S.busy.refund ? "disabled" : ""}>Refund</button>` })).join(""),
+      T.last.length ? "Last 10 tips. Refund returns the Stars to the person (asks first)." : "No tips yet.");
+
+    const groups = errorGroups(A.errors);
+    const real = groups.filter((g) => !g.routine);
+    const real24 = real.filter((g) => A.now - g.at < 86400).length;
+    const errors = () => {
+      const shown = S.allErrors ? groups : real;
+      const hidden = groups.length - real.length;
+      const rows = shown.map((g) => row({ title: `<span class="clamp adm-err">${esc(g.message)}</span>`,
+        sub: esc(`${g.count > 1 ? `${g.count} times, last ` : ""}${when(g.at, tz)} · ${g.component === "job" ? "News job" : g.component === "worker" ? "Bot server" : g.component}` +
+          (g.routine ? " · routine" : "")), cls: `err${g.routine ? " routine" : ""}` })).join("")
+        + (!S.allErrors && hidden ? row({ title: `Show all (${n(hidden)} routine ${hidden === 1 ? "note" : "notes"})`, tag: "button", cls: "action tap", attrs: 'data-action="all-errors"' }) : "");
+      return sub("", rows || row({ title: "No errors" }),
+        "Newest first; the same message is grouped. Routine notes (a skipped item resent, a busy model that fell back) are hidden until Show all.");
+    };
 
     // Step 16: which copy this is, in big letters (staging amber, production red)
     const envBadge = `<div class="env-label ${A.env === "staging" ? "staging" : "production"}" id="env-label">${A.env === "staging" ? "STAGING" : "PRODUCTION"}</div>`;
     return `${envBadge}<div class="updated"><span>Updated ${esc(hm(A.now, tz))}</span>${S.adminLoading ? '<span class="spinner spin-sm"></span>'
       : '<button class="link" data-action="refresh" style="font-size:13px">Refresh</button>'}</div>
-      ${section("", status + runRow + okRow + trigRow + alertRow)}
-      ${section("Actions", actions, "Both ask before they run.")}
-      <section class="section"><h2 class="section-head">News pipeline</h2>${seg}<div class="group">${stats}</div></section>
-      ${section("AI by model", models)}
-      ${section("AI budget, today", guardRows, "Over 80% of a soft limit, or a 429 from Gemini in the last hour: new topic checks wait. Over the limit, or every Gemini model refusing: translations wait too. The first pass and the editor never wait.")}
-      ${section("Custom topics", (ctRows || row({ title: "No custom topics yet" })) + checkRows, C.topics.length ? "Delete removes it from its followers. Block also stops anyone creating it again. Both ask first." : "")}
-      ${feeds}
-      ${section("Users", tiles + userRows)}
-      <section class="section" id="announce"><h2 class="section-head">Announcement</h2>${annBody}<p class="section-foot">${esc(annFoot)}</p></section>
-      ${annRows ? section("Recent announcements", annRows) : ""}
-      ${section("Recent feedback", fbRows || row({ title: "No feedback yet" }), FB.total ? `${plural(FB.total, "message", "messages")} in all; the latest 20 here. Each one is also sent to your Telegram chat.` : "")}
-      ${section("Tips", tipRows, T.last.length ? "Last 10 tips. Refund returns the Stars to the person (asks first)." : "No tips yet.")}
-      ${section("Languages, last 24 h", langRowsA || row({ title: "No data" }), "A story with no translation yet is held: left out of the digest and sent in a later one once translated. A digest goes out fully in English only when none of its stories is translated; the badge counts those.")}
-      ${section("Database today", d1, (D.account ? `"Account" is Cloudflare's own count for both copies together (checked hourly, last ${hm(D.account.at, tz)}); the limits are for the whole account. ` : "")
-        + "Free limits per day, reset at 00:00 UTC. You get an alert at 80%.")}
-      ${section("Recent errors", errRows || row({ title: "No errors" }), A.errors.length ? "Newest first. Notes from the news job about skipped items are normal." : "")}`;
+      ${top}
+      ${section("Actions", actions, "Both ask before they run.", 'id="actions"')}
+      ${limits}
+      <div class="adm-list" id="adm-list">
+      ${admSection("pipeline", s24.failed ? badge(`${s24.failed} failed`, "warn") : mute(`${n(s24.runs)} runs, 24 h`), pipeline)}
+      ${admSection("ai", aiLook ? badge("Needs a look", "warn") : mute(`${n(Z.ai.reduce((a, m) => a + m.calls, 0))} calls`), ai)}
+      ${admSection("feeds", feedSum, feeds)}
+      ${admSection("users", mute(`${n(U.active)} active`), users)}
+      ${admSection("custom", mute(`${n(C.topics.length)} active`), custom)}
+      ${admSection("announce", annSum, announce)}
+      ${admSection("feedback", fbNew ? badge(`${fbNew} new`, "warn") : mute(n(FB.total)), feedback)}
+      ${admSection("tips", mute(`${n(T.stars)} ⭐`), tips)}
+      ${admSection("errors", real24 ? badge(`${real24} in 24 h`, "warn") : mute("None new"), errors)}
+      </div>`;
   }
 
   async function adminAction(kind) {
@@ -1112,11 +1288,19 @@
       case "edit-topics": S.editTopics = !S.editTopics; haptic("select"); renderMyTopics(); break;
       case "refund": refundAction(el); break;
       case "user-delete": userDeleteAction(el); break;
-      case "delete-me": deleteMe(); break;
+      case "delete-me": deleteAsk(); break;
+      case "delete-yes": deleteMe(); break;
+      case "delete-cancel": deleteCancel(); break;
       case "topic-admin": topicAdminAction(el); break;
       case "range": S.range = v; haptic("select"); renderView(); break;
       case "refresh": haptic("impact", "light"); loadAdmin(true); renderView(); break;
       case "all-errors": S.allErrors = true; renderView(); break;
+      case "adm-sec":   // Step 18: a section opens or closes with a tap (all closed at first)
+        S.admOpen = S.admOpen || {};
+        S.admOpen[v] = !S.admOpen[v];
+        haptic("select");
+        renderView();
+        break;
       case "digest-now": adminAction("digest"); break;
       case "run-job": adminAction("run"); break;
       case "retry": boot(); break;
@@ -1183,8 +1367,9 @@
       else fatal(tr("app.load_failed"), e.message, true);
       return;
     }
+    S.server = copy(S.st);
     setLang(S.st.user.lang);
-    if (S.st.setup) { S.page = "setup"; S.step = 1; }   // Step 15: the first open
+    if (S.st.setup) { S.page = "setup"; S.step = 1; S.setupTouched = false; S.st.user.topics = []; }   // Step 15: the first open; Step 18: topics start off
     renderShell();
     renderView();
   }

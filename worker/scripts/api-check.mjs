@@ -55,12 +55,20 @@ const restored = await api("/api/settings", ownerInit, { digest_times: old });
 check("old value restored", restored.status === 200 && (await row()).digest_times === JSON.stringify(old), `back to ${old.join(",")}`);
 const bad = await api("/api/settings", ownerInit, { digest_times: ["09:30"] });
 check("a half-hour time is refused with a friendly message", bad.status === 400, bad.body.error);
+// Step 18: an empty list is refused, and the refusal says what is saved (nothing changes)
+const empty = await api("/api/settings", ownerInit, { digest_times: [] });
+check("an empty times list is refused with the saved state", empty.status === 400 && empty.body.code === "keep_time" &&
+  JSON.stringify(empty.body.state?.user?.digest_times) === JSON.stringify(old) && (await row()).digest_times === JSON.stringify(old), empty.body.error);
 const gone = await api("/api/settings", ownerInit, { max_stories: 7 });
 check("a removed setting is refused", gone.status === 400, gone.body.error);
 
 const admin = await api("/api/admin", ownerInit);
 check("admin data for the owner", admin.status === 200 && !!admin.body.health, `${admin.ms} ms, level ${admin.body.health?.level}, ` +
   `${admin.body.users?.count} users, ${admin.body.feeds?.total} feeds, D1 today ${admin.body.d1?.rows_read} read / ${admin.body.d1?.rows_written} written`);
+// Step 18: the dashboard summary (one health level and reason, key numbers, limits)
+const Z = admin.body.summary;
+check("admin dashboard summary", !!Z && ["ok", "warn", "bad"].includes(Z.level) && !!Z.reason && !!Z.numbers && !!Z.limits,
+  `${Z?.level}: ${Z?.reason}; ${Z?.numbers?.active_users} active, ${Z?.numbers?.digests_today} digests today, ${Z?.numbers?.stories_today} stories today`);
 const stranger = await api("/api/admin", await sign(owner + 1, "Someone"));
 check("admin data for anyone else: 403", stranger.status === 403, stranger.body.error);
 const tampered = await api("/api/admin", ownerInit.replace(/hash=[0-9a-f]/, (m) => m.slice(0, -1) + (m.endsWith("0") ? "1" : "0")));

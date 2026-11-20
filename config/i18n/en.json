@@ -97,7 +97,7 @@
   },
   "errors": {
     "delete_confirm": "Please confirm the deletion.",
-    "delete_owner_confirm": "The owner's account needs a second confirmation.",
+    "delete_owner_confirm": "The Admin account needs a second confirmation.",
     "reopen": "Please close and reopen Settings from the bot.",
     "reopen_simple": "Please close and reopen Settings.",
     "too_large": "Request too large.",
@@ -112,7 +112,7 @@
     "times_hour": "🕘 Pick a full hour, {from} to {to}.",
     "lang_bad": "🌍 That language is not available.",
     "server": "⚠️ Something went wrong. Please try again in a minute.",
-    "owner_only": "This is only for the bot's owner.",
+    "owner_only": "This is only for the admin.",
     "not_found": "Not found.",
     "no_user": "👋 Send /start to the bot first.",
     "tip_amount": "This tip amount is not available.",
@@ -186,7 +186,7 @@
     "help_privacy": "We keep your Telegram id and name.\nAnd your settings, nothing more.\nAI checks a topic you add.\nNothing is sold or shared.",
     "delete_row": "🗑 Delete my data",
     "delete_confirm": "Delete all your data? Your settings, topics and history are removed, and the bot stops writing to you. This cannot be undone.",
-    "delete_owner_confirm": "This is the owner's account. Delete your own data too? Admin stays yours after /start.",
+    "delete_owner_confirm": "This is your Admin account. Delete your own data too? Admin stays yours after /start.",
     "delete_done": "✅ Your data is deleted. Send /start to begin again.",
     "feedback_placeholder": "Ideas, problems, questions",
     "feedback_send": "Send",
@@ -205,6 +205,9 @@
     "add_topic_hint": "e.g. Formula 1, Japan, AI",
     "setup_lang": "🌍 Language",
     "help_feedback_h": "💬 Feedback",
-    "help_feedback": "Ideas or problems?\nTap Send feedback.\nThe owner reads every message."
+    "help_feedback": "Ideas or problems?\nTap Send feedback.\nWe read every message.",
+    "setup_pick_topic": "Pick at least one topic",
+    "delete_yes": "Delete",
+    "delete_cancel": "Cancel"
   }
 }

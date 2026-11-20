@@ -108,13 +108,13 @@ export function topicLabel(lang, tag, labelEn) {
   return labelEn ?? raw("en", `topics.${tag}`) ?? tag;
 }
 
-// Bot command descriptions for setMyCommands.
+// Bot command descriptions for setMyCommands. Step 18 (owner): /support and /paysupport are not in the
+// visible menu any more; both still work when typed (src/bot.js), as Telegram requires for Stars, and
+// Support Axiom stays in Settings.
 export function commandList(lang) {
   return [
     { command: "start", description: t(lang, "commands.start") },
     { command: "settings", description: t(lang, "commands.settings") },
-    { command: "support", description: t(lang, "commands.support") },     // Step 10: tips
-    { command: "paysupport", description: t(lang, "commands.paysupport") },   // Telegram's rule for Stars
     { command: "terms", description: t(lang, "commands.terms") },
   ];
 }

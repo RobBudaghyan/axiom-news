@@ -279,8 +279,9 @@ describe("Step 15: setup texts and the first open", () => {
   test("the Mini App opens the setup when the server says so, and only then", async () => {
     const { readFileSync } = await import("node:fs");
     const js = readFileSync(new URL("../public/app/app.js", import.meta.url), "utf8");
-    assert.match(js, /setLang\(S\.st\.user\.lang\);\s*if \(S\.st\.setup\) \{ S\.page = "setup"; S\.step = 1; \}/);
-    assert.match(js, /await chain;[^\n]*\n\s*S\.st = await api\("\/api\/onboard", \{ skipped \}\);/);
+    // Step 18: the setup starts with every topic off on screen (nothing is saved until a tap)
+    assert.ok(js.includes('setLang(S.st.user.lang);\n    if (S.st.setup) { S.page = "setup"; S.step = 1; S.setupTouched = false; S.st.user.topics = []; }'));
+    assert.match(js, /await chain;[^\n]*\n\s*const r = await api\("\/api\/onboard", \{ skipped \}\);/);
   });
 });
 

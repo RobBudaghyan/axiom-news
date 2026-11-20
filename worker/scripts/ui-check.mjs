@@ -381,8 +381,11 @@ try {
   check("owner: the same three amounts, no 1-Star test amount", r === "100,500,1000", r);
 
   r = await b.run(`click('[data-value=admin]'); await until(() => document.querySelector('.status'));
-    const bad = document.querySelector('.badge.bad');
-    const res = { editor: document.body.innerText.includes('Editor pass'), bad: bad ? getComputedStyle(bad).color : null };
+    click('[data-action=adm-sec][data-value=pipeline]'); await wait(200);
+    const bad = document.createElement('span'); bad.className = 'badge bad'; document.querySelector('#view').append(bad);
+    const res = { editor: document.body.innerText.includes('Editor pass'), bad: getComputedStyle(bad).color };
+    bad.remove();
+    click('[data-action=adm-sec][data-value=pipeline]'); await wait(150);
     const lab = document.querySelector('#env-label');
     res.env = lab ? [lab.textContent, getComputedStyle(lab).backgroundColor, Math.round(lab.getBoundingClientRect().height), lab === document.querySelector('#view').firstElementChild] : null;
     const sq = (s) => { const e = document.querySelector(s); const c = getComputedStyle(e); const r = e.getBoundingClientRect(); return [Math.round(r.width), c.borderTopLeftRadius, c.backgroundColor]; };
@@ -398,11 +401,11 @@ try {
     click('[data-action=run-job]'); await until(() => /news job|Started/.test(text('#toast')));
     res.t2 = text('#toast');
     return res;`);
-  check("Admin shows the editor pass", r.editor);
+  check("Admin shows the editor pass (inside Pipeline)", r.editor);
   check("Step 16: Admin opens with a big STAGING label (amber, 48 px, first on the page)",
     JSON.stringify(r.env) === JSON.stringify(["STAGING", "rgb(199, 119, 0)", 48, true]), JSON.stringify(r.env));
   check("Admin in the Settings style: rows 48 px or more, 12 px cards, solid squares (green health, red actions)", r.style.ok, JSON.stringify(r.style));
-  check("Admin failure badges are orange, not red", r.bad === "rgb(176, 58, 6)", String(r.bad));
+  check("Step 18: Admin failure badges are the system red (the health colours), not the brand red", r.bad === "rgb(215, 0, 21)", String(r.bad));
   check("owner: Send me a digest now asks first, then sends", r.confirmed && /Sent: (\d+ stor|a short note)/.test(r.t1), r.t1);
   check("owner: Run news job now respects the 20-minute gap", /last ran at \d\d:\d\d/.test(r.t2) || /Started/.test(r.t2), r.t2);
   await b.open(`${BASE}/app/?theme=light&as=owner&confirm=0`);
@@ -509,12 +512,28 @@ const SETUP_LAYOUT = `const v = document.querySelector('#view');
     check("Step 16 setup: a language tap saves at once and the whole flow switches language instantly (and back)",
       r.lang === "ru" && r.a.title === "🌍 Язык" && r.a.head === "1 из 4" && r.a.nav.join() === "Пропустить,Далее" &&
       r.lang2 === "en" && r.b.title === "🌍 Language" && r.b.head === "1 of 4" && r.haptic.includes("haptic impact light"), JSON.stringify(r));
-    r = await n.run(`${SERVER} click('[data-action=setup-next]'); await wait(300); ${SETUP_LAYOUT}`);
-    check("setup step 2: '📰 Your topics', 2 of 4, the six topics on, Back and Next, no tabs",
+    r = await n.run(`${SERVER} click('[data-action=setup-next]'); await wait(300); const a = (() => { ${SETUP_LAYOUT} })();
+      const next = document.querySelector('[data-action=setup-next]'), hint = document.querySelector('#setup-hint');
+      const on = [...document.querySelectorAll('[data-action=topic][aria-checked=true]')].length, u = await server();
+      click('[data-action=setup-next]'); await wait(250);
+      return { ...a, on, saved: u.topics.length, nextOff: next.disabled, hint: hint && !hint.hidden ? hint.textContent : null,
+        hintPx: hint ? getComputedStyle(hint).fontSize : null, stayed: text('#title') };`);
+    check("Step 18 setup step 2: '📰 Your topics', 2 of 4, every topic OFF, Next disabled with one hint line 'Pick at least one topic' (nothing saved yet)",
       r.title === "📰 Your topics" && r.head === "2 of 4" && r.nav.join() === "Back,Next" && !r.tabs && r.heights.join() === "48" && r.navOk &&
-      !r.cut.length && !r.sideways, JSON.stringify(r));
-    r = await n.run(`${SERVER} const on = [...document.querySelectorAll('[data-action=topic][aria-checked=true]')].length;
-      click('[data-value=ukraine_war]'); await settled(); const u = await server();
+      !r.cut.length && !r.sideways && r.on === 0 && r.saved === 6 && r.nextOff && r.hint === "Pick at least one topic" && r.hintPx === "13px" &&
+      r.stayed === "📰 Your topics", JSON.stringify(r));
+    r = await n.run(`${SERVER} click('[data-value=armenia]'); await settled(); const u = await server();
+      const next = document.querySelector('[data-action=setup-next]'), hint = document.querySelector('#setup-hint');
+      const after1 = { saved: u.topics, nextOff: next.disabled, hintHidden: hint.hidden };
+      click('[data-value=armenia]'); await settled(); const u2 = await server();
+      const after0 = { saved: u2.topics, nextOff: document.querySelector('[data-action=setup-next]').disabled, hintHidden: document.querySelector('#setup-hint').hidden };
+      for (const t of ['politics_conflicts', 'economy_markets', 'armenia', 'russia', 'iran_war']) { click('[data-value=' + t + ']'); await wait(60); }
+      await settled(); return { after1, after0, u3: (await server()).topics, nextOff: document.querySelector('[data-action=setup-next]').disabled };`);
+    check("Step 18 setup: one topic on enables Next and hides the hint (saved at once); switching it off again disables Next",
+      r.after1.saved.join() === "armenia" && !r.after1.nextOff && r.after1.hintHidden && r.after0.saved.length === 0 && r.after0.nextOff &&
+      !r.after0.hintHidden && r.u3.length === 5 && !r.nextOff, JSON.stringify(r));
+    r = await n.run(`${SERVER} const on = 6 - [...document.querySelectorAll('[data-action=topic][aria-checked=true]')].length === 1 ? 6 : -1;
+      const u = await server();
       click('[data-action=setup-next]'); await wait(300); const s2 = (() => { ${SETUP_LAYOUT} })();
       const times = [...document.querySelectorAll('[data-action=time]')].length, on2 = [...document.querySelectorAll('[data-action=time][aria-pressed=true]')].map((x) => x.dataset.value);
       click('[data-value="20:00"]'); await settled(); const u2 = await server();
@@ -522,7 +541,7 @@ const SETUP_LAYOUT = `const v = document.querySelector('#view');
       click('[data-action=setup-next]'); await wait(200); click('[data-action=setup-next]'); await wait(300); const s3 = (() => { ${SETUP_LAYOUT} })();
       const hero = !!document.querySelector('#hero'), sample = text('#view .help-p');
       return { on, saved: u.topics, s2, times, on2, savedTimes: u2.digest_times, back, s3, hero, sample };`);
-    check("setup: a topic tap saves at once; step 3 '🕘 Digest times', 3 of 4, 18 hours with 09, 14, 20 on, Back and Next on the grid",
+    check("setup: the picks are saved (no Ukraine War); step 3 '🕘 Digest times', 3 of 4, 18 hours with 09, 14, 20 on, Back and Next on the grid",
       r.on === 6 && !r.saved.includes("ukraine_war") && r.s2.title === "🕘 Digest times" && r.s2.head === "3 of 4" && r.times === 18 &&
       r.on2.join() === "09:00,14:00,20:00" && r.s2.nav.join() === "Back,Next" && r.s2.navOk && r.s2.heights.join() === "48" &&
       r.savedTimes.join() === "09:00,14:00" && r.back === "📰 Your topics", JSON.stringify(r).slice(0, 700));
@@ -560,6 +579,7 @@ for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
         await fetch(`${BASE}/__reset`, { method: "POST" });
         await w.open(`${BASE}/app/?theme=${scheme}&as=new&tg_lang=${lang}`, scheme);
         const S = await w.run(`const out = []; for (let i = 0; i < 4; i++) { out.push((() => { ${SETUP_LAYOUT} })());
+          if (i === 1) { click('[data-value=russia]'); await wait(250); }   // Step 18: Next waits for one topic
           if (i < 3) { click('[data-action=setup-next]'); await wait(250); } } return out;`);
         const ru = lang === "ru";
         check(`${width} px, ${ru ? "Russian" : "English"}, ${scheme}: the four setup steps (language first) keep the layout rules`,
@@ -580,9 +600,10 @@ for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
   const a = await openBrowser();
   try {
     await a.open(`${BASE}/app/?theme=light&as=owner&confirm=1`);
-    let r = await a.run(`${SERVER} click('[data-action=tab][data-value=admin]'); await until(() => document.querySelector('#announce'), 6000);
+    let r = await a.run(`${SERVER} click('[data-action=tab][data-value=admin]'); await until(() => document.querySelector('#adm-announce'), 6000);
+      click('[data-action=adm-sec][data-value=announce]'); await until(() => document.querySelector('#announce'), 3000);
       const sec = document.querySelector('#announce');
-      return { head: text('#announce .section-head'), aud: [...sec.querySelectorAll('[data-action=ann-audience]')].map((b) => b.textContent + ':' + b.getAttribute('aria-pressed')),
+      return { head: text('#adm-announce .adm-head .row-title'), aud: [...sec.querySelectorAll('[data-action=ann-audience]')].map((b) => b.textContent + ':' + b.getAttribute('aria-pressed')),
         foot: text('#announce .section-foot') };`);
     check("Admin: Announcement section with the English field and the audience (All users, English, Russian)",
       r.head === "Announcement" && r.aud.join() === "All users:true,English:false,Russian:false" && /English, Russian/.test(r.foot), JSON.stringify(r));
@@ -621,6 +642,178 @@ for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
     check("announcement checks ran to the end", false, e.message);
   } finally {
     await a.close();
+  }
+}
+
+// ------------------------------------------------------------ Step 18: beta fixes
+// The digest times bug, reproduced: answers held 300 ms (so taps land while a request is on its way),
+// rapid random taps, and a failing request. The screen must never show zero times, must send one
+// request at a time, and must end equal to what the server saved.
+const SLOW = `if (!window.__slow) { window.__slow = true; const real = window.fetch; window.__net = { inflight: 0, max: 0, n: 0 }; window.__failNext = false;
+    window.fetch = async (u, o) => { if (!String(u).includes('/api/settings')) return real(u, o);
+      const N = window.__net; N.n++; N.inflight++; N.max = Math.max(N.max, N.inflight);
+      try { if (window.__failNext) { window.__failNext = false; await wait(200);
+          return new Response(JSON.stringify({ error: 'Network trouble' }), { status: 500 }); }
+        const r = await real(u, o); await wait(300); return r; } finally { N.inflight--; } }; }
+  window.__minOn = 99; if (!window.__mo) { window.__mo = new MutationObserver(() => { window.__minOn = Math.min(window.__minOn, pressed().length); });
+    window.__mo.observe(document.querySelector('#times'), { attributes: true, subtree: true, attributeFilter: ['aria-pressed'] }); }`;
+{
+  await fetch(`${BASE}/__reset`, { method: "POST" });
+  const q = await openBrowser({ width: 390, port: 9337 });
+  try {
+    await q.open(`${BASE}/app/?theme=light&as=friend`);
+    await q.run(API({ digest_times: ["09:00", "14:00"] }));
+    await q.open(`${BASE}/app/?theme=light&as=friend`);
+    // the owner's case: add one, remove one, then the rest while answers are still on their way
+    let r = await q.run(`${SERVER} ${SLOW} const t0 = window.__toasts.length;
+      click('[data-value="20:00"]'); await wait(30); click('[data-value="09:00"]'); await wait(350);
+      click('[data-value="14:00"]'); await wait(300); click('[data-value="20:00"]'); await wait(1600);
+      return { on: pressed(), u: (await server()).digest_times, min: window.__minOn, max: window.__net.max, n: window.__net.n, toast: window.__toasts.slice(t0).join(' | ') };`);
+    check("Step 18 times bug: taps while answers are on their way never leave zero times on screen; the last one is refused; screen = server",
+      r.min >= 1 && r.on.length >= 1 && JSON.stringify(r.on) === JSON.stringify(r.u) && r.u.join() === "20:00" && r.max === 1 &&
+      /Keep at least one time/.test(r.toast), JSON.stringify(r));
+    r = await q.run(`${SERVER} ${SLOW} window.__minOn = 99; const hours = [...document.querySelectorAll('[data-action=time]')].map((x) => x.dataset.value);
+      let seed = 11; const rnd = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed; };
+      for (let i = 0; i < 40; i++) { click('[data-value="' + hours[rnd() % 6] + '"]'); await wait(20 + rnd() % 60); }
+      await wait(2500); const n0 = window.__net.n;
+      return { on: pressed(), u: (await server()).digest_times, min: window.__minOn, max: window.__net.max, n: n0 };`);
+    check("Step 18 times bug: 40 rapid random taps: one request at a time (taps merged), never zero on screen, at most 5, screen = server",
+      r.min >= 1 && r.on.length >= 1 && r.on.length <= 5 && JSON.stringify(r.on) === JSON.stringify(r.u) && r.max === 1 && r.n < 40, JSON.stringify(r));
+    r = await q.run(`${SERVER} ${SLOW} const before = (await server()).digest_times; const t0 = window.__toasts.length; window.__failNext = true;
+      const pick = ['06:00', '07:00', '08:00'].find((x) => !pressed().includes(x)); click('[data-value="' + pick + '"]');
+      await wait(60); const mid = pressed(); await wait(1200);
+      return { before, mid, pick, on: pressed(), u: (await server()).digest_times, toast: window.__toasts.slice(t0).join(' | ') };`);
+    check("Step 18 times bug: a failed save rolls the screen back to the server's state, with a short error",
+      r.mid.includes(r.pick) && !r.on.includes(r.pick) && JSON.stringify(r.on) === JSON.stringify(r.u) && JSON.stringify(r.u) === JSON.stringify(r.before) &&
+      /Network trouble/.test(r.toast), JSON.stringify(r));
+    r = await q.run(`const res = await fetch('/api/settings', { method: 'POST', headers: { authorization: 'tma ' + Telegram.WebApp.initData,
+      'content-type': 'application/json' }, body: JSON.stringify({ digest_times: [] }) }); const j = await res.json();
+      return { status: res.status, code: j.code, saved: j.state && j.state.user.digest_times };`);
+    check("Step 18 times bug: the server refuses an empty list and answers with the saved times", r.status === 400 && r.code === "keep_time" &&
+      Array.isArray(r.saved) && r.saved.length >= 1, JSON.stringify(r));
+
+    // Help: "we", never "the owner"; Delete my data in the brand red, its question in place
+    for (const scheme of ["light", "dark"]) {
+      await fetch(`${BASE}/__reset`, { method: "POST" });
+      await q.open(`${BASE}/app/?theme=${scheme}&as=friend`, scheme);
+      r = await q.run(`click('[data-action=open-help]'); await wait(350);
+        const v = document.querySelector('#view'); const row = document.querySelector('#delete-me .row-title');
+        const out = { fb: text('#help-feedback .help-p'), owner: /owner/i.test(v.innerText), rowColor: getComputedStyle(row).color };
+        click('#delete-me'); await wait(250);
+        const yes = document.querySelector('#delete-yes');
+        out.q = text('#delete-q'); out.yesBg = yes && getComputedStyle(yes).backgroundColor; out.yesText = yes && yes.textContent;
+        out.yesH = yes && Math.round(yes.getBoundingClientRect().height); out.cancel = text('[data-action=delete-cancel]');
+        out.rowColor2 = getComputedStyle(document.querySelector('#delete-me .row-title')).color;
+        click('[data-action=delete-cancel]'); await wait(250); out.gone = !document.querySelector('#delete-q');
+        click('#delete-me'); await wait(200); click('#delete-yes'); await until(() => document.querySelector('#deleted'), 4000);
+        out.done = text('#deleted'); return out;`);
+      const dark = scheme === "dark";
+      check(`Step 18 (${scheme}): Help says "We read every message" (no "owner"); Delete my data is brand red (${dark ? "#ff6b6b text, #d0232a fill" : "#b1161c"}), not orange; its question shows in place with a red Delete and Cancel`,
+        /We read every message/.test(r.fb) && !r.owner && r.rowColor === (dark ? "rgb(255, 107, 107)" : RED) && r.rowColor2 === r.rowColor &&
+        /^Delete all your data\?/.test(r.q) && r.yesBg === (dark ? RED_DARK : RED) && r.yesText === "Delete" && r.yesH === 48 && r.cancel === "Cancel" &&
+        r.gone && /Your data is deleted/.test(r.done), JSON.stringify(r));
+    }
+    await fetch(`${BASE}/__reset`, { method: "POST" });
+    await q.open(`${BASE}/app/?theme=light&as=owner`);
+    r = await q.run(`click('[data-action=open-help]'); await wait(350); click('#delete-me'); await wait(200); const q1 = text('#delete-q');
+      click('#delete-yes'); await wait(250); const q2 = text('#delete-q'); const still = !document.querySelector('#deleted');
+      click('[data-action=delete-cancel]'); await wait(200); return { q1, q2, still, gone: !document.querySelector('#delete-q') };`);
+    check("Step 18: the owner gets a second question ('This is your Admin account...') before anything is deleted; Cancel stops it",
+      /^Delete all your data\?/.test(r.q1) && /^This is your Admin account/.test(r.q2) && r.still && r.gone, JSON.stringify(r));
+    await q.open(`${BASE}/app/?theme=light&as=friend`);
+    await q.run(`${API({ lang: "ru" })} return 1;`);
+    await q.open(`${BASE}/app/?theme=light&as=friend`);
+    r = await q.run(`click('[data-action=open-help]'); await wait(350); return { fb: text('#help-feedback .help-p'), owner: /владел/i.test(document.querySelector('#view').innerText) };`);
+    check("Step 18: Russian Help says 'Мы читаем каждое сообщение' (no 'владелец')", /Мы читаем каждое сообщение/.test(r.fb) && !r.owner, JSON.stringify(r));
+    await q.run(API({ lang: "en" }));
+    check("no console errors (Step 18 checks)", q.consoleErrors().length === 0, JSON.stringify(q.consoleErrors()[0]?.params ?? "").slice(0, 200));
+  } catch (e) {
+    check("Step 18 checks ran to the end", false, e.message);
+  } finally {
+    await q.close();
+  }
+}
+
+// The Admin dashboard: what it shows and that every action is still there (390 px, light), then the
+// layout rules at 360, 390 and 430 px, light and dark, with every section open.
+const ADMIN_LAYOUT = `const v = document.querySelector('#view'); const box = (e) => e.getBoundingClientRect();
+  const rows = [...v.querySelectorAll('.group .row')].filter((e) => e.offsetParent);
+  return { short: rows.filter((e) => box(e).height < 47.5).map((e) => e.innerText.slice(0, 40)),
+    radii: [...new Set([...v.querySelectorAll('.group')].map((e) => getComputedStyle(e).borderTopLeftRadius))],
+    wide: [...v.querySelectorAll('.group, .b, .row')].filter((e) => e.offsetParent && box(e).right > window.innerWidth + 0.5).length,
+    kpiCut: [...v.querySelectorAll('.kpi b, .kpi span')].filter((e) => e.scrollWidth > e.clientWidth + 1).map((e) => e.textContent),
+    sideways: document.documentElement.scrollWidth > window.innerWidth };`;
+const adminLayoutOk = (x) => !x.short.length && x.radii.join() === "12px" && !x.wide && !x.kpiCut.length && !x.sideways;
+{
+  await fetch(`${BASE}/__reset`, { method: "POST" });
+  const d = await openBrowser({ width: 390, port: 9338 });
+  try {
+    await d.open(`${BASE}/app/?theme=light&as=owner`);
+    let r = await d.run(`click('[data-value=admin]'); await until(() => document.querySelector('#health'), 6000);
+      const v = document.querySelector('#view'); const kids = [...v.children].map((e) => e.id || e.className);
+      const heads = [...document.querySelectorAll('.adm-head')].map((h) => h.querySelector('.row-title').textContent + ':' + h.getAttribute('aria-expanded'));
+      return { kids: kids.slice(0, 5), title: text('#health .status-title'), reason: text('#health .status-sub'),
+        dot: getComputedStyle(document.querySelector('#health .dot')).backgroundColor,
+        kpis: [...document.querySelectorAll('.kpi')].map((k) => k.querySelector('span').textContent + '=' + k.querySelector('b').textContent),
+        heads, bodies: document.querySelectorAll('.adm-body').length,
+        lim: [...document.querySelectorAll('#limits [data-lim]')].map((x) => x.dataset.lim + (x.querySelector('.badge') ? '!' : '')),
+        actions: [...document.querySelectorAll('#actions [data-action]')].map((x) => x.dataset.action) };`);
+    check("Step 18 Admin: STAGING, then one health line (green 'All good' with its reason) and six key numbers",
+      r.kids[0] === "env-label" && r.title === "All good" && /fine/.test(r.reason) && r.dot === "rgb(52, 199, 89)" &&
+      r.kpis.map((k) => k.split("=")[0]).join() === "Active users,Digests today,Delivered,Stories today,Last run · Done,Next run" &&
+      r.kpis[1] === "Digests today=14" && r.kpis[2] === "Delivered=100%", JSON.stringify(r));
+    check("Step 18 Admin: Actions (Send me a digest now, Run news job now) and the free limits (D1 reads, writes, Worker CPU, AI per model), no colour while fine",
+      r.actions.join() === "digest-now,run-job" && r.lim.slice(0, 3).join() === "reads,writes,cpu" && r.lim.filter((x) => x.startsWith("ai")).length >= 2 &&
+      !r.lim.some((x) => x.endsWith("!")), JSON.stringify(r));
+    check("Step 18 Admin: nine sections, all closed at first (Pipeline, AI, Feeds, Users, Custom topics, Announcement, Feedback, Tips, Errors)",
+      r.heads.join() === "Pipeline:false,AI:false,Feeds:false,Users:false,Custom topics:false,Announcement:false,Feedback:false,Tips:false,Errors:false" &&
+      r.bodies === 0, JSON.stringify(r.heads));
+    r = await d.run(`const open = (k) => { click('[data-action=adm-sec][data-value=' + k + ']'); };
+      open('feeds'); await wait(150); const feeds = { rows: [...document.querySelectorAll('#adm-feeds .adm-body .row')].map((x) => x.innerText.split('\\n')[0]),
+        working: text('#adm-feeds .kv-num') };
+      open('feeds'); await wait(150); const closed = !document.querySelector('#adm-feeds .adm-body');
+      open('custom'); await wait(150); const custom = { names: [...document.querySelectorAll('#adm-custom .adm-body .adm-part:first-child .row .row-title .ellipsis')].map((x) => x.textContent),
+        hidden: text('#custom-hidden'), acts: [...document.querySelectorAll('#adm-custom [data-action=topic-admin]')].map((x) => x.dataset.act) };
+      open('errors'); await wait(150); const e1 = [...document.querySelectorAll('#adm-errors .row.err')].map((x) => x.className.includes('routine'));
+      const more = text('#adm-errors [data-action=all-errors]'); click('#adm-errors [data-action=all-errors]'); await wait(150);
+      const e2 = [...document.querySelectorAll('#adm-errors .row.err')].map((x) => [x.className.includes('routine'), x.querySelector('.row-sub').textContent]);
+      open('users'); open('tips'); open('announce'); open('pipeline'); open('ai'); open('feedback'); open('feeds'); await wait(200);
+      const acts = [...new Set([...document.querySelectorAll('#view [data-action]')].map((x) => x.dataset.action))];
+      return { feeds, closed, custom, e1, more, e2, acts, open: [...document.querySelectorAll('.adm-head[aria-expanded=true]')].length };`);
+    check("Step 18 Admin: Feeds lists only the failing and silent feeds, the rest as one count; a second tap closes it",
+      r.feeds.working === "112 of 115" && r.feeds.rows.join() === "Working,Times of Israel,Azatutyun,Iran International" && r.closed, JSON.stringify(r.feeds));
+    check("Step 18 Admin: Custom topics shows only active ones (Formula 1) with Keywords, Delete, Block; the switched-off one is '1 hidden'",
+      r.custom.names.join() === "Formula 1" && /^1 hidden/.test(r.custom.hidden) && r.custom.acts.join() === "keywords,delete,block", JSON.stringify(r.custom));
+    check("Step 18 Admin: Errors grouped, newest first, routine notes hidden behind 'Show all'",
+      r.e1.length >= 2 && r.e1.every((x) => !x) && /^Show all \(2 routine notes\)$/.test(r.more) && r.e2.length === r.e1.length + 2 &&
+      r.e2.some((x) => x[0] && /^10 times, last/.test(x[1])), JSON.stringify({ e1: r.e1, more: r.more, e2: r.e2 }));
+    check("Step 18 Admin: every action is still there (digest, news job, Delete user, Refund, Keywords/Delete/Block, announcement, Refresh)",
+      ["digest-now", "run-job", "user-delete", "refund", "topic-admin", "ann-translate", "ann-audience", "refresh", "range"].every((a) => r.acts.includes(a)) && r.open === 9,
+      r.acts.join(","));
+    check("no console errors (Step 18 Admin)", d.consoleErrors().length === 0, JSON.stringify(d.consoleErrors()[0]?.params ?? "").slice(0, 200));
+  } catch (e) {
+    check("Step 18 Admin checks ran to the end", false, e.message);
+  } finally {
+    await d.close();
+  }
+}
+for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
+  const w = await openBrowser({ width, port });
+  try {
+    for (const scheme of ["light", "dark"]) {
+      await w.open(`${BASE}/app/?theme=${scheme}&as=owner`, scheme);
+      const r = await w.run(`click('[data-value=admin]'); await until(() => document.querySelector('#health'), 6000);
+        const closed = (() => { ${ADMIN_LAYOUT} })();
+        for (const k of ['pipeline', 'ai', 'feeds', 'users', 'custom', 'announce', 'feedback', 'tips', 'errors']) click('[data-action=adm-sec][data-value=' + k + ']');
+        await wait(300); const open = (() => { ${ADMIN_LAYOUT} })();
+        return { closed, open, red: getComputedStyle(document.querySelector('[data-action=digest-now] .row-icon')).backgroundColor };`);
+      check(`${width} px, ${scheme}: the Admin dashboard keeps the design (rows 48 px or more, 12 px cards, nothing wider, numbers not cut), closed and open`,
+        adminLayoutOk(r.closed) && adminLayoutOk(r.open) && r.red === (scheme === "dark" ? RED_DARK : RED), JSON.stringify(r).slice(0, 600));
+    }
+  } catch (e) {
+    check(`${width} px Admin ran to the end`, false, e.message);
+  } finally {
+    await w.close();
   }
 }
 

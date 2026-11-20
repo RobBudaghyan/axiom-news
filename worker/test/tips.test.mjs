@@ -248,10 +248,10 @@ describe("/paysupport, /terms, commands and texts", () => {
     assert.match(fetchMock.calls[0].body.text, /^📄 Terms for tips\n/);
   });
 
-  test("the command list has /support, /paysupport and /terms in every language", () => {
+  test("Step 18: the visible command list is /start, /settings and /terms in every language (no /support, no /paysupport)", () => {
     for (const lang of Object.keys(DICTS)) {
       const list = commandList(lang);
-      assert.deepEqual(list.map((c) => c.command), ["start", "settings", "support", "paysupport", "terms"]);
+      assert.deepEqual(list.map((c) => c.command), ["start", "settings", "terms"]);
       for (const c of list) assert.ok(c.description.length >= 3 && c.description.length <= 256 && !FORBIDDEN.test(c.description));
     }
   });

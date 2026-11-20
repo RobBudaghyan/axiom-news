@@ -177,10 +177,14 @@ describe("Step 17: protection and confirm steps", () => {
 
   test("the Mini App asks before it deletes (one confirm, a second for the owner) and then stops calling the API", () => {
     const src = readFileSync(new URL("../public/app/app.js", import.meta.url), "utf8");
+    // Step 18: the question shows in place (a brand-red Delete): the row only asks, Delete calls the API
+    assert.ok(src.includes('case "delete-me": deleteAsk(); break;'));
+    assert.ok(src.includes('case "delete-yes": deleteMe(); break;'));
+    assert.ok(src.includes('tr(S.delAsk === 2 ? "app.delete_owner_confirm" : "app.delete_confirm")'));
     const me = src.slice(src.indexOf("async function deleteMe()"), src.indexOf("async function deleteMe()") + 1400);
-    const first = me.indexOf('confirmBox(tr("app.delete_confirm"))'), second = me.indexOf('confirmBox(tr("app.delete_owner_confirm"))');
+    const second = me.indexOf("if (owner && S.delAsk === 1) { S.delAsk = 2;");
     const call = me.indexOf('api("/api/account/delete"');
-    assert.ok(first > 0 && second > first && call > second, "confirm, owner confirm, then the call");
+    assert.ok(second > 0 && call > second, "owner: a second question first, then the call");
     assert.match(me, /S\.deleted = true/);
     assert.match(me, /tg\.close\(\)/);
     assert.match(src, /function renderView\(animate = false\) \{\n\s+if \(S\.deleted\) return;/);

@@ -48,10 +48,14 @@ export const needsSetup = (user) => !!user && !user.onboarded_at && !Number(user
 
 // POST /api/onboard {skipped}: the first call marks the user onboarded and sends the sample digest;
 // a repeated call (a double tap, a second device) changes nothing and sends nothing.
+// Step 18 (owner): the setup's topics step starts with every topic off, so Skip puts the defaults (the
+// six main topics) back on, in the same statement that ends the setup.
 export async function onboard(db, userId, body, now, cfg, io) {
   const [claimed] = await db.batch([{
-    sql: "UPDATE users SET onboarded_at = ?2 WHERE id = ?1 AND onboarded_at IS NULL AND imported = 0 RETURNING id",
-    params: [userId, now] }]);
+    sql: "UPDATE users SET onboarded_at = ?2, topics = CASE WHEN ?3 = 1 THEN " +
+         "(SELECT json_group_array(tag) FROM (SELECT tag FROM topics WHERE is_default = 1 ORDER BY sort)) ELSE topics END " +
+         "WHERE id = ?1 AND onboarded_at IS NULL AND imported = 0 RETURNING id",
+    params: [userId, now, body?.skipped === true ? 1 : 0] }]);
   if (!claimed.length) return { sample: false };
   try {
     const r = await sendDigestNow(db, userId, now, cfg, io, { sample: true });

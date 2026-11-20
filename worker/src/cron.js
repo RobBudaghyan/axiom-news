@@ -30,6 +30,22 @@ export function fallbackStatement(userId, fb, now) {
     `stories has a ${fb.lang} translation yet`, now, "digest");
 }
 
+// Step 18: today's deliveries for Admin (digests and quiet notes sent, failed tries, readers who blocked
+// the bot), one meta row, added to in SQL (two ticks never lose a count), started again each UTC day.
+// Written only by a tick that tried to send something.
+export const DIGEST_DAY_KEY = "digest_day";
+export function digestDayStatement(out, now) {
+  const day = new Date(now * 1000).toISOString().slice(0, 10);
+  const add = (k) => `coalesce(json_extract(value, '$.${k}'), 0) + json_extract(excluded.value, '$.${k}')`;
+  return {
+    sql: "INSERT INTO meta (key, value) VALUES (?1, json_object('day', ?2, 'sent', ?3, 'quiet', ?4, 'failed', ?5, 'blocked', ?6, 'stories', ?7)) " +
+         "ON CONFLICT(key) DO UPDATE SET value = CASE WHEN json_extract(value, '$.day') = ?2 THEN json_object('day', ?2, " +
+         `'sent', ${add("sent")}, 'quiet', ${add("quiet")}, 'failed', ${add("failed")}, 'blocked', ${add("blocked")}, 'stories', ${add("stories")}) ` +
+         "ELSE excluded.value END",
+    params: [DIGEST_DAY_KEY, day, out.sent, out.quiet, out.failed - out.blocked, out.blocked, out.stories],
+  };
+}
+
 // Every D1 write after a digest was sent: never-twice rows for the stories in it, the digest time,
 // the held stories (Step 10) and the English fallback note. Used by the cron and the Admin button.
 export function digestWrites(user, plan, sentIds, now) {
@@ -128,6 +144,7 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
       out.cut += plan.cut ?? 0;            // stories that qualified but did not fit (Step 8)
       writes.push(...digestWrites(user, plan, sentIds, now));
     }
+    if (out.sent || out.failed) writes.push(digestDayStatement(out, now));
   }
 
   // Step 15: after the digests, the one reminder (users who never opened the app) and a batch of

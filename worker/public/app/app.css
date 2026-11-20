@@ -32,7 +32,10 @@
   --ok: #34c759;
   --ok-text: #1f9d48;
   --ok-soft: rgba(52, 199, 89, 0.15);
-  --h: 48px;                         /* every row and button */
+  --red: #ff3b30;                    /* Step 18: Admin's red health and limits (system red, not the brand) */
+  --red-text: #d70015;
+  --red-soft: rgba(255, 59, 48, 0.14);
+  --h: 48px;                        /* every row and button */
   --r: 12px;                         /* every card and button */
   --gap: 8px;                        /* every grid gap */
   --pad: 16px;                       /* inside a card, and the page sides */
@@ -67,6 +70,9 @@
   --bad-soft: rgba(249, 115, 22, 0.2);
   --warn-text: #ffd24d;
   --warn-soft: rgba(245, 180, 0, 0.2);
+  --red: #ff453a;
+  --red-text: #ff6961;
+  --red-soft: rgba(255, 69, 58, 0.2);
   color-scheme: dark;
 }
 
@@ -254,7 +260,7 @@ button.row:active, .tap:active { background: var(--press); }
 
 .link { color: var(--accent-text); font-size: inherit; }
 .row-right .link[data-action="topic-admin"] { min-height: 44px; padding: 0 4px; font-size: 15px; }
-.link.danger { color: var(--bad-text); }
+.link.danger { color: var(--red-text); }
 
 /* Step 15: Help and Send feedback rows (a solid colour square and a chevron) and their pages */
 .sq.solid.red { background: var(--accent); }   /* Step 16 (owner): Help and Send feedback in the brand red, like the "+" of Add a topic */
@@ -298,7 +304,7 @@ button.row:active, .tap:active { background: var(--press); }
   background: var(--ok-soft); color: var(--ok-text); white-space: nowrap;
 }
 .badge.warn { background: var(--warn-soft); color: var(--warn-text); }
-.badge.bad { background: var(--bad-soft); color: var(--bad-text); }
+.badge.bad { background: var(--red-soft); color: var(--red-text); }   /* Step 18: red, as the health line */
 .badge.mute { background: var(--fill); color: var(--text-2); }
 .kv-num { color: var(--text); font-variant-numeric: tabular-nums; }
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); }
@@ -317,11 +323,43 @@ button.row:active, .tap:active { background: var(--press); }
 .meter { padding: 12px var(--pad); }
 .meter-top { display: flex; justify-content: space-between; gap: 8px; font-size: 15px; }
 .meter-top span:last-child { color: var(--text-2); font-variant-numeric: tabular-nums; }
-.sdot { width: 9px; height: 9px; border-radius: 50%; background: var(--bad); }
+.sdot { width: 9px; height: 9px; border-radius: 50%; background: var(--red); }
 .sdot.warn { background: var(--warn); }
 .updated { display: flex; justify-content: space-between; align-items: center; margin: 2px var(--pad) 0; font-size: 13px;
   color: var(--text-2); }
 .spin-sm { width: 18px; height: 18px; border-width: 2px; }
+
+/* Step 18: the dashboard. Green, amber and red only where something needs attention (red here is the
+   system red, brighter than the brand's #b1161c). */
+.status.bad .dot { background: var(--red); }
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); position: relative; }
+.kpis::before { content: ""; position: absolute; top: 0; left: var(--pad); right: 0; height: 1px; background: var(--sep);
+  transform: scaleY(0.5); transform-origin: top; }
+.kpi { position: relative; min-width: 0; min-height: 68px; padding: 11px 4px 10px; text-align: center; }
+.kpi:nth-child(n + 4)::after { content: ""; position: absolute; top: 0; left: 8px; right: 8px; height: 1px; background: var(--sep);
+  transform: scaleY(0.5); transform-origin: top; }
+.kpi:not(:nth-child(3n + 1))::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 1px;
+  background: var(--sep); transform: scaleX(0.5); }
+.kpi b { display: block; font-size: 22px; line-height: 27px; font-weight: 600; letter-spacing: -0.02em; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; }
+.kpi span { display: block; font-size: 12px; line-height: 15px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi.warn b { color: var(--warn-text); }
+.kpi.bad b { color: var(--red-text); }
+.adm-sec { margin-top: var(--gap); }
+.adm-list { margin-top: var(--sec); }
+.adm-list > .adm-sec:first-child { margin-top: 0; }
+.adm-head .chev { transition: transform 0.2s var(--ease); }
+.adm-head[aria-expanded="true"] .chev { transform: rotate(90deg); }
+.adm-sum { font-size: 15px; max-width: 48%; }
+.adm-sum .adm-mute, .adm-mute { color: var(--text-2); font-size: 15px; white-space: nowrap; }
+.adm-body { padding-bottom: 12px; }
+.adm-part { margin-top: var(--gap); }
+.adm-part > .section-head { margin-top: 16px; }
+.adm-part > .seg.small { margin: 0 0 var(--gap); }
+.row.lim.warn .row-title { color: var(--warn-text); }
+.row.lim.bad .row-title { color: var(--red-text); }
+.adm-err { font-size: 15px; line-height: 20px; }
+.row.err.routine .adm-err { color: var(--text-2); }
 
 /* ------------------------------------------------------------------ loading, empty, toast */
 .loading { min-height: 70vh; display: grid; place-items: center; }
@@ -377,7 +415,11 @@ button.row:active, .tap:active { background: var(--press); }
 }
 
 /* Step 17: "Delete my data" (Help) and Admin's Delete; the line shown after a deletion */
-.row.action.danger .row-title { color: var(--bad-text); justify-content: center; }
+/* Step 18 (owner): Delete my data and its Delete button in the brand red (#b1161c; dark: fill #d0232a,
+   text #ff6b6b), not the orange of Admin's failures */
+.row.action.danger .row-title, .row.action.danger:disabled .row-title { color: var(--accent-text); justify-content: center; }
+.del-q { border-top: 0.5px solid var(--sep); }
+.del-actions { margin-top: var(--gap); }
 .row-right .user-del { margin-left: 12px; font-size: 15px; }
 .deleted { min-height: 60vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
 .deleted-line { margin: 0; font-size: 17px; line-height: 24px; text-align: center; color: var(--text); }

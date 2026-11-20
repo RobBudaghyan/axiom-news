@@ -35,7 +35,7 @@ export function adminStatements(now) {
     { sql: RUN_STATS_SQL, params: [now - DAY] },
     { sql: RUN_STATS_SQL, params: [now - 7 * DAY] },
     { sql: MODELS_SQL, params: [now - DAY, now - 7 * DAY] },
-    { sql: "SELECT key, value FROM meta WHERE key IN ('feed_health', 'last_alert_at', 'last_alert_text', 'd1_worker', 'cf_usage')", params: [] },
+    { sql: "SELECT key, value FROM meta WHERE key IN ('feed_health', 'last_alert_at', 'last_alert_text', 'd1_worker', 'cf_usage', 'digest_day')", params: [] },
     { sql: "SELECT id, first_name, timezone, digest_times, blocked, last_digest_at, next_digest_at, created_at, lang, " +
            // Step 16: no Pause; "all off" = no main topic and no custom topic switched on
            "(coalesce(topics, '[]') = '[]' AND NOT EXISTS (SELECT 1 FROM custom_follows f WHERE f.user_id = users.id AND f.enabled = 1)) AS all_off " +
@@ -64,6 +64,9 @@ export function adminStatements(now) {
     { sql: "SELECT h.lang, count(DISTINCT h.story_id) AS stories, count(*) AS holds, " +
            "sum(EXISTS (SELECT 1 FROM sent x WHERE x.user_id = h.user_id AND x.story_id = h.story_id)) AS released " +
            "FROM digest_holds h WHERE h.at >= ?1 GROUP BY h.lang", params: [now - DAY] },
+    // Step 18: new stories since 00:00 UTC (created today means updated today: the updated_at index)
+    { sql: "SELECT count(*) AS n, sum(final_score >= 7) AS strong FROM stories WHERE updated_at >= ?1 AND created_at >= ?1 AND merged_into IS NULL",
+      params: [dayStart] },
   ];
 }
 
@@ -119,7 +122,7 @@ export function feedReport(health, now, cfg = CONFIG) {
 
 export function shapeAdmin(rows, now, cfg = CONFIG) {
   const [[last], [lastOk], [s24], [s7], models, metaRows, users, errors, [jobD1], sizes = [],
-         readers = [], translated = [], trCalls = [], fallbacks = [], holds = []] = rows;
+         readers = [], translated = [], trCalls = [], fallbacks = [], holds = [], [today0] = []] = rows;
   const sizeOf = new Map(sizes.map((r) => [r.user_id, r]));
   const meta = Object.fromEntries(metaRows.map((r) => [r.key, r.value]));
 
@@ -152,8 +155,15 @@ export function shapeAdmin(rows, now, cfg = CONFIG) {
     })(),
   }));
 
+  const utcDay = new Date(now * 1000).toISOString().slice(0, 10);
+  const dd = jsonOr(meta.digest_day, null);
+  const deliveries = dd && dd.day === utcDay
+    ? { sent: num(dd.sent), quiet: num(dd.quiet), failed: num(dd.failed), blocked: num(dd.blocked), stories: num(dd.stories) }
+    : { sent: 0, quiet: 0, failed: 0, blocked: 0, stories: 0 };
+
   return {
     now,
+    today: { day: utcDay, stories: num(today0?.n), strong: num(today0?.strong), deliveries },   // Step 18
     health: {
       level, problems,
       last_run: last ? {
@@ -196,5 +206,103 @@ export function shapeAdmin(rows, now, cfg = CONFIG) {
           : null;
       })(),
     },
+  };
+}
+
+// ------------------------------------------------------------------ Step 18: the dashboard summary
+// One health level (ok / warn / bad = green / amber / red) with the most serious reason in one line,
+// the key numbers, and the free limits. Pure: built from what shapeAdmin and the other Admin parts
+// already hold, after api.js attached them (custom, env).
+export const LIMIT_WARN = 0.7, LIMIT_BAD = 0.9;
+const JOB_MINUTE = 7;   // the hourly job starts at about :07 (src/index.js)
+const pct = (x) => `${Math.round(x * 100)}%`;
+
+export function adminLimits(A) {
+  const L = A.d1.limits, acc = A.d1.account;
+  const share = (r, w) => ({ reads: r / L.rows_read, writes: w / L.rows_written });
+  return {
+    source: acc ? "account" : "copy",   // Cloudflare's own numbers for the account, else this copy's counts
+    today: acc ? share(acc.r, acc.w) : share(A.d1.rows_read, A.d1.rows_written),
+    yesterday: acc?.y ? share(acc.y.r, acc.y.w) : null,
+    counts: acc ? { r: acc.r, w: acc.w } : { r: A.d1.rows_read, w: A.d1.rows_written },
+    cpu_over: acc ? Number(acc.cpu ?? 0) : 0,
+    checked_at: acc?.at ?? null,
+  };
+}
+
+// AI calls and errors per model over 24 h (all kinds together), with today's count against the soft
+// limit of the AI budget guard where it has one.
+export function aiModels(A) {
+  const by = new Map();
+  for (const m of A.stats.models) {
+    const k = m.model || m.provider;
+    const x = by.get(k) ?? { model: k, provider: m.provider, calls: 0, failed: 0, kinds: [] };
+    x.calls += m["24h"].calls;
+    x.failed += m["24h"].calls - m["24h"].ok;
+    if (m["24h"].calls && !x.kinds.includes(m.kind)) x.kinds.push(m.kind);
+    by.set(k, x);
+  }
+  for (const g of A.custom?.guard?.models ?? []) {
+    const x = by.get(g.model) ?? { model: g.model, provider: "gemini", calls: 0, failed: 0, kinds: [] };
+    x.today = Number(g.calls ?? 0);
+    x.soft_limit = g.soft_limit ?? null;
+    x.r429 = Number(g.r429 ?? 0);
+    by.set(g.model, x);
+  }
+  return [...by.values()].filter((x) => x.calls || x.today).sort((a, b) => b.calls - a.calls);
+}
+
+export function nextRunAt(now, env) {
+  if (env === "staging") return null;   // staging never runs the job (it copies production's stories)
+  const t = Math.floor(now / H) * H + JOB_MINUTE * 60;
+  return t > now ? t : t + H;
+}
+
+export function adminSummary(A, now) {
+  const issues = [];
+  const add = (level, text) => issues.push({ level, text });
+  const h = A.health;
+  for (const p of h.problems) add(/failed|never finished|No successful/.test(p) ? 2 : 1, p);
+  if (h.last_run?.status === "partial") add(1, "The last news job was only partly done.");
+  if (h.alert) add(1, "An alert was sent in the last 24 hours.");
+
+  const lim = adminLimits(A);
+  for (const [k, name] of [["writes", "D1 writes"], ["reads", "D1 reads"]]) {
+    const v = lim.today[k];
+    if (v >= LIMIT_BAD) add(2, `${name} at ${pct(v)} of the free limit today.`);
+    else if (v >= LIMIT_WARN) add(1, `${name} at ${pct(v)} of the free limit today.`);
+  }
+  if (lim.cpu_over) add(1, `${lim.cpu_over} Worker ${lim.cpu_over === 1 ? "run" : "runs"} over the CPU limit today.`);
+
+  const d = A.today?.deliveries ?? { sent: 0, failed: 0, blocked: 0 };
+  const tries = d.sent + d.failed;
+  const rate = tries ? d.sent / tries : null;
+  if (d.failed && rate < 0.8 && d.failed >= 3) add(2, `${d.failed} digest deliveries failed today (${pct(rate)} delivered).`);
+  else if (d.failed) add(1, `${d.failed} digest ${d.failed === 1 ? "delivery" : "deliveries"} failed today.`);
+
+  const ai = aiModels(A);
+  for (const m of ai) if (m.calls >= 4 && m.failed / m.calls >= 0.5) add(1, `${m.model}: ${m.failed} of ${m.calls} AI calls failed (24 h).`);
+  const g = A.custom?.guard;
+  if (g && Math.max(g.level ?? 0, g.job_level ?? 0) >= 2) add(1, "AI budget: topic checks and translations wait.");
+  else if (g && Math.max(g.level ?? 0, g.job_level ?? 0) === 1) add(1, "AI budget: new topic checks wait.");
+  const F = A.feeds;
+  if (F.total && F.failing.length / F.total >= 0.1) add(1, `${F.failing.length} of ${F.total} feeds failing.`);
+
+  issues.sort((a, b) => b.level - a.level);
+  const top = issues.length ? issues[0].level : 0;
+  const more = issues.length - 1;
+  return {
+    level: ["ok", "warn", "bad"][top],
+    reason: issues.length ? `${issues[0].text}${more > 0 ? ` (+${more} more)` : ""}` : "The news job, digests and limits are fine.",
+    issues,
+    numbers: {
+      active_users: A.users.active, users: A.users.count,
+      digests_today: d.sent, failed_today: d.failed, blocked_today: d.blocked ?? 0, delivery: rate,
+      stories_today: A.today?.stories ?? 0, strong_today: A.today?.strong ?? 0,
+      last_run: h.last_run ? { at: h.last_run.started_at, status: h.last_run.status } : null,
+      next_run_at: nextRunAt(now, A.env),
+    },
+    limits: lim,
+    ai,
   };
 }

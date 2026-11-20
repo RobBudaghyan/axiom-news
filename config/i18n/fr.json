@@ -97,7 +97,7 @@
   },
   "errors": {
     "delete_confirm": "Merci de confirmer la suppression.",
-    "delete_owner_confirm": "Le compte du propriétaire demande une seconde confirmation.",
+    "delete_owner_confirm": "Le compte Admin demande une seconde confirmation.",
     "reopen": "Veuillez fermer puis rouvrir les réglages depuis le bot.",
     "reopen_simple": "Veuillez fermer puis rouvrir les réglages.",
     "too_large": "Requête trop volumineuse.",
@@ -112,7 +112,7 @@
     "times_hour": "🕘 Choisissez une heure pile, de {from} à {to}.",
     "lang_bad": "🌍 Cette langue n'est pas disponible.",
     "server": "⚠️ Un problème est survenu. Réessayez dans une minute.",
-    "owner_only": "Réservé au propriétaire du bot.",
+    "owner_only": "Réservé à l'administrateur.",
     "not_found": "Introuvable.",
     "no_user": "👋 Envoyez d'abord /start au bot.",
     "tip_amount": "Ce montant n'est pas disponible.",
@@ -186,7 +186,7 @@
     "help_privacy": "Nous gardons id, prénom et réglages.\nUne IA vérifie un sujet ajouté.\nRien n'est vendu ni partagé.",
     "delete_row": "🗑 Supprimer mes données",
     "delete_confirm": "Supprimer toutes vos données ? Vos réglages, sujets et historique seront effacés, et le bot ne vous écrira plus. Impossible d'annuler.",
-    "delete_owner_confirm": "C'est le compte du propriétaire. Supprimer aussi vos données ? L'Admin reste à vous après /start.",
+    "delete_owner_confirm": "C'est votre compte Admin. Supprimer aussi vos données ? L'Admin reste à vous après /start.",
     "delete_done": "✅ Vos données sont supprimées. Envoyez /start pour recommencer.",
     "feedback_placeholder": "Idées, problèmes, questions",
     "feedback_send": "Envoyer",
@@ -205,6 +205,9 @@
     "add_topic_hint": "par ex. Formule 1, Japon, IA",
     "setup_lang": "🌍 Langue",
     "help_feedback_h": "💬 Avis",
-    "help_feedback": "Une idée, un problème ?\nTouchez Envoyer un avis.\nLe propriétaire lit chaque message."
+    "help_feedback": "Une idée, un problème ?\nTouchez Envoyer un avis.\nNous lisons chaque message.",
+    "setup_pick_topic": "Choisissez au moins un sujet",
+    "delete_yes": "Supprimer",
+    "delete_cancel": "Annuler"
   }
 }

@@ -123,6 +123,14 @@ function seed() {
     .run(JSON.stringify({ en: "Formula 1", ru: "Формула-1", hy: "Ֆորմուլա 1", fr: "Formule 1" }),
       JSON.stringify([{ q: "Formula 1", ed: "en" }, { q: "F1 Grand Prix", ed: "en_gb" }]), now - 3 * 86400, now - 1200);
   sqlite.prepare("INSERT INTO custom_follows (user_id, topic_id, at) VALUES (102, 1, ?), (105, 1, ?)").run(now - 3 * 86400, now - 2 * 86400);
+  // Step 18: a custom topic its only follower switched off (Admin hides it: "1 hidden")
+  sqlite.prepare("INSERT INTO custom_topics (id, tag, names, emoji, definition, queries, boost_max, aliases, created_by, created_at) " +
+    "VALUES (2, 'c2', ?, '🏏', 'Cricket: matches, players and tournaments.', '[]', 0, '[]', 103, ?)")
+    .run(JSON.stringify({ en: "Cricket", ru: "Крикет", hy: "Կրիկետ", fr: "Cricket" }), now - 2 * 86400);
+  sqlite.prepare("INSERT INTO custom_follows (user_id, topic_id, at, enabled) VALUES (103, 2, ?, 0)").run(now - 2 * 86400);
+  // Step 18: today's deliveries so far (Admin's key numbers)
+  sqlite.prepare("INSERT INTO meta (key, value) VALUES ('digest_day', ?)").run(JSON.stringify({
+    day: new Date(now * 1000).toISOString().slice(0, 10), sent: 14, quiet: 2, failed: 0, blocked: 0, stories: 63 }));
   sqlite.prepare("INSERT INTO custom_topic_days (topic_id, day, searches, fetched, dup_dropped, new_items) VALUES (1, ?, 30, 412, 37, 96)")
     .run(new Date(now * 1000).toISOString().slice(0, 10));
   const check = sqlite.prepare("INSERT INTO topic_checks (user_id, at, input, outcome, topic_id, reason, ai) VALUES (?,?,?,?,?,?,?)");
