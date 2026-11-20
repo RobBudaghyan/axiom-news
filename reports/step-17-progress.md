@@ -163,3 +163,19 @@ one staging job run after 00:00 UTC (today's writes end near 98k), then his "shi
 - Part 2: `reports/step-17-launch-checklist.md`. The TEST token is now also in `.env.staging`; the bot scripts
   refuse the TEST bot on production. **STOP: waiting for the owner's branding OK, the real token in `.env`,
   and "go".**
+
+## 2026-11-20: delete user, delete my data, blocked readers (staging, waiting for "ship it, go")
+- `worker/src/account.js`: one batch deletes a user and every row about them (users, sent, digest_holds,
+  custom_follows, feedback, announcement_sends, topic_checks, error notes naming them); tips stay with
+  user_id 0 (totals; no refund possible after); custom topics they created lose created_by; a topic with no
+  follower left starts the 7-day clock.
+- Admin > Users: Delete on every row but the owner's (confirm; the server refuses the owner's id).
+  Help, under Privacy: "🗑 Delete my data" (confirm, a second one for the owner), then one line and the app
+  closes; nothing more is called. en, ru, hy, fr.
+- `my_chat_member` kicked: the reader is marked blocked at once; `point-bot.mjs` asks Telegram for it.
+- Tests: Worker 320 (11 new in `test/account.test.mjs`), Python 177; 8 rules broken on purpose, all caught.
+  Preview checked (Help row 48 px, done line, Admin Delete, no Delete on the owner's row).
+- Staging deployed (2cd63495), TEST bot webhook updated (my_chat_member), api-check 9 PASS, note sent to the
+  owner on the TEST bot. Commit eabb91d (not pushed).
+- Owner: branding OK; real token in `.env` (checked: @axiom_news_bot, no webhook, nothing pending); BotFather
+  done except the profile previews. **STOP: waiting for "ship it, go".**
