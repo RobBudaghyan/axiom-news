@@ -17,6 +17,8 @@
 //   POST /api/feedback        {text}    Step 15: store a reader's feedback and forward it to the owner
 //   POST /api/admin/announce  {action, ...}  Step 15: draft (translate), preview, send or cancel an announcement (owner only)
 //   POST /api/admin/topic     {id, action}  Step 13: delete or block a custom topic; Step 15: "keywords" refreshes its keywords (owner only)
+//   POST /api/account/delete  {confirm, owner_confirm}  Step 17: "Delete my data" (Help); the owner needs owner_confirm too
+//   POST /api/admin/user-delete {id}    Step 17: delete a reader and all their data (owner only; never the owner)
 import { verifyInitData } from "./auth.js";
 import { CONFIG, candidateStatement, hhmm, localParts, nextSlot, planDigest } from "./digest.js";
 import { SettingsError, TZ_AUTO, TZ_DEFAULT, nextDigestAfterChange, publicUser, validZone, validatePatch } from "./settings.js";
@@ -28,6 +30,7 @@ import { LANGS, chooseLang, effectiveLang, t, topicLabel } from "./i18n.js";
 import { setChatLanguage } from "./bot.js";
 import { TIP_AMOUNTS, allowedAmount, invoiceFields, refundTip, tipsStatements, shapeTips } from "./tips.js";
 import { needsSetup, onboard, sendDigestNow } from "./onboard.js";
+import { deleteUser } from "./account.js";
 import { ANNOUNCE_ADMIN_COUNT, announceAdminStatements, cancelAnnouncement, draftAnnouncement, previewAnnouncement,
   shapeAnnounce, startAnnouncement } from "./announce.js";
 import { FEEDBACK_ADMIN_COUNT, feedbackStatements, sendFeedback, shapeFeedback } from "./feedback.js";
@@ -271,6 +274,18 @@ async function refund(db, body, now, io) {
   return json(r.status, { ok: r.body.ok, message: r.body.message });
 }
 
+// Step 17: Admin "Delete user". The owner's own account is never deleted from here (Help has its own,
+// doubly confirmed "Delete my data").
+async function adminDeleteUser(db, env, body, now) {
+  const id = Number(body?.id);
+  if (!Number.isInteger(id) || id <= 0) return json(400, { ok: false, message: "Which user? (missing id)" });
+  if (String(id) === String(env.OWNER_TELEGRAM_ID ?? "")) return json(400, { ok: false, message: "This is your own account; it cannot be deleted from Admin." });
+  const [[u]] = await db.batch([{ sql: "SELECT first_name FROM users WHERE id = ?1", params: [id] }]);
+  if (!u) return json(404, { ok: false, message: "No such user (already deleted?)." });
+  await deleteUser(db, id, now);
+  return json(200, { ok: true, message: `Deleted ${u.first_name || "the user"} and all their data.` });
+}
+
 // ------------------------------------------------------------------ router
 
 // io (tests replace it): {send(chatId, html), dispatch(env), tg(method, body)?, appUrl?}
@@ -298,12 +313,19 @@ export async function handleApi(request, env, db, now, io, cfg = CONFIG) {
         return json(200, { ...(await open(db, tg, {}, now, cfg, isOwner)), sample: r });
       }
       case "POST /api/feedback": return json(200, await sendFeedback(db, tg, body, now, io, env.OWNER_TELEGRAM_ID));
+      case "POST /api/account/delete": {   // Step 17: "Delete my data"
+        if (body?.confirm !== true) return fail(400, "delete_confirm");
+        if (isOwner && body?.owner_confirm !== true) return fail(400, "delete_owner_confirm");
+        await deleteUser(db, tg.id, now);
+        return json(200, { ok: true, deleted: true });
+      }
       case "GET /api/admin":
       case "POST /api/admin/digest":
       case "POST /api/admin/run-job":
       case "POST /api/admin/refund":
       case "POST /api/admin/topic":
-      case "POST /api/admin/announce": {
+      case "POST /api/admin/announce":
+      case "POST /api/admin/user-delete": {
         if (!isOwner) return fail(403, "owner_only");
         if (route === "GET /api/admin") {
           // One batch, each block sliced by its own count (Step 15: no position taken from the end).
@@ -314,6 +336,8 @@ export async function handleApi(request, env, db, now, io, cfg = CONFIG) {
           for (const b of blocks) { parts.push(rows.slice(at, at + b.length)); at += b.length; }
           const out = shapeAdmin(parts[0], now, cfg);
           out.env = env?.ENV_NAME === "staging" ? "staging" : "production";   // Step 16: Admin says which copy this is
+          // Step 17: the owner's own row has no Delete button
+          out.users.list = out.users.list.map((u) => ({ ...u, owner: String(u.id) === String(env.OWNER_TELEGRAM_ID ?? "") }));
           out.custom = shapeCustomAdmin(parts[1].slice(0, CUSTOM_ADMIN_COUNT), now);
           out.tips = shapeTips(...parts[2]);
           out.feedback = shapeFeedback(...parts[3].slice(0, FEEDBACK_ADMIN_COUNT));
@@ -324,6 +348,7 @@ export async function handleApi(request, env, db, now, io, cfg = CONFIG) {
         if (route === "POST /api/admin/refund") return await refund(db, body, now, io);
         if (route === "POST /api/admin/topic") return await adminTopic(db, body, now);
         if (route === "POST /api/admin/announce") return await announce(db, env, body, now, io);
+        if (route === "POST /api/admin/user-delete") return await adminDeleteUser(db, env, body, now);
         return await runJobNow(db, env, now, cfg, io);
       }
       default: return fail(404, "not_found");

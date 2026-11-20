@@ -211,6 +211,7 @@
 
   // ---------------------------------------------------------------- shell
   function renderShell() {
+    if (S.deleted) return;   // Step 17: after "Delete my data" only the one line stays
     const owner = S.st.is_owner && !S.page;   // Step 15: a page (Help, Feedback) has no tabs
     app.removeAttribute("aria-busy");
     app.innerHTML = `<header class="top"><h1 class="title" id="title"></h1>${owner ? `
@@ -229,6 +230,7 @@
     tabs.querySelector(".seg-thumb").style.transform = S.tab === "admin" ? "translateX(100%)" : "none";
   }
   function renderView(animate = false) {
+    if (S.deleted) return;
     const v = $("#view");
     if (!v) return;
     v.innerHTML = S.page ? PAGES[S.page]() : S.tab === "admin" ? adminHTML() : settingsHTML();
@@ -558,7 +560,34 @@
   const HELP = ["what", "stories", "topics", "times", "lang", "support", "feedback", "privacy"];
   const lines = (s) => String(s).split("\n").map((l) => `<span class="line">${esc(l)}</span>`).join("");
   function helpHTML() {
-    return HELP.map((k) => sec(tr(`app.help_${k}_h`), card(`<p class="help-p lines">${lines(tr(`app.help_${k}`))}</p>`), `id="help-${k}"`)).join("");
+    return HELP.map((k) => sec(tr(`app.help_${k}_h`), card(`<p class="help-p lines">${lines(tr(`app.help_${k}`))}</p>`), `id="help-${k}"`)).join("")
+      // Step 17: under the privacy section, one small row (confirm step, then everything about the reader goes)
+      + sec("", card(`<button class="row action danger tap" data-action="delete-me" id="delete-me" ${S.busy.del ? "disabled" : ""}>` +
+        `<span class="row-main row-title">${S.busy.del ? '<span class="spinner small"></span>' : esc(tr("app.delete_row"))}</span></button>`), 'id="help-delete"');
+  }
+  // Step 17: "Delete my data". One confirm (two for the owner); afterwards one short line, then the app closes
+  // and nothing more is called (an /api/open would create the reader again).
+  async function deleteMe() {
+    haptic("impact", "medium");
+    if (!(await confirmBox(tr("app.delete_confirm")))) return;
+    const owner = !!S.st.is_owner;
+    if (owner && !(await confirmBox(tr("app.delete_owner_confirm")))) return;
+    S.busy.del = true;
+    renderView();
+    try {
+      await api("/api/account/delete", owner ? { confirm: true, owner_confirm: true } : { confirm: true });
+    } catch (e) {
+      S.busy = {};
+      renderView();
+      haptic("error");
+      toast(e.message, "err", 4200);
+      return;
+    }
+    S.deleted = true;
+    haptic("success");
+    try { if (tg && ver("6.1")) { tg.BackButton.offClick(onBack); tg.BackButton.hide(); } } catch { /* old client */ }
+    app.innerHTML = `<main class="deleted" id="deleted"><p class="deleted-line">${esc(tr("app.delete_done"))}</p></main>`;
+    setTimeout(() => { try { if (tg) tg.close(); } catch { /* old client */ } }, 2600);
   }
   function feedbackHTML() {
     const busy = !!S.busy.fb;
@@ -806,7 +835,9 @@
       title: `${esc(x.name)} ${x.blocked ? badge("Blocked", "bad") : x.all_off ? badge("All off", "mute") : ""}`,
       sub: esc(`${(x.lang || "en").toUpperCase()} · ${city(x.timezone)} · ${x.times.join(", ")}` +
         (x.digests_24h ? ` · avg ${x.avg_stories_24h} stories (${x.digests_24h} ${x.digests_24h === 1 ? "digest" : "digests"}, 24 h)` : "")),
-      right: `<span class="tnum" style="font-size:15px">${x.last_digest_at ? esc(ago(x.last_digest_at)) : "No digest yet"}</span>` })).join("");
+      right: `<span class="tnum" style="font-size:15px">${x.last_digest_at ? esc(ago(x.last_digest_at)) : "No digest yet"}</span>`
+        // Step 17: Delete (asks first); never on the owner's own row
+        + (x.owner ? "" : `<button class="link danger user-del" data-action="user-delete" data-value="${x.id}" data-name="${esc(x.name)}" ${S.busy.userDel ? "disabled" : ""}>Delete</button>`) })).join("");
 
     // Step 9: reader languages (Admin stays English).
     const langRowsA = (A.languages || []).map((l) => row({
@@ -990,6 +1021,25 @@
     loadAdmin(true);
   }
 
+  // Step 17: Admin "Delete user" (owner only; the server refuses the owner's own account too)
+  async function userDeleteAction(el) {
+    const name = el.dataset.name || "this user";
+    haptic("impact", "medium");
+    if (!(await confirmBox(`Delete ${name} and all their data? Their settings, topics, history and feedback are removed. This cannot be undone.`))) return;
+    S.busy.userDel = true;
+    renderView();
+    try {
+      const r = await api("/api/admin/user-delete", { id: Number(el.dataset.value) });
+      haptic("success");
+      toast(r.message, "ok", 3000);
+    } catch (e) {
+      haptic("error");
+      toast(e.message, "err", 4200);
+    }
+    S.busy = {};
+    loadAdmin(true);
+  }
+
   async function refundAction(el) {
     const name = el.dataset.name || "this person", amount = el.dataset.amount;
     haptic("impact", "medium");
@@ -1032,6 +1082,7 @@
 
   // ---------------------------------------------------------------- events
   document.addEventListener("click", (ev) => {
+    if (S.deleted) return;
     const el = ev.target.closest("[data-action]");
     // the whole "Add a topic" row is tappable: a tap anywhere on it opens the field
     if (!el && ev.target.closest && ev.target.closest(".add-row") && ev.target.id !== "topic-input") {
@@ -1060,6 +1111,8 @@
       case "custom-switch": toggleCustom(el); break;
       case "edit-topics": S.editTopics = !S.editTopics; haptic("select"); renderMyTopics(); break;
       case "refund": refundAction(el); break;
+      case "user-delete": userDeleteAction(el); break;
+      case "delete-me": deleteMe(); break;
       case "topic-admin": topicAdminAction(el); break;
       case "range": S.range = v; haptic("select"); renderView(); break;
       case "refresh": haptic("impact", "light"); loadAdmin(true); renderView(); break;

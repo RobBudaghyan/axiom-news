@@ -96,6 +96,8 @@
     "Toronto": "Toronto"
   },
   "errors": {
+    "delete_confirm": "Please confirm the deletion.",
+    "delete_owner_confirm": "The owner's account needs a second confirmation.",
     "reopen": "Please close and reopen Settings from the bot.",
     "reopen_simple": "Please close and reopen Settings.",
     "too_large": "Request too large.",
@@ -182,6 +184,10 @@
     "help_support": "Axiom News is free.\nTips in Telegram Stars are voluntary.\nA tip changes nothing else.",
     "help_privacy_h": "🔒 Privacy",
     "help_privacy": "We keep your Telegram id and name.\nAnd your settings, nothing more.\nAI checks a topic you add.\nNothing is sold or shared.",
+    "delete_row": "🗑 Delete my data",
+    "delete_confirm": "Delete all your data? Your settings, topics and history are removed, and the bot stops writing to you. This cannot be undone.",
+    "delete_owner_confirm": "This is the owner's account. Delete your own data too? Admin stays yours after /start.",
+    "delete_done": "✅ Your data is deleted. Send /start to begin again.",
     "feedback_placeholder": "Ideas, problems, questions",
     "feedback_send": "Send",
     "feedback_thanks": "✅ Sent. Thank you.",

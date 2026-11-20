@@ -104,6 +104,18 @@ export async function handleUpdate(update, ctx) {
     return { handled: true, command: "pre_checkout", ok };
   }
   if (update.callback_query) return handleCallback(update.callback_query, ctx);
+  // Step 17: Telegram tells us when a reader blocks the bot (my_chat_member, status "kicked"): mark them
+  // blocked at once, so no digest, reminder or announcement is even tried. Unblocking needs no step here:
+  // the reader presses Start, and /start clears blocked and plans the next digest.
+  if (update.my_chat_member) {
+    const m = update.my_chat_member;
+    if (m.chat?.type !== "private" || !m.from?.id) return { handled: false };
+    if (m.new_chat_member?.status === "kicked") {
+      await ctx.db.batch([{ sql: "UPDATE users SET blocked = 1 WHERE id = ?1", params: [m.from.id] }]);
+      return { handled: true, command: "blocked" };
+    }
+    return { handled: true, command: "chat_member" };
+  }
   const msg = update.message;
   if (!msg?.from || msg.chat?.type !== "private") return { handled: false };
   const cfg = ctx.cfg ?? CONFIG;

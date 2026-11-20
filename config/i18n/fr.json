@@ -96,6 +96,8 @@
     "Toronto": "Toronto"
   },
   "errors": {
+    "delete_confirm": "Merci de confirmer la suppression.",
+    "delete_owner_confirm": "Le compte du propriétaire demande une seconde confirmation.",
     "reopen": "Veuillez fermer puis rouvrir les réglages depuis le bot.",
     "reopen_simple": "Veuillez fermer puis rouvrir les réglages.",
     "too_large": "Requête trop volumineuse.",
@@ -182,6 +184,10 @@
     "help_support": "Axiom News est gratuit.\nUn pourboire en Stars est volontaire.\nIl ne change rien d'autre.",
     "help_privacy_h": "🔒 Confidentialité",
     "help_privacy": "Nous gardons id, prénom et réglages.\nUne IA vérifie un sujet ajouté.\nRien n'est vendu ni partagé.",
+    "delete_row": "🗑 Supprimer mes données",
+    "delete_confirm": "Supprimer toutes vos données ? Vos réglages, sujets et historique seront effacés, et le bot ne vous écrira plus. Impossible d'annuler.",
+    "delete_owner_confirm": "C'est le compte du propriétaire. Supprimer aussi vos données ? L'Admin reste à vous après /start.",
+    "delete_done": "✅ Vos données sont supprimées. Envoyez /start pour recommencer.",
     "feedback_placeholder": "Idées, problèmes, questions",
     "feedback_send": "Envoyer",
     "feedback_thanks": "✅ Envoyé. Merci.",

@@ -22,8 +22,9 @@ if (!STAGING && me.username === "justatia_bot") throw new Error("refusing: produ
 if (!process.argv.includes("--check")) {
   // callback_query: the /support amount buttons; pre_checkout_query: Telegram asks before a Stars tip
   // goes through (Step 10). Before Step 16 the TEST bot had only "message", so both were never delivered.
+  // my_chat_member (Step 17): a reader blocked the bot (marked blocked at once).
   await tgCall(env.TELEGRAM_BOT_TOKEN, "setWebhook", { url, secret_token: env.TELEGRAM_WEBHOOK_SECRET,
-    allowed_updates: ["message", "callback_query", "pre_checkout_query"], max_connections: 40, drop_pending_updates: false });
+    allowed_updates: ["message", "callback_query", "pre_checkout_query", "my_chat_member"], max_connections: 40, drop_pending_updates: false });
   // every reader's own chat menu (set when they pick a language) must open this copy's Mini App too
   const users = await d1Rest(env).query("SELECT id, lang, language FROM users WHERE blocked = 0");
   let fixed = 0;

@@ -375,3 +375,9 @@ button.row:active, .tap:active { background: var(--press); }
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
   .loader-logo { animation: none !important; opacity: 1; }   /* still, not a flicker */
 }
+
+/* Step 17: "Delete my data" (Help) and Admin's Delete; the line shown after a deletion */
+.row.action.danger .row-title { color: var(--bad-text); justify-content: center; }
+.row-right .user-del { margin-left: 12px; font-size: 15px; }
+.deleted { min-height: 60vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+.deleted-line { margin: 0; font-size: 17px; line-height: 24px; text-align: center; color: var(--text); }
