@@ -123,7 +123,9 @@ describe("Step 15: the setup and the sample digest", () => {
     const digest = sends().filter((c) => c.body.chat_id === NEW);
     assert.equal(digest.length, 1);
     const html = digest[0].body.rich_message?.html ?? digest[0].body.text;
-    assert.match(html, /^<p><i>🧪 Sample digest: the important news of the last 24 hours<\/i><\/p>/);
+    // Step 17 (owner): no label; the greeting says what it is
+    assert.match(html, /^<p><b>Good (morning|afternoon|evening), Nora<\/b> · here is what happened in the last 24 hours<\/p>/);
+    assert.doesNotMatch(html, /🧪|Sample/);
     assert.match(html, /Armenia and Turkey open the border/);
     assert.doesNotMatch(html, /Old news/);
     assert.equal(sqlite.prepare("SELECT count(*) AS n FROM sent WHERE user_id = ? AND story_id = ?").get(NEW, a).n, 1);
@@ -226,15 +228,46 @@ describe("Step 15: exactly one reminder", () => {
   });
 });
 
+describe("Step 17: the sample digest is a taste", () => {
+  test("at most 2 stories a topic and 8 in all, best first; the rest is not marked sent", async () => {
+    const { binding, sqlite } = fakeD1();
+    const now = nowS();
+    const topics = ["politics_conflicts", "economy_markets", "armenia", "russia", "iran_war", "ukraine_war"];
+    const ids = [];
+    for (const [ti, tag] of topics.entries()) {
+      for (let k = 0; k < 3; k++) {
+        ids.push(addStory(sqlite, `Story ${tag} ${k}`, [tag], 9, now - 3600 - k * 60 - ti,
+          { final_score: 9 - k, main_topic: tag, headline: `Story ${tag} ${k}` }));
+      }
+    }
+    fetchMock = telegram();
+    await api(binding, "/api/open", NEW, {});
+    const r = await api(binding, "/api/onboard", NEW, { skipped: true });
+    assert.equal(r.body.sample.stories, 8);
+    const html = sends().filter((c) => c.body.chat_id === NEW)[0].body.rich_message?.html;
+    for (const tag of topics) assert.ok((html.match(new RegExp(`Story ${tag} \\d`, "g")) ?? []).length <= 2, tag);
+    assert.doesNotMatch(html, /Story \w+ 2</, "never the third of a topic");
+    assert.equal(sqlite.prepare("SELECT count(*) AS n FROM sent WHERE user_id = ?").get(NEW).n, 8);
+  });
+
+  test("sampleCut keeps the order and the limits from config", async () => {
+    const { sampleCut } = await import("../src/digest.js");
+    const s = (id, primary) => ({ id, primary });
+    const list = [s(1, "a"), s(2, "a"), s(3, "a"), s(4, "b"), s(5, "c"), s(6, "b"), s(7, "b")];
+    assert.deepEqual(sampleCut(list, { sample_max_stories: 4, sample_per_topic: 2 }).map((x) => x.id), [1, 2, 4, 5]);
+    assert.deepEqual(sampleCut(list, { sample_max_stories: 8, sample_per_topic: 1 }).map((x) => x.id), [1, 4, 5]);
+  });
+});
+
 describe("Step 15: setup texts and the first open", () => {
   test("the setup and welcome texts in Russian, Armenian and French; no dash anywhere", () => {
     assert.deepEqual(["setup_topics", "setup_times", "setup_done", "setup_next", "setup_back", "setup_skip", "setup_finish"].map((k) => t("ru", `app.${k}`)),
       ["📰 Ваши темы", "🕘 Время сводок", "✅ Всё готово", "Далее", "Назад", "Пропустить", "Готово"]);
     assert.equal(t("ru", "app.setup_step", { n: 2, of: 4 }), "2 из 4");
     assert.equal(t("ru", "bot.setup_button"), "⚙️ Настроить");
-    assert.match(t("ru", "digest.sample_label"), /^🧪 Пример сводки/);
+    assert.equal(t("ru", "digest.sample_line"), "вот что произошло за последние 24 часа");
     for (const lang of ["en", "ru", "hy", "fr"]) {
-      for (const k of ["bot.welcome_setup", "bot.setup_button", "bot.reminder", "digest.sample_label", "app.setup_topics", "app.setup_times",
+      for (const k of ["bot.welcome_setup", "bot.setup_button", "bot.reminder", "digest.sample_line", "app.setup_topics", "app.setup_times",
         "app.setup_done", "app.setup_step", "app.setup_next", "app.setup_back", "app.setup_skip", "app.setup_finish", "app.setup_sample"]) {
         const v = t(lang, k, { name: "X", n: 1, times: "09:00", zone: "Z" });
         assert.ok(v && v !== k && !/[–—]/.test(v), `${lang} ${k}`);

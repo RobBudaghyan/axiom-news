@@ -46,7 +46,7 @@ describe("webhook", () => {
     const reply = fetchMock.calls[0];
     assert.match(reply.url, /\/sendAnimation$/);   // Step 17b: the logo animation with the welcome as caption
     assert.equal(reply.body.chat_id, OWNER);
-    assert.match(reply.body.caption, /^👋 Welcome to Axiom News\.\n\n📰 You will receive a short digest/);
+    assert.match(reply.body.caption, /^👋 Welcome to Axiom News\.\n\n🌍 Axiom News sums up the important news from about 100 trusted outlets\.\n📰 You will receive a short digest/);
     assert.match(reply.body.caption, /⚙️ Setup takes about 20 seconds: language, topics and delivery times\.\n\n👇 Tap <b>Set up<\/b> to begin\.$/);
     assert.equal(reply.body.reply_markup.inline_keyboard[0][0].text, "⚙️ Set up");
     assert.ok(reply.body.reply_markup.inline_keyboard[0][0].web_app.url);

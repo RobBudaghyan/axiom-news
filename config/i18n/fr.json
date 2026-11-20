@@ -17,7 +17,7 @@
     },
     "count_line": "{count} {stories} {since}",
     "quiet_line": "Période calme : rien d'important sur vos sujets {since}.",
-    "sample_label": "🧪 Exemple de résumé : l'actualité importante des dernières 24 heures"
+    "sample_line": "voici ce qui s'est passé ces dernières 24 heures"
   },
   "topics": {
     "politics_conflicts": "Politique et conflits",
@@ -55,7 +55,7 @@
     "paysupport_sent": "✅ Merci. Votre message a été envoyé.\n↩️ Un pourboire fait par erreur revient sur votre solde Stars.",
     "terms": "📄 Conditions des pourboires\n❤️ Axiom News est gratuit.\n⭐ Un pourboire est volontaire et ne débloque rien.\n↩️ Pas de remboursement, sauf pour un pourboire fait par erreur (via /paysupport).\nℹ️ Le support de Telegram ne peut pas aider pour les paiements aux bots.\n🔒 Nous gardons seulement qui a donné, le montant, l'identifiant de paiement et l'heure.",
     "help_cmd": "❓ Tout est dans les réglages : touchez Aide.\n💬 Vous pouvez aussi nous envoyer un avis.",
-    "welcome_setup": "👋 Bienvenue sur Axiom News.\n\n📰 Un court résumé de l'actualité importante, aux heures de votre choix.\n⚙️ Configuration en 20 secondes environ : langue, sujets, heures.\n\n👇 Touchez <b>Configurer</b> pour commencer.",
+    "welcome_setup": "👋 Bienvenue sur Axiom News.\n\n🌍 Axiom News résume l'actualité importante d'une centaine de médias fiables.\n📰 Un court résumé de l'actualité importante, aux heures de votre choix.\n⚙️ Configuration en 20 secondes environ : langue, sujets, heures.\n\n👇 Touchez <b>Configurer</b> pour commencer.",
     "setup_button": "⚙️ Configurer",
     "reminder": "👋 Votre résumé n'est pas encore configuré.\n⚙️ Cela prend environ 20 secondes.\n👇 Touchez <b>Configurer</b> pour commencer.",
     "description": "📰 Un court résumé de l'actualité importante, aux heures de votre choix.\n\n🌍 Des sources reconnues, dont le Financial Times, The Economist, Bloomberg, The Wall Street Journal et Al Jazeera\n🗂 Politique, Économie, Arménie, Russie, Iran, Ukraine, ainsi que vos propres sujets (par exemple, Formule 1)\n🌐 Disponible en plusieurs langues\n\n🆓 Gratuit, sans publicité",

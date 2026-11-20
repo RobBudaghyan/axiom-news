@@ -23,7 +23,7 @@ export const setupButton = (appUrl, lang) =>
   (appUrl ? { reply_markup: { inline_keyboard: [[{ text: t(lang, "bot.setup_button"), web_app: { url: appUrl } }]] } } : {});
 
 // Builds and sends one digest to one user now, exactly as the cron does, and records it (sent rows,
-// held stories, last and next digest). opts.label: a line above the greeting (the sample digest).
+// held stories, last and next digest). opts.labelKey: a line above the greeting; opts.sample: the sample digest (Step 17: no label, its own greeting line, at most 8 stories, 2 a topic).
 // Used by Admin's "Send me a digest now" and by the sample digest after the setup.
 export async function sendDigestNow(db, userId, now, cfg, io, opts = {}) {
   const [rows, topics, custom] = await db.batch([{ sql: "SELECT * FROM users WHERE id = ?1", params: [userId] },
@@ -36,7 +36,8 @@ export async function sendDigestNow(db, userId, now, cfg, io, opts = {}) {
   const [cands] = await db.batch([candidateStatement(u, now, cfg)]);
   const lang = effectiveLang(user);
   const label = opts.labelKey ? `<i>${escapeHtml(t(lang, opts.labelKey))}</i>` : undefined;
-  const plan = planDigest(u, cands, [...topics, ...asTopicRows(enabledOnly(custom))], now, cfg, label ? { label } : {});
+  const popts = { ...(label ? { label } : {}), ...(opts.sample ? { sample: true } : {}) };   // Step 17: the sample digest
+  const plan = planDigest(u, cands, [...topics, ...asTopicRows(enabledOnly(custom))], now, cfg, popts);
   const ids = await sendDigest(io, user.id, plan);
   await db.batch(digestWrites(user, plan, ids, now));
   return { user, plan, ids };
@@ -53,7 +54,7 @@ export async function onboard(db, userId, body, now, cfg, io) {
     params: [userId, now] }]);
   if (!claimed.length) return { sample: false };
   try {
-    const r = await sendDigestNow(db, userId, now, cfg, io, { labelKey: "digest.sample_label" });
+    const r = await sendDigestNow(db, userId, now, cfg, io, { sample: true });
     return { sample: !!r && !r.off, stories: r ? r.ids.length : 0, skipped: !!body?.skipped };
   } catch (e) {
     await db.batch([errorStatement(`sample digest for user ${userId}: ${e.message}`, now)]);

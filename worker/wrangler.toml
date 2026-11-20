@@ -29,9 +29,9 @@ database_id = "2a1eb212-95b8-4715-b628-2967cbcb0367"
 
 [vars]
 ENV_NAME = "production"
-# Step 16: until the launch (the real bot), production sends nothing to users: the TEST bot and the
-# users' copy live on staging. Owner alerts still go out. Set to "on" at launch.
-USER_SENDS = "off"
+# Step 16: until the launch production sent nothing to users. Step 17 (launch, 2026-11-20): on, with
+# the real bot @axiom_news_bot.
+USER_SENDS = "on"
 JOB_DISPATCH = "on"
 SEND_STUB = "off"
 HEALTH_ALERTS = "on"

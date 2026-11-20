@@ -17,7 +17,7 @@
     },
     "count_line": "{count} {stories} {since}",
     "quiet_line": "Quiet period: nothing important on your topics {since}.",
-    "sample_label": "🧪 Sample digest: the important news of the last 24 hours"
+    "sample_line": "here is what happened in the last 24 hours"
   },
   "topics": {
     "politics_conflicts": "Politics & Conflicts",
@@ -55,7 +55,7 @@
     "paysupport_sent": "✅ Thank you. Your note has been sent.\n↩️ A tip made by mistake goes back to your Stars.",
     "terms": "📄 Terms for tips\n❤️ Axiom News is free.\n⭐ A tip is voluntary and unlocks nothing.\n↩️ Tips are not refunded, except one made by mistake (ask with /paysupport).\nℹ️ Telegram support cannot help with payments to bots.\n🔒 We keep only who tipped, the amount, the payment id and the time.",
     "help_cmd": "❓ Everything is in Settings: tap Help.\n💬 You can send us feedback there too.",
-    "welcome_setup": "👋 Welcome to Axiom News.\n\n📰 You will receive a short digest of the important news at the times you choose.\n⚙️ Setup takes about 20 seconds: language, topics and delivery times.\n\n👇 Tap <b>Set up</b> to begin.",
+    "welcome_setup": "👋 Welcome to Axiom News.\n\n🌍 Axiom News sums up the important news from about 100 trusted outlets.\n📰 You will receive a short digest of the important news at the times you choose.\n⚙️ Setup takes about 20 seconds: language, topics and delivery times.\n\n👇 Tap <b>Set up</b> to begin.",
     "setup_button": "⚙️ Set up",
     "reminder": "👋 Your digest is not set up yet.\n⚙️ It takes about 20 seconds.\n👇 Tap <b>Set up</b> to begin.",
     "description": "📰 A short digest of the important news, delivered at the times you choose.\n\n🌍 Built on reputable sources, including the Financial Times, The Economist, Bloomberg, The Wall Street Journal and Al Jazeera\n🗂 Politics, Economy, Armenia, Russia, Iran, Ukraine, plus custom topics of your own (e.g. Formula 1)\n🌐 Available in several languages\n\n🆓 Free, no ads",

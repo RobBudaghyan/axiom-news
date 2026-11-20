@@ -335,7 +335,7 @@ describe("language defaults and the language setting", () => {
     await worker.fetch(post("/start", { id: OWNER, first_name: "Rob", language_code: "ru" }), env(binding));
     assert.equal(langOf(sqlite), "ru");
     const [reply, ...setup] = fetchMock.calls;
-    assert.match(reply.body.caption, /^👋 Добро пожаловать в Axiom News\.\n\n📰 Вы будете получать короткую сводку/);
+    assert.match(reply.body.caption, /^👋 Добро пожаловать в Axiom News\.\n\n🌍 Axiom News кратко пересказывает важные новости[^\n]*\n📰 Вы будете получать короткую сводку/);
     assert.match(reply.body.caption, /Нажмите <b>Настроить<\/b>, чтобы начать\.$/);
     assert.equal(reply.body.reply_markup.inline_keyboard[0][0].text, "⚙️ Настроить");
     const cmd = setup.find((c) => c.url.endsWith("/setMyCommands")).body;

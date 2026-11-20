@@ -253,7 +253,7 @@ function greetingParts(opts, cfg) {
   const time = recent ? timeText(lang, localParts(lastDigestAt, tz)) : null;
   const since = recent ? t(lang, "digest.since_mid", { time }) : t(lang, "digest.last24_mid");
   const sinceStart = recent ? t(lang, "digest.since_start", { time }) : t(lang, "digest.last24_start");
-  return { hello, since, sinceStart, lang };
+  return { hello, since, sinceStart, lang, sample: !!opts.sample };
 }
 
 // ------------------------------------------------------------------ fallback line emoji
@@ -332,8 +332,8 @@ export const storyLink = (s, inner) => `<a href="${escapeAttr(s.best_url)}">${in
 // underlined heading with the topic emoji, the outlet alone on the last line.
 export const CLASSIC = {
   name: "classic", kind: "html", gap: "\n\n", count: visibleLength, label: (x) => x,
-  header: ({ hello, sinceStart, lang }, count) =>
-    t(lang, "digest.header", { hello, since: sinceStart, count, stories: plural(lang, count, "digest.stories") }),
+  header: ({ hello, sinceStart, lang, sample }, count) => (sample ? `${hello}, ${t(lang, "digest.sample_line")}:`
+    : t(lang, "digest.header", { hello, since: sinceStart, count, stories: plural(lang, count, "digest.stories") })),
   quiet: ({ hello, since, lang }) => t(lang, "digest.quiet", { hello, since }),
   heading: (x) => `${x.emoji ? `${x.emoji} ` : ""}<b><u>${escapeHtml(x.label)}</u></b>`,
   story: (s, n) => {
@@ -353,8 +353,9 @@ export const CLASSIC = {
 export const RICH = {
   name: "rich", kind: "rich", gap: "", count: visibleLength,
   label: (x) => `<p>${x}</p>`,
-  header: ({ hello, since, lang }, count) =>
-    `<p><b>${hello}</b> · ${t(lang, "digest.count_line", { count, stories: plural(lang, count, "digest.stories"), since })}</p>`,
+  // Step 17 (owner): the sample digest after the setup says "here is what happened in the last 24 hours"
+  header: ({ hello, since, lang, sample }, count) => (sample ? `<p><b>${hello}</b> · ${t(lang, "digest.sample_line")}</p>`
+    : `<p><b>${hello}</b> · ${t(lang, "digest.count_line", { count, stories: plural(lang, count, "digest.stories"), since })}</p>`),
   quiet: ({ hello, since, lang }) => `<p><b>${hello}</b> · ${t(lang, "digest.quiet_line", { since })}</p>`,
   heading: (x, i) => `${i ? "<hr/>" : ""}<table bordered><tr><th align="center">${x.emoji ? `${x.emoji} ` : ""}` +
     `${escapeHtml(x.label)}</th></tr></table>`,
@@ -516,6 +517,22 @@ export function chooseDigestLanguage(picked, want) {
   };
 }
 
+// Step 17 (owner): the sample digest after the setup is a taste, not 15 stories at once: the best
+// first, at most sample_per_topic of each topic and sample_max_stories in all. The rest is not marked
+// sent, so it can still come in the first real digest (inside its 24 h).
+export function sampleCut(stories, cfg = CONFIG) {
+  const max = cfg.sample_max_stories ?? 8, per = cfg.sample_per_topic ?? 2;
+  const n = new Map(), out = [];
+  for (const s of stories) {
+    if (out.length >= max) break;
+    const k = s.primary ?? s.main_topic ?? "";
+    if ((n.get(k) ?? 0) >= per) continue;
+    n.set(k, (n.get(k) ?? 0) + 1);
+    out.push(s);
+  }
+  return out;
+}
+
 // One user's whole digest from candidate rows: pick (two-score rule), choose the language (holding
 // untranslated stories), then cut to one unfolded message (measured on the text actually sent, so
 // the room a held story leaves goes to the next translated story), format. No I/O.
@@ -524,10 +541,10 @@ export function chooseDigestLanguage(picked, want) {
 export function planDigest(user, candidates, topics, now, cfg = CONFIG, opts = {}) {
   const chosen = chooseDigestLanguage(pickStories(candidates, parseList(user.topics), cfg),
                                       opts.lang ?? effectiveLang(user));
-  const picked = chosen.stories;
+  const picked = opts.sample ? sampleCut(chosen.stories, cfg) : chosen.stories;
   const tz = user.timezone || cfg.default_timezone;
   const mopts = { now, tz, lastDigestAt: user.last_digest_at, name: user.first_name, lang: chosen.lang,
-                  topicInfo: topicInfoFrom(topics, chosen.lang), label: opts.label, layout: opts.layout };
+                  topicInfo: topicInfoFrom(topics, chosen.lang), label: opts.label, layout: opts.layout, sample: !!opts.sample };
   mopts.greeting = greetingParts(mopts, cfg);
   let { kept, cut } = fitToLength(picked, mopts, cfg);
   let msg = buildMessage(kept, mopts, cfg);
