@@ -18,6 +18,7 @@ const url = app.replace(/\/app\/$/, "/telegram");
 const env = loadEnv();
 const me = await tgCall(env.TELEGRAM_BOT_TOKEN, "getMe", {});
 if (STAGING && me.username !== "justatia_bot") throw new Error(`refusing: staging is for the TEST bot, not @${me.username}`);
+if (!STAGING && me.username === "justatia_bot") throw new Error("refusing: production is not for the TEST bot (put the real bot's token in .env)");
 if (!process.argv.includes("--check")) {
   // callback_query: the /support amount buttons; pre_checkout_query: Telegram asks before a Stars tip
   // goes through (Step 10). Before Step 16 the TEST bot had only "message", so both were never delivered.

@@ -23,6 +23,10 @@ const APP_URL = /^APP_URL\s*=\s*"([^"]+)"/m.exec(toml.split("[env.staging]")[STA
 if (!APP_URL) throw new Error("APP_URL missing in wrangler.toml");
 const token = loadEnv().TELEGRAM_BOT_TOKEN;
 if (!token) throw new Error("TELEGRAM_BOT_TOKEN missing in .env");
+// Step 17 launch: each copy has its own bot (staging the TEST bot, production the real one).
+const who = (await tgCall(token, "getMe", {})).username;
+if (STAGING && who !== "justatia_bot") throw new Error(`refusing: staging is for the TEST bot, not @${who}`);
+if (!STAGING && who === "justatia_bot") throw new Error("refusing: production is not for the TEST bot (put the real bot's token in .env)");
 
 const COMMANDS = commandList("en");
 const others = Object.keys(DICTS).filter((l) => l !== "en");

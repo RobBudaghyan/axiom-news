@@ -59,7 +59,7 @@ Shipped (owner's "ship it", 2026-11-19 15:19 UTC):
   today and yesterday (the hourly check now also asks Cloudflare for yesterday's totals). The 80% alert
   stays as it was.
 
-Owner's feed decision (2026-11-19), on staging first, waiting for its own "ship it":
+Owner's feed decision (2026-11-19), shipped 2026-11-20 04:40 UTC after a staging run:
 - Disabled: trend_az, azertag, rt_en, marketwatch, politico_eu, wapo_politics (48 h: 0 to 2 stories
   scored 7+ each). hetq_hy kept (Armenian source; its value is the Armenia topic path).
 - tass_ru, ria, rg, izvestia: 8 -> 4 new items a run (they hit the cap every run).
@@ -117,3 +117,19 @@ production's limits. Until then the staging sync runs only by hand. When the own
    (`point-bot.mjs`, `setup-bot.mjs` with AXIOM_ENV=staging), add the GitHub secrets
    `STAGING_CLOUDFLARE_ACCOUNT_ID` and `STAGING_D1_TOKEN` (the automatic 6-hour sync then starts again),
    then delete the old staging Worker and D1 from the main account.
+
+## 7. 2026-11-20: the full day and the follow-up
+
+- 2026-11-19, whole day (Cloudflare): **96.7k written (97%)**, 2.42M read (48%). Production 65.4k
+  written, staging 31.2k. After the ship, production wrote 0.8k to 1.8k an hour (2.3k to 2.5k before).
+- 2026-11-20 00:00 to 05:00 UTC: 3.4k written (500 to 960 an hour, a quiet night).
+- Shipped 04:40 UTC (owner's "ship it", job only): the feed change, and the editor fix (an event of more
+  than 6 stories is kept when its stories share a core; 45 stories a call, up to 4; left-out stories wait
+  for the next run). Staging run: 82 s, 49 new items, editor 3 calls (139 candidates), 0 failed calls,
+  36 duplicates merged (21 of the Shenzhen summit stories), 577 rows written
+  (`reports/data/step-17c/staging-job-run-feeds-editor.txt`).
+
+| Production run | New items | AI calls | Editor calls (stories each) | Merged | Run time | Rows written |
+|---|---|---|---|---|---|---|
+| 155 (04:07, before) | 91 | 20 (6 failed editor calls, 4 Groq) | 1 ok + 6 failed (89, 54) | 4 | 367 s | 555 |
+| **156** (05:07, after) | 110 | **5** | **2 ok** (60, 59) | 54 (the summit stories) | **71 s** | 780 (the merges) |

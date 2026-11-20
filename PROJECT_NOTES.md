@@ -250,7 +250,8 @@ bot @axiom_news_bot at the end.
 | 2026-11-15 | /paysupport forwards the user's note to the owner; /terms states the tip terms; the owner refunds from Admin after a confirm (refundStarPayment) | Telegram's rules for bots that take Stars |
 | 2026-11-19 | Step 17c (D1 writes): the job writes each new item once, after the AI pass, in its final state; a not-news item leaves only its URL hash (`items_seen`); `dup_group` NULL = its own group; the Worker's usage row once an hour | measured on staging: an insert is 3 rows, a status update 1 to 2, a delete 1; a story item 6 -> 4 rows over its life, a not-news item 5 -> 2; production runs 2.35k -> 1.1k to 1.4k writes |
 | 2026-11-19 | Staging sync on demand only until staging has its own free Cloudflare account (owner: account later) | D1 limits are per account; the sync and staging tests used 10k to 30k of production's writes a day |
-| 2026-11-19 | Feeds: trend_az, azertag, rt_en, marketwatch, politico_eu, wapo_politics off; tass_ru, ria, rg, izvestia 8 -> 4 a run; hetq_hy kept (owner, Step 17c; on staging first) | 48 h: 0 to 2 stories scored 7+ each for many writes; hetq_hy is an Armenian source for the topic path |
+| 2026-11-19 | Feeds: trend_az, azertag, rt_en, marketwatch, politico_eu, wapo_politics off; tass_ru, ria, rg, izvestia 8 -> 4 a run; hetq_hy kept (owner, Step 17c; shipped 2026-11-20) | 48 h: 0 to 2 stories scored 7+ each for many writes; hetq_hy is an Armenian source for the topic path |
+| 2026-11-20 | Editor: an event of more than 6 stories is kept when its stories share a core of words that is also in its headline or description; 45 new stories a call (was 90), up to 4 calls; stories an answer left out wait for the next run (Step 17c) | 40 stories about one summit were refused as a "roundup" in every run, so every second call failed 6 times; 105-story answers sometimes stopped early or ran to the 32k output limit (runs up to 15 min) |
 | 2026-11-19 | The description names reputable outlets without a count; Help says "about 100 outlets"; no "a few times a day", "English or Russian", News.am or RFE/RL in user texts (owner, Step 17b) | 123 enabled feeds come from 98 outlets, so "120+ sources" overstated; the bot sends at the times the reader chooses, and more languages may come |
 | 2026-11-19 | BotFather splash icon is one SVG path (`branding/out/splash-icon.svg`, boolean-flattened logo, evenodd) (Step 17b) | BotFather refused an SVG with several shapes |
 | 2026-11-19 | Branding visuals built in code (HTML/SVG/CSS, headless Edge, ffmpeg), the logo as outlines from Montserrat ExtraBold fitted to the old 320 px photo (Step 17b) | no AI images or stock art (owner); the old logo existed only as a soft JPEG |
@@ -342,7 +343,8 @@ bot @axiom_news_bot at the end.
 - **Step 17c done (2026-11-19): D1 writes.** Items written once, not-news as hashes, fewer small writes,
   staging sync on demand, Admin "Free limit used" line (today and yesterday). Shipped 15:19 UTC;
   production runs 1,209 and 1,062 writes (2.3k to 2.4k before). Projected: normal day about 34k writes
-  (34%), busy day about 42k, reads 20% to 24%. Feed change waits for its staging run and "ship it".
+  (34%), busy day about 42k, reads 20% to 24%. 2026-11-20: the feed change and the editor fix shipped
+  (staging run 82 s, editor 0 failed calls).
   Details in `reports/step-17c-database-writes.md`.
 - Three test users (the owner and two more), now on staging.
 

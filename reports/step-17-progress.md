@@ -151,3 +151,15 @@ sync on demand, Admin "Free limit used" line. Shipped 15:19 UTC (owner's "ship i
 143 and 144: 1,209 and 1,062 writes (2.3k to 2.4k before). Details in `reports/step-17c-database-writes.md`.
 **Waiting on the owner:** the feed change (6 feeds off, 4 caps at 4) is made locally, not pushed: it needs
 one staging job run after 00:00 UTC (today's writes end near 98k), then his "ship it". Staging account: later.
+
+## 2026-11-20 (Step 17c follow-up, Part 2)
+- Yesterday (2026-11-19 UTC), the whole day: 96.7k rows written (97%), 2.42M read (48%); production 65.4k
+  written, staging 31.2k (index builds and tests). Today 00:00 to 04:59: 3.4k written (production 500 to
+  960 an hour overnight).
+- Shipped 04:40 UTC (owner's "ship it", job only): the feed change (staging run: 117 feeds, caps cut) and
+  the editor fix: an event of more than 6 stories is kept when its stories share a core (40 Shenzhen summit
+  stories were refused in every run, so every second editor call failed 6 times); 45 stories a call, up to 4
+  calls; stories an answer left out wait for the next run. Staging run: 82 s, editor 3 calls, 0 failed.
+- Part 2: `reports/step-17-launch-checklist.md`. The TEST token is now also in `.env.staging`; the bot scripts
+  refuse the TEST bot on production. **STOP: waiting for the owner's branding OK, the real token in `.env`,
+  and "go".**
