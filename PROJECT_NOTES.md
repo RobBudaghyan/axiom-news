@@ -48,8 +48,10 @@ bot @axiom_news_bot at the end.
   #000 with #1c1c1e), every row and button 48 px high with 12 px corners and 8 px gaps, button
   grids on six shared columns, a small coloured square and a red switch on every row, no helper
   texts (one owner exception since Step 16: "e.g. Formula 1, Japan, AI" under Add a topic), no "Saved" toast (a light haptic tap; errors still show). An Admin tab, visible only to
-  the owner, in the same style, shows stats, errors and AI usage, plus a "Send me a digest now"
-  button.
+  the owner, in the same style. Step 18: a dashboard: one health line (green, amber, red) with the reason,
+  key numbers (active users, digests today and delivered, stories today, last and next run), actions, the
+  free limits (D1, Worker CPU, AI per model), then sections closed until tapped (Pipeline, AI, Feeds,
+  Users, Custom topics, Announcement, Feedback, Tips, Errors). Red there is the system red, not the brand.
 - **AI:** Gemini free tier, falling back to Groq; if both fail, items wait an hour. About 82
   calls/day (about 57 first pass + 25 editor), independent of user count; plus about 20 a day per
   reader language other than English while someone reads it (Step 9).
@@ -69,6 +71,8 @@ bot @axiom_news_bot at the end.
   settings: the title and 100, 500 and 1000 Stars buttons, no text since Step 12) and /support (the same three buttons):
   voluntary Telegram Stars tips, the same for everyone (no test amount). Nothing is locked and a tip
   changes nothing else. /paysupport and /terms as Telegram requires; the owner refunds from Admin.
+  Step 18 (owner): the visible command menu is /start, /settings and /terms; /support and /paysupport still
+  work when typed.
 - **Custom topics (Step 13, "My topics"):** a reader adds up to 3 topics of their own in the Mini
   App. Shared: two readers with "Colombia" (or "Colombian news") follow one topic. The Worker checks
   each new name ONCE with AI (sensible news topic; not nonsense, offensive or a private person;
@@ -102,7 +106,8 @@ bot @axiom_news_bot at the end.
   listed in Admin. /help points to Settings.
 - **Welcome (Step 15):** /start from a new user: a short welcome with "Set up". The first Mini App
   open: a setup (Step 16: language, topics, times, done; the language preselected from Telegram,
-  a tap switches the whole flow at once), skippable; then one sample digest of the last 24 h by
+  a tap switches the whole flow at once; Step 18: every topic starts off and Next waits for one, Skip
+  keeps the six main topics), skippable; then one sample digest of the last 24 h by
   the normal rules. One reminder the next day (10:00 to 20:00 their time) for someone who never
   opened the app. Readers imported from the old bot (`import-users.mjs`, `imported = 1`) get none
   of it; they get the announcement.
@@ -353,9 +358,16 @@ bot @axiom_news_bot at the end.
   readers who block the bot are marked blocked; the welcome has one line about Axiom News; the sample
   digest has no label and at most 8 stories (2 a topic). Production users: only the owner (the two test
   users deleted). Details in `reports/step-17-launch.md`.
+- **Step 18 done (2026-11-20): beta fixes, shipped (owner pre-approved).** Setup topics start off (Next waits
+  for one; Skip restores the six); Help says "we"; Delete my data in the brand red with an in-place
+  question; the digest times bug fixed on both sides (answers overwrote newer taps; now one request at a
+  time, rollback on errors, `UPDATE ... RETURNING` with an SQL guard); /support and /paysupport out of the
+  menu (still work typed); a new Admin dashboard (health line, key numbers, limits, sections that open with
+  a tap, only active custom topics, grouped errors); staging silent (`USER_SENDS` off). Worker 341 tests,
+  Python 177, click-through 164. Details in `reports/step-18-beta-fixes.md`.
 
 ## Next step
-Live. Watch the first days: new readers' welcome, setup and sample digest; Admin "Free limit used" (D1
+Live (Step 18 shipped; owner checks on his phone). Watch the first days: new readers' welcome, setup and sample digest; Admin "Free limit used" (D1
 writes projected about 31% a day); Worker CPU per tick (2 ms after the launch); the editor (45 stories a
 call). Open: staging in its own free Cloudflare account (guide in `reports/step-17c-database-writes.md`),
 the BotFather profile previews (owner).
