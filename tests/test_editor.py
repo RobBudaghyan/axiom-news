@@ -217,6 +217,34 @@ class Validation(unittest.TestCase):
         self.assertEqual(evs, [])
         self.assertEqual(set(ids) <= set(left), True)
 
+    def test_roundup_with_a_listing_description_is_still_ignored(self):
+        subjects = ["Gaza ceasefire talks resume in Cairo", "Kyiv hit by drone attack overnight",
+                    "US tariffs on steel take effect", "Armenian parliament passes budget",
+                    "Iran rial falls to record low", "Oil prices climb on supply fears", "Japan PM visits Manila"]
+        ids = [add_story(self.db, s, ["politics_conflicts"]) for s in subjects]
+        by_id = {s["id"]: s for s in editor.Editor(self.db, [], topics=TOPICS, facts=[],
+                                                    facts_checked="x").pool(T0)}
+        desc = "Gaza ceasefire talks, a Kyiv drone attack, US steel tariffs, an Armenian budget and oil prices."
+        evs, left = editor.validate_events(answer((ids, 6, "World news roundup", desc, "")), by_id, {})
+        self.assertEqual(evs, [])
+        self.assertTrue(set(ids) <= set(left))
+
+    def test_one_big_event_is_kept_and_only_its_stories_are_merged(self):
+        """Step 17c, real case 2026-11-19/20: 40 stories about the Shenzhen summit in one event."""
+        summit = ["Trump and Putin met at the Shenzhen summit with Xi", "Putin praised the trilateral summit with Trump",
+                  "Trump arrived at the APEC summit for talks with Putin", "Peskov said the Putin Trump summit went well",
+                  "Xi hosted Trump and Putin at a historic summit", "Putin and Trump discussed Ukraine at the summit",
+                  "Lavrov called the Putin Trump summit constructive"]
+        ids = [add_story(self.db, s, ["politics_conflicts"]) for s in summit]
+        odd = add_story(self.db, "Armenian parliament passes the budget", ["armenia"])
+        by_id = {s["id"]: s for s in editor.Editor(self.db, [], topics=TOPICS, facts=[],
+                                                    facts_checked="x").pool(T0)}
+        evs, left = editor.validate_events(answer((ids + [odd], 8, "Trump, Putin and Xi hold a summit in Shenzhen",
+                                                   "Trump and Putin met Xi at the summit.", "")), by_id, {})
+        self.assertEqual(len(evs), 1)
+        self.assertEqual(sorted(evs[0].ids), sorted(ids))
+        self.assertIn(odd, left)
+
     def test_an_edited_story_keeps_its_text_when_the_answer_leaves_it_empty(self):
         e = add_story(self.db, "Edited", ["politics_conflicts"], edited={"score": 7, "headline": "Old head",
                                                                  "description": "Old desc.", "emojis": "🏛️"})
@@ -383,7 +411,7 @@ class Step8(unittest.TestCase):
     def test_a_second_call_only_while_unscored_candidates_remain(self):
         for i in range(7):
             add_story(self.db, f"Politics story {i}", ["politics_conflicts"], 6)
-        s = Settings(editor_new=5, editor_compare=2)
+        s = Settings(editor_new=5, editor_compare=2, editor_max_calls=2)
         gem = FakeProvider("gemini", [score_all(5), score_all(5)])
         ed, calls = make_editor(self.db, [gem], s)
         res = ed.run(T0)
@@ -402,6 +430,29 @@ class Step8(unittest.TestCase):
         res = make_editor(self.db, [gem], s)[0].run(T0)
         self.assertEqual(res.rounds, 2)
         self.assertGreater(self.db.query("SELECT count(*) n FROM stories WHERE final_score IS NULL")[0]["n"], 0)
+
+    def test_stories_an_answer_left_out_wait_for_the_next_run(self):
+        """Step 17c: a later call of the same run does not ask again for stories an answer left out."""
+        for i in range(7):
+            add_story(self.db, f"Politics story {i}", ["politics_conflicts"], 6)
+        s = Settings(editor_new=5, editor_compare=2, editor_max_calls=4)
+        prompts = []
+
+        def first_three(prompt):
+            prompts.append(prompt)
+            got = score_all(5)(prompt)
+            got["events"] = got["events"][:3]          # leaves out 2 of 5
+            return got
+        gem = FakeProvider("gemini", [first_three, score_all(5)])
+        res = make_editor(self.db, [gem], s)[0].run(T0)
+        self.assertEqual(res.calls, 2)                   # no third call for the two left out
+        first = {l.split(" |")[0] for l in prompts[0].splitlines() if CAND.match(l)}
+        second = {l.split(" |")[0] for l in gem.prompts[1].splitlines() if CAND.match(l)}
+        scored = {f"S{r['id']}" for r in self.db.query("SELECT id FROM stories WHERE final_score IS NOT NULL")}
+        left = first - scored
+        self.assertEqual(len(left), 2)
+        self.assertFalse(left & second)
+        self.assertEqual(self.db.query("SELECT count(*) n FROM stories WHERE final_score IS NULL")[0]["n"], 2)
 
     def test_no_second_call_after_falling_back_to_groq(self):
         for i in range(15):

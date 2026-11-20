@@ -226,7 +226,7 @@ class TestInvariant(unittest.TestCase):
                                          "topic_score": rnd.randint(4, 9), "headline": head,
                                          "description": rnd.choice(["", text]), "emojis": ""})
             gem = FakeProvider("gemini", [answer])
-            s = Settings()
+            s = Settings(editor_new=90)   # one answer covers every random story (the job uses 45 a call)
             editor.Editor(db, [ProviderPlan(gem, s.gemini_max_input_tokens, s.existing_max, 4)], topics=topics,
                           facts=["f"], facts_checked="x", settings=s, log=lambda _m: None).run(T0)
             for sid in ids:

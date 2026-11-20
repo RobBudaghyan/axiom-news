@@ -75,7 +75,9 @@ class Settings:
     fetch_workers: int = 16
     fetch_timeout_s: float = 20
     # Editor pass (Step 5, job/editor.py): one extra AI call per run over the strongest stories.
-    editor_new: int = 90                 # not-yet-edited stories per call (Step 8: 45 -> 90; measured 89 of 90 covered)
+    editor_new: int = 45                 # not-yet-edited stories per call (Step 8: 45 -> 90; Step 17c: back to 45,
+                                         # since 105-story answers (8k to 16k tokens) sometimes stopped early or ran
+                                         # away to the 32k output limit and were retried, up to 15 min a run)
     editor_per_topic: int = 3            # ...of which the best few of every topic come first
     editor_compare: int = 15             # already-edited stories shown for comparison and merging
     editor_items_per_story: int = 3      # article titles/snippets shown per story
@@ -83,7 +85,8 @@ class Settings:
     # Step 8: a lower floor for small topics whose medium news the first pass rates low
     # (19 Armenia stories a day at 2-3, e.g. a party switch in a local race).
     editor_topic_floor: dict = field(default_factory=lambda: {"armenia": 3})
-    editor_max_calls: int = 2            # Step 8: a 2nd call in the same run only while unscored candidates remain
+    editor_max_calls: int = 4            # Step 8: a 2nd call in the same run only while unscored candidates remain
+                                         # (Step 17c: 2 -> 4 with half the size, the same 180 a run)
     editor_groq_new: int = 10            # Groq's 8k tokens/minute (prompt + reply) fits far fewer
     editor_groq_per_topic: int = 1
     editor_groq_compare: int = 2

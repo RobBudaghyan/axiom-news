@@ -29,7 +29,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
-from job import ai, custom
+from collections import Counter
+
+from job import ai, custom, dupes
 from job.config import ROOT, Settings
 from job.d1 import in_list_statements
 
@@ -39,7 +41,15 @@ MIN_COVERED_SHARE = 0.5     # an answer that mentions fewer candidates than this
 MAX_HEADLINE = 200
 MAX_DESCRIPTION = 420
 MAX_EMOJIS = 4
-MAX_EVENT_STORIES = 6       # more stories in one event is a roundup, not one event
+MAX_EVENT_STORIES = 6       # more stories in one event is a roundup, not one event...
+# ...unless it is one big event (Step 17c, seen 2026-11-19/20: 40 stories about one summit, refused in
+# every run, so every second editor call failed on all models). A big event is kept when its stories
+# share a core (content words in at least half of their first-pass summaries) and at least
+# BIG_EVENT_CORE of those words are in the event's headline or description; then only the stories
+# with at least BIG_EVENT_SHARED words in common with that text are merged, the rest stay unedited.
+# A roundup of unrelated stories has no such core and is still ignored.
+BIG_EVENT_CORE = 2
+BIG_EVENT_SHARED = 2
 
 POOL_SQL = ("SELECT id, summary, topics, importance, best_url, best_source, best_tier, best_published_at, "
             "source_count, created_at, updated_at, headline, description, emojis, final_score, edited_at, main_topic, "
@@ -474,6 +484,17 @@ def source_text(stories: list[dict], items: dict[int, list[dict]]) -> tuple[str,
     return "\n".join(parts), latin
 
 
+def big_event_members(ids: list[int], by_id: dict[int, dict], headline: str, description: str) -> list[int]:
+    """The stories of an event with more than MAX_EVENT_STORIES that really belong to it ([] = a roundup)."""
+    text = set(dupes.tokens(f"{headline} {description}"))
+    maps = {i: set(dupes.tokens(by_id[i].get("summary") or "")) for i in ids}
+    count = Counter(w for m in maps.values() for w in m)
+    core = {w for w, n in count.items() if 2 * n >= len(ids)} & text
+    if len(core) < BIG_EVENT_CORE:
+        return []
+    return [i for i in ids if len(maps[i] & text) >= BIG_EVENT_SHARED]
+
+
 def validate_events(data: dict, by_id: dict[int, dict], items: dict[int, list[dict]],
                     topic_order: list[str] | None = None) -> tuple[list[Event], list[int]]:
     """Check one answer. Returns (events, candidate ids the answer left out). Unknown or repeated
@@ -485,7 +506,9 @@ def validate_events(data: dict, by_id: dict[int, dict], items: dict[int, list[di
         if not isinstance(raw, dict):
             continue
         ids = _ids(raw.get("ids"), set(by_id), used)
-        if not ids or len(ids) > MAX_EVENT_STORIES:
+        if ids and len(ids) > MAX_EVENT_STORIES:   # Step 17c: one big event, or a roundup
+            ids = big_event_members(ids, by_id, str(raw.get("headline") or ""), str(raw.get("description") or ""))
+        if not ids:
             continue      # a "roundup" of unrelated stories (seen once: 44 in one event): ignored
         used.update(ids)
         try:
@@ -678,8 +701,12 @@ class Editor:
             return events, left_out
         return None
 
-    def _round(self, now: int, pool: list[dict], out: EditorResult) -> tuple[str, bool]:
-        """One editor answer over the best unscored stories. Returns (status, used_small_model)."""
+    def _round(self, now: int, pool: list[dict], out: EditorResult,
+               skip: set[int] | None = None) -> tuple[str, bool]:
+        """One editor answer over the best unscored stories. Returns (status, used_small_model).
+        skip: Step 17c: stories an earlier answer of this run left out; they wait for the next run."""
+        if skip:
+            pool = [s for s in pool if s["id"] not in skip or s.get("edited_at") is not None]
         for plan in self.plans:
             p = plan.provider
             small = p.name == "groq"
@@ -713,6 +740,8 @@ class Editor:
             out.rounds += 1
             if left_out:
                 out.errors.append(f"editor: answer left out {len(left_out)} of {len(cands)} candidates")
+            if skip is not None:
+                skip.update(left_out)
             return "ok", small
         return "failed", False
 
@@ -722,8 +751,9 @@ class Editor:
         per-minute limit makes a second Groq call slow; the backlog waits for the next hour)."""
         out = EditorResult()
         rounds = 1 if self.dry_run else max(1, self.s.editor_max_calls)
+        skip: set[int] = set()
         for _ in range(rounds):
-            status, small = self._round(now, self.pool(now, min_importance, hours), out)
+            status, small = self._round(now, self.pool(now, min_importance, hours), out, skip)
             if status == "skipped":
                 break
             if status == "failed":

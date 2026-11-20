@@ -1,0 +1,27 @@
+custom topics: 1 active, 1 searched, 2 requests (0 failed), 7 results, 1 seen before, 3 same as the pool, 0 over the per-topic cap, 3 new items, 1.8s
+near-duplicate groups: 33 stories changed group
+editor: ok, provider gemini, 3 round(s), 139 candidates, 84 events written, 36 merged away, 0 left out, 2 texts dropped by the fact guard, calls 3, tokens in 30775 out 9518
+translate: ok, 44 eligible stories; ru 16 ok of 16 to do, 0 rejected, 0 unanswered, 1 calls via gemini, tokens in 1707 out 1484
+status ok in 81.2s | feeds ok 117, failed 0
+items: in window 304, new 49, sent to AI 58, expired 0, left pending 0
+stories: created 20, merged into existing 7; items dropped 23 (of which unaccounted 4)
+AI: provider gemini, calls 5, tokens in 47275 out 13634 | pruned None
+editor: ok, provider gemini, 3 round(s), 139 candidates, 84 events written, 36 merged away, 0 left out, 2 texts dropped by the fact guard, calls 3, tokens in 30775 out 9518
+translate: ok, 44 eligible stories; ru 16 ok of 16 to do, 0 rejected, 0 unanswered, 1 calls via gemini, tokens in 1707 out 1484
+custom topics: 1 active, 1 searched, 2 requests (0 failed), 7 results, 1 seen before, 3 same as the pool, 0 over the per-topic cap, 3 new items, 1.8s
+cap cut (new items left out by the per-feed cap): izvestia 9, rg 1, ria 25, tass_ru 67
+AI error: editor: answer left out 19 of 60 candidates
+AI error: editor: fact guard dropped 2 texts: description S1000000177: Chinese; headline S8658: Armenian
+D1: 42 calls, rows read 22683, rows written 577
+  D1 read    8799 rows in   4x: SELECT id, summary, topics, importance, best_url, best_source, best_tier, best_published_at, source_count, cre
+  D1 read    3573 rows in   1x: SELECT id, title FROM items WHERE id > (SELECT coalesce(max(id), 0) FROM items) - ? AND fetched_at >= ?
+  D1 read    3177 rows in   1x: SELECT id, summary, headline, description, g FROM ( SELECT s.*, coalesce(s.final_score, s.importance - ?2) AS 
+  D1 read    2223 rows in   1x: SELECT id, topics, main_topic, final_score, topic_score, headline, summary, description FROM stories WHERE (up
+  D1 read    2066 rows in   1x: SELECT id, summary, dup_group FROM stories WHERE updated_at >= ? AND importance >= ? AND merged_into IS NULL O
+  D1 read     736 rows in   3x: SELECT story_id, source_name, tier, title, snippet, published_at, headline_only FROM items WHERE story_id IN (
+  D1 read     544 rows in   2x: SELECT id, summary, topics, importance, best_url, best_source, best_tier, best_published_at, headline, descrip
+  D1 read     423 rows in   5x: SELECT url_hash FROM items WHERE url_hash IN (?..)
+  D1 read     353 rows in   5x: SELECT url_hash FROM items_seen WHERE url_hash IN (?..)
+  D1 read      90 rows in   1x: SELECT max(started_at) AS t FROM job_runs WHERE status IN ('ok', 'partial', 'ai_failed')
+  D1 read      90 rows in   1x: SELECT max(started_at) AS t FROM job_runs WHERE pruned IS NOT NULL
+  D1 read      88 rows in   1x: SELECT id, best_url FROM stories WHERE coalesce(link_state, 0) <> 2 AND best_url LIKE ? AND id IN (?..)
