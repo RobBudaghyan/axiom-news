@@ -179,3 +179,8 @@ one staging job run after 00:00 UTC (today's writes end near 98k), then his "shi
   owner on the TEST bot. Commit eabb91d (not pushed).
 - Owner: branding OK; real token in `.env` (checked: @axiom_news_bot, no webhook, nothing pending); BotFather
   done except the profile previews. **STOP: waiting for "ship it, go".**
+
+## 2026-11-20: launched
+Owner: "ship all of this and proceed with switch" (after asking for the welcome line and a shorter,
+unlabelled sample digest, both on staging first). Switch done 08:36 to 08:42 UTC; details and the invite
+messages in `reports/step-17-launch.md`. Step 17 is done.

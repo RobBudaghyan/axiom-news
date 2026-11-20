@@ -251,6 +251,8 @@ bot @axiom_news_bot at the end.
 | 2026-11-19 | Step 17c (D1 writes): the job writes each new item once, after the AI pass, in its final state; a not-news item leaves only its URL hash (`items_seen`); `dup_group` NULL = its own group; the Worker's usage row once an hour | measured on staging: an insert is 3 rows, a status update 1 to 2, a delete 1; a story item 6 -> 4 rows over its life, a not-news item 5 -> 2; production runs 2.35k -> 1.1k to 1.4k writes |
 | 2026-11-19 | Staging sync on demand only until staging has its own free Cloudflare account (owner: account later) | D1 limits are per account; the sync and staging tests used 10k to 30k of production's writes a day |
 | 2026-11-19 | Feeds: trend_az, azertag, rt_en, marketwatch, politico_eu, wapo_politics off; tass_ru, ria, rg, izvestia 8 -> 4 a run; hetq_hy kept (owner, Step 17c; shipped 2026-11-20) | 48 h: 0 to 2 stories scored 7+ each for many writes; hetq_hy is an Armenian source for the topic path |
+| 2026-11-20 | Deleting a user (Admin or "Delete my data") removes every row about them in one batch; tips stay with user_id 0; never the owner from Admin, the owner's own "Delete my data" needs a second confirm (Step 17) | the owner asked for it before the launch; one shared function (`worker/src/account.js`) so both paths delete the same; a test fails if a new table with user_id is not covered |
+| 2026-11-20 | The sample digest after the setup: no label, "here is what happened in the last 24 hours", at most 8 stories, 2 a topic (owner, Step 17) | not to shock a new reader with 15 stories; the rest can still come in the first real digest |
 | 2026-11-20 | Editor: an event of more than 6 stories is kept when its stories share a core of words that is also in its headline or description; 45 new stories a call (was 90), up to 4 calls; stories an answer left out wait for the next run (Step 17c) | 40 stories about one summit were refused as a "roundup" in every run, so every second call failed 6 times; 105-story answers sometimes stopped early or ran to the 32k output limit (runs up to 15 min) |
 | 2026-11-19 | The description names reputable outlets without a count; Help says "about 100 outlets"; no "a few times a day", "English or Russian", News.am or RFE/RL in user texts (owner, Step 17b) | 123 enabled feeds come from 98 outlets, so "120+ sources" overstated; the bot sends at the times the reader chooses, and more languages may come |
 | 2026-11-19 | BotFather splash icon is one SVG path (`branding/out/splash-icon.svg`, boolean-flattened logo, evenodd) (Step 17b) | BotFather refused an SVG with several shapes |
@@ -346,19 +348,17 @@ bot @axiom_news_bot at the end.
   (34%), busy day about 42k, reads 20% to 24%. 2026-11-20: the feed change and the editor fix shipped
   (staging run 82 s, editor 0 failed calls).
   Details in `reports/step-17c-database-writes.md`.
-- Three test users (the owner and two more), now on staging.
+- **Step 17 done (2026-11-20): launch.** Production is the real bot @axiom_news_bot (08:41 UTC), sending to
+  readers; staging keeps the TEST bot. Admin "Delete user" and Help "Delete my data" (every language);
+  readers who block the bot are marked blocked; the welcome has one line about Axiom News; the sample
+  digest has no label and at most 8 stories (2 a topic). Production users: only the owner (the two test
+  users deleted). Details in `reports/step-17-launch.md`.
 
 ## Next step
-Step 16 (in progress, `reports/step-16-progress.md`): load test on staging, iPhone check. Then the
-launch: production gets the real bot @axiom_news_bot (new token as production's secret,
-`node scripts/point-bot.mjs` and `node scripts/setup-bot.mjs` without AXIOM_ENV, `USER_SENDS = "on"`
-in wrangler.toml, deployed only after the owner says "ship it"), then import the old bot's readers
-(`worker/scripts/import-users.mjs users.json --dry`, then without `--dry`, on production) and send them
-an announcement from production's Admin. Staging keeps the TEST bot. Watch: Economy & Markets volume,
-digest sizes after the Step 16 bar (all six topics about 10, Armenia only about 6), keyword refreshes,
-the first live reminder and sample digest, D1 reads after the items index (before it the job read about
-3.6M rows a day, 73%; a follow-up should remove the job's other full scans of the story pool), and
-Worker CPU per tick in Cloudflare's metrics (typical 6 to 9 ms, worst seen 15 ms, never flagged).
+Live. Watch the first days: new readers' welcome, setup and sample digest; Admin "Free limit used" (D1
+writes projected about 31% a day); Worker CPU per tick (2 ms after the launch); the editor (45 stories a
+call). Open: staging in its own free Cloudflare account (guide in `reports/step-17c-database-writes.md`),
+the BotFather profile previews (owner).
 
 ## Known issues / open questions
 - **Translations (Step 9):** the code checks catch numbers, names, alphabets and accents, not a
