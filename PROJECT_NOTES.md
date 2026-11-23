@@ -30,8 +30,8 @@ bot @axiom_news_bot at the end.
   Wars & Conflicts), Economy & Markets (Экономика и рынки), Technology & AI (Технологии и ИИ, 💻, Step
   19), Armenia, Iran War (Война в Иране), Ukraine War (Война на Украине). All six on for a new user.
   Russia was removed as a main topic in Step 19 (owner); its stories went to their best remaining topic.
-- **Reader languages (Step 9):** English (default) and Russian; Armenian and French are built and
-  approved on quality but hidden (`config/languages.json`). Everything a reader sees is in their
+- **Reader languages (Step 9, Step 19):** English (default), Russian, French and Armenian, all on since
+  Step 19 (owner), in that order everywhere, a 2x2 grid in Settings and setup (`config/languages.json`). Everything a reader sees is in their
   language: digest text, greeting, headings, quiet note, bot replies, menu button, commands, the
   Mini App (Admin stays English). A new user starts in Telegram's language if supported, else
   English; then only the Mini App picker changes it. The hourly job translates, after the
@@ -268,6 +268,7 @@ bot @axiom_news_bot at the end.
 | 2026-11-23 | Technology & AI (`tech_ai`) is a main topic, Russia is not; existing users got tech_ai; Russia stories re-tagged (owner, Step 19) | the owner's choice of topics; Russian sources stay for Politics, Ukraine War and Russian readers |
 | 2026-11-23 | Eight tech feeds; Bloomberg tech capped at 4 a run; The Verge, Wired (all), TechCrunch, The Register, CNBC tech, BBC tech and The Economist science left out (Step 19) | quality and noise: the left-out ones are mostly reviews, deals, start-up rounds or overlap; about 100 to 120 items a weekday, under 1% of free D1 writes |
 | 2026-11-23 | Custom topic rule eased: refused only when it means a WHOLE main topic; `main_aliases` match with no AI call; the check prompt lists narrower examples; `not_main` (AI, ИИ, artificial intelligence) overrides the AI's "same as Technology & AI" (owner, Step 19) | Stocks and Finance were refused because Economy & Markets exists; the real model still called "AI" the main topic because the label contains it |
+| 2026-11-23 | French and Armenian on; order en, ru, fr, hy; a main topic name that does not fit its 48 px row gets a smaller font (13 px at least), never two lines; Armenian "Politics & Conflicts" is just "Քաղաքականություն" (owner, Step 19) | the owner's choice; Armenian names wrapped to 56 px rows, and the 38-letter Armenian label did not fit 360 px even at 12 px |
 | 2026-11-23 | tech_ai boost cap 1, more specific than Economy & Markets (Step 19) | +2 would lift routine launches; a chip export ban is a tech story first |
 
 ## Current status

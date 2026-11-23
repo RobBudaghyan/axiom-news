@@ -22,9 +22,23 @@ migration must change together.
   to the main topic; "World news" is too broad. Staging Worker 1e149933, api-check 11 of 11. Tests:
   Worker 346 (two rules broken on purpose, both caught), Python 185.
 
+- **Part 3: languages (2026-11-23).** French and Armenian on; order English, Russian, French, Armenian
+  (🇬🇧 🇷🇺 🇫🇷 🇦🇲) in the picker (a 2x2 grid in Settings and setup: each button spans 3 of 6 columns),
+  the dictionaries, setup-bot and Admin. TEST bot set up: commands, menu button, description and about in
+  all four, English as the default with no language code (`AXIOM_ENV=staging node scripts/setup-bot.mjs`:
+  OK). Found and fixed: Armenian main topic names wrapped to two lines (56 px rows): a name that does not
+  fit now gets a smaller font (13 px at least); Armenian "Politics & Conflicts" (38 letters) did not fit
+  360 px even at 12 px, so it is now "Քաղաքականություն" (Politics) **(owner: please confirm the
+  wording)**. Click-through now covers en, ru, fr, hy at 360, 390, 430 px, light and dark: 248 checks
+  pass. Worker 350 tests.
+  **AI budget:** the primary Gemini model made 100 to 127 calls a day this week (pass 1, editor, Russian
+  translation, topic checks), against our soft limit of 250 (the guard delays topic checks at 80%, 200).
+  Each language someone reads adds one call per run with new stories, about 20 a day (Russian: 18 to 23).
+  With French and Armenian readers: about 145 to 175 a day, 58% to 70%. No reader, no call. On a bad day
+  (Gemini overloaded, many retries) the fallback model takes the rest; its limit is also 250.
+
 ## Next
-- Parts 3 to 7: the owner's message was cut off in the middle of Part 2 ("...AI startups,
-  Armenian"), so they are not known yet. Part 2's own list may have had more examples after that.
+- Part 4: welcome video. Part 5: alerts, daily stats, backups. Part 6: branding. Part 7: ship and check.
 
 ## Ship (owner pre-approved "ship it" for the whole step), in this order
 1. Merge `step-19` into `main` and push (the job's new topics, prompts and feeds).
