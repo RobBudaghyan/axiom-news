@@ -600,8 +600,9 @@ export function guardAlert(countRows, metaRows, now, budget = BUDGET) {
     : "new topic checks are delayed (translations, pass 1 and the editor still run)";
   const reasons = [...new Set([...live.reasons, ...(jobLevel ? job.reasons ?? [] : [])])].join("; ");
   return {
-    text: `Axiom News AI budget: level ${level}: ${what}. Why: ${reasons || "see Admin"}. ` +
-      "Gemini's free day resets at midnight Pacific time. Details in Admin under AI budget. This is the only such alert today.",
+    text: `Axiom News alert: AI budget level ${level}: ${what}. Why: ${reasons || "see Admin"}. ` +
+      "Gemini's free day resets at midnight Pacific time; this is the only such alert today.\nWhat to do: nothing if it is rare; " +
+      "if it comes most days, add a reader language less or lower the soft limits in config/ai_budget.json (Admin > AI shows the calls).",
     writes: [{ sql: "INSERT INTO meta (key, value) VALUES ('ai_guard_alert_day', ?1) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
                params: [live.day] }],
   };

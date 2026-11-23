@@ -70,14 +70,16 @@ export function assessUsage(got, prev, now, limits = D1_LIMITS, share = ALERT_SH
   if (high.length && state.d1_alert_day !== day) {
     alerts.push({ kind: "d1", text: `Axiom News alert: the database is near its free daily limit: ${high.join(", ")}, both copies together, ` +
       "today (UTC). Over the limit, database calls fail until 00:00 UTC: no new stories and no digests until then. " +
-      "Check Admin > Database today. Next alert of this kind tomorrow at the earliest." });
+      "Next alert of this kind tomorrow at the earliest.\nWhat to do: stop staging tests and syncs for today; if it repeats, " +
+      "switch off the busiest low-value feeds (Admin > Feeds, config/sources.yaml)." });
     state.d1_alert_day = day;
   }
   if (got.over.length && state.cpu_alert_day !== day) {
     const what = got.over.map((o) => `${o.script}: ${o.n} ${o.status}`).join(", ");
     alerts.push({ kind: "cpu", text: `Axiom News alert: Cloudflare stopped Worker runs over the free CPU limit (10 ms): ${what}, ` +
-      "in the last hour. A stopped digest tick is retried at the next minute. If this repeats, see plan B in OWNER_GUIDE.md. " +
-      "Next alert of this kind tomorrow at the earliest." });
+      "in the last hour. A stopped digest tick is retried at the next minute. " +
+      "Next alert of this kind tomorrow at the earliest.\nWhat to do: nothing if it is rare; if it repeats daily, lower " +
+      "max_users_per_tick in config/digest.json (plan B in OWNER_GUIDE.md)." });
     state.cpu_alert_day = day;
   }
   return { state, alerts };

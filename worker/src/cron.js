@@ -9,6 +9,8 @@ import { asTopicRows, guardAlert, withCustomTopics } from "./custom.js";
 import { countStatement } from "./guard.js";
 import { reminderStatement, runReminders } from "./onboard.js";
 import { activeStatement, runAnnouncementBatch } from "./announce.js";
+import { WATCH_STATEMENTS, digestStatsStatement, dueAlerts, statsDayDue, statsDoneWrite, statsRow, statsStatements,
+  statsWrite, watchCandidates } from "./watch.js";
 
 const DUE_WHERE = "next_digest_at IS NOT NULL AND next_digest_at <= ?1 AND paused = 0 AND blocked = 0";
 const DUE_SQL = `SELECT * FROM users WHERE ${DUE_WHERE} ORDER BY next_digest_at LIMIT ?2`;
@@ -70,11 +72,13 @@ export async function sendDigest(io, chatId, plan) {
   return plan.storyIds;
 }
 
-// io: {send(chatId, text, {kind, reply_markup}), alert(text), appUrl}. opts: {digests: bool, extraProblems: []}.
+// io: {send(chatId, text, {kind, reply_markup}), alert(text), appUrl}. opts: {digests: bool, extraProblems: [],
+// guard: production's hourly alert checks, stats: the hourly tick (both copies keep daily_stats)}.
 export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
   const digests = opts.digests !== false;
   // Step 13: the AI budget guard is checked on the hourly tick (once an hour is enough for one alert a day)
   const guard = !!opts.guard;
+  const watch = guard || !!opts.stats;   // Step 19: the hourly watch reads (alerts, daily stats)
   const reads = [
     ...HEALTH_STATEMENTS,
     ...(digests ? [{ sql: DUE_SQL, params: [now, cfg.max_users_per_tick] }, { sql: TOPICS_SQL, params: [] },
@@ -82,11 +86,14 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
                    reminderStatement(now), activeStatement()] : []),   // Step 15: one reminder, announcements
     ...(guard ? [countStatement(now),
                  { sql: "SELECT key, value FROM meta WHERE key IN ('ai_guard', 'ai_guard_alert_day')", params: [] }] : []),
+    ...(watch ? WATCH_STATEMENTS(now) : []),
   ];
   const got = await db.batch(reads);
   const [runs, lastOk, meta] = got;
   let [due = [], topics = [], custom = [], reminders = [], announcing = []] = digests ? got.slice(3, 8) : [];
-  const [guardCounts, guardMeta] = guard ? got.slice(digests ? 8 : 3) : [];
+  const after = digests ? 8 : 3;
+  const [guardCounts, guardMeta] = guard ? got.slice(after, after + 2) : [];
+  const watchGot = watch ? got.slice(after + (guard ? 2 : 0), after + (guard ? 2 : 0) + 2) : null;
   const writes = [];
   const out = { due: due.length, sent: 0, quiet: 0, blocked: 0, failed: 0, stories: 0, cut: 0, alert: false };
 
@@ -144,7 +151,7 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
       out.cut += plan.cut ?? 0;            // stories that qualified but did not fit (Step 8)
       writes.push(...digestWrites(user, plan, sentIds, now));
     }
-    if (out.sent || out.failed) writes.push(digestDayStatement(out, now));
+    if (out.sent || out.failed) writes.push(digestDayStatement(out, now), digestStatsStatement(out, now));
   }
 
   // Step 15: after the digests, the one reminder (users who never opened the app) and a batch of
@@ -161,14 +168,39 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
   const health = assessHealth({ runs, lastOk, meta, extra: opts.extraProblems ?? [] }, now, cfg.default_timezone);
   out.problems = health.problems;
   for (const p of opts.extraProblems ?? []) writes.push(errorStatement(p, now));
-  // Step 16: staging (opts.health false) never alerts the owner about the job: it runs for production only
-  if (health.alert && opts.health !== false) {
-    try {
-      await io.alert(health.alert);
-      writes.push(...health.writes);
+  // Step 19: every alert kind at most once a UTC day, each with a "What to do" line (watch.js).
+  // Step 16: staging (opts.health false) never alerts the owner: the job runs for production only.
+  if (opts.health !== false) {
+    writes.push(...health.writes);
+    const candidates = [...health.candidates, ...(guard && watchGot ? watchCandidates(watchGot, now) : [])];
+    const { due, record } = dueAlerts(candidates, watchGot?.[0] ?? meta, now);
+    const sentKinds = [];
+    for (const a of due) {
+      try {
+        await io.alert(a.text);
+        sentKinds.push(a.kind);
+      } catch (e) {
+        writes.push(errorStatement(`alert to owner failed: ${e.message}`, now));
+      }
+    }
+    if (sentKinds.length) {
       out.alert = true;
+      out.alerts = sentKinds;
+      writes.push(record(sentKinds),   // Admin shows the last alert
+        { sql: "INSERT INTO meta (key, value) VALUES ('last_alert_at', ?1), ('last_alert_text', ?2) " +
+               "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+          params: [String(now), due.filter((a) => sentKinds.includes(a.kind)).map((a) => a.text.split("\n")[0].replace(/^Axiom News alert: /, "")).join("; ")] });
+    }
+  }
+  // Step 19: yesterday's daily_stats row, once (the first hourly tick after 00:00 UTC)
+  const statsDay = watchGot ? statsDayDue(watchGot[0], now) : null;
+  if (statsDay) {
+    try {
+      const rows = await db.batch(statsStatements(statsDay));
+      writes.push(statsWrite(statsRow(statsDay, rows, now)), statsDoneWrite(statsDay));
+      out.stats_day = statsDay;
     } catch (e) {
-      writes.push(errorStatement(`alert to owner failed: ${e.message}`, now));
+      writes.push(errorStatement(`daily stats ${statsDay}: ${e.message}`, now));
     }
   }
   if (guard) {

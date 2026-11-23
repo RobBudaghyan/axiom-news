@@ -109,7 +109,7 @@ export default {
         send: userSender(env, (chatId, text, extra) => sendDigestMessage(env.TELEGRAM_BOT_TOKEN, chatId, text, extra)),
         appUrl: env.APP_URL,
         alert: (text) => sendPlain(env.TELEGRAM_BOT_TOKEN, Number(env.OWNER_TELEGRAM_ID), text),
-      }, now, { digests: !hourly && sw.userSends, guard: hourly && sw.alerts, health: sw.alerts, extraProblems });
+      }, now, { digests: !hourly && sw.userSends, guard: hourly && sw.alerts, stats: hourly, health: sw.alerts, extraProblems });
       // Step 17: the account's free limits (D1 rows, Worker CPU), production only, once an hour
       let usage = {};
       if (hourly && sw.alerts) {

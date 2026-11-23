@@ -45,13 +45,26 @@ migration must change together.
   `?v=19` on the URL. Staging serves it (200, video/mp4). Worker 351 tests. Tools after the PC restart:
   Twemoji 15.0.0 and imageio-ffmpeg reinstalled in the session scratchpad (not in the repo).
 
+- **Part 5: alerts, daily stats, backups (2026-11-23).** No regular reports exist (checked: Admin is
+  pull-only). `worker/src/watch.js`: every alert kind at most once a UTC day with a "What to do:" line;
+  kept: D1, CPU, failed run, stuck run, AI guard; added: digests failing (3+ failed and 20% of tries
+  today), many feeds down (10+ feeds failing 3 runs in a row), no news run for 2+ hours (was 3), Google
+  silent for 24 h with active custom topics. Table `daily_stats` (schema in `db/schema.sql`, applied to
+  staging): one row per UTC day, written once by the first hourly tick after 00:00 UTC; digests and
+  deletions counted live; not in the prune; feedback is not pruned by age either. **Backups:** D1 Time
+  Travel is on for both databases (checked with `wrangler d1 time-travel info`); Cloudflare's docs: any
+  minute in the last 7 days on the free plan (30 on paid), always on, a restore overwrites in place and
+  can be undone. Restore steps in `OWNER_GUIDE.md` (new) and `docs/ARCHITECTURE.md`. Worker 359 tests.
+  **At ship:** apply the schema to production (`venv/Scripts/python scripts/apply_schema.py`).
+
 ## Next
-- Part 5: alerts, daily stats, backups. Part 6: branding. Part 7: ship and check.
+- Part 6: branding. Part 7: ship and check.
 
 ## Ship (owner pre-approved "ship it" for the whole step), in this order
 1. Merge `step-19` into `main` and push (the job's new topics, prompts and feeds).
 2. `cd worker; npm run deploy:staging`, then `SHIP_IT=yes npm run deploy:prod`.
-3. `node scripts/migrate-step19.mjs --dry`, then without `--dry` (production users and stories).
+3. `venv/Scripts/python scripts/apply_schema.py` (production: the new `daily_stats` table), then
+   `node scripts/migrate-step19.mjs --dry`, then without `--dry` (production users and stories).
 4. `node scripts/setup-bot.mjs` (real bot) and `AXIOM_ENV=staging node scripts/setup-bot.mjs` (TEST
    bot): the new bot descriptions.
 
