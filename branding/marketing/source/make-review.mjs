@@ -58,7 +58,7 @@ const html = `<!doctype html>
   .switch button { border: 0; font: inherit; font-weight: 600; padding: 8px 16px; border-radius: 9px; background: none; color: var(--text); cursor: pointer; }
   .switch button.on { background: var(--red); color: #fff; }
   body.en .lang-ru, body.ru .lang-en { display: none; }
-  .sgrid { display: grid; grid-template-columns: 56px repeat(3, minmax(0, 1fr)); gap: 14px; align-items: start; }
+  .sgrid { display: grid; grid-template-columns: 56px repeat(3, minmax(0, 1fr)); gap: 14px; align-items: start; max-width: 720px; }
   .colh { font-weight: 600; text-transform: capitalize; text-align: center; color: var(--text-2); }
   .rowh { font-weight: 600; padding-top: 40%; color: var(--text-2); }
   .row { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
