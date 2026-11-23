@@ -164,13 +164,21 @@ describe("Step 13: adding a custom topic", () => {
     fetchMock = ai();
     let r = await add(binding, A, "Armenia");
     assert.deepEqual(r.body.result, { kind: "main_topic", reason: "Armenia is a main topic. Switch it on above." });
-    r = await add(binding, A, "Россия");
+    r = await add(binding, A, "Технологии и ИИ");
     assert.equal(r.body.result.kind, "main_topic");
     assert.equal(aiCalls().length, 0);
     r = await add(binding, A, "Armenian news");
     assert.equal(r.body.result.kind, "main_topic");
     assert.equal(aiCalls().length, 1);
     assert.equal(sqlite.prepare("SELECT count(*) AS n FROM custom_follows").get().n, 0);
+  });
+
+  test("Step 19: Russia is no longer a main topic, so it can be a reader's own topic", async () => {
+    const { binding } = setup();
+    fetchMock = ai();
+    const r = await add(binding, A, "Russia");
+    assert.notEqual(r.body.result.kind, "main_topic");
+    assert.equal(aiCalls().length, 1);
   });
 
   test("5 AI checks a day per reader; the owner has no limit", async () => {

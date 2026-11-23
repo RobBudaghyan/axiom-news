@@ -132,10 +132,10 @@ describe("Step 18: the setup's topics step", () => {
     fetchMock = mockFetch(() => undefined);
     const { binding, sqlite } = fakeD1();
     addUser(sqlite, { id: NEW, onboarded_at: null, opened_at: null });
-    await post(binding, "/api/settings", NEW, { topics: ["russia"] });
+    await post(binding, "/api/settings", NEW, { topics: ["tech_ai"] });
     await post(binding, "/api/onboard", NEW, { skipped: false });
     await post(binding, "/api/onboard", NEW, { skipped: true });
-    assert.deepEqual(topicsOf(sqlite), ["russia"]);
+    assert.deepEqual(topicsOf(sqlite), ["tech_ai"]);
   });
   test("the hint and the Next rule exist in every language, short, no long dash", () => {
     for (const lang of Object.keys(DICTS)) {

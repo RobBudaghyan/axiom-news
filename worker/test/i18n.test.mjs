@@ -125,7 +125,7 @@ describe("never an em dash, in any language", () => {
   });
 
   test("a story text with a dash is cleaned before it is sent; the message builder refuses one", () => {
-    const s = { ...story("Moscow — the capital", ["russia"], 8), primary: "russia" };
+    const s = { ...story("Moscow — the capital", ["tech_ai"], 8), primary: "tech_ai" };
     const msg = buildMessage([s], { now: yerevan(20), tz: TZ, name: "Rob", lang: "ru", topicInfo: topicInfoFrom(TOPICS, "ru") });
     assert.doesNotMatch(msg.text, FORBIDDEN);
     assert.throws(() => buildMessage([], { now: yerevan(20), tz: TZ, name: "Rob", label: "a — b" }), /dash/);

@@ -1,0 +1,86 @@
+
+##### all_six: 51 stories in 7 digests (6, 8, 4, 11, 9, 5, 8), 0 cut for length
+--- 20:00: 6 stories, 1540 characters
+  [7/t9] armenia (main armenia): Armenia announces official launch of TRIPP energy project
+  [7/t7] politics_conflicts (main politics_conflicts): Mexican forces capture top drug lord Fausto Isidro Meza Flores
+  [6/t7] economy_markets (main economy_markets): EU proposes long-term budget cuts, Big Tech tax, and defense boost
+  [6/t7] ukraine_war (main ukraine_war): Ursula von der Leyen blames Russian services for attack on Ukrainian rapper in Denmark
+  [6/t7] ukraine_war (main ukraine_war): Dozens of drones target Russia's Leningrad region
+  [6/t7] economy_markets (main economy_markets): Japan's economy shrinks in third quarter as weather impacts spending
+--- 09:00: 8 stories, 1855 characters
+  [7/t8] ukraine_war (main ukraine_war): Russian missile and drone barrage kills seven people in Kyiv
+  [7/t8] ukraine_war (main ukraine_war): Britain places sanctions on all ten of Russia largest oil producers
+  [7/t7] ukraine_war (main ukraine_war): Russian projectile strike kills two and injures ten in Lviv
+  [6/t7] iran_war (main iran_war): Iran begins daily electricity rationing amid severe fuel shortages
+  [6/t7] ukraine_war (main ukraine_war): Russian air defense intercepts incoming Ukrainian drones
+  [6/t7] ukraine_war (main ukraine_war): US works to broaden Ukraine-Russia ceasefire
+  [6/t7] economy_markets (main economy_markets): Trump warns of US bankruptcy risk and calls to remove debt limit
+  [6/t7] ukraine_war (main ukraine_war): Zelensky says Russia may accept European representation in peace talks
+--- 14:00: 4 stories, 1016 characters
+  [7/t8] economy_markets (main economy_markets): COP31 climate talks stall as fossil fuel rift derails draft deal
+  [6/t7] ukraine_war (main ukraine_war): Ukrainian drone attacks injure five and trigger air alarms in Russia
+  [6/t7] armenia (main armenia): Azerbaijan occupies 37 percent of Jermuk hydrological reserve
+  [6/t7] ukraine_war (main ukraine_war): Ukrainian attacks in Belgorod Oblast leave one dead and six injured
+--- 20:00: 11 stories, 2897 characters
+  [7/t9] armenia (main armenia): Armenia publishes draft new constitution omitting Independence Declaration references
+  [8/t8] politics_conflicts (main politics_conflicts): Pediatrician Annie Andrews wins South Carolina midterm upset
+  [6/t7] ukraine_war (main ukraine_war): US proposal for security guarantees for Ukraine brings cautious optimism in Europe
+  [6/t7] economy_markets (main economy_markets): China launches corruption investigation into CNPC deputy general manager Xie Jun
+  [6/t7] ukraine_war (main ukraine_war): Five injured in Ukrainian drone attacks on Russia Belgorod Region
+  [6/t7] ukraine_war (main ukraine_war): Zelensky urges US to approve Patriot interceptor deliveries amid heavy Russian aerial attacks
+  [6/t7] economy_markets (main economy_markets): Taiwan considers lowering margin requirements to support stock market
+  [6/t7] ukraine_war (main ukraine_war): Ukraine reports recapturing fourteen settlements in eastern Kharkiv Oblast
+  [6/t7] economy_markets (main economy_markets): US benchmark mortgage rates surge past seven percent
+  [6/t7] ukraine_war (main ukraine_war): Odesa schools switch to remote learning and Kyiv residents face water disruptions
+  [6/t7] economy_markets (main economy_markets): South Korea rolls out phased measures to stabilize volatile markets
+--- 09:00: 9 stories, 2319 characters
+  [8/t8] politics_conflicts (main politics_conflicts): Democrats secure at least 258 seats in US House
+  [7/t8] ukraine_war (main ukraine_war): Russian aerial and missile attacks across Ukraine kill multiple people
+  [7/t8] ukraine_war (main ukraine_war): Ukrainian sea drones strike and sink Russian warship in Libya
+  [7/t8] ukraine_war (main ukraine_war): Ukrainian drones strike oil refineries and infrastructure in Russia
+  [6/t7] ukraine_war (main ukraine_war): Moscow considers response options after attacks on ships in Benghazi
+  [6/t7] ukraine_war (main ukraine_war): Denmark expels Russian official over alleged assassination plot
+  [6/t7] economy_markets (main economy_markets): EU and Indonesia sign comprehensive trade and tariff agreement
+  [6/t7] ukraine_war (main ukraine_war): Drone attacks damage 19 residential buildings in Krasnodar Krai
+  [6/t7] armenia (main armenia): Report claims Azerbaijan occupied 37 percent of Jermuk hydrological reserve
+--- 14:00: 5 stories, 1239 characters
+  [6/t7] ukraine_war (main ukraine_war): Western intelligence warns Russia is preparing to deploy nuclear-armed satellite
+  [6/t7] armenia (main armenia): Armenian Prime Minister pledges to resign if constitutional referendum fails
+  [6/t7] economy_markets (main economy_markets): European natural gas prices climb above 90 euros per megawatt-hour
+  [6/t7] economy_markets (main economy_markets): Nvidia drops to fourth place after capitalization falls 14 percent
+  [6/t7] ukraine_war (main ukraine_war): FSB arrests Russian citizen in Crimea suspected of spying for Ukrainian intelligence
+--- now 15:30 (window still open): 8 stories, 2018 characters
+  [7/t9] armenia (main armenia): Armenia launches Trump-backed TRIPP transport project
+  [7/t8] ukraine_war (main ukraine_war): Russian attacks kill 14 people in Kyiv Oblast and damage facilities
+  [7/t7] economy_markets (main economy_markets): CrowdStrike agrees to acquire Zscaler in 43.9 billion dollar deal
+  [6/t7] ukraine_war (main ukraine_war): Ukraine ready for four-party talks with Europe, US and Russia
+  [6/t7] armenia (main armenia): Armenia draft constitution sparks domestic debate and opposition pushback
+  [6/t7] economy_markets (main economy_markets): Coca-Cola Europacific Partners hit by formal EU antitrust probe
+  [6/t7] tech_ai (main tech_ai): Oregon and Virginia attorneys general sue Elon Musk companies over Grok deepfakes
+  [6/t7] economy_markets (main economy_markets): Brent crude drops below 89 dollars and copper sinks amid supply and AI uncertainty
+
+##### armenia_only: 7 stories in 7 digests (1, 0, 1, 1, 1, 1, 2), 0 cut for length
+--- 20:00: 1 stories, 290 characters
+  [7/t9] armenia (main armenia): Armenia announces official launch of TRIPP energy project
+--- 09:00: 0 stories, 78 characters
+--- 14:00: 1 stories, 299 characters
+  [6/t7] armenia (main armenia): Azerbaijan occupies 37 percent of Jermuk hydrological reserve
+--- 20:00: 1 stories, 365 characters
+  [7/t9] armenia (main armenia): Armenia publishes draft new constitution omitting Independence Declaration references
+--- 09:00: 1 stories, 324 characters
+  [6/t7] armenia (main armenia): Report claims Azerbaijan occupied 37 percent of Jermuk hydrological reserve
+--- 14:00: 1 stories, 251 characters
+  [6/t7] armenia (main armenia): Armenian Prime Minister pledges to resign if constitutional referendum fails
+--- now 15:30 (window still open): 2 stories, 547 characters
+  [7/t9] armenia (main armenia): Armenia launches Trump-backed TRIPP transport project
+  [6/t7] armenia (main armenia): Armenia draft constitution sparks domestic debate and opposition pushback
+
+##### tech_only: 1 stories in 7 digests (0, 0, 0, 0, 0, 0, 1), 0 cut for length
+--- 20:00: 0 stories, 78 characters
+--- 09:00: 0 stories, 78 characters
+--- 14:00: 0 stories, 80 characters
+--- 20:00: 0 stories, 78 characters
+--- 09:00: 0 stories, 78 characters
+--- 14:00: 0 stories, 80 characters
+--- now 15:30 (window still open): 1 stories, 338 characters
+  [6/t7] tech_ai (main tech_ai): Oregon and Virginia attorneys general sue Elon Musk companies over Grok deepfakes

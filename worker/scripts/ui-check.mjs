@@ -132,7 +132,7 @@ try {
   check("a save gives one light haptic tap and no toast", !r.toasts.length && JSON.stringify(r.haptics) === '["haptic impact light"]',
     `${JSON.stringify(r.haptics)} / toasts ${JSON.stringify(r.toasts)}`);
 
-  r = await b.run(`${SERVER} for (const t of ['politics_conflicts', 'armenia', 'russia']) { click('[data-value=' + t + ']'); await wait(120); }
+  r = await b.run(`${SERVER} for (const t of ['politics_conflicts', 'armenia', 'tech_ai']) { click('[data-value=' + t + ']'); await wait(120); }
     await settled(); const t0 = window.__toasts.length; click('[data-value=economy_markets]'); await wait(300);
     return { u: await server(), toast: window.__toasts.slice(t0).join(' | '), on: document.querySelector('[data-value=economy_markets]').getAttribute('aria-checked'),
       hero: text('#hero').trim().replace(/\\s+/g, ' ') };`);
@@ -278,7 +278,7 @@ try {
     return { rows: mine(), toasts: window.__toasts.slice(t) };`);
   check("My topics: a sixth AI check in a day is refused before any AI call (5 a day per reader)",
     r.rows.length === 2 && JSON.stringify(r.toasts) === '["Up to 5 new topics a day. Try again tomorrow."]', JSON.stringify(r));
-  r = await b.run(`${SERVER} for (const t of ['politics_conflicts', 'armenia', 'russia', 'economy_markets']) {
+  r = await b.run(`${SERVER} for (const t of ['politics_conflicts', 'armenia', 'tech_ai', 'economy_markets']) {
       const el = document.querySelector('[data-action=topic][data-value=' + t + ']'); if (el.getAttribute('aria-checked') === 'true') { el.click(); await wait(150); } }
     await settled(); return (await server()).topics;`);
   check("with a custom topic, every main topic may be off", Array.isArray(r) && r.length === 0, JSON.stringify(r));
@@ -527,7 +527,7 @@ const SETUP_LAYOUT = `const v = document.querySelector('#view');
       const after1 = { saved: u.topics, nextOff: next.disabled, hintHidden: hint.hidden };
       click('[data-value=armenia]'); await settled(); const u2 = await server();
       const after0 = { saved: u2.topics, nextOff: document.querySelector('[data-action=setup-next]').disabled, hintHidden: document.querySelector('#setup-hint').hidden };
-      for (const t of ['politics_conflicts', 'economy_markets', 'armenia', 'russia', 'iran_war']) { click('[data-value=' + t + ']'); await wait(60); }
+      for (const t of ['politics_conflicts', 'economy_markets', 'armenia', 'tech_ai', 'iran_war']) { click('[data-value=' + t + ']'); await wait(60); }
       await settled(); return { after1, after0, u3: (await server()).topics, nextOff: document.querySelector('[data-action=setup-next]').disabled };`);
     check("Step 18 setup: one topic on enables Next and hides the hint (saved at once); switching it off again disables Next",
       r.after1.saved.join() === "armenia" && !r.after1.nextOff && r.after1.hintHidden && r.after0.saved.length === 0 && r.after0.nextOff &&
@@ -579,7 +579,7 @@ for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
         await fetch(`${BASE}/__reset`, { method: "POST" });
         await w.open(`${BASE}/app/?theme=${scheme}&as=new&tg_lang=${lang}`, scheme);
         const S = await w.run(`const out = []; for (let i = 0; i < 4; i++) { out.push((() => { ${SETUP_LAYOUT} })());
-          if (i === 1) { click('[data-value=russia]'); await wait(250); }   // Step 18: Next waits for one topic
+          if (i === 1) { click('[data-value=tech_ai]'); await wait(250); }   // Step 18: Next waits for one topic
           if (i < 3) { click('[data-action=setup-next]'); await wait(250); } } return out;`);
         const ru = lang === "ru";
         check(`${width} px, ${ru ? "Russian" : "English"}, ${scheme}: the four setup steps (language first) keep the layout rules`,

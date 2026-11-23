@@ -24,7 +24,7 @@ TOPICS = [
     {"tag": "politics_conflicts", "label": {"en": "Politics & Conflicts"}, "emoji": "P", "default": True, "definition": "politics_conflicts"},
     {"tag": "economy_markets", "label": {"en": "Economy & Markets"}, "emoji": "E", "default": True, "definition": "economy"},
     {"tag": "armenia", "label": {"en": "Armenia"}, "emoji": "A", "default": True, "definition": "armenia"},
-    {"tag": "russia", "label": {"en": "Russia"}, "emoji": "R", "default": True, "definition": "russia"},
+    {"tag": "tech_ai", "label": {"en": "Technology & AI"}, "emoji": "T", "default": True, "definition": "tech_ai"},
     {"tag": "iran_war", "label": {"en": "Iran"}, "emoji": "I", "default": True, "definition": "iran"},
     {"tag": "ukraine_war", "label": {"en": "Ukraine"}, "emoji": "U", "default": True, "definition": "ukraine"},
 ]

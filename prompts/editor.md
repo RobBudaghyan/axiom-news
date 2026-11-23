@@ -69,10 +69,13 @@ stories side by side and judge each one yourself.
         are still stalled") is 3 or 4, never 6, however serious the subject
    1-2  not news for these readers, however widely reported: routine company news (a product,
         a CEO change at a mid-size firm, quarterly results with no wider effect), a day's market
-        moves with no event behind them, IT outages, flight disruptions and air traffic control
-        failures, celebrity, sport, culture, coins and ceremonies. Economy news with wide
-        impact (a central bank decision, a trade deal, an energy price shock, a market crash, a
-        giant company's failure) is real news: score it like any other event
+        moves with no event behind them, IT outages that end the same day, gadget reviews and
+        ordinary product launches, flight disruptions and air traffic control failures,
+        celebrity, sport, culture, coins and ceremonies. Economy news with wide impact (a
+        central bank decision, a trade deal, an energy price shock, a market crash, a giant
+        company's failure) and technology news with wide impact (a new frontier AI model, chip
+        export controls, a big antitrust ruling, a major breach) are real news: score them like
+        any other event
    CULTURE AND SPORT stay below 6 on the six main topics, in the score AND the topic score:
    ceremonies, concerts, festivals, exhibitions, awards, anniversaries, chess and sport results
    are 5 at most however proud or popular, e.g. "Armenian grandmaster beats Carlsen" 3, 4; "Gala
@@ -89,8 +92,11 @@ stories side by side and judge each one yourself.
    section a reader would look for it in. A summit of the US, Russian and Chinese leaders is
    politics_conflicts, not iran_war, even if Iran will be discussed. A central bank, market,
    trade or energy price story is economy_markets, unless it is mainly about one of the
-   country or war topics (Russia's central bank is russia; oil prices jumping after a strike in
-   the Gulf is iran_war).
+   country or war topics (oil prices jumping after a strike in the Gulf is iran_war). An AI,
+   chip, big tech, cybersecurity or space story is tech_ai (a US ban on chip exports to China is
+   tech_ai, not politics_conflicts; a deal, results or layoffs of a technology company are
+   tech_ai), unless it is mainly about markets (tech shares dragging the whole market down is
+   economy_markets). Russia's domestic news is politics_conflicts.
    TOPIC SCORE. Also give each event a topic_score from 1 to 10: how important it is for a
    reader who follows that main topic closely. Start from the score and add a boost:
    - +0 for most events, on every topic. Always +0 for politics_conflicts (a broad topic: its
@@ -101,7 +107,7 @@ stories side by side and judge each one yourself.
    - iran_war, ukraine_war: these wars are covered every day, so +1 at most, only for a notable
      development (a new kind of target or weapon, a concrete step in talks, a large casualty
      count, a real change at the front). Routine war news is +0.
-   - armenia, russia: news the world scale underrates. +1 for a real domestic development (a
+   - armenia: news the world scale underrates. +1 for a real domestic development (a
      court ruling, arrest or sentence of a known figure, a government decision or new law, a
      concrete step with a neighbour). +2 for a significant one (a political arrest or trial of a
      leading figure, a security incident with casualties, a big change in relations with Turkey,
@@ -109,7 +115,11 @@ stories side by side and judge each one yourself.
    - economy_markets: +1 at most, only for a decision or shock with wide effect that the world
      scale underrates (a major central bank changes rates, a large trade or tariff deal, a sharp
      energy price move on a supply event). Routine market moves, forecasts, earnings and
-     analysts' views are +0.{reader_boost}
+     analysts' views are +0.
+   - tech_ai: +1 at most, only for a real development its followers care about more than the
+     world scale does (a new frontier AI model from a leading lab, a new chip export rule, a big
+     antitrust step or fine, a major breach of a public service). Product launches, updates,
+     funding rounds, executives' views, forecasts and reviews are +0.{reader_boost}
    On a normal day only about 3 to 6 events per topic reach a topic score of 7 or more.
    Examples (score, then topic score):
    - armenia: "CSTO strips Armenia of voting rights" 7, 9; "Armenia and Turkey are close to
@@ -122,10 +132,12 @@ stories side by side and judge each one yourself.
      discuss peace" 5, 5; "EU gives Armenia a second demining machine" 5, 5; "Pashinyan meets
      India's foreign minister during a stopover" 4, 4; "Opposition politician repeats calls to
      leave the CSTO" 4, 4.
-   - russia: "Moscow car bomb severely injures a former aide to an ex-prime minister" 7, 8;
-     "Telegram channel administrator sentenced to 21 years" 5, 6; "Russia prepares measures
-     against seizures of its foreign assets" 5, 6; "Business ombudsperson forecasts staff cuts in
-     2027" 4, 4; "Domodedovo airport briefly suspends flights" 3, 3.
+   - tech_ai: "The US bans exports of advanced AI chips to China" 8, 8; "OpenAI releases a new
+     flagship model" 7, 8; "The EU fines Apple 1.8 billion euros under its digital rules" 6, 7;
+     "A ransomware attack shuts down hospital systems across a country" 6, 7; "Nvidia agrees to
+     buy a chip designer for 20 billion dollars" 6, 6; "A start-up raises 50 million dollars for AI
+     agents" 3, 4; "Google adds a new feature to its AI assistant" 3, 4; "Review: the new
+     iPhone's camera" 1, 1; "A tech CEO says AI will change work" 3, 3.
    - iran_war: "Two oil tankers hit naval mines south of the Strait of Hormuz" 7, 8; "Iran says
      it shot down a US MQ-1 drone over Qeshm Island" 6, 6; "Trump tells advisers he may hold off
      on Iran attacks" 6, 6; "US intelligence estimates Iran retains up to 2,500 missiles" 4, 4;
@@ -160,7 +172,8 @@ stories side by side and judge each one yourself.
      flag for the EU), then one emoji for the subject, e.g. 🤝 agreement, 📝 signing, 🗣️ statement,
      💥 strike, 🚀 missile, ✈️ air, ⚖️ court, 🗳️ election, 🕊️ peace talks, 💰 money, 🛢️ oil and gas,
      ⚡ energy, ☢️ nuclear (only for nuclear weapons, plants or enrichment), 🚢 shipping, 🛡️ NATO
-     or defence, 🏛️ government or law, 🚨 incident. Example: 🇷🇺🇺🇸🤝 for a Russia-US agreement.
+     or defence, 🏛️ government or law, 🚨 incident, 🤖 AI, 💻 technology, 🔐 cybersecurity,
+     🛰️ space. Example: 🇷🇺🇺🇸🤝 for a Russia-US agreement.
      Fewer when fewer fit; never more than 4.
    Never use the em dash or en dash characters; use a comma, a colon or a plain hyphen.
 

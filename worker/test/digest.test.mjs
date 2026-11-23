@@ -32,8 +32,8 @@ describe("candidate SQL (real schema)", () => {
       court: add("Armenian court case", ["armenia", "politics_conflicts"], 4,
                  { final_score: 4, topic_score: 6, main_topic: "armenia" }),          // in only for Armenia followers
       routine: add("Routine Armenia visit", ["armenia"], 6, { final_score: 4, topic_score: 5, main_topic: "armenia" }),
-      unedited9: add("Unedited 9", ["russia"], 9),                           // 9 - offset 2 = 7
-      unedited8: add("Unedited 8", ["russia"], 8),                           // 6: unedited stories have no topic path
+      unedited9: add("Unedited 9", ["tech_ai"], 9),                           // 9 - offset 2 = 7
+      unedited8: add("Unedited 8", ["tech_ai"], 8),                           // 6: unedited stories have no topic path
       edited5: add("Edited 5", ["politics_conflicts"], 9, { final_score: 5 }),
       old: add("Old", ["politics_conflicts"], 9, { final_score: 9 }, now - 25 * 3600),
       sent: add("Already sent", ["politics_conflicts"], 9, { final_score: 9 }),
@@ -54,7 +54,7 @@ describe("candidate SQL (real schema)", () => {
   });
   test("the topic path needs the main topic followed", async () => {
     const { run } = await setup();
-    assert.deepEqual(await run({ topics: '["politics_conflicts","russia"]' }), ["Unedited 9"]);   // the court case is tagged politics too
+    assert.deepEqual(await run({ topics: '["politics_conflicts","tech_ai"]' }), ["Unedited 9"]);   // the court case is tagged politics too
     assert.deepEqual(await run({ topics: '["armenia"]' }), ["Armenian court case"]);
   });
   test("since the last digest, counting a late first score (scored_at)", async () => {
@@ -128,7 +128,7 @@ describe("selection: the two-score rule", () => {
     assert.equal(t("ukraine_war", 4, 8), 5);
     assert.equal(t("iran_war", 6, 7), 7);
     assert.equal(t("armenia", 4, 9), 6);
-    assert.equal(t("russia", 5, 6), 6);
+    assert.equal(t("tech_ai", 5, 6), 6);
     assert.equal(topicScore({ final_score: 4, topic_score: 9, main_topic: "armenia" }, { ...CFG, topic_boost_max: {} }), 9);
     // a capped story drops out: the Ukraine report the editor lifted from 4 to 8 is a 5 for followers
     assert.deepEqual(pickStories([story("Ukraine report", ["ukraine_war"], 4, { topic_score: 8, main_topic: "ukraine_war" })],
@@ -138,7 +138,7 @@ describe("selection: the two-score rule", () => {
     const { db, sqlite } = fakeD1();
     const now = yerevan(14, 5);
     const r = rng(7);
-    const tags = ["politics_conflicts", "economy_markets", "armenia", "russia", "iran_war", "ukraine_war"];
+    const tags = ["politics_conflicts", "economy_markets", "tech_ai", "armenia", "iran_war", "ukraine_war"];
     for (let i = 0; i < 300; i++) {
       const main = tags[Math.floor(r() * tags.length)];
       const edited = r() < 0.85;
@@ -147,7 +147,7 @@ describe("selection: the two-score rule", () => {
         edited ? { final_score: g, topic_score: r() < 0.8 ? g + Math.floor(r() * 4) : undefined, main_topic: r() < 0.9 ? main : undefined }
                : {});
     }
-    for (const userTopics of [["armenia"], ["politics_conflicts"], ALL, ["ukraine_war", "russia"]]) {
+    for (const userTopics of [["armenia"], ["politics_conflicts"], ALL, ["ukraine_war", "tech_ai"]]) {
       for (const cfg of [CFG, { ...CFG, topic_bar: 5 }, { ...CFG, topic_needs_boost: false }, { ...CFG, topic_boost_max: {} }]) {
         const st = candidateStatement({ id: OWNER, topics: JSON.stringify(userTopics), last_digest_at: null }, now,
           { ...cfg, candidate_limit: 1000 });
@@ -164,7 +164,7 @@ describe("selection: the two-score rule", () => {
     assert.equal(storyScore({ final_score: null, importance: 9 }), 7);
     assert.equal(storyScore({ final_score: 4, importance: 9 }), 4);
     const big = story("Unedited big story", ["politics_conflicts"], null, { importance: 9 });
-    const mid = story("Unedited mid story", ["russia"], null, { importance: 8, main_topic: "russia" });
+    const mid = story("Unedited mid story", ["tech_ai"], null, { importance: 8, main_topic: "tech_ai" });
     assert.deepEqual(ids(pickStories([big, mid], ALL, CFG)), [big.id]);
   });
   test("bars are config values", () => {
@@ -192,11 +192,11 @@ describe("selection: the two-score rule", () => {
   });
   test("section: the editor's main topic when followed, else the most specific followed tag", () => {
     assert.equal(primaryTopic(["economy_markets", "ukraine_war"], ALL), "ukraine_war");
-    assert.equal(primaryTopic(["politics_conflicts", "russia"], ALL), "russia");
+    assert.equal(primaryTopic(["politics_conflicts", "tech_ai"], ALL), "tech_ai");
     assert.equal(primaryTopic(["economy_markets", "ukraine_war"], ["economy_markets"]), "economy_markets");
-    const tags = ["politics_conflicts", "russia", "iran_war"];
+    const tags = ["politics_conflicts", "tech_ai", "iran_war"];
     assert.equal(primaryTopic(tags, ALL, CONFIG.topic_specificity, "politics_conflicts"), "politics_conflicts");
-    assert.equal(primaryTopic(tags, ["russia", "iran_war"], CONFIG.topic_specificity, "politics_conflicts"), "iran_war");
+    assert.equal(primaryTopic(tags, ["tech_ai", "iran_war"], CONFIG.topic_specificity, "politics_conflicts"), "iran_war");
     const summit = story("Trump, Putin and Xi to meet", tags, 8, { main_topic: "politics_conflicts" });
     assert.equal(pickStories([summit], ALL, CFG)[0].primary, "politics_conflicts");
   });
@@ -257,7 +257,7 @@ describe("length cut: ONE message under the fold limit", () => {
   });
   test("on equal relevance, the story from the most crowded section goes first (the old cap's job)", () => {
     const ua = [0, 1, 2].map((i) => long(`Ukraine ${i}`, ["ukraine_war"], 7));
-    const ru = [0, 1].map((i) => long(`Russia ${i}`, ["russia"], 7));
+    const ru = [0, 1].map((i) => long(`Russia ${i}`, ["tech_ai"], 7));
     const picked = pickStories([...ua, ...ru], ALL, CFG);
     const full = visibleLength(buildMessage(picked, OPTS, CFG).text);
     const { cut } = fitToLength(picked, OPTS, { ...CFG, message_char_limit: full - 50 });

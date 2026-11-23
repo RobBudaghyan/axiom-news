@@ -94,8 +94,8 @@ class TestMatch(unittest.TestCase):
         self.assertFalse(r.allows("c1", "Japanese steel"))
 
     def test_fallback_main_topic_is_the_most_specific(self):
-        kept, main, moved = self.rule.apply(["politics_conflicts", "russia", "c1"], "c1", "Putin meets Xi")
-        self.assertEqual((kept, main, moved), (["politics_conflicts", "russia"], "russia", True))
+        kept, main, moved = self.rule.apply(["politics_conflicts", "tech_ai", "c1"], "c1", "Putin meets Xi")
+        self.assertEqual((kept, main, moved), (["politics_conflicts", "tech_ai"], "tech_ai", True))
         self.assertEqual(self.rule.apply(["c1"], "c1", "Canada and China"), ([], None, True))
         self.assertEqual(self.rule.apply(["c1"], "c1", "Japan votes"), (["c1"], "c1", False))
 
@@ -218,7 +218,7 @@ class TestInvariant(unittest.TestCase):
             ids, answer = [], {"events": []}
             for _ in range(50):
                 text = " ".join(rnd.choice(words) for _ in range(5))
-                tags = rnd.sample(["politics_conflicts", "russia", "c1", "c2"], rnd.randint(1, 3))
+                tags = rnd.sample(["politics_conflicts", "tech_ai", "c1", "c2"], rnd.randint(1, 3))
                 sid = story(db, text, tags, imp=5)
                 ids.append(sid)
                 head = " ".join(rnd.choice(words) for _ in range(4))

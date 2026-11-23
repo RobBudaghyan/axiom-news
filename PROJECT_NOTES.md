@@ -16,8 +16,8 @@ bot @axiom_news_bot at the end.
   a strict final score 1-10, the main topic, a one-sentence headline, a 1-3 sentence description
   (only facts from the articles) and 2-3 emojis. If it fails, digests use the first-pass data.
   Step 8: it also gives a **topic score** (for followers of the main topic: the score plus a
-  boost, capped in code at 0 for Politics & Conflicts, 1 for Economy & Markets and the two wars, 2
-  for Armenia and Russia), sees up to 90 new stories per call, and makes a second call on a backlog.
+  boost, capped in code at 0 for Politics & Conflicts, 1 for Economy & Markets, Technology & AI and
+  the two wars, 2 for Armenia), sees up to 90 new stories per call, and makes a second call on a backlog.
 - **Digests per user** at chosen local times (on the hour, 06:00-23:00, 1 to 5; defaults
   09:00/14:00/20:00), time zone from the phone. **No fixed count (Step 8):** a story is in if its
   final score is 7+, or its main topic is followed and its topic score is 7+ (Step 16; 6 before)
@@ -26,9 +26,10 @@ bot @axiom_news_bot at the end.
   folded behind "Show more"); if longer, the lowest-ranked stories are cut, keeping each followed
   topic's best story. Building a digest is a database filter with no AI. The same story is never sent
   to a user twice; if nothing qualifies, a short "quiet period" note.
-- **Topics (Step 15):** Politics & Conflicts (Политика и конфликты; the merge of Politics and Wars &
-  Conflicts), Economy & Markets (Экономика и рынки, new), Armenia, Russia, Iran War (Война в Иране),
-  Ukraine War (Война на Украине). All six on for a new user.
+- **Topics (Step 15, Step 19):** Politics & Conflicts (Политика и конфликты; the merge of Politics and
+  Wars & Conflicts), Economy & Markets (Экономика и рынки), Technology & AI (Технологии и ИИ, 💻, Step
+  19), Armenia, Iran War (Война в Иране), Ukraine War (Война на Украине). All six on for a new user.
+  Russia was removed as a main topic in Step 19 (owner); its stories went to their best remaining topic.
 - **Reader languages (Step 9):** English (default) and Russian; Armenian and French are built and
   approved on quality but hidden (`config/languages.json`). Everything a reader sees is in their
   language: digest text, greeting, headings, quiet note, bot replies, menu button, commands, the
@@ -262,6 +263,9 @@ bot @axiom_news_bot at the end.
 | 2026-11-19 | The description names reputable outlets without a count; Help says "about 100 outlets"; no "a few times a day", "English or Russian", News.am or RFE/RL in user texts (owner, Step 17b) | 123 enabled feeds come from 98 outlets, so "120+ sources" overstated; the bot sends at the times the reader chooses, and more languages may come |
 | 2026-11-19 | BotFather splash icon is one SVG path (`branding/out/splash-icon.svg`, boolean-flattened logo, evenodd) (Step 17b) | BotFather refused an SVG with several shapes |
 | 2026-11-19 | Branding visuals built in code (HTML/SVG/CSS, headless Edge, ffmpeg), the logo as outlines from Montserrat ExtraBold fitted to the old 320 px photo (Step 17b) | no AI images or stock art (owner); the old logo existed only as a soft JPEG |
+| 2026-11-23 | Technology & AI (`tech_ai`) is a main topic, Russia is not; existing users got tech_ai; Russia stories re-tagged (owner, Step 19) | the owner's choice of topics; Russian sources stay for Politics, Ukraine War and Russian readers |
+| 2026-11-23 | Eight tech feeds; Bloomberg tech capped at 4 a run; The Verge, Wired (all), TechCrunch, The Register, CNBC tech, BBC tech and The Economist science left out (Step 19) | quality and noise: the left-out ones are mostly reviews, deals, start-up rounds or overlap; about 100 to 120 items a weekday, under 1% of free D1 writes |
+| 2026-11-23 | tech_ai boost cap 1, more specific than Economy & Markets (Step 19) | +2 would lift routine launches; a chip export ban is a tech story first |
 
 ## Current status
 - **Step 1 done:** repo, docs, topics, prompt, lessons, 116 verified feeds.

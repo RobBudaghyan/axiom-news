@@ -232,7 +232,7 @@ describe("Step 17: the sample digest is a taste", () => {
   test("at most 2 stories a topic and 8 in all, best first; the rest is not marked sent", async () => {
     const { binding, sqlite } = fakeD1();
     const now = nowS();
-    const topics = ["politics_conflicts", "economy_markets", "armenia", "russia", "iran_war", "ukraine_war"];
+    const topics = ["politics_conflicts", "economy_markets", "tech_ai", "armenia", "iran_war", "ukraine_war"];
     const ids = [];
     for (const [ti, tag] of topics.entries()) {
       for (let k = 0; k < 3; k++) {

@@ -22,8 +22,8 @@
   "topics": {
     "politics_conflicts": "Politique et conflits",
     "economy_markets": "Économie et marchés",
+    "tech_ai": "Technologie et IA",
     "armenia": "Arménie",
-    "russia": "Russie",
     "iran_war": "Guerre en Iran",
     "ukraine_war": "Guerre en Ukraine"
   },
@@ -58,7 +58,7 @@
     "welcome_setup": "👋 Bienvenue sur Axiom News.\n\n🌍 Axiom News résume l'actualité importante d'une centaine de médias fiables.\n📰 Un court résumé de l'actualité importante, aux heures de votre choix.\n⚙️ Configuration en 20 secondes environ : langue, sujets, heures.\n\n👇 Touchez <b>Configurer</b> pour commencer.",
     "setup_button": "⚙️ Configurer",
     "reminder": "👋 Votre résumé n'est pas encore configuré.\n⚙️ Cela prend environ 20 secondes.\n👇 Touchez <b>Configurer</b> pour commencer.",
-    "description": "📰 Un court résumé de l'actualité importante, aux heures de votre choix.\n\n🌍 Des sources reconnues, dont le Financial Times, The Economist, Bloomberg, The Wall Street Journal et Al Jazeera\n🗂 Politique, Économie, Arménie, Russie, Iran, Ukraine, ainsi que vos propres sujets (par exemple, Formule 1)\n🌐 Disponible en plusieurs langues\n\n🆓 Gratuit, sans publicité",
+    "description": "📰 Un court résumé de l'actualité importante, aux heures de votre choix.\n\n🌍 Des sources reconnues, dont le Financial Times, The Economist, Bloomberg, The Wall Street Journal et Al Jazeera\n🗂 Politique, Économie, Technologie, Arménie, Iran, Ukraine, ainsi que vos propres sujets (par exemple, Formule 1)\n🌐 Disponible en plusieurs langues\n\n🆓 Gratuit, sans publicité",
     "short_description": "📰 De courts résumés de l'actualité importante, issus de sources reconnues, aux heures de votre choix."
   },
   "commands": {
