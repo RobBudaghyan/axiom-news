@@ -1,5 +1,5 @@
 // Writes branding/marketing/review.html: every asset of the kit on one page (videos play, file sizes
-// shown), the Story videos as a grid (rows = lengths, columns = looks) with an English/Russian switch.
+// shown), the Story videos as a grid (rows = lengths, columns = looks) with a language switch (Step 19: English, Russian, French, Armenian).
 //   node branding/marketing/source/make-review.mjs        (run again after re-rendering)
 import { existsSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -22,7 +22,8 @@ const cell = (rel, kind, label) => {
 };
 
 let story = "";
-for (const lang of ["en", "ru"]) {
+const LANGS = ["en", "ru", "fr", "hy"];
+for (const lang of LANGS) {
   story += `<div class="lang-${lang}"><div class="sgrid"><div></div>${LOOKS.map((l) => `<div class="colh">${l}</div>`).join("")}`;
   for (const len of LENGTHS) {
     story += `<div class="rowh">${Number(len)} s</div>`;
@@ -57,7 +58,8 @@ const html = `<!doctype html>
   .switch { display: inline-flex; background: var(--card); border-radius: 12px; padding: 4px; gap: 4px; }
   .switch button { border: 0; font: inherit; font-weight: 600; padding: 8px 16px; border-radius: 9px; background: none; color: var(--text); cursor: pointer; }
   .switch button.on { background: var(--red); color: #fff; }
-  body.en .lang-ru, body.ru .lang-en { display: none; }
+  body.en [class^=lang-]:not(.lang-en), body.ru [class^=lang-]:not(.lang-ru), body.fr [class^=lang-]:not(.lang-fr),
+  body.hy [class^=lang-]:not(.lang-hy) { display: none; }
   .sgrid { display: grid; grid-template-columns: 56px repeat(3, minmax(0, 1fr)); gap: 14px; align-items: start; max-width: 720px; }
   .colh { font-weight: 600; text-transform: capitalize; text-align: center; color: var(--text-2); }
   .rowh { font-weight: 600; padding-top: 40%; color: var(--text-2); }
@@ -74,7 +76,7 @@ const html = `<!doctype html>
 <body class="en">
 <main>
 <header><h1>Axiom News marketing kit</h1>
-<div class="switch"><button data-l="en" class="on">English</button><button data-l="ru">Русский</button></div></header>
+<div class="switch"><button data-l="en" class="on">English</button><button data-l="ru">Русский</button><button data-l="fr">Français</button><button data-l="hy">Հայերեն</button></div></header>
 <p class="note">Everything here is rendered from code in <code>source/</code>. Videos play while on screen; click any item to open the file itself. Details and captions: README.md.</p>
 
 <h2>Instagram Story videos</h2>
@@ -83,11 +85,10 @@ ${story}
 
 <h2>Instagram feed</h2>
 <p class="note">1080 x 1350. The single post, then the 4-slide carousel.</p>
-<div class="lang-en"><div class="row">${feed("en")}</div></div>
-<div class="lang-ru"><div class="row">${feed("ru")}</div></div>
+${LANGS.map((l) => `<div class="lang-${l}"><div class="row">${feed(l)}</div></div>`).join("\n")}
 
-<h2>How it works (for the bot)</h2>
-<p class="note">1280 x 720, 8 s, loops, no words (one file for every language).</p>
+<h2>Welcome video (how it works)</h2>
+<p class="note">1280 x 720, 11 s: the logo, then how it works; loops, no words (one file for every language). Installed as the bot's welcome video (worker/public/media/welcome.mp4).</p>
 <div class="wide">${cell("bot/axiom-how-it-works-1280x720.mp4", "video", "how it works")}</div>
 
 <h2>What's new card</h2>

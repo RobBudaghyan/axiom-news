@@ -85,6 +85,10 @@ const TEXT = {
         next: "Next digest", today: "Today at", name: "Axiom News", link: "t.me/axiom_news_bot" },
   ru: { topics: "Ваши темы.", times: "Ваше время.", lang: "Ваш язык.", free: "Бесплатно", mine: "Мои темы",
         next: "Следующая сводка", today: "Сегодня в", name: "Axiom News", link: "t.me/axiom_news_bot" },
+  fr: { topics: "Vos sujets.", times: "Vos heures.", lang: "Votre langue.", free: "Gratuit", mine: "Mes sujets",
+        next: "Prochain résumé", today: "Aujourd'hui à", name: "Axiom News", link: "t.me/axiom_news_bot" },
+  hy: { topics: "Ձեր թեմաները։", times: "Ձեր ժամերը։", lang: "Ձեր լեզուն։", free: "Անվճար", mine: "Իմ թեմաները",
+        next: "Հաջորդ ամփոփումը", today: "Այսօր, ժամը", name: "Axiom News", link: "t.me/axiom_news_bot" },
 };
 const CLOCK = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.2v5l3.2 2"/></svg>`;
 

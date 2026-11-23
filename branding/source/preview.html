@@ -42,9 +42,15 @@
     ru: { setup: ["Настройка за 20 секунд", "Язык, темы и время доставки"],
           settings: ["Ваши темы и время", "Всё сохраняется сразу"],
           digest: ["Короткая сводка важных новостей", "В выбранное вами время, в Telegram"] },
+    fr: { setup: ["Prêt en 20 secondes environ", "Langue, sujets et heures d'envoi"],
+          settings: ["Vos sujets et vos heures", "Chaque changement est enregistré aussitôt"],
+          digest: ["Un court résumé de l'actualité importante", "Aux heures de votre choix, dans Telegram"] },
+    hy: { setup: ["Կարգավորում՝ մոտ 20 վայրկյանում", "Լեզու, թեմաներ և առաքման ժամեր"],
+          settings: ["Ձեր թեմաներն ու ժամերը", "Ամեն փոփոխություն պահվում է անմիջապես"],
+          digest: ["Կարևոր նորությունների կարճ ամփոփում", "Ձեր ընտրած ժամերին, Telegram-ում"] },
   };
   // how much of each screenshot to show (CSS px of the 390 x 844 screen, from the top)
-  const CROP = { setup: 228, topics: 395, settings: 690 };
+  const CROP = { setup: 206, topics: 384, settings: 690 };   // Step 19: the 2x2 language grid
   window.setup = async ({ lang, shot }) => {
     document.documentElement.lang = lang;
     const [h, sub] = TEXT[lang][shot];

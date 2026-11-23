@@ -58,7 +58,7 @@
     "welcome_setup": "👋 Bienvenue sur Axiom News.\n\n🌍 Axiom News résume l'actualité importante d'une centaine de médias fiables.\n📰 Un court résumé de l'actualité importante, aux heures de votre choix.\n⚙️ Configuration en 20 secondes environ : langue, sujets, heures.\n\n👇 Touchez <b>Configurer</b> pour commencer.",
     "setup_button": "⚙️ Configurer",
     "reminder": "👋 Votre résumé n'est pas encore configuré.\n⚙️ Cela prend environ 20 secondes.\n👇 Touchez <b>Configurer</b> pour commencer.",
-    "description": "📰 Un court résumé de l'actualité importante, aux heures de votre choix.\n\n🌍 Des sources reconnues, dont le Financial Times, The Economist, Bloomberg, The Wall Street Journal et Al Jazeera\n🗂 Politique, Économie, Technologie, Arménie, Iran, Ukraine, ainsi que vos propres sujets (par exemple, Formule 1)\n🌐 Disponible en plusieurs langues\n\n🆓 Gratuit, sans publicité",
+    "description": "📰 Un court résumé de l'actualité importante, aux heures de votre choix.\n\n🌍 Des sources reconnues, dont le Financial Times, The Economist, Bloomberg, The Wall Street Journal et Al Jazeera\n🗂 Politique, Économie, Technologie et IA, Arménie, Iran, Ukraine, ainsi que vos propres sujets (par exemple, Bourse ou Formule 1)\n🌐 Disponible en plusieurs langues\n\n🆓 Gratuit, sans publicité",
     "short_description": "📰 De courts résumés de l'actualité importante, issus de sources reconnues, aux heures de votre choix."
   },
   "commands": {
@@ -175,7 +175,7 @@
     "help_stories_h": "🤖 Le choix des actualités",
     "help_stories": "Environ 100 médias lus chaque heure.\nUne IA regroupe et note les articles.\nVous recevez le plus important.\nJamais deux fois la même.",
     "help_topics_h": "🗂️ Sujets",
-    "help_topics": "Activez ou désactivez chaque sujet.\nAjoutez jusqu'à 3 sujets à vous.\nUn sujet désactivé n'envoie rien.\nTout désactivé : aucun résumé.",
+    "help_topics": "Six sujets principaux, chacun activable.\nAjoutez jusqu'à 3 sujets à vous.\nUn sujet désactivé n'envoie rien.\nTout désactivé : aucun résumé.",
     "help_times_h": "🕘 Heures des résumés",
     "help_times": "De 1 à 5 fois par jour.\nElles suivent le fuseau du téléphone.",
     "help_lang_h": "🌍 Langue",
@@ -202,7 +202,7 @@
     "setup_sample": "📬 Un exemple de résumé arrive bientôt.\nIl contient l'actualité importante des dernières 24 heures.",
     "all_off": "Tous les sujets sont désactivés",
     "all_off_hint": "Activez-en un pour recevoir des résumés.",
-    "add_topic_hint": "par ex. Formule 1, Japon, IA",
+    "add_topic_hint": "par ex. Bourse, Formule 1, Japon",
     "setup_lang": "🌍 Langue",
     "help_feedback_h": "💬 Avis",
     "help_feedback": "Une idée, un problème ?\nTouchez Envoyer un avis.\nNous lisons chaque message.",

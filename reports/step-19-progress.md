@@ -57,8 +57,38 @@ migration must change together.
   can be undone. Restore steps in `OWNER_GUIDE.md` (new) and `docs/ARCHITECTURE.md`. Worker 359 tests.
   **At ship:** apply the schema to production (`venv/Scripts/python scripts/apply_schema.py`).
 
+- **Part 6: branding (2026-11-23).** Texts in four languages: the bot description names Politics, Economy,
+  Technology & AI, Armenia, Iran, Ukraine and "custom topics of your own (e.g. Stocks or Formula 1)", keeps
+  "Available in several languages", no Russia; Help "Topics" opens with the six main topics; the Add a topic
+  hint is "e.g. Stocks, Formula 1, Japan". Re-rendered from fresh staging data (French and Armenian
+  translations made once with the job's Translator on staging, 2 AI calls) and fresh Mini App shots: profile
+  previews `branding/out/preview-{en,ru,fr,hy}-{setup,settings,digest}.png` (setup crop fixed for the 2x2
+  grid), share cards `branding/out/share-{en,ru,fr,hy}-1080x{1080,1920}.png`, all 60 Story videos
+  `branding/marketing/story/<len>/<look>/axiom-story-*-{en,ru,fr,hy}.mp4` (topics with Technology & AI,
+  four flags 2x2), feed post and carousel `branding/marketing/feed/*-{en,ru,fr,hy}-*.png`, the What's new
+  card (now announcing Technology & AI and the two languages), `review.html` (four-language switch) and the
+  README captions (French and Armenian added). The kits now fall back to Segoe UI for Armenian. Click-through
+  248 of 248; 33 of 33 rules broken on purpose caught (`scripts/step19_mutations.py`; three weak tests were
+  strengthened first).
+
+### What the owner must redo by hand (everything else is automatic)
+1. **BotFather > your bot > Edit Mini App (Main Mini App) > Previews**, one set per language (en, ru, fr,
+   hy): replace the old images with `branding/out/preview-<lang>-setup.png`,
+   `branding/out/preview-<lang>-settings.png`, `branding/out/preview-<lang>-digest.png`. French and
+   Armenian are new sets.
+2. Nothing for the description and about: `setup-bot.mjs` sets them in all four languages (run at ship).
+   The description picture (`branding/out/description-640x360.mp4`) and the profile photo show only the
+   logo, so they stay.
+3. **Phone / Instagram:** post or schedule from `branding/marketing/` (open `review.html`): Stories
+   `story/...-<lang>.mp4`, feed `feed/axiom-post-<lang>-1080x1350.png` and the carousel
+   `feed/axiom-carousel-<lang>-<1..4>-1080x1350.png`, the What's new card `whats-new/whats-new-1080x1350.png`
+   or `-1080x1920.png`; captions in `branding/marketing/README.md`. Share cards to send to friends:
+   `branding/out/share-<lang>-1080x1080.png` and `-1080x1920.png`.
+4. Confirm the Armenian name of Politics & Conflicts: now just "Քաղաքականություն" (the long form did not
+   fit a phone row).
+
 ## Next
-- Part 6: branding. Part 7: ship and check.
+- Part 7: ship and check.
 
 ## Ship (owner pre-approved "ship it" for the whole step), in this order
 1. Merge `step-19` into `main` and push (the job's new topics, prompts and feeds).
@@ -70,3 +100,8 @@ migration must change together.
 
 ## Waiting on the owner
 - The rest of the Step 19 brief (Parts 3 to 7, and the end of Part 2's examples).
+
+## Baseline before shipping (production, read-only, 2026-11-23, last 24 h)
+24 runs, average 105 s (longest 353 s); job D1 writes 22,720, reads 575,294; 3,201 new items; tokens
+1,611,328 in, 470,638 out; 148 job AI calls. Account D1 today (UTC, so far, staging tests included): 611k
+reads, 31.3k writes; yesterday 593k reads, 17.9k writes.

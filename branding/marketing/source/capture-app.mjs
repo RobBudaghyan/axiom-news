@@ -13,10 +13,10 @@ const reset = () => fetch(`${BASE}/__reset`, { method: "POST" });
 const ONLY = process.argv[2];
 const SHOTS = [];
 for (const theme of ["light", "dark"]) {
-  SHOTS.push([`settings-en-${theme}`, `theme=${theme}&as=friend`, ""]);
-  SHOTS.push([`settings-ru-${theme}`, `theme=${theme}&as=friend`, "click('[data-action=lang][data-value=ru]'); await wait(900);"]);
-  SHOTS.push([`setup-en-${theme}`, `theme=${theme}&as=new&tg_lang=en`, ""]);
-  SHOTS.push([`setup-ru-${theme}`, `theme=${theme}&as=new&tg_lang=ru`, ""]);
+  for (const l of ["en", "ru", "fr", "hy"]) {   // Step 19: all four languages
+    SHOTS.push([`settings-${l}-${theme}`, `theme=${theme}&as=friend`, l === "en" ? "" : `click('[data-action=lang][data-value=${l}]'); await wait(900);`]);
+    SHOTS.push([`setup-${l}-${theme}`, `theme=${theme}&as=new&tg_lang=${l}`, ""]);
+  }
 }
 mkdirSync(OUT, { recursive: true });
 const b = await openBrowser({ width: 390, height: 844, scale: 3, port: 9347 });

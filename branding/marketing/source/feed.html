@@ -31,12 +31,20 @@
   const COPY = {
     en: { line: "A short digest of the important news, at the times you choose.",
           get: "What you get.", getSub: "A short digest of the important news, from outlets like the Financial Times, The Economist and Bloomberg.",
-          topicsSub: "Six main topics, and up to three of your own.", hint: "e.g. Formula 1, Japan, AI",
+          topicsSub: "Six main topics, and up to three of your own.", hint: "e.g. Stocks, Formula 1, Japan",
           timesSub: "From 06:00 to 23:00, up to five a day.", langs: "Available in several languages." },
     ru: { line: "Короткая сводка важных новостей в выбранное вами время.",
           get: "Что вы получаете.", getSub: "Короткая сводка важных новостей из изданий вроде Financial Times, The Economist и Bloomberg.",
-          topicsSub: "Шесть основных тем и до трёх своих.", hint: "например: Формула-1, Япония, ИИ",
+          topicsSub: "Шесть основных тем и до трёх своих.", hint: "например: Акции, Формула-1, Япония",
           timesSub: "С 06:00 до 23:00, до пяти раз в день.", langs: "Доступно на нескольких языках." },
+    fr: { line: "Un court résumé de l'actualité importante, aux heures de votre choix.",
+          get: "Ce que vous recevez.", getSub: "Un court résumé de l'actualité importante, de médias comme le Financial Times, The Economist et Bloomberg.",
+          topicsSub: "Six sujets principaux, et jusqu'à trois à vous.", hint: "par ex. Bourse, Formule 1, Japon",
+          timesSub: "De 06:00 à 23:00, jusqu'à cinq fois par jour.", langs: "Disponible en plusieurs langues." },
+    hy: { line: "Կարևոր նորությունների կարճ ամփոփում՝ ձեր ընտրած ժամերին։",
+          get: "Ինչ եք ստանում։", getSub: "Կարևոր նորությունների կարճ ամփոփում՝ Financial Times-ի, The Economist-ի և Bloomberg-ի նման աղբյուրներից։",
+          topicsSub: "Վեց հիմնական թեմա և մինչև երեք ձերը։", hint: "օրինակ՝ Բաժնետոմսեր, Ֆորմուլա 1, Ճապոնիա",
+          timesSub: "06:00-ից 23:00, օրական մինչև հինգ անգամ։", langs: "Հասանելի է մի քանի լեզվով։" },
   };
   const page = $("#page");
   const SLIDES = {
@@ -65,18 +73,18 @@
         `<p class="abs label" style="left:60px;top:519px">${T.mine}</p>` +
         `<div class="abs group" style="left:44px;right:44px;top:542px">${topicRow(CUSTOM, L)}</div>` +
         `<p class="abs hint" style="left:60px;top:610px;margin:0">${C.hint}</p>`;
-      $$(".row").forEach((r, i) => setSwitch(r, [1, 1, 1, 0, 0, 1, 1][i]));
+      $$(".row").forEach((r, i) => setSwitch(r, [1, 1, 1, 1, 0, 0, 1][i]));
     },
     async 4(L, T, C) {
       document.body.className = "look-light";
       page.innerHTML = `<h1 class="abs head h">${T.times}</h1><p class="abs sub">${C.timesSub}</p>` +
         `<div class="abs grid" style="left:44px;right:44px;top:156px">${TIMES.map((x) => btn(x)).join("")}</div>` +
         `<p class="abs label" style="left:46px;top:342px;font-size:15px;color:var(--fg);font-weight:500">${C.langs}</p>` +
-        `<div class="abs langs" style="left:44px;right:44px;top:372px">${LANGS.map(([f, n]) => btn(`${emo(f)}<span>${n}</span>`)).join("")}</div>` +
-        `<div class="abs" style="left:0;right:0;top:494px;display:flex;flex-direction:column;align-items:center;gap:12px">` +
+        `<div class="abs langs" style="left:44px;right:44px;top:368px">${LANGS.map(([f, n]) => btn(`${emo(f)}<span>${n}</span>`)).join("")}</div>` +
+        `<div class="abs" style="left:0;right:0;top:500px;display:flex;flex-direction:column;align-items:center;gap:12px">` +
         `<div style="width:132px">${lockupSVG()}</div><span class="link" style="margin-top:6px">${T.link}</span><span class="pill">${T.free}</span></div>`;
       $$(".grid .btn").forEach((b, i) => setBtn(b, [3, 8, 14].includes(i) ? 1 : 0));
-      $$(".langs .btn").forEach((b, i) => setBtn(b, (L === "en" ? 0 : 1) === i ? 1 : 0));
+      $$(".langs .btn").forEach((b, i) => setBtn(b, LANGS.findIndex((x) => x[2] === L) === i ? 1 : 0));
     },
   };
   window.setup = async ({ lang, slide }) => {

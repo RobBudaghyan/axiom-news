@@ -43,8 +43,8 @@ After changing the welcome animation, copy `out/welcome-1280x720.mp4` to `worker
 | `profile-photo-1280.png` / `-640.png` | BotFather, Edit Botpic |
 | `splash-icon.svg` (`splash-icon-512.png` to look at) | BotFather's Mini App loading screen (one path, as BotFather requires) |
 | `loading-icon.svg` / `-512.png` / `-192.png` | The rounded logo with several shapes (BotFather refuses it for the splash; fine elsewhere) |
-| `preview-{en,ru}-{setup,settings,digest}.png` | The bot profile's Main Mini App previews |
-| `share-{en,ru}-1080x1080.png`, `-1080x1920.png` | For the owner to share |
+| `preview-{en,ru,fr,hy}-{setup,settings,digest}.png` | The bot profile's Main Mini App previews |
+| `share-{en,ru,fr,hy}-1080x1080.png`, `-1080x1920.png` | For the owner to share |
 | `frames/` | Checks: logo against the original, avatar sizes, motion contact sheets, loading screen |
 
 Credits: Montserrat and Inter (SIL Open Font License), Twemoji graphics (CC BY 4.0, used only in the

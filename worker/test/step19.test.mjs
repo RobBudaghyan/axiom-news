@@ -23,7 +23,10 @@ describe("Step 19: languages", () => {
       for (const key of ["bot.menu_button", "bot.description", "bot.short_description"]) {
         const v = t(lang, key);
         assert.ok(v && !/[–—]/.test(v), `${lang} ${key}`);
-        if (lang !== "en") assert.notEqual(v, t("en", key), `${lang} ${key} is translated`);
+        if (lang !== "en") {
+          assert.notEqual(v, t("en", key), `${lang} ${key} is translated`);
+          assert.doesNotMatch(v.replace(/Axiom News|Financial Times|The Economist|The Wall Street Journal/g, ""),/\b(digests?|news|short|important|the|times|choose)\b/i, `${lang} ${key}: English words`);
+        }
       }
       assert.ok(t(lang, "bot.description").length <= 512, lang);
       assert.ok(t(lang, "bot.short_description").length <= 120, lang);
@@ -83,6 +86,8 @@ describe("Step 19: alerts only when action is needed", () => {
   });
 
   test("Google silent for a whole day with active custom topics; none when no topic is active", () => {
+    assert.equal(GOOGLE_SILENT_S, 24 * 3600, "a whole day");
+    assert.deepEqual(kinds([[], [{ topics: 2, last: now - 3 * 3600 }]]), [], "3 hours of silence is normal (429s)");
     assert.deepEqual(kinds([[], [{ topics: 2, last: now - GOOGLE_SILENT_S + 60 }]]), []);
     assert.deepEqual(kinds([[], [{ topics: 2, last: now - GOOGLE_SILENT_S }]]), ["google_blocked"]);
     assert.deepEqual(kinds([[], [{ topics: 0, last: now - 3 * 86400 }]]), []);

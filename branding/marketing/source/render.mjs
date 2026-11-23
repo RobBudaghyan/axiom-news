@@ -53,7 +53,7 @@ function saveChecks(name, stills, n) {
 const LENGTHS = { "05": 5, "08": 8, "10": 10, "15": 15, "20": 20 };
 function storyList(filters) {
   const list = [];
-  for (const lang of ["en", "ru"]) for (const len of Object.keys(LENGTHS)) for (const look of ["red", "light", "dark"]) {
+  for (const lang of ["en", "ru", "fr", "hy"]) for (const len of Object.keys(LENGTHS)) for (const look of ["red", "light", "dark"]) {
     const tags = [lang, len, `${len}s`, look];
     if (filters.every((f) => tags.includes(f))) list.push({ len, look, lang });
   }
@@ -92,7 +92,7 @@ async function shot(b, page, query, file, w, h) {
 }
 async function feed(b, filters) {
   const out = [];
-  for (const lang of ["en", "ru"]) {
+  for (const lang of ["en", "ru", "fr", "hy"]) {
     if (filters.length && !filters.includes(lang)) continue;
     out.push(await shot(b, "feed.html", { lang, slide: "post" }, join(KIT, "feed", `axiom-post-${lang}-1080x1350.png`), 540, 675));
     for (const s of [1, 2, 3, 4]) {

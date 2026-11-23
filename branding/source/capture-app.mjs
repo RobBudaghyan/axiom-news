@@ -12,14 +12,13 @@ const OUT = fileURLToPath(new URL("./shots/", import.meta.url));
 const reset = () => fetch(`${BASE}/__reset`, { method: "POST" });
 
 // name, query, steps in the page before the shot
-const SHOTS = [
-  ["setup-en", "theme=light&as=new&tg_lang=en", ""],
-  ["setup-ru", "theme=light&as=new&tg_lang=ru", ""],
-  ["topics-en", "theme=light&as=new&tg_lang=en", "click('[data-action=setup-next]'); await wait(500);"],
-  ["topics-ru", "theme=light&as=new&tg_lang=ru", "click('[data-action=setup-next]'); await wait(500);"],
-  ["settings-en", "theme=light&as=friend", ""],
-  ["settings-ru", "theme=light&as=friend", "click('[data-action=lang][data-value=ru]'); await wait(900);"],
-];
+// Step 19: all four languages
+const LANGS = ["en", "ru", "fr", "hy"];
+const SHOTS = LANGS.flatMap((l) => [
+  [`setup-${l}`, `theme=light&as=new&tg_lang=${l}`, ""],
+  [`topics-${l}`, `theme=light&as=new&tg_lang=${l}`, "click('[data-action=setup-next]'); await wait(500);"],
+  [`settings-${l}`, "theme=light&as=friend", l === "en" ? "" : `click('[data-action=lang][data-value=${l}]'); await wait(900);`],
+]);
 
 mkdirSync(OUT, { recursive: true });
 const b = await openBrowser({ width: 390, height: 844, scale: 3, port: 9345 });

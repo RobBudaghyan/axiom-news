@@ -137,7 +137,7 @@ const JOBS = {
     await video(b, "anim.html", "welcome-1280x720.mp4", { width: 640, height: 360, scale: 2, seconds: 2, crf: 20, query: { short: true } });
   },
   async cards(b) {
-    for (const lang of ["en", "ru"]) {
+    for (const lang of ["en", "ru", "fr", "hy"]) {   // Step 19: four languages
       await still(b, "card.html", `share-${lang}-1080x1080.png`, 540, 540, 2, { query: { lang, shape: "square" } });
       await still(b, "card.html", `share-${lang}-1080x1920.png`, 540, 960, 2, { query: { lang, shape: "story" } });
     }
@@ -149,7 +149,7 @@ const JOBS = {
     }
   },
   async previews(b) {
-    for (const lang of ["en", "ru"]) {
+    for (const lang of ["en", "ru", "fr", "hy"]) {   // Step 19: four languages
       for (const shot of ["setup", "settings", "digest"]) {
         await still(b, "preview.html", `preview-${lang}-${shot}.png`, 540, 960, 2, { query: { lang, shot } });
       }

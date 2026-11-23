@@ -51,6 +51,9 @@ class MainTopics(unittest.TestCase):
         line = line[:line.index("\n   - ", 5)]
         topic_scores = {int(m) for m in re.findall(r'" \d+, (\d+)', line)}
         self.assertTrue({4, 6, 8} <= topic_scores, topic_scores)
+        # the anchor examples themselves: an 8 (chip export ban), a 6 (a big chip deal), a 4 (a small funding round)
+        for anchor in ('advanced AI chips to China" 8, 8;', 'chip designer for 20 billion dollars" 6, 6;', 'for AI\n     agents" 3, 4;'):
+            self.assertIn(anchor, line)
         self.assertIn("Russia's domestic news is politics_conflicts", text)
         self.assertNotIn("armenia, russia", text)
 

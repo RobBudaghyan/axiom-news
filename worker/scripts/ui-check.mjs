@@ -196,8 +196,8 @@ try {
   r = await b.run(`const h = document.querySelector('#my-topics #topic-hint'); const card = document.querySelector('#my-topics .group');
     return { text: h && h.textContent, after: h && h.previousElementSibling === card, font: h && getComputedStyle(h).fontSize,
       n: document.querySelectorAll('#topic-hint').length };`);
-  check("Step 16: one small hint line under Add a topic: 'e.g. Formula 1, Japan, AI' (13 px)",
-    r.text === "e.g. Formula 1, Japan, AI" && r.after && r.font === "13px" && r.n === 1, JSON.stringify(r));
+  check("Step 16: one small hint line under Add a topic: 'e.g. Stocks, Formula 1, Japan' (Step 19) (13 px)",
+    r.text === "e.g. Stocks, Formula 1, Japan" && r.after && r.font === "13px" && r.n === 1, JSON.stringify(r));
   await b.run("document.activeElement.blur();");
   r = await b.run(`${MY} const i = document.querySelector('#topic-input'); i.value = 'Col'; i.dispatchEvent(new Event('input', { bubbles: true }));
     const shown = getComputedStyle(document.querySelector('.add-go')).display, word = text('.add-go');
@@ -467,7 +467,7 @@ for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
           M.n === 2 && M.head === (ru ? "Мои темы" : "My topics") && M.edit === (ru ? "Изменить" : "Edit") && M.ph === (ru ? "Добавить тему" : "Add a topic") &&
           M.names[0] === (ru ? "Япония" : "Japan") && M.flag === "🇯🇵" && M.tint === "rgba(255, 59, 48, 0.18)" && M.on.join() === "true,false" &&
           M.long.every((x) => x[1] === "ellipsis" && x[2] === 48) && (width > 400 || M.long[1][0]), JSON.stringify(M));
-        const E = await w.run(`click('[data-action=edit-topics]'); await wait(300); const L = (() => { ${LAYOUT} })();
+        const E = await w.run(`click('[data-action=edit-topics]'); await wait(450); const L = (() => { ${LAYOUT} })();
           const done = text('#my-topics [data-action=edit-topics]'); click('[data-action=edit-topics]'); await wait(200); return { L, done };`);
         check(`${width} px, ${ru ? "Russian" : "English"}, ${scheme}: edit mode keeps the layout rules ("${ru ? "Готово" : "Done"}")`,
           layoutOk(E.L) && E.done === (ru ? "Готово" : "Done"), JSON.stringify(E).slice(0, 600));
