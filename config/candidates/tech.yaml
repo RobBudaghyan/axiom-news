@@ -1,0 +1,21 @@
+# Step 19 candidate Technology & AI feeds, tested with scripts/check_feeds.py --file (PC) and the
+# "check feeds" workflow with this file (GitHub's runners). Not read by the hourly job.
+# Tagged economy_markets here only so the check's topic validation passes before tech_ai exists on
+# main; the ones that passed were copied into config/sources.yaml with tech_ai
+# (see reports/step-19-topics.md).
+sources:
+  - {key: mit_tech_review, name: MIT Technology Review, url: "https://www.technologyreview.com/feed/", region: global, language: en, topics: [economy_markets], paywalled: true, state_owned: false, tier: 1}
+  - {key: ars_technica, name: Ars Technica, url: "https://feeds.arstechnica.com/arstechnica/index", region: global, language: en, topics: [economy_markets], paywalled: false, state_owned: false, tier: 2}
+  - {key: the_verge, name: The Verge, url: "https://www.theverge.com/rss/index.xml", region: global, language: en, topics: [economy_markets], paywalled: false, state_owned: false, tier: 2}
+  - {key: wired, name: Wired, url: "https://www.wired.com/feed/rss", region: global, language: en, topics: [economy_markets], paywalled: true, state_owned: false, tier: 2}
+  - {key: wired_ai, name: Wired, url: "https://www.wired.com/feed/tag/ai/latest/rss", region: global, language: en, topics: [economy_markets], paywalled: true, state_owned: false, tier: 2}
+  - {key: ft_tech, name: Financial Times, url: "https://www.ft.com/technology?format=rss", region: global, language: en, topics: [economy_markets], paywalled: true, state_owned: false, tier: 1}
+  - {key: bloomberg_tech, name: Bloomberg, url: "https://feeds.bloomberg.com/technology/news.rss", region: global, language: en, topics: [economy_markets], paywalled: true, state_owned: false, tier: 1}
+  - {key: wsj_tech, name: The Wall Street Journal, url: "https://feeds.content.dowjones.io/public/rss/RSSWSJD", region: global, language: en, topics: [economy_markets], paywalled: true, state_owned: false, tier: 1}
+  - {key: guardian_tech, name: The Guardian, url: "https://www.theguardian.com/uk/technology/rss", region: global, language: en, topics: [economy_markets], paywalled: false, state_owned: false, tier: 1}
+  - {key: nyt_tech, name: The New York Times, url: "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml", region: global, language: en, topics: [economy_markets], paywalled: true, state_owned: false, tier: 1}
+  - {key: bbc_tech, name: BBC News, url: "https://feeds.bbci.co.uk/news/technology/rss.xml", region: global, language: en, topics: [economy_markets], paywalled: false, state_owned: true, tier: 1, note: "UK public broadcaster, editorially independent"}
+  - {key: techcrunch, name: TechCrunch, url: "https://techcrunch.com/feed/", region: global, language: en, topics: [economy_markets], paywalled: false, state_owned: false, tier: 2}
+  - {key: the_register, name: The Register, url: "https://www.theregister.com/headlines.atom", region: global, language: en, topics: [economy_markets], paywalled: false, state_owned: false, tier: 2}
+  - {key: economist_scitech, name: The Economist, url: "https://www.economist.com/science-and-technology/rss.xml", region: global, language: en, topics: [economy_markets], paywalled: true, state_owned: false, tier: 1}
+  - {key: cnbc_tech, name: CNBC, url: "https://www.cnbc.com/id/19854910/device/rss/rss.html", region: global, language: en, topics: [economy_markets], paywalled: false, state_owned: false, tier: 2}
