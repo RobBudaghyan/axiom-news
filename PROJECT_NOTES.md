@@ -115,7 +115,8 @@ bot @axiom_news_bot at the end.
   opened the app. Readers imported from the old bot (`import-users.mjs`, `imported = 1`) get none
   of it; they get the announcement.
 - **Branding (Step 17b):** the Axiom News logo rebuilt as a vector (`branding/`); the welcome is one
-  message: a 2 s logo animation (`worker/public/media/welcome.mp4`, sent by URL), the text as caption,
+  message: a video (`worker/public/media/welcome.mp4`, sent by URL; Step 19: the logo animation, then how it
+  works, 11 s), the text as caption,
   and "⚙️ Set up" (text fallback if the animation fails). The reminder: the same short text for everyone.
   The Mini App loads with the logo fading in (no spinner). Tone: calm and factual, emojis at line starts.
 - **Announcements (Step 15):** Admin, owner only. Written in English; AI translates into every
@@ -269,6 +270,7 @@ bot @axiom_news_bot at the end.
 | 2026-11-23 | Eight tech feeds; Bloomberg tech capped at 4 a run; The Verge, Wired (all), TechCrunch, The Register, CNBC tech, BBC tech and The Economist science left out (Step 19) | quality and noise: the left-out ones are mostly reviews, deals, start-up rounds or overlap; about 100 to 120 items a weekday, under 1% of free D1 writes |
 | 2026-11-23 | Custom topic rule eased: refused only when it means a WHOLE main topic; `main_aliases` match with no AI call; the check prompt lists narrower examples; `not_main` (AI, ИИ, artificial intelligence) overrides the AI's "same as Technology & AI" (owner, Step 19) | Stocks and Finance were refused because Economy & Markets exists; the real model still called "AI" the main topic because the label contains it |
 | 2026-11-23 | French and Armenian on; order en, ru, fr, hy; a main topic name that does not fit its 48 px row gets a smaller font (13 px at least), never two lines; Armenian "Politics & Conflicts" is just "Քաղաքականություն" (owner, Step 19) | the owner's choice; Armenian names wrapped to 56 px rows, and the 38-letter Armenian label did not fit 360 px even at 12 px |
+| 2026-11-23 | The welcome video is the rebuilt how-it-works clip: logo animation, then a wide Settings screen (topics, times, a digest), 11 s, 220 KB, no words, loops; URL `?v=19` (owner, Step 19) | the old clip's phone screen was 183 px wide in a 640 px frame; one file fits every language |
 | 2026-11-23 | tech_ai boost cap 1, more specific than Economy & Markets (Step 19) | +2 would lift routine launches; a chip export ban is a tech story first |
 
 ## Current status

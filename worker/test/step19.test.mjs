@@ -43,3 +43,13 @@ describe("Step 19: languages", () => {
     assert.match(css, /\.row-title\.fit \{ white-space: nowrap;/);
   });
 });
+
+describe("Step 19: the welcome video", () => {
+  test("is the how-it-works clip: same file, H.264 1280x720, small (under 400 KB)", () => {
+    const a = readFileSync(new URL("../public/media/welcome.mp4", import.meta.url));
+    const b = readFileSync(new URL("../../branding/marketing/bot/axiom-how-it-works-1280x720.mp4", import.meta.url));
+    assert.ok(a.equals(b), "welcome.mp4 is the rebuilt clip");
+    assert.ok(a.length < 400_000, `${a.length} bytes`);
+    assert.ok(a.includes(Buffer.from("avc1")), "H.264");
+  });
+});

@@ -37,8 +37,16 @@ migration must change together.
   With French and Armenian readers: about 145 to 175 a day, 58% to 70%. No reader, no call. On a bad day
   (Gemini overloaded, many retries) the fallback model takes the rest; its limit is also 250.
 
+- **Part 4: welcome video (2026-11-23).** `branding/marketing/source/howitworks.html` rebuilt: the logo
+  animation (as `welcome-1280x720.mp4`), then a wide white Settings screen (560 of 640 px, was 183) with the
+  six main topics (Technology & AI, no Russia) and Formula 1 in two columns, the times grid, a digest
+  arriving; fades to plain red, its first frame (checked: first and last frames are plain red). 11 s,
+  1280x720, 222 KB, no words. Installed as `worker/public/media/welcome.mp4`, sent with duration 11 and
+  `?v=19` on the URL. Staging serves it (200, video/mp4). Worker 351 tests. Tools after the PC restart:
+  Twemoji 15.0.0 and imageio-ffmpeg reinstalled in the session scratchpad (not in the repo).
+
 ## Next
-- Part 4: welcome video. Part 5: alerts, daily stats, backups. Part 6: branding. Part 7: ship and check.
+- Part 5: alerts, daily stats, backups. Part 6: branding. Part 7: ship and check.
 
 ## Ship (owner pre-approved "ship it" for the whole step), in this order
 1. Merge `step-19` into `main` and push (the job's new topics, prompts and feeds).

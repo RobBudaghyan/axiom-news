@@ -35,8 +35,8 @@ export function welcomeText(user, topics, now, isNew, lang = effectiveLang(user)
 // Step 17b: the welcome for a new reader (HTML: "Set up" in bold), the same for everyone.
 export const welcomeSetupText = (user, lang = effectiveLang(user)) => t(lang, "bot.welcome_setup");
 
-// Step 17b: the welcome is ONE message: the short logo animation (public/media/welcome.mp4, sent by
-// URL) with the text as its caption and the Set up button. If Telegram refuses the animation, the
+// Step 17b: the welcome is ONE message: the welcome video (public/media/welcome.mp4, sent by URL;
+// Step 19: the logo animation, then how it works, 11 s, no words, loops) with the text as its caption and the Set up button. If Telegram refuses the animation, the
 // same text and button go as a plain message, so a new reader always gets the welcome.
 export async function sendWelcome(ctx, chatId, user, lang) {
   const text = welcomeSetupText(user, lang);
@@ -44,7 +44,7 @@ export async function sendWelcome(ctx, chatId, user, lang) {
   if (ctx.tg && ctx.welcomeAnimation) {
     try {
       await ctx.tg("sendAnimation", { chat_id: chatId, animation: ctx.welcomeAnimation, caption: text,
-        width: 1280, height: 720, duration: 2, ...extra });
+        width: 1280, height: 720, duration: 11, ...extra });
       return "animation";
     } catch (e) {
       if (e.status === 403) throw e;   // blocked: nothing else would arrive either

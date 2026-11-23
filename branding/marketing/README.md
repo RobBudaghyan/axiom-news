@@ -16,7 +16,7 @@ File Explorer). The English/Русский switch is at the top right.
 | `story/<length>/<look>/` | `axiom-story-<05s,08s,10s,15s,20s>-<red,light,dark>-<en,ru>.mp4`, a first-frame `.png` next to each | Instagram Stories (also Reels or a Telegram channel). 1080x1920, 60 fps, silent: add music inside Instagram. Text stays out of the top 250 px and bottom 340 px, so Instagram's name bar, reply field and stickers never cover it. |
 | `feed/` | `axiom-post-<lang>-1080x1350.png` | A single Instagram post (portrait 4:5). |
 | `feed/` | `axiom-carousel-<lang>-<1..4>-1080x1350.png` | A 4-slide Instagram carousel, in this order: logo; what you get; topics (with Formula 1 as a custom topic); times, languages, link, Free. |
-| `bot/` | `axiom-how-it-works-1280x720.mp4` (90 KB, 8 s, loops, no words) | For the bot, see below. Not installed. |
+| `bot/` | `axiom-how-it-works-1280x720.mp4` (220 KB, 11 s, loops, no words) | **The welcome video** (Step 19): installed as `worker/public/media/welcome.mp4`. |
 | `whats-new/` | `whats-new-1080x1350.png`, `whats-new-1080x1920.png`, `whats-new.html` | Announcing a new feature on Instagram (feed and Story) or in the channel. |
 | `review.html` | | The page with all of the above. |
 | `source/` | | The scenes and scripts (below). |
@@ -32,15 +32,14 @@ All lengths are their own edits of the same scenes; nothing is sped up.
 The three looks: **red** (red background, white logo, like the share card), **light** (the Mini App in light
 mode), **dark** (the Mini App in dark mode; there the digest card is dark too, as Telegram shows it in dark mode).
 
-## The "how it works" clip and the bot
-A phone-width screen in the Mini App's style: topics switch on (one is the custom Formula 1 row), three
-digest times are picked, then a digest arrives in the chat. Labels are soft bars, so the same file works
-in every language. Two ways to use it (both are small Worker changes, so they go to staging first):
-1. **Instead of the welcome animation.** Copy it to `worker/public/media/welcome.mp4`. The welcome is
-   already sent with `sendAnimation` and the text as its caption, so nothing else changes. It is 8 s
-   instead of 2 s, so the welcome feels slower; Telegram loops it silently.
-2. **In Help.** In the Mini App's Help screen as a muted, looping `<video>` (90 KB) above the text,
-   or sent by the bot with `sendAnimation` when someone types /help.
+## The welcome video ("how it works")
+Step 19 (owner): one 11 s clip, no words, loops cleanly. It opens with the logo animation (the same motion
+as `branding/out/welcome-1280x720.mp4`), then a wide white Settings screen in the Mini App's style: the six
+main topics and the custom Formula 1 switch on (two columns), three digest times are picked, a digest
+arrives in the chat; it fades back to plain red, which is its first frame. Labels are soft bars, so the same
+file works in every language. It is the welcome video for new readers: `worker/public/media/welcome.mp4`
+(sent with `sendAnimation`, the welcome text as its caption; the URL carries `?v=19` so Telegram fetches the
+new file). After a re-render, copy it there and raise `WELCOME_VERSION` in `worker/src/index.js`.
 
 ## Suggested Instagram captions
 

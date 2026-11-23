@@ -76,7 +76,7 @@ async function bot(b) {
   const file = join(KIT, "bot", "axiom-how-it-works-1280x720.mp4");
   await b.open(join(HERE, "howitworks.html"), 640, 360, 2);
   await b.evaluate("window.setup({})");
-  const { stills, n } = await encode(b, file, { fps: 30, seconds: 8, crf: 25, preset: "veryslow", outW: 1280, outH: 720, tune: "animation" });
+  const { stills, n } = await encode(b, file, { fps: 30, seconds: 11, crf: 25, preset: "veryslow", outW: 1280, outH: 720, tune: "animation" });   // Step 19: logo + how it works
   writeFileSync(file.replace(/\.mp4$/, ".png"), stills[0]);
   saveChecks("bot-how-it-works", stills, n);
   return file;

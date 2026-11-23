@@ -41,7 +41,8 @@ describe("Step 15: welcome, new vs returning vs imported", () => {
     const m = sends()[0].body;
     // Step 17b: one message, the logo animation with the welcome as its HTML caption and the button
     assert.match(sends()[0].url, /\/sendAnimation$/);
-    assert.equal(m.animation, "https://w.test/media/welcome.mp4");
+    assert.equal(m.animation, "https://w.test/media/welcome.mp4?v=19");
+    assert.equal(m.duration, 11);
     assert.equal(m.caption, t("ru", "bot.welcome_setup"));
     assert.equal(m.parse_mode, "HTML");
     assert.equal(m.reply_markup.inline_keyboard[0][0].text, "⚙️ Настроить");
