@@ -33,7 +33,7 @@ function seed() {
     "paused, blocked, created_at, last_digest_at, next_digest_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
   const people = [
     [OWNER, "Sam", "Asia/Yerevan", 1, ["09:00", "14:00", "20:00"], ALL, 0, 0],
-    [101, "Ani", "Asia/Yerevan", 1, ["09:00", "19:00"], ["armenia", "politics_conflicts", "russia"], 0, 0],
+    [101, "Ani", "Asia/Yerevan", 1, ["09:00", "19:00"], ["armenia", "politics_conflicts", "tech_ai"], 0, 0],
     [102, "David", "Europe/Berlin", 1, ["07:00", "13:00", "21:00"], ALL, 0, 0],
     [103, "Mariam", "America/Los_Angeles", 1, ["09:00"], ["iran_war", "economy_markets"], 1, 0],
     [104, "Narek", "Asia/Yerevan", 0, ["09:00", "14:00", "20:00"], ALL, 0, 1],

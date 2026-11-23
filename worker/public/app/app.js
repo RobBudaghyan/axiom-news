@@ -234,6 +234,7 @@
     const v = $("#view");
     if (!v) return;
     v.innerHTML = S.page ? PAGES[S.page]() : S.tab === "admin" ? adminHTML() : settingsHTML();
+    fitTitles(v);
     if (animate) { v.classList.remove("view"); void v.offsetWidth; v.classList.add("view"); }
   }
 
@@ -264,7 +265,7 @@
   const card = (rows) => `<div class="group">${rows}</div>`;
   const grid = (buttons) => `<div class="grid">${buttons}</div>`;
   // A soft colour per topic for its square (iOS system hues at low strength)
-  const TINT = { politics_conflicts: "0, 122, 255", economy_markets: "48, 176, 199", armenia: "255, 149, 0", russia: "88, 86, 214",
+  const TINT = { politics_conflicts: "0, 122, 255", economy_markets: "48, 176, 199", tech_ai: "88, 86, 214", armenia: "255, 149, 0",
     iran_war: "52, 199, 89", ukraine_war: "255, 204, 0" };
   const tint = (tag) => `--tint: rgba(${TINT[tag] || "142, 142, 147"}, 0.18)`;
 
@@ -273,8 +274,18 @@
     const on = (t) => u.topics.includes(t.tag);
     const attrs = (t) => `role="switch" aria-checked="${on(t)}" data-action="topic" data-value="${esc(t.tag)}"`;
     return card(topics.map((t) => `<button class="row has-icon tap" ${attrs(t)}><span class="sq" style="${tint(t.tag)}" aria-hidden="true">${esc(t.emoji)}</span>` +
-      `<span class="row-main row-title">${esc(t.label)}</span>${switchEl}</button>`).join(""));
+      `<span class="row-main row-title fit">${esc(t.label)}</span>${switchEl}</button>`).join(""));
   }
+  // Step 19: shrink a topic name that does not fit on its one 48 px line (half a pixel at a time, 13 px at least)
+  function fitTitles(root) {
+    for (const e of root.querySelectorAll(".row-title.fit")) {
+      e.style.fontSize = "";
+      for (let s = 17; e.scrollWidth > e.clientWidth + 0.5 && s > 13;) { s -= 0.5; e.style.fontSize = `${s}px`; }
+    }
+  }
+  const refit = () => { const v = $("#view"); if (v) fitTitles(v); };
+  addEventListener("resize", refit);
+  document.fonts?.ready?.then(refit);
 
   // Step 13 fixes (owner, after his test): each custom topic row looks exactly like a main topic
   // row: the topic's own emoji from the AI check in a tinted square, its name in the reader's

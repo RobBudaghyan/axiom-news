@@ -22,8 +22,8 @@
   "topics": {
     "politics_conflicts": "Politics & Conflicts",
     "economy_markets": "Economy & Markets",
+    "tech_ai": "Technology & AI",
     "armenia": "Armenia",
-    "russia": "Russia",
     "iran_war": "Iran War",
     "ukraine_war": "Ukraine War"
   },
@@ -58,7 +58,7 @@
     "welcome_setup": "👋 Welcome to Axiom News.\n\n🌍 Axiom News sums up the important news from about 100 trusted outlets.\n📰 You will receive a short digest of the important news at the times you choose.\n⚙️ Setup takes about 20 seconds: language, topics and delivery times.\n\n👇 Tap <b>Set up</b> to begin.",
     "setup_button": "⚙️ Set up",
     "reminder": "👋 Your digest is not set up yet.\n⚙️ It takes about 20 seconds.\n👇 Tap <b>Set up</b> to begin.",
-    "description": "📰 A short digest of the important news, delivered at the times you choose.\n\n🌍 Built on reputable sources, including the Financial Times, The Economist, Bloomberg, The Wall Street Journal and Al Jazeera\n🗂 Politics, Economy, Armenia, Russia, Iran, Ukraine, plus custom topics of your own (e.g. Formula 1)\n🌐 Available in several languages\n\n🆓 Free, no ads",
+    "description": "📰 A short digest of the important news, delivered at the times you choose.\n\n🌍 Built on reputable sources, including the Financial Times, The Economist, Bloomberg, The Wall Street Journal and Al Jazeera\n🗂 Politics, Economy, Technology & AI, Armenia, Iran, Ukraine, plus custom topics of your own (e.g. Stocks or Formula 1)\n🌐 Available in several languages\n\n🆓 Free, no ads",
     "short_description": "📰 Short digests of the important news from reputable sources, at the times you choose."
   },
   "commands": {
@@ -175,7 +175,7 @@
     "help_stories_h": "🤖 How stories are chosen",
     "help_stories": "We read about 100 outlets every hour.\nAI groups and scores the stories.\nYou receive the most important ones.\nNo story is sent twice.",
     "help_topics_h": "🗂️ Topics",
-    "help_topics": "Switch any topic on or off.\nAdd up to 3 of your own under My topics.\nA topic that is off sends nothing.\nAll topics off: no digests at all.",
+    "help_topics": "Six main topics, each on or off.\nAdd up to 3 of your own under My topics.\nA topic that is off sends nothing.\nAll topics off: no digests at all.",
     "help_times_h": "🕘 Digest times",
     "help_times": "Pick 1 to 5 times a day.\nThey follow your phone's time zone.",
     "help_lang_h": "🌍 Language",
@@ -202,7 +202,7 @@
     "setup_sample": "📬 A sample digest will arrive shortly.\nIt covers the important news of the last 24 hours.",
     "all_off": "All topics are off",
     "all_off_hint": "Switch one on to get digests.",
-    "add_topic_hint": "e.g. Formula 1, Japan, AI",
+    "add_topic_hint": "e.g. Stocks, Formula 1, Japan",
     "setup_lang": "🌍 Language",
     "help_feedback_h": "💬 Feedback",
     "help_feedback": "Ideas or problems?\nTap Send feedback.\nWe read every message.",

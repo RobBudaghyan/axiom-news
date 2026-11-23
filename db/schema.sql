@@ -334,3 +334,29 @@ CREATE TABLE IF NOT EXISTS errors (
 );
 
 -- (Step 15: the Step 6 shadow tables shadow_items and shadow_runs were dropped.)
+
+-- Step 19 (owner): one row per UTC day, never pruned (not in the job's daily prune, no user ids).
+-- The Worker's first hourly tick after 00:00 UTC writes the finished day (worker/src/watch.js);
+-- digests_sent / digests_failed / digests_blocked are added live by the digest ticks and deleted by
+-- account deletions, so the day's final write never touches those four. stories and languages are
+-- JSON ({main topic: stories created that day}, {lang: users}); d1_* are the whole account's rows.
+CREATE TABLE IF NOT EXISTS daily_stats (
+  day              TEXT PRIMARY KEY,                  -- YYYY-MM-DD (UTC)
+  users            INTEGER,                           -- all users at the end of the day
+  active           INTEGER,                           -- not blocked, at least one topic on
+  new_users        INTEGER,
+  deleted          INTEGER NOT NULL DEFAULT 0,
+  digests_sent     INTEGER NOT NULL DEFAULT 0,        -- digests and quiet notes delivered
+  digests_failed   INTEGER NOT NULL DEFAULT 0,        -- failed, not counting readers who blocked the bot
+  digests_blocked  INTEGER NOT NULL DEFAULT 0,
+  stories          TEXT,
+  languages        TEXT,
+  custom_added     INTEGER,                           -- topic checks that added or joined a custom topic
+  custom_rejected  INTEGER,                           -- refused: rejected, blocked, a main topic
+  feedback         INTEGER,
+  ai_calls         INTEGER,
+  ai_errors        INTEGER,
+  d1_rows_read     INTEGER,
+  d1_rows_written  INTEGER,
+  written_at       INTEGER
+) WITHOUT ROWID;

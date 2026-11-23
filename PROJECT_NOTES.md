@@ -16,8 +16,8 @@ bot @axiom_news_bot at the end.
   a strict final score 1-10, the main topic, a one-sentence headline, a 1-3 sentence description
   (only facts from the articles) and 2-3 emojis. If it fails, digests use the first-pass data.
   Step 8: it also gives a **topic score** (for followers of the main topic: the score plus a
-  boost, capped in code at 0 for Politics & Conflicts, 1 for Economy & Markets and the two wars, 2
-  for Armenia and Russia), sees up to 90 new stories per call, and makes a second call on a backlog.
+  boost, capped in code at 0 for Politics & Conflicts, 1 for Economy & Markets, Technology & AI and
+  the two wars, 2 for Armenia), sees up to 90 new stories per call, and makes a second call on a backlog.
 - **Digests per user** at chosen local times (on the hour, 06:00-23:00, 1 to 5; defaults
   09:00/14:00/20:00), time zone from the phone. **No fixed count (Step 8):** a story is in if its
   final score is 7+, or its main topic is followed and its topic score is 7+ (Step 16; 6 before)
@@ -26,11 +26,12 @@ bot @axiom_news_bot at the end.
   folded behind "Show more"); if longer, the lowest-ranked stories are cut, keeping each followed
   topic's best story. Building a digest is a database filter with no AI. The same story is never sent
   to a user twice; if nothing qualifies, a short "quiet period" note.
-- **Topics (Step 15):** Politics & Conflicts (Политика и конфликты; the merge of Politics and Wars &
-  Conflicts), Economy & Markets (Экономика и рынки, new), Armenia, Russia, Iran War (Война в Иране),
-  Ukraine War (Война на Украине). All six on for a new user.
-- **Reader languages (Step 9):** English (default) and Russian; Armenian and French are built and
-  approved on quality but hidden (`config/languages.json`). Everything a reader sees is in their
+- **Topics (Step 15, Step 19):** Politics & Conflicts (Политика и конфликты; the merge of Politics and
+  Wars & Conflicts), Economy & Markets (Экономика и рынки), Technology & AI (Технологии и ИИ, 💻, Step
+  19), Armenia, Iran War (Война в Иране), Ukraine War (Война на Украине). All six on for a new user.
+  Russia was removed as a main topic in Step 19 (owner); its stories went to their best remaining topic.
+- **Reader languages (Step 9, Step 19):** English (default), Russian, French and Armenian, all on since
+  Step 19 (owner), in that order everywhere, a 2x2 grid in Settings and setup (`config/languages.json`). Everything a reader sees is in their
   language: digest text, greeting, headings, quiet note, bot replies, menu button, commands, the
   Mini App (Admin stays English). A new user starts in Telegram's language if supported, else
   English; then only the Mini App picker changes it. The hourly job translates, after the
@@ -77,7 +78,9 @@ bot @axiom_news_bot at the end.
   App. Shared: two readers with "Colombia" (or "Colombian news") follow one topic. The Worker checks
   each new name ONCE with AI (sensible news topic; not nonsense, offensive or a private person;
   normalised name in four languages, emoji, 2-5 Google News searches, a boost cap 0-2); 5 checks a
-  reader a day (owner unlimited); a main topic is refused; blocked names cannot come back. The
+  reader a day (owner unlimited); only a name for a WHOLE main topic is refused (Step 19: its labels
+  and `main_aliases` with no AI call, e.g. Economy, Markets, Tech, Armenian news; anything narrower,
+  e.g. Stocks, Finance, Crypto, Oil, AI startups, AI, is a normal custom topic); blocked names cannot come back. The
   hourly job searches Google News for topics with an active, unpaused follower (40 requests a run,
   8 new headlines a topic, no-AI dedupe against the pool); pass 1 and the editor know the custom
   topics (sport and the like count as news for them); digests give them their own section. Each
@@ -112,7 +115,8 @@ bot @axiom_news_bot at the end.
   opened the app. Readers imported from the old bot (`import-users.mjs`, `imported = 1`) get none
   of it; they get the announcement.
 - **Branding (Step 17b):** the Axiom News logo rebuilt as a vector (`branding/`); the welcome is one
-  message: a 2 s logo animation (`worker/public/media/welcome.mp4`, sent by URL), the text as caption,
+  message: a video (`worker/public/media/welcome.mp4`, sent by URL; Step 19: the logo animation, then how it
+  works, 11 s), the text as caption,
   and "⚙️ Set up" (text fallback if the animation fails). The reminder: the same short text for everyone.
   The Mini App loads with the logo fading in (no spinner). Tone: calm and factual, emojis at line starts.
 - **Announcements (Step 15):** Admin, owner only. Written in English; AI translates into every
@@ -262,6 +266,14 @@ bot @axiom_news_bot at the end.
 | 2026-11-19 | The description names reputable outlets without a count; Help says "about 100 outlets"; no "a few times a day", "English or Russian", News.am or RFE/RL in user texts (owner, Step 17b) | 123 enabled feeds come from 98 outlets, so "120+ sources" overstated; the bot sends at the times the reader chooses, and more languages may come |
 | 2026-11-19 | BotFather splash icon is one SVG path (`branding/out/splash-icon.svg`, boolean-flattened logo, evenodd) (Step 17b) | BotFather refused an SVG with several shapes |
 | 2026-11-19 | Branding visuals built in code (HTML/SVG/CSS, headless Edge, ffmpeg), the logo as outlines from Montserrat ExtraBold fitted to the old 320 px photo (Step 17b) | no AI images or stock art (owner); the old logo existed only as a soft JPEG |
+| 2026-11-23 | Technology & AI (`tech_ai`) is a main topic, Russia is not; existing users got tech_ai; Russia stories re-tagged (owner, Step 19) | the owner's choice of topics; Russian sources stay for Politics, Ukraine War and Russian readers |
+| 2026-11-23 | Eight tech feeds; Bloomberg tech capped at 4 a run; The Verge, Wired (all), TechCrunch, The Register, CNBC tech, BBC tech and The Economist science left out (Step 19) | quality and noise: the left-out ones are mostly reviews, deals, start-up rounds or overlap; about 100 to 120 items a weekday, under 1% of free D1 writes |
+| 2026-11-23 | Custom topic rule eased: refused only when it means a WHOLE main topic; `main_aliases` match with no AI call; the check prompt lists narrower examples; `not_main` (AI, ИИ, artificial intelligence) overrides the AI's "same as Technology & AI" (owner, Step 19) | Stocks and Finance were refused because Economy & Markets exists; the real model still called "AI" the main topic because the label contains it |
+| 2026-11-23 | French and Armenian on; order en, ru, fr, hy; a main topic name that does not fit its 48 px row gets a smaller font (13 px at least), never two lines; Armenian "Politics & Conflicts" is just "Քաղաքականություն" (owner, Step 19) | the owner's choice; Armenian names wrapped to 56 px rows, and the 38-letter Armenian label did not fit 360 px even at 12 px |
+| 2026-11-23 | The welcome video is the rebuilt how-it-works clip: logo animation, then a wide Settings screen (topics, times, a digest), 11 s, 220 KB, no words, loops; URL `?v=19` (owner, Step 19) | the old clip's phone screen was 183 px wide in a 640 px frame; one file fits every language |
+| 2026-11-23 | Alerts only when action is needed: one per kind per UTC day, each with a "What to do" line; new kinds: digests failing (3+ and 20%), 10+ feeds down 3 runs, Google silent 24 h; no news run after 2 h (was 3); table `daily_stats` (one row a day, never pruned); backups are D1 Time Travel, 7 days on the free plan, steps in `OWNER_GUIDE.md` (owner, Step 19) | the owner wants no reports, only actionable alerts, and a long-term record that the 30-day log prune does not delete |
+| 2026-11-23 | Branding in four languages: description and about name the six topics (Technology & AI, no Russia) and "Stocks or Formula 1"; profile previews, share cards, 60 Story videos, feed post and carousel, What's new card re-rendered; the kits fall back to Segoe UI for Armenian (owner, Step 19) | Inter has no Armenian letters; Windows' generic sans-serif drew them badly |
+| 2026-11-23 | tech_ai boost cap 1, more specific than Economy & Markets (Step 19) | +2 would lift routine launches; a chip export ban is a tech story first |
 
 ## Current status
 - **Step 1 done:** repo, docs, topics, prompt, lessons, 116 verified feeds.

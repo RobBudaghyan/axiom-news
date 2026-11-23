@@ -44,8 +44,8 @@ YOUR TASKS
 
 2. FILTER. Keep an item only if it is real news on at least one topic below.
    Put everything else in not_news_ids: news outside all the topics, however big
-   (technology outages, routine company news, sport, science, health, ordinary
-   crime), ads, lifestyle, entertainment, celebrity,
+   (short IT outages, routine company news, sport, health, ordinary crime), ads,
+   lifestyle, entertainment, celebrity,
    weather, horoscopes, podcasts/newsletters with no specific news, opinion pieces
    with no new facts, ceremonial events where nothing was decided ("minister
    visited a museum"), vague "officials discussed cooperation" with no outcome.
@@ -54,7 +54,12 @@ YOUR TASKS
    news with wide impact IS news (economy_markets): central bank decisions, inflation
    and jobs data that move markets, trade deals and tariffs, energy prices, big market
    moves, and big company news with wide effect (a giant firm collapses, a huge merger).
-   A daily market wrap with no event behind it is not.
+   A daily market wrap with no event behind it is not. Technology with wide impact IS
+   news (tech_ai): a new frontier AI model or a big AI deal, AI rules, chip export
+   controls and chip supply, antitrust cases and big moves of the large tech companies,
+   major hacks and data breaches, space missions, science with wide effect. Gadget
+   reviews, ordinary product launches and updates, app tips, games, deals and discounts,
+   and small start-up funding rounds are not.
    When genuinely unsure whether an on-topic item is significant real news, KEEP
    it: a missed story is worse than a marginal one. Do not create a story for a
    not-news item; only list its id in not_news_ids.

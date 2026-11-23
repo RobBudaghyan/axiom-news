@@ -501,6 +501,33 @@ the icon centring (28 checks since Step 5).
   topic, recent checks, blocked names) with Delete and Block (Block also puts every name and alias on
   `topic_blocks`), and an "AI budget, today" section.
 
+## 4e. Step 19: Technology & AI in, Russia out (owner)
+
+- **Main topics:** Politics & Conflicts, Economy & Markets, Technology & AI (`tech_ai`, new), Armenia,
+  Iran War, Ukraine War; all six on for a new user. `russia` is gone: users lost it and got `tech_ai`,
+  stories were re-tagged to their most specific remaining main topic
+  (`worker/scripts/migrate-step19.mjs`). The Russian-language feeds stay (Politics, Ukraine War and
+  Russian readers). Russia can now be a reader's own topic.
+- **Boost cap 1** for `tech_ai` (like Economy & Markets): tech outlets publish many launches and deals,
+  so +2 would lift routine product news into the topic path. In `topic_specificity` it sits below the
+  country and war topics and above Economy & Markets.
+- **Feeds:** eight tech feeds (FT, Bloomberg capped at 4 a run, WSJ, NYT, The Guardian, MIT Technology
+  Review, Ars Technica, Wired AI); measurements in `reports/step-19-topics.md`.
+- **Custom topic rule (Part 2):** a reader's topic is refused as a main topic only when it means the
+  WHOLE main topic: its labels in every language and `config/custom_topics.json` `main_aliases` match
+  with no AI call; the check prompt gives the AI the same rule with narrower examples (Stocks, Finance,
+  Crypto, Oil, AI startups); `not_main` (AI, ИИ, artificial intelligence) wins over the AI's answer.
+  `worker/scripts/step19-topic-check.mjs` asks the real model about a list of names (no D1).
+- **Alerts and daily stats (Part 5):** `worker/src/watch.js`. Every alert kind (job failed, stuck, no
+  news run for 2 hours, GitHub start failed, digests failing, many feeds down, Google silent for a day,
+  AI budget, D1, CPU) reaches the owner at most once a UTC day (meta `alert_days`; D1, CPU and the AI
+  budget keep their own daily keys) and ends with a "What to do:" line. No regular reports. `daily_stats`:
+  one row per UTC day, written by the first hourly tick after midnight (meta `stats_day`), digest counts
+  and deletions added live; never pruned. Backups: D1 Time Travel, 7 days on the free plan
+  (`OWNER_GUIDE.md` has the restore steps).
+- Pass 1 keeps tech news with wide impact (gadget reviews, ordinary launches, small funding rounds stay
+  out); the editor has a `tech_ai` boost rule and 4/6/8 examples.
+
 ## 4d. Step 15: topics, off means off, Help and Feedback, welcome, announcements
 
 - **Main topics.** `politics_conflicts` (Politics & Conflicts) replaced `politics` and

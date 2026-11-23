@@ -41,7 +41,8 @@ describe("Step 15: welcome, new vs returning vs imported", () => {
     const m = sends()[0].body;
     // Step 17b: one message, the logo animation with the welcome as its HTML caption and the button
     assert.match(sends()[0].url, /\/sendAnimation$/);
-    assert.equal(m.animation, "https://w.test/media/welcome.mp4");
+    assert.equal(m.animation, "https://w.test/media/welcome.mp4?v=19");
+    assert.equal(m.duration, 11);
     assert.equal(m.caption, t("ru", "bot.welcome_setup"));
     assert.equal(m.parse_mode, "HTML");
     assert.equal(m.reply_markup.inline_keyboard[0][0].text, "⚙️ Настроить");
@@ -232,7 +233,7 @@ describe("Step 17: the sample digest is a taste", () => {
   test("at most 2 stories a topic and 8 in all, best first; the rest is not marked sent", async () => {
     const { binding, sqlite } = fakeD1();
     const now = nowS();
-    const topics = ["politics_conflicts", "economy_markets", "armenia", "russia", "iran_war", "ukraine_war"];
+    const topics = ["politics_conflicts", "economy_markets", "tech_ai", "armenia", "iran_war", "ukraine_war"];
     const ids = [];
     for (const [ti, tag] of topics.entries()) {
       for (let k = 0; k < 3; k++) {

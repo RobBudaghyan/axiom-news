@@ -16,9 +16,10 @@ topics:
       Government, elections, legislation, diplomacy, sanctions, major court rulings, and
       armed conflicts anywhere in the world: military operations, attacks, terrorism,
       ceasefires, peace talks, arms deliveries and major defence developments. Any
-      country. Stories about the Ukraine war or an Iran war also get this tag. Not:
-      economy and market news (that is economy_markets) unless a government decision
-      is the core of the story, technology, celebrity news, sports, lifestyle.
+      country, Russia's domestic politics included. Stories about the Ukraine war or an
+      Iran war also get this tag. Not: economy and market news (that is economy_markets)
+      unless a government decision is the core of the story, technology (that is
+      tech_ai), celebrity news, sports, lifestyle.
 
   - tag: economy_markets
     label: {en: "Economy & Markets", ru: "Экономика и рынки"}
@@ -30,7 +31,22 @@ topics:
       tariffs, energy and commodity prices, and big company news with wide impact (a
       giant firm collapses, a huge merger, a market-moving decision). Not: routine
       company news (products, mid-size results, executive changes), a day's market
-      moves with no event behind them, stock tips.
+      moves with no event behind them, stock tips. A tech company's results or a chip
+      deal is economy_markets only when it moves the wider market; otherwise tech_ai.
+
+  - tag: tech_ai
+    label: {en: "Technology & AI", ru: "Технологии и ИИ"}
+    emoji: "💻"
+    default: true
+    definition: >-
+      Technology with wide impact: artificial intelligence (new frontier models, AI
+      companies and their deals, AI rules and safety), chips and semiconductors (export
+      controls, supply, big chipmakers), the big tech companies (major launches, antitrust
+      and regulation, large deals, layoffs at scale), cybersecurity (major hacks, data
+      breaches, ransomware against public services), space, and science or tech policy with
+      wide impact. Not: gadget reviews, ordinary product launches and updates, app tips,
+      games, mid-size start-up funding rounds, rumours, and IT outages that end the same
+      day with no wider effect.
 
   - tag: armenia
     label: {en: "Armenia", ru: "Армения"}
@@ -41,16 +57,6 @@ topics:
       relations, border and peace process; Armenia's relations with Russia, Turkey,
       Iran, Georgia, the EU and the US; the Armenian diaspora when politically
       significant. Not: news about Azerbaijan or Turkey with no Armenia connection.
-
-  - tag: russia
-    label: {en: "Russia", ru: "Россия"}
-    emoji: "🇷🇺"
-    default: true
-    definition: >-
-      Russia's domestic politics, economy, sanctions, repression, elites and foreign
-      policy. Stories mainly about battlefield events in Ukraine belong to
-      ukraine_war; tag russia too only if they say something significant about
-      Russia itself (mobilisation, economy, Kremlin decisions).
 
   - tag: iran_war
     label: {en: "Iran War", ru: "Война в Иране"}

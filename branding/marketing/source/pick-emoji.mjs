@@ -9,8 +9,8 @@ import { fileURLToPath } from "node:url";
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const SRC = process.argv[2];
 if (!SRC) throw new Error("usage: pick-emoji.mjs <twemoji package folder>");
-const FIXED = "🏛️📈🇦🇲🇷🇺🇮🇷🇺🇦🇬🇧🏎️⭐🗞️📰🌍🕘";
-const text = FIXED + ["en", "ru"].map((l) => readFileSync(join(HERE, "data", `digest-${l}.html`), "utf8")).join("");
+const FIXED = "🏛️📈💻🇦🇲🇷🇺🇮🇷🇺🇦🇬🇧🇫🇷🏎️⭐🗞️📰🌍🕘";   // Step 19: 💻 Technology & AI, 🇫🇷 French
+const text = FIXED + ["en", "ru", "fr", "hy"].filter((l) => existsSync(join(HERE, "data", `digest-${l}.html`))).map((l) => readFileSync(join(HERE, "data", `digest-${l}.html`), "utf8")).join("");
 const file = (seq) => {
   const cps = [...seq].map((c) => c.codePointAt(0).toString(16));
   return (seq.includes("‍") ? cps : cps.filter((c) => c !== "fe0f")).join("-");

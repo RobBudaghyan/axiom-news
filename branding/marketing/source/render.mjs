@@ -53,7 +53,7 @@ function saveChecks(name, stills, n) {
 const LENGTHS = { "05": 5, "08": 8, "10": 10, "15": 15, "20": 20 };
 function storyList(filters) {
   const list = [];
-  for (const lang of ["en", "ru"]) for (const len of Object.keys(LENGTHS)) for (const look of ["red", "light", "dark"]) {
+  for (const lang of ["en", "ru", "fr", "hy"]) for (const len of Object.keys(LENGTHS)) for (const look of ["red", "light", "dark"]) {
     const tags = [lang, len, `${len}s`, look];
     if (filters.every((f) => tags.includes(f))) list.push({ len, look, lang });
   }
@@ -76,7 +76,7 @@ async function bot(b) {
   const file = join(KIT, "bot", "axiom-how-it-works-1280x720.mp4");
   await b.open(join(HERE, "howitworks.html"), 640, 360, 2);
   await b.evaluate("window.setup({})");
-  const { stills, n } = await encode(b, file, { fps: 30, seconds: 8, crf: 25, preset: "veryslow", outW: 1280, outH: 720, tune: "animation" });
+  const { stills, n } = await encode(b, file, { fps: 30, seconds: 11, crf: 25, preset: "veryslow", outW: 1280, outH: 720, tune: "animation" });   // Step 19: logo + how it works
   writeFileSync(file.replace(/\.mp4$/, ".png"), stills[0]);
   saveChecks("bot-how-it-works", stills, n);
   return file;
@@ -92,7 +92,7 @@ async function shot(b, page, query, file, w, h) {
 }
 async function feed(b, filters) {
   const out = [];
-  for (const lang of ["en", "ru"]) {
+  for (const lang of ["en", "ru", "fr", "hy"]) {
     if (filters.length && !filters.includes(lang)) continue;
     out.push(await shot(b, "feed.html", { lang, slide: "post" }, join(KIT, "feed", `axiom-post-${lang}-1080x1350.png`), 540, 675));
     for (const s of [1, 2, 3, 4]) {

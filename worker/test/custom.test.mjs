@@ -164,13 +164,58 @@ describe("Step 13: adding a custom topic", () => {
     fetchMock = ai();
     let r = await add(binding, A, "Armenia");
     assert.deepEqual(r.body.result, { kind: "main_topic", reason: "Armenia is a main topic. Switch it on above." });
-    r = await add(binding, A, "Россия");
+    r = await add(binding, A, "Технологии и ИИ");
     assert.equal(r.body.result.kind, "main_topic");
     assert.equal(aiCalls().length, 0);
-    r = await add(binding, A, "Armenian news");
+    r = await add(binding, A, "Latest Armenian news");
     assert.equal(r.body.result.kind, "main_topic");
     assert.equal(aiCalls().length, 1);
     assert.equal(sqlite.prepare("SELECT count(*) AS n FROM custom_follows").get().n, 0);
+  });
+
+  test("Step 19: a name for a WHOLE main topic is refused with no AI call, in any language", async () => {
+    const { binding, sqlite } = setup();
+    fetchMock = ai();
+    const cases = [["Economy", "Economy & Markets"], ["Markets", "Economy & Markets"], ["economy and markets", "Economy & Markets"],
+      ["Tech", "Technology & AI"], ["Technology", "Technology & AI"], ["Технологии", "Technology & AI"],
+      ["Armenian news", "Armenia"], ["Новости Армении", "Armenia"], ["Politics", "Politics & Conflicts"], ["War in Ukraine", "Ukraine War"]];
+    for (const [name, label] of cases) {
+      const r = await add(binding, A, name);
+      assert.deepEqual(r.body.result, { kind: "main_topic", reason: `${label} is a main topic. Switch it on above.` }, name);
+    }
+    assert.equal(aiCalls().length, 0);
+    assert.equal(sqlite.prepare("SELECT count(*) AS n FROM custom_follows").get().n, 0);
+  });
+
+  test("Step 19: a topic narrower than a main topic is a normal custom topic (Stocks, Finance, Crypto, Oil, AI startups)", async () => {
+    // "AI": the real model calls it Technology & AI; config not_main makes it a custom topic anyway
+    for (const name of ["Stocks", "Finance", "Crypto", "Oil", "AI startups", "Armenian diaspora", "AI", "ИИ"]) {
+      const { binding } = setup();
+      fetchMock = ai();
+      const r = await add(binding, A, name);
+      assert.equal(r.body.result.kind, "added", name);
+      assert.equal(aiCalls().length, 1, name);
+      fetchMock.restore();
+    }
+  });
+
+  test("Step 19: the check prompt says only a WHOLE main topic is the same, with narrower examples", async () => {
+    const { binding } = setup();
+    fetchMock = ai();
+    await add(binding, A, "Stocks");
+    const p = promptOf(JSON.parse(aiCalls()[0].init.body));
+    assert.match(p, /A MAIN TOPIC tag only when the topic means that WHOLE main topic/);
+    assert.match(p, /"Stocks", "Finance", "Banking", "Crypto", "Oil", "Gold",\n {5}"AI startups"/);
+    assert.match(p, /   - tech_ai: Technology & AI/);
+    assert.doesNotMatch(p, /russia/);
+  });
+
+  test("Step 19: Russia is no longer a main topic, so it can be a reader's own topic", async () => {
+    const { binding } = setup();
+    fetchMock = ai();
+    const r = await add(binding, A, "Russia");
+    assert.notEqual(r.body.result.kind, "main_topic");
+    assert.equal(aiCalls().length, 1);
   });
 
   test("5 AI checks a day per reader; the owner has no limit", async () => {

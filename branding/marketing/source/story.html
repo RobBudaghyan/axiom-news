@@ -29,7 +29,7 @@
   /* on red, chosen (red) buttons sit on a white panel, as in the app on its light background */
   .look-red .panel { background: #fff; padding: 10px; border-radius: 24px; box-shadow: var(--shadow); left: 40px; width: 460px; }
   .look-red .panel .btn { background: #f2f2f7; box-shadow: none; }
-  .story { left: 50px; width: 440px; top: 338px; box-shadow: var(--shadow); }
+  .story { left: 50px; width: 440px; top: 406px; box-shadow: var(--shadow); }   /* Step 19: below the 2x2 language grid */
   .story .layer { position: absolute; left: 0; right: 0; top: 0; }
   .shot { left: 70px; top: 150px; width: 400px; height: 640px; border-radius: 30px; overflow: hidden; box-shadow: var(--shadow);
     background: var(--card); }
@@ -120,9 +120,9 @@
         `<div class="abs msg story" data-in="0.16"><div class="layer" data-l="${from}"><div class="inner"></div></div>` +
         `<div class="layer" data-l="${LANG}"><div class="inner"></div></div></div>`;
       for (const layer of $$(".layer", el)) await loadDigest($(".inner", layer), layer.dataset.l, 1);
-      const [bEn, bRu] = $$(".btn", el), story = $(".story", el);
+      const btns = $$(".btn", el), story = $(".story", el), at = (l) => LANGS.findIndex((x) => x[2] === l);
       const lf = $(`.layer[data-l=${from}]`, el), lt_ = $(`.layer[data-l=${LANG}]`, el);
-      const btnFrom = from === "en" ? bEn : bRu, btnTo = from === "en" ? bRu : bEn;
+      const btnFrom = btns[at(from)], btnTo = btns[at(LANG)];
       return (lt, dur) => {
         const s = 0.85 * EDIT.P;
         const k = inOutCubic(prog(lt, s, s + 0.55));

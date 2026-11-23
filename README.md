@@ -6,7 +6,7 @@ the fallback).
 
 **What a reader gets:** a short digest of the most important news, one Telegram message at the
 times they choose (by default 09:00, 14:00 and 20:00 in their time zone), on the topics they
-switch on: six main topics (Politics & Conflicts, Economy & Markets, Armenia, Russia, Iran War,
+switch on: six main topics (Politics & Conflicts, Economy & Markets, Technology & AI, Armenia, Iran War,
 Ukraine War) and up to three of their own ("My topics", e.g. Japan). Everything is in their
 language (English and Russian on; Armenian and French built but hidden). Settings, Help and Send
 feedback live in a Telegram Mini App. New readers get a short welcome, a 3-step setup and a sample

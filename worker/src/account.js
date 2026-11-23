@@ -9,6 +9,8 @@
 // possible) and custom topics they created (created_by cleared). A custom topic nobody follows any
 // more starts the normal 7-day clock (orphan_since), exactly as when its last follower removes it.
 
+import { deletedStatsStatement } from "./watch.js";
+
 export const USER_TABLES = ["sent", "digest_holds", "custom_follows", "feedback", "announcement_sends", "topic_checks"];
 
 export function deleteUserStatements(userId, now) {
@@ -26,6 +28,7 @@ export function deleteUserStatements(userId, now) {
     { sql: "DELETE FROM errors WHERE message LIKE '%user ' || ?1 || ':%' OR message LIKE '% for ' || ?1 || ':%' " +
            "OR message LIKE '% to ' || ?1 || ':%'",
       params: [String(id)] },
+    deletedStatsStatement(id, now),   // Step 19: daily_stats.deleted (only if the user exists)
     { sql: "DELETE FROM users WHERE id = ?1 RETURNING id", params: [id] },
   ];
 }

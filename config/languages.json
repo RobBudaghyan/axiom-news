@@ -1,10 +1,10 @@
 {
-  "_comment": "Step 9: reader languages. 'enabled' = shown in the Mini App picker, chosen by default from Telegram's language on a user's first /start, and translated by the hourly job (only if an active user reads it). 'available' = every language with a dictionary (config/i18n/<code>.json); a language not enabled keeps its code but is hidden, and a user whose language is not enabled gets English everywhere. English is the fallback for every missing key and for any digest with an untranslated story. Edit here, then redeploy the Worker and push (the job reads it too).",
+  "_comment": "Step 19 (owner): all four on, in the order English, Russian, French, Armenian (the picker is a 2x2 grid). Step 9: reader languages. 'enabled' = shown in the Mini App picker, chosen by default from Telegram's language on a user's first /start, and translated by the hourly job (only if an active user reads it). 'available' = every language with a dictionary (config/i18n/<code>.json); a language not enabled keeps its code but is hidden, and a user whose language is not enabled gets English everywhere. English is the fallback for every missing key and for any digest with an untranslated story. Edit here, then redeploy the Worker and push (the job reads it too).",
   "default": "en",
-  "enabled": ["en", "ru"],
-  "available": ["en", "ru", "hy", "fr"],
-  "flags": {"en": "🇬🇧", "ru": "🇷🇺", "hy": "🇦🇲", "fr": "🇫🇷"},
-  "names": {"en": "English", "ru": "Русский", "hy": "Հայերեն", "fr": "Français"},
-  "english_names": {"en": "English", "ru": "Russian", "hy": "Armenian", "fr": "French"},
-  "locale": {"en": "en-GB", "ru": "ru-RU", "hy": "hy-AM", "fr": "fr-FR"}
+  "enabled": ["en", "ru", "fr", "hy"],
+  "available": ["en", "ru", "fr", "hy"],
+  "flags": {"en": "🇬🇧", "ru": "🇷🇺", "fr": "🇫🇷", "hy": "🇦🇲"},
+  "names": {"en": "English", "ru": "Русский", "fr": "Français", "hy": "Հայերեն"},
+  "english_names": {"en": "English", "ru": "Russian", "fr": "French", "hy": "Armenian"},
+  "locale": {"en": "en-GB", "ru": "ru-RU", "fr": "fr-FR", "hy": "hy-AM"}
 }

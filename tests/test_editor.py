@@ -83,7 +83,7 @@ class Candidates(unittest.TestCase):
         b = add_story(self.db, "Edited low", ["politics_conflicts"], 6, edited={"score": 3, "headline": "L"})
         pool = editor.Editor(self.db, [], topics=TOPICS, facts=[], facts_checked="x").pool(T0)
         self.assertEqual(editor.choose(pool, TOPIC_ORDER, 10, 3, 5), ([], []))   # nothing new: no call
-        c = add_story(self.db, "New one", ["russia"], 5)
+        c = add_story(self.db, "New one", ["tech_ai"], 5)
         pool = editor.Editor(self.db, [], topics=TOPICS, facts=[], facts_checked="x").pool(T0)
         new, compare = editor.choose(pool, TOPIC_ORDER, 10, 3, 1)
         self.assertEqual([s["id"] for s in new], [c])
@@ -119,7 +119,7 @@ class Validation(unittest.TestCase):
 
     def setUp(self):
         self.db = new_db()
-        self.a = add_story(self.db, "Russia and US sign a grain deal", ["russia"], items=self.SRC)
+        self.a = add_story(self.db, "Russia and US sign a grain deal", ["tech_ai"], items=self.SRC)
         self.b = add_story(self.db, "Grain deal signed", ["politics_conflicts"], items=self.SRC)
         self.by_id = {s["id"]: s for s in editor.Editor(self.db, [], topics=TOPICS, facts=[],
                                                          facts_checked="x").pool(T0)}
@@ -269,7 +269,7 @@ class MainTopic(unittest.TestCase):
     def test_the_editor_names_the_main_topic_which_is_added_to_the_tags(self):
         db = new_db()
         s = add_story(db, "Trump, Putin and Xi to meet in China", ["iran_war", "economy_markets"], 8)
-        bad = add_story(db, "Other", ["russia"], 6)
+        bad = add_story(db, "Other", ["tech_ai"], 6)
         ed, _ = make_editor(db, [FakeProvider("gemini", [{"events": [
             {"ids": [f"S{s}"], "score": 8, "topic": "politics_conflicts", "headline": "Trump, Putin and Xi to meet in China",
              "description": "", "emojis": ""},
@@ -287,7 +287,7 @@ class Writes(unittest.TestCase):
         self.old = add_story(self.db, "Strike on Kharkiv kills 3", ["ukraine_war", "economy_markets"], 6,
                              age_h=5, tier=2, source="Beta News",
                              items=[("Beta News", 2, "Russian strike on Kharkiv kills 3", "")])
-        self.new = add_story(self.db, "Kharkiv strike death toll rises to 3", ["russia"], 7, age_h=1, tier=1,
+        self.new = add_story(self.db, "Kharkiv strike death toll rises to 3", ["tech_ai"], 7, age_h=1, tier=1,
                              source="Alpha Times", items=[("Alpha Times", 1, "Kharkiv strike toll rises to 3", "")])
         self.other = add_story(self.db, "Armenia budget passed", ["armenia"], 5)
         self.db.query("INSERT INTO sent (user_id, story_id, sent_at) VALUES (7, ?, ?)", [self.new, T0 - 600])
@@ -309,7 +309,7 @@ class Writes(unittest.TestCase):
         self.assertEqual(lead["best_source"], "Alpha Times")           # best link of the group (tier 1)
         self.assertEqual(lead["source_count"], 2)
         self.assertEqual(lead["updated_at"], int(T0 - H))              # the newest of the group
-        self.assertEqual(json.loads(lead["topics"]), ["economy_markets", "russia", "ukraine_war"])
+        self.assertEqual(json.loads(lead["topics"]), ["economy_markets", "tech_ai", "ukraine_war"])
         self.assertEqual(lead["edited_at"], T0)
         self.assertIsNone(lead["main_topic"])                          # the answer named no topic
         # user 7 got the merged-away story: the kept one counts as sent too (never twice)
@@ -369,13 +369,13 @@ class Step8(unittest.TestCase):
     def test_topic_score_is_clamped_never_below_the_score_and_kept_when_missing(self):
         a = add_story(self.db, "Armenian judges suspended", ["armenia"], 5)
         b = add_story(self.db, "Big summit", ["politics_conflicts"], 7)
-        c = add_story(self.db, "Odd answer", ["russia"], 5)
+        c = add_story(self.db, "Odd answer", ["tech_ai"], 5)
         gem = FakeProvider("gemini", [{"events": [
             {"ids": [f"S{a}"], "score": 4, "topic_score": 6, "topic": "armenia", "headline": "", "description": "",
              "emojis": ""},
             {"ids": [f"S{b}"], "score": 8, "topic_score": 5, "topic": "politics_conflicts", "headline": "", "description": "",
              "emojis": ""},
-            {"ids": [f"S{c}"], "score": 5, "topic_score": 40, "topic": "russia", "headline": "", "description": "",
+            {"ids": [f"S{c}"], "score": 5, "topic_score": 40, "topic": "tech_ai", "headline": "", "description": "",
              "emojis": ""}]}])
         ed, _ = make_editor(self.db, [gem])
         ed.run(T0)
@@ -401,7 +401,7 @@ class Step8(unittest.TestCase):
         ed, _ = make_editor(self.db, [FakeProvider("gemini", [score_all(5, 6)])])
         ed.run(T0)
         self.assertEqual(story(self.db, a)["scored_at"], T0)
-        b = add_story(self.db, "New one", ["russia"], 5, now=T0 + H)
+        b = add_story(self.db, "New one", ["tech_ai"], 5, now=T0 + H)
         ed, _ = make_editor(self.db, [FakeProvider("gemini", [score_all(5, 5)])])
         ed.run(T0 + H)                                              # `a` comes back only to compare
         self.assertEqual(story(self.db, a)["edited_at"], T0 + H)
@@ -419,7 +419,7 @@ class Step8(unittest.TestCase):
         self.assertEqual(self.db.query("SELECT count(*) n FROM stories WHERE final_score IS NULL")[0]["n"], 0)
         self.assertEqual([c[2] for c in calls], [5, 4])             # 5 new; then 2 new + 2 to compare
         # no backlog: one call
-        add_story(self.db, "One more", ["russia"], 6)
+        add_story(self.db, "One more", ["tech_ai"], 6)
         gem = FakeProvider("gemini", [score_all(5)])
         res = make_editor(self.db, [gem], s)[0].run(T0)
         self.assertEqual((res.rounds, len(gem.prompts)), (1, 1))
@@ -474,7 +474,7 @@ class Step8(unittest.TestCase):
         a = add_story(self.db, "Judges suspended", ["armenia"], 5, edited={"score": 4, "headline": "Judges suspended"})
         self.db.query("UPDATE stories SET main_topic = 'armenia' WHERE id = ?", [a])
         b = add_story(self.db, "Summit", ["politics_conflicts"], 7, edited={"score": 7, "headline": "Summit"})
-        new = add_story(self.db, "Not edited yet", ["russia"], 6)
+        new = add_story(self.db, "Not edited yet", ["tech_ai"], 6)
         before = {i: story(self.db, i) for i in (a, b, new)}
         gem = FakeProvider("gemini", [{"events": [
             {"ids": [f"S{a}", f"S{b}"], "score": 9, "topic_score": 6, "topic": "politics_conflicts", "headline": "Changed",

@@ -135,7 +135,7 @@ describe("cron: a held story waits for its translation", () => {
     const { db, sqlite, a, b } = setup();
     const outbox = [];
     await runTick(db, io(outbox), yerevan(14, 2));
-    const c = addStory(sqlite, "C", ["russia"], 6, yerevan(19), { final_score: 8, headline: "Russia story" });
+    const c = addStory(sqlite, "C", ["tech_ai"], 6, yerevan(19), { final_score: 8, headline: "Russia story" });
     addTranslation(sqlite, c, "ru", "История о России");
     const out = await runTick(db, io(outbox), yerevan(20, 2));
     assert.equal(out.held, 1);

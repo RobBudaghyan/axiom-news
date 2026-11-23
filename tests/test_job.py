@@ -340,7 +340,7 @@ class Merge(Base):
 
         self.clock.advance(1)
         self.feeds.entries.append(entry("alpha", "UA: Kharkiv strike toll rises", 10, self.clock()))
-        gem = FakeProvider("gemini", [grouping_responder({"UA": ["ukraine_war", "russia"]}, importance=7,
+        gem = FakeProvider("gemini", [grouping_responder({"UA": ["ukraine_war", "tech_ai"]}, importance=7,
                                                          merge={"UA": "Summary of UA"})])
         make_job(self.db, gem, FakeProvider("groq", []), self.feeds, self.clock).run()
         self.assertIn("Summary of UA", gem.prompts[0])        # existing story shown to the AI
@@ -349,7 +349,7 @@ class Merge(Base):
         s = rows[0]
         self.assertEqual((s["source_count"], s["importance"], s["best_source"]), (2, 7, "Alpha Times"))
         self.assertEqual(s["summary"], "Summary of UA: drone strike on Kharkiv")  # empty AI summary keeps it
-        self.assertEqual(json.loads(s["topics"]), ["politics_conflicts", "russia", "ukraine_war"])
+        self.assertEqual(json.loads(s["topics"]), ["politics_conflicts", "tech_ai", "ukraine_war"])
         self.assertEqual(s["updated_at"], int(self.clock()))
         self.assertEqual(last_run(self.db)["stories_merged"], 1)
 
@@ -419,7 +419,7 @@ def prompt_items_ids(prompt):
 
 
 class Validation(unittest.TestCase):
-    ORDER = ["politics_conflicts", "economy_markets", "armenia", "russia", "iran_war", "ukraine_war"]
+    ORDER = ["politics_conflicts", "economy_markets", "armenia", "tech_ai", "iran_war", "ukraine_war"]
 
     def test_rules(self):
         data = {"stories": [

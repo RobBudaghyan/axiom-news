@@ -1,0 +1,1044 @@
+{
+ "at": "2026-11-23T11:31:16.000Z",
+ "hours": 48,
+ "pool": 2092,
+ "simulated": 176,
+ "topics": [
+  "politics_conflicts",
+  "economy_markets",
+  "tech_ai",
+  "armenia",
+  "iran_war",
+  "ukraine_war"
+ ],
+ "results": {
+  "all_six": {
+   "digests": 7,
+   "stories": 54,
+   "per_digest": 7.7,
+   "min": 4,
+   "max": 11,
+   "cut": 0,
+   "sizes": [
+    8,
+    8,
+    4,
+    11,
+    9,
+    6,
+    8
+   ],
+   "byTopic": {
+    "armenia": 7,
+    "politics_conflicts": 3,
+    "tech_ai": 7,
+    "ukraine_war": 25,
+    "economy_markets": 11,
+    "iran_war": 1
+   },
+   "chars_max": 2897,
+   "digests_detail": [
+    {
+     "at": "20:00",
+     "stories": 8,
+     "chars": 2029,
+     "list": [
+      {
+       "id": 11735,
+       "primary": "armenia",
+       "main": "armenia",
+       "tags": [
+        "politics_conflicts",
+        "armenia"
+       ],
+       "score": 7,
+       "topic": 9,
+       "headline": "Armenia announces official launch of TRIPP energy project"
+      },
+      {
+       "id": 11746,
+       "primary": "politics_conflicts",
+       "main": "politics_conflicts",
+       "tags": [
+        "politics_conflicts"
+       ],
+       "score": 7,
+       "topic": 7,
+       "headline": "Mexican forces capture top drug lord Fausto Isidro Meza Flores"
+      },
+      {
+       "id": 11788,
+       "primary": "tech_ai",
+       "main": "tech_ai",
+       "tags": [
+        "politics_conflicts",
+        "tech_ai"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Russian hackers launch new phishing campaign against journalists"
+      },
+      {
+       "id": 11767,
+       "primary": "tech_ai",
+       "main": "tech_ai",
+       "tags": [
+        "politics_conflicts",
+        "economy_markets",
+        "ukraine_war",
+        "tech_ai"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "EU proposes long-term budget cuts, Big Tech tax, and defense boost"
+      },
+      {
+       "id": 11830,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Ursula von der Leyen blames Russian services for attack on Ukrainian rapper in Denmark"
+      },
+      {
+       "id": 11663,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Dozens of drones target Russia's Leningrad region"
+      },
+      {
+       "id": 11703,
+       "primary": "economy_markets",
+       "main": "economy_markets",
+       "tags": [
+        "economy_markets"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Japan's economy shrinks in third quarter as weather impacts spending"
+      },
+      {
+       "id": 11758,
+       "primary": "tech_ai",
+       "main": "tech_ai",
+       "tags": [
+        "politics_conflicts",
+        "tech_ai"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Newspaper investigation reveals Russian tech firm secretly collected data in Sweden"
+      }
+     ]
+    },
+    {
+     "at": "09:00",
+     "stories": 8,
+     "chars": 1855,
+     "list": [
+      {
+       "id": 12077,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 7,
+       "topic": 8,
+       "headline": "Russian missile and drone barrage kills seven people in Kyiv"
+      },
+      {
+       "id": 11957,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 7,
+       "topic": 8,
+       "headline": "Britain places sanctions on all ten of Russia largest oil producers"
+      },
+      {
+       "id": 12202,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 7,
+       "topic": 7,
+       "headline": "Russian projectile strike kills two and injures ten in Lviv"
+      },
+      {
+       "id": 12027,
+       "primary": "iran_war",
+       "main": "iran_war",
+       "tags": [
+        "politics_conflicts",
+        "economy_markets",
+        "iran_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Iran begins daily electricity rationing amid severe fuel shortages"
+      },
+      {
+       "id": 12266,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Russian air defense intercepts incoming Ukrainian drones"
+      },
+      {
+       "id": 12143,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "US works to broaden Ukraine-Russia ceasefire"
+      },
+      {
+       "id": 12132,
+       "primary": "economy_markets",
+       "main": "economy_markets",
+       "tags": [
+        "economy_markets"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Trump warns of US bankruptcy risk and calls to remove debt limit"
+      },
+      {
+       "id": 11964,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Zelensky says Russia may accept European representation in peace talks"
+      }
+     ]
+    },
+    {
+     "at": "14:00",
+     "stories": 4,
+     "chars": 1016,
+     "list": [
+      {
+       "id": 12335,
+       "primary": "economy_markets",
+       "main": "economy_markets",
+       "tags": [
+        "politics_conflicts",
+        "economy_markets"
+       ],
+       "score": 7,
+       "topic": 8,
+       "headline": "COP31 climate talks stall as fossil fuel rift derails draft deal"
+      },
+      {
+       "id": 12431,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Ukrainian drone attacks injure five and trigger air alarms in Russia"
+      },
+      {
+       "id": 12477,
+       "primary": "armenia",
+       "main": "armenia",
+       "tags": [
+        "politics_conflicts",
+        "armenia"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Azerbaijan occupies 37 percent of Jermuk hydrological reserve"
+      },
+      {
+       "id": 12361,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Ukrainian attacks in Belgorod Oblast leave one dead and six injured"
+      }
+     ]
+    },
+    {
+     "at": "20:00",
+     "stories": 11,
+     "chars": 2897,
+     "list": [
+      {
+       "id": 12751,
+       "primary": "armenia",
+       "main": "armenia",
+       "tags": [
+        "politics_conflicts",
+        "economy_markets",
+        "armenia"
+       ],
+       "score": 7,
+       "topic": 9,
+       "headline": "Armenia publishes draft new constitution omitting Independence Declaration references"
+      },
+      {
+       "id": 12565,
+       "primary": "politics_conflicts",
+       "main": "politics_conflicts",
+       "tags": [
+        "politics_conflicts"
+       ],
+       "score": 8,
+       "topic": 8,
+       "headline": "Pediatrician Annie Andrews wins South Carolina midterm upset"
+      },
+      {
+       "id": 12591,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "US proposal for security guarantees for Ukraine brings cautious optimism in Europe"
+      },
+      {
+       "id": 12733,
+       "primary": "economy_markets",
+       "main": "economy_markets",
+       "tags": [
+        "economy_markets"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "China launches corruption investigation into CNPC deputy general manager Xie Jun"
+      },
+      {
+       "id": 12655,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Five injured in Ukrainian drone attacks on Russia Belgorod Region"
+      },
+      {
+       "id": 12550,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Zelensky urges US to approve Patriot interceptor deliveries amid heavy Russian aerial attacks"
+      },
+      {
+       "id": 12710,
+       "primary": "economy_markets",
+       "main": "economy_markets",
+       "tags": [
+        "economy_markets"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Taiwan considers lowering margin requirements to support stock market"
+      },
+      {
+       "id": 12723,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Ukraine reports recapturing fourteen settlements in eastern Kharkiv Oblast"
+      },
+      {
+       "id": 12639,
+       "primary": "economy_markets",
+       "main": "economy_markets",
+       "tags": [
+        "economy_markets"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "US benchmark mortgage rates surge past seven percent"
+      },
+      {
+       "id": 12580,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Odesa schools switch to remote learning and Kyiv residents face water disruptions"
+      },
+      {
+       "id": 12587,
+       "primary": "economy_markets",
+       "main": "economy_markets",
+       "tags": [
+        "economy_markets"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "South Korea rolls out phased measures to stabilize volatile markets"
+      }
+     ]
+    },
+    {
+     "at": "09:00",
+     "stories": 9,
+     "chars": 2319,
+     "list": [
+      {
+       "id": 12972,
+       "primary": "politics_conflicts",
+       "main": "politics_conflicts",
+       "tags": [
+        "politics_conflicts"
+       ],
+       "score": 8,
+       "topic": 8,
+       "headline": "Democrats secure at least 258 seats in US House"
+      },
+      {
+       "id": 12931,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 7,
+       "topic": 8,
+       "headline": "Russian aerial and missile attacks across Ukraine kill multiple people"
+      },
+      {
+       "id": 13087,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 7,
+       "topic": 8,
+       "headline": "Ukrainian sea drones strike and sink Russian warship in Libya"
+      },
+      {
+       "id": 13146,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 7,
+       "topic": 8,
+       "headline": "Ukrainian drones strike oil refineries and infrastructure in Russia"
+      },
+      {
+       "id": 13051,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Moscow considers response options after attacks on ships in Benghazi"
+      },
+      {
+       "id": 13159,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Denmark expels Russian official over alleged assassination plot"
+      },
+      {
+       "id": 13226,
+       "primary": "economy_markets",
+       "main": "economy_markets",
+       "tags": [
+        "economy_markets"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "EU and Indonesia sign comprehensive trade and tariff agreement"
+      },
+      {
+       "id": 12899,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Drone attacks damage 19 residential buildings in Krasnodar Krai"
+      },
+      {
+       "id": 12994,
+       "primary": "armenia",
+       "main": "armenia",
+       "tags": [
+        "armenia"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Report claims Azerbaijan occupied 37 percent of Jermuk hydrological reserve"
+      }
+     ]
+    },
+    {
+     "at": "14:00",
+     "stories": 6,
+     "chars": 1534,
+     "list": [
+      {
+       "id": 13435,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war",
+        "tech_ai"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Western intelligence warns Russia is preparing to deploy nuclear-armed satellite"
+      },
+      {
+       "id": 13521,
+       "primary": "armenia",
+       "main": "armenia",
+       "tags": [
+        "politics_conflicts",
+        "armenia"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Armenian Prime Minister pledges to resign if constitutional referendum fails"
+      },
+      {
+       "id": 13362,
+       "primary": "economy_markets",
+       "main": "economy_markets",
+       "tags": [
+        "economy_markets"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "European natural gas prices climb above 90 euros per megawatt-hour"
+      },
+      {
+       "id": 13394,
+       "primary": "tech_ai",
+       "main": "tech_ai",
+       "tags": [
+        "economy_markets",
+        "tech_ai"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Nvidia drops to fourth place after capitalization falls 14 percent"
+      },
+      {
+       "id": 13339,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "FSB arrests Russian citizen in Crimea suspected of spying for Ukrainian intelligence"
+      },
+      {
+       "id": 13414,
+       "primary": "tech_ai",
+       "main": "tech_ai",
+       "tags": [
+        "politics_conflicts",
+        "tech_ai"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Russian FSB hackers launch new phishing attacks targeting journalists"
+      }
+     ]
+    },
+    {
+     "at": "now 15:31 (window still open)",
+     "stories": 8,
+     "chars": 2018,
+     "list": [
+      {
+       "id": 13557,
+       "primary": "armenia",
+       "main": "armenia",
+       "tags": [
+        "politics_conflicts",
+        "armenia",
+        "iran_war"
+       ],
+       "score": 7,
+       "topic": 9,
+       "headline": "Armenia launches Trump-backed TRIPP transport project"
+      },
+      {
+       "id": 1000000193,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 7,
+       "topic": 8,
+       "headline": "Russian attacks kill 14 people in Kyiv Oblast and damage facilities"
+      },
+      {
+       "id": 1000000212,
+       "primary": "economy_markets",
+       "main": "economy_markets",
+       "tags": [
+        "economy_markets",
+        "tech_ai"
+       ],
+       "score": 7,
+       "topic": 7,
+       "headline": "CrowdStrike agrees to acquire Zscaler in 43.9 billion dollar deal"
+      },
+      {
+       "id": 13726,
+       "primary": "ukraine_war",
+       "main": "ukraine_war",
+       "tags": [
+        "politics_conflicts",
+        "ukraine_war"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Ukraine ready for four-party talks with Europe, US and Russia"
+      },
+      {
+       "id": 1000000201,
+       "primary": "armenia",
+       "main": "armenia",
+       "tags": [
+        "politics_conflicts",
+        "armenia"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Armenia draft constitution sparks domestic debate and opposition pushback"
+      },
+      {
+       "id": 1000000226,
+       "primary": "economy_markets",
+       "main": "economy_markets",
+       "tags": [
+        "economy_markets"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Coca-Cola Europacific Partners hit by formal EU antitrust probe"
+      },
+      {
+       "id": 1000000242,
+       "primary": "tech_ai",
+       "main": "tech_ai",
+       "tags": [
+        "tech_ai"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Oregon and Virginia attorneys general sue Elon Musk companies over Grok deepfakes"
+      },
+      {
+       "id": 13566,
+       "primary": "tech_ai",
+       "main": "tech_ai",
+       "tags": [
+        "economy_markets",
+        "c9",
+        "tech_ai"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Brent crude drops below 89 dollars and copper sinks amid supply and AI uncertainty"
+      }
+     ]
+    }
+   ]
+  },
+  "armenia_only": {
+   "digests": 7,
+   "stories": 7,
+   "per_digest": 1,
+   "min": 0,
+   "max": 2,
+   "cut": 0,
+   "sizes": [
+    1,
+    0,
+    1,
+    1,
+    1,
+    1,
+    2
+   ],
+   "byTopic": {
+    "armenia": 7
+   },
+   "chars_max": 547,
+   "digests_detail": [
+    {
+     "at": "20:00",
+     "stories": 1,
+     "chars": 290,
+     "list": [
+      {
+       "id": 11735,
+       "primary": "armenia",
+       "main": "armenia",
+       "tags": [
+        "politics_conflicts",
+        "armenia"
+       ],
+       "score": 7,
+       "topic": 9,
+       "headline": "Armenia announces official launch of TRIPP energy project"
+      }
+     ]
+    },
+    {
+     "at": "09:00",
+     "stories": 0,
+     "chars": 78,
+     "list": []
+    },
+    {
+     "at": "14:00",
+     "stories": 1,
+     "chars": 299,
+     "list": [
+      {
+       "id": 12477,
+       "primary": "armenia",
+       "main": "armenia",
+       "tags": [
+        "politics_conflicts",
+        "armenia"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Azerbaijan occupies 37 percent of Jermuk hydrological reserve"
+      }
+     ]
+    },
+    {
+     "at": "20:00",
+     "stories": 1,
+     "chars": 365,
+     "list": [
+      {
+       "id": 12751,
+       "primary": "armenia",
+       "main": "armenia",
+       "tags": [
+        "politics_conflicts",
+        "economy_markets",
+        "armenia"
+       ],
+       "score": 7,
+       "topic": 9,
+       "headline": "Armenia publishes draft new constitution omitting Independence Declaration references"
+      }
+     ]
+    },
+    {
+     "at": "09:00",
+     "stories": 1,
+     "chars": 324,
+     "list": [
+      {
+       "id": 12994,
+       "primary": "armenia",
+       "main": "armenia",
+       "tags": [
+        "armenia"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Report claims Azerbaijan occupied 37 percent of Jermuk hydrological reserve"
+      }
+     ]
+    },
+    {
+     "at": "14:00",
+     "stories": 1,
+     "chars": 251,
+     "list": [
+      {
+       "id": 13521,
+       "primary": "armenia",
+       "main": "armenia",
+       "tags": [
+        "politics_conflicts",
+        "armenia"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Armenian Prime Minister pledges to resign if constitutional referendum fails"
+      }
+     ]
+    },
+    {
+     "at": "now 15:31 (window still open)",
+     "stories": 2,
+     "chars": 547,
+     "list": [
+      {
+       "id": 13557,
+       "primary": "armenia",
+       "main": "armenia",
+       "tags": [
+        "politics_conflicts",
+        "armenia",
+        "iran_war"
+       ],
+       "score": 7,
+       "topic": 9,
+       "headline": "Armenia launches Trump-backed TRIPP transport project"
+      },
+      {
+       "id": 1000000201,
+       "primary": "armenia",
+       "main": "armenia",
+       "tags": [
+        "politics_conflicts",
+        "armenia"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Armenia draft constitution sparks domestic debate and opposition pushback"
+      }
+     ]
+    }
+   ]
+  },
+  "tech_only": {
+   "digests": 7,
+   "stories": 7,
+   "per_digest": 1,
+   "min": 0,
+   "max": 3,
+   "cut": 0,
+   "sizes": [
+    3,
+    0,
+    0,
+    0,
+    0,
+    2,
+    2
+   ],
+   "byTopic": {
+    "tech_ai": 7
+   },
+   "chars_max": 782,
+   "digests_detail": [
+    {
+     "at": "20:00",
+     "stories": 3,
+     "chars": 782,
+     "list": [
+      {
+       "id": 11788,
+       "primary": "tech_ai",
+       "main": "tech_ai",
+       "tags": [
+        "politics_conflicts",
+        "tech_ai"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Russian hackers launch new phishing campaign against journalists"
+      },
+      {
+       "id": 11767,
+       "primary": "tech_ai",
+       "main": "tech_ai",
+       "tags": [
+        "politics_conflicts",
+        "economy_markets",
+        "ukraine_war",
+        "tech_ai"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "EU proposes long-term budget cuts, Big Tech tax, and defense boost"
+      },
+      {
+       "id": 11758,
+       "primary": "tech_ai",
+       "main": "tech_ai",
+       "tags": [
+        "politics_conflicts",
+        "tech_ai"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Newspaper investigation reveals Russian tech firm secretly collected data in Sweden"
+      }
+     ]
+    },
+    {
+     "at": "09:00",
+     "stories": 0,
+     "chars": 78,
+     "list": []
+    },
+    {
+     "at": "14:00",
+     "stories": 0,
+     "chars": 80,
+     "list": []
+    },
+    {
+     "at": "20:00",
+     "stories": 0,
+     "chars": 78,
+     "list": []
+    },
+    {
+     "at": "09:00",
+     "stories": 0,
+     "chars": 78,
+     "list": []
+    },
+    {
+     "at": "14:00",
+     "stories": 2,
+     "chars": 543,
+     "list": [
+      {
+       "id": 13394,
+       "primary": "tech_ai",
+       "main": "tech_ai",
+       "tags": [
+        "economy_markets",
+        "tech_ai"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Nvidia drops to fourth place after capitalization falls 14 percent"
+      },
+      {
+       "id": 13414,
+       "primary": "tech_ai",
+       "main": "tech_ai",
+       "tags": [
+        "politics_conflicts",
+        "tech_ai"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Russian FSB hackers launch new phishing attacks targeting journalists"
+      }
+     ]
+    },
+    {
+     "at": "now 15:31 (window still open)",
+     "stories": 2,
+     "chars": 598,
+     "list": [
+      {
+       "id": 1000000242,
+       "primary": "tech_ai",
+       "main": "tech_ai",
+       "tags": [
+        "tech_ai"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Oregon and Virginia attorneys general sue Elon Musk companies over Grok deepfakes"
+      },
+      {
+       "id": 13566,
+       "primary": "tech_ai",
+       "main": "tech_ai",
+       "tags": [
+        "economy_markets",
+        "c9",
+        "tech_ai"
+       ],
+       "score": 6,
+       "topic": 7,
+       "headline": "Brent crude drops below 89 dollars and copper sinks amid supply and AI uncertainty"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

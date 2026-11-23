@@ -46,8 +46,10 @@ function sameSecret(a, b) {
 
 const nowS = () => Math.floor(Date.now() / 1000);
 export const appUrl = (env, url) => env.APP_URL || `${url.origin}/app/`;
-// Step 17b: the welcome animation, a static file next to the Mini App (public/media/welcome.mp4)
-export const welcomeAnimationUrl = (env, url) => new URL("../media/welcome.mp4", appUrl(env, url)).href;
+// Step 17b: the welcome animation, a static file next to the Mini App (public/media/welcome.mp4).
+// Step 19: a new video; the ?v= mark makes Telegram fetch it again instead of a copy it kept of the old one.
+export const WELCOME_VERSION = "19";
+export const welcomeAnimationUrl = (env, url) => new URL(`../media/welcome.mp4?v=${WELCOME_VERSION}`, appUrl(env, url)).href;
 
 export default {
   async fetch(request, env) {
@@ -107,7 +109,7 @@ export default {
         send: userSender(env, (chatId, text, extra) => sendDigestMessage(env.TELEGRAM_BOT_TOKEN, chatId, text, extra)),
         appUrl: env.APP_URL,
         alert: (text) => sendPlain(env.TELEGRAM_BOT_TOKEN, Number(env.OWNER_TELEGRAM_ID), text),
-      }, now, { digests: !hourly && sw.userSends, guard: hourly && sw.alerts, health: sw.alerts, extraProblems });
+      }, now, { digests: !hourly && sw.userSends, guard: hourly && sw.alerts, stats: hourly, health: sw.alerts, extraProblems });
       // Step 17: the account's free limits (D1 rows, Worker CPU), production only, once an hour
       let usage = {};
       if (hourly && sw.alerts) {

@@ -148,6 +148,9 @@ button.row:active, .tap:active { background: var(--press); }
 .row-icon.tile svg { width: 18px; height: 18px; }
 .row-main { flex: 1 1 auto; min-width: 0; }
 .row-title { font-size: 17px; line-height: 22px; }
+/* Step 19: a main topic name that does not fit on one line (Armenian, French) gets a smaller font, never
+   a second line (fitTitles in app.js, down to 13 px; the ellipsis only as a last resort) */
+.row-title.fit { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .row-sub { font-size: 13px; line-height: 17px; color: var(--text-2); margin-top: 1px; }
 .row-right { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; color: var(--text-2); font-size: 17px; }
 .row-right .value { max-width: 46vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

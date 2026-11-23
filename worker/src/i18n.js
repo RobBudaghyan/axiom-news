@@ -9,7 +9,7 @@ import HY from "../../config/i18n/hy.json" with { type: "json" };
 import FR from "../../config/i18n/fr.json" with { type: "json" };
 
 export { LANGS };
-export const DICTS = { en: EN, ru: RU, hy: HY, fr: FR };
+export const DICTS = { en: EN, ru: RU, fr: FR, hy: HY };   // Step 19: the order users see
 
 // Owner rule: never an em dash (nor an en dash, a figure dash or a horizontal bar), in any language.
 export const FORBIDDEN = /[‒–—―]/;

@@ -119,7 +119,8 @@ try {
   r = await b.run(`return [...document.querySelectorAll('[data-action=lang]')].map((x) => ({ t: [...x.children].map((c) => c.className + ':' + c.textContent).join(' '), on: x.getAttribute('aria-checked'),
     bg: getComputedStyle(x).backgroundColor, cls: x.className }));`);
   check("language: buttons like the times, flag on the left, the chosen one red",
-    r.length === 2 && r[0].t === "emo:🇬🇧 lbl:English" && r[1].t === "emo:🇷🇺 lbl:Русский" && r[0].on === "true" && r[0].bg === RED &&
+    r.length === 4 && r[0].t === "emo:🇬🇧 lbl:English" && r[1].t === "emo:🇷🇺 lbl:Русский" && r[2].t === "emo:🇫🇷 lbl:Français" &&
+    r[3].t === "emo:🇦🇲 lbl:Հայերեն" && r[0].on === "true" && r[0].bg === RED &&
     r[1].bg !== RED && r.every((x) => /\bb\b/.test(x.cls)), JSON.stringify(r));
   r = await b.run(`return { tg: (window.__calls || []).filter((c) => /^set(Header|Background|BottomBar)Color/.test(c)).slice(-3),
     bg: getComputedStyle(document.body).backgroundColor };`);
@@ -132,7 +133,7 @@ try {
   check("a save gives one light haptic tap and no toast", !r.toasts.length && JSON.stringify(r.haptics) === '["haptic impact light"]',
     `${JSON.stringify(r.haptics)} / toasts ${JSON.stringify(r.toasts)}`);
 
-  r = await b.run(`${SERVER} for (const t of ['politics_conflicts', 'armenia', 'russia']) { click('[data-value=' + t + ']'); await wait(120); }
+  r = await b.run(`${SERVER} for (const t of ['politics_conflicts', 'armenia', 'tech_ai']) { click('[data-value=' + t + ']'); await wait(120); }
     await settled(); const t0 = window.__toasts.length; click('[data-value=economy_markets]'); await wait(300);
     return { u: await server(), toast: window.__toasts.slice(t0).join(' | '), on: document.querySelector('[data-value=economy_markets]').getAttribute('aria-checked'),
       hero: text('#hero').trim().replace(/\\s+/g, ' ') };`);
@@ -195,8 +196,8 @@ try {
   r = await b.run(`const h = document.querySelector('#my-topics #topic-hint'); const card = document.querySelector('#my-topics .group');
     return { text: h && h.textContent, after: h && h.previousElementSibling === card, font: h && getComputedStyle(h).fontSize,
       n: document.querySelectorAll('#topic-hint').length };`);
-  check("Step 16: one small hint line under Add a topic: 'e.g. Formula 1, Japan, AI' (13 px)",
-    r.text === "e.g. Formula 1, Japan, AI" && r.after && r.font === "13px" && r.n === 1, JSON.stringify(r));
+  check("Step 16: one small hint line under Add a topic: 'e.g. Stocks, Formula 1, Japan' (Step 19) (13 px)",
+    r.text === "e.g. Stocks, Formula 1, Japan" && r.after && r.font === "13px" && r.n === 1, JSON.stringify(r));
   await b.run("document.activeElement.blur();");
   r = await b.run(`${MY} const i = document.querySelector('#topic-input'); i.value = 'Col'; i.dispatchEvent(new Event('input', { bubbles: true }));
     const shown = getComputedStyle(document.querySelector('.add-go')).display, word = text('.add-go');
@@ -241,7 +242,7 @@ try {
   check("My topics: nonsense is rejected with a short reason, an error haptic, the text stays to edit",
     r.rows.length === 2 && JSON.stringify(r.toasts) === '["This does not look like a news topic."]' && r.input === "asdfgh" &&
     r.haptics.includes("haptic error"), JSON.stringify(r));
-  r = await b.run(`${SERVER} ${MY} const t = window.__toasts.length; addT('Armenian news'); await done();
+  r = await b.run(`${SERVER} ${MY} const t = window.__toasts.length; addT('Latest Armenian news'); await done();
     return { rows: mine(), toasts: window.__toasts.slice(t) };`);
   check("My topics: a main topic is refused with its name", r.rows.length === 2 &&
     JSON.stringify(r.toasts) === '["Armenia is a main topic. Switch it on above."]', JSON.stringify(r));
@@ -278,7 +279,7 @@ try {
     return { rows: mine(), toasts: window.__toasts.slice(t) };`);
   check("My topics: a sixth AI check in a day is refused before any AI call (5 a day per reader)",
     r.rows.length === 2 && JSON.stringify(r.toasts) === '["Up to 5 new topics a day. Try again tomorrow."]', JSON.stringify(r));
-  r = await b.run(`${SERVER} for (const t of ['politics_conflicts', 'armenia', 'russia', 'economy_markets']) {
+  r = await b.run(`${SERVER} for (const t of ['politics_conflicts', 'armenia', 'tech_ai', 'economy_markets']) {
       const el = document.querySelector('[data-action=topic][data-value=' + t + ']'); if (el.getAttribute('aria-checked') === 'true') { el.click(); await wait(150); } }
     await settled(); return (await server()).topics;`);
   check("with a custom topic, every main topic may be off", Array.isArray(r) && r.length === 0, JSON.stringify(r));
@@ -423,19 +424,36 @@ try {
 // Step 13: the owner first gets two custom topics, one with a long name (cut with "..." in its row).
 // Step 13 fixes: Japan (its flag on a red tint) and the long one switched off; each size is also
 // checked in edit mode.
+// Step 19: the four language buttons form a symmetric 2x2 grid (same size, two per row, columns aligned),
+// in the order English, Russian, French, Armenian.
+const LANG_GRID = `const bs = [...document.querySelectorAll('[data-action=lang]')].map((x) => x.getBoundingClientRect());
+  const r = (v) => Math.round(v);
+  return { n: bs.length, order: [...document.querySelectorAll('[data-action=lang]')].map((x) => x.dataset.value).join(),
+    ok: bs.length === 4 && r(bs[0].top) === r(bs[1].top) && r(bs[2].top) === r(bs[3].top) && r(bs[2].top) > r(bs[0].top) &&
+      r(bs[0].left) === r(bs[2].left) && r(bs[1].left) === r(bs[3].left) && new Set(bs.map((b) => r(b.width))).size === 1 &&
+      new Set(bs.map((b) => r(b.height))).size === 1 };`;
+const LANG_NAME = { en: "English", ru: "Russian", fr: "French", hy: "Armenian" };
 await fetch(`${BASE}/__reset`, { method: "POST" });
 for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
   const w = await openBrowser({ width, port });
   try {
     await w.open(`${BASE}/app/?theme=light&as=owner`);
     await w.run(`${ADD("Japan")} ${ADD("International Space Station research")} ${SWITCH("International Space Station research", false)}`);
-    for (const lang of ["ru", "en"]) {
+    for (const lang of ["ru", "en", "fr", "hy"]) {
       await w.open(`${BASE}/app/?theme=light&as=owner`);
       await w.run(API({ lang }));
       for (const scheme of ["light", "dark"]) {
         await w.open(`${BASE}/app/?theme=${scheme}&as=owner`, scheme);
         const L = await w.run(LAYOUT);
-        check(`${width} px, ${lang === "ru" ? "Russian" : "English"}, ${scheme}: the layout rules hold (My topics too)`, layoutOk(L), JSON.stringify(L).slice(0, 600));
+        check(`${width} px, ${LANG_NAME[lang]}, ${scheme}: the layout rules hold (My topics too)`, layoutOk(L), JSON.stringify(L).slice(0, 600));
+        const G = await w.run(LANG_GRID);
+        check(`${width} px, ${LANG_NAME[lang]}, ${scheme}: Step 19: the four languages in a 2x2 grid, en ru fr hy`, G.ok && G.order === "en,ru,fr,hy", JSON.stringify(G));
+        if (lang === "fr" || lang === "hy") {   // the en/ru checks below assert exact words; here the layout in edit mode
+          const E = await w.run(`click('[data-action=edit-topics]'); await wait(450); const L = (() => { ${LAYOUT} })();
+            click('[data-action=edit-topics]'); await wait(250); return { L };`);
+          check(`${width} px, ${LANG_NAME[lang]}, ${scheme}: edit mode keeps the layout rules`, layoutOk(E.L), JSON.stringify(E).slice(0, 600));
+          continue;
+        }
         // the emoji tint is sampled from a canvas; if the emoji font is not ready yet the app retries (300 ms, fonts.ready)
         const M = await w.run(`await until(() => getComputedStyle(document.querySelector('#my-topics .ct .sq')).backgroundColor !== 'rgba(142, 142, 147, 0.18)', 2000).catch(() => {});
           const t = [...document.querySelectorAll('#my-topics .ct .row-title')];
@@ -449,7 +467,7 @@ for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
           M.n === 2 && M.head === (ru ? "Мои темы" : "My topics") && M.edit === (ru ? "Изменить" : "Edit") && M.ph === (ru ? "Добавить тему" : "Add a topic") &&
           M.names[0] === (ru ? "Япония" : "Japan") && M.flag === "🇯🇵" && M.tint === "rgba(255, 59, 48, 0.18)" && M.on.join() === "true,false" &&
           M.long.every((x) => x[1] === "ellipsis" && x[2] === 48) && (width > 400 || M.long[1][0]), JSON.stringify(M));
-        const E = await w.run(`click('[data-action=edit-topics]'); await wait(300); const L = (() => { ${LAYOUT} })();
+        const E = await w.run(`click('[data-action=edit-topics]'); await wait(450); const L = (() => { ${LAYOUT} })();
           const done = text('#my-topics [data-action=edit-topics]'); click('[data-action=edit-topics]'); await wait(200); return { L, done };`);
         check(`${width} px, ${ru ? "Russian" : "English"}, ${scheme}: edit mode keeps the layout rules ("${ru ? "Готово" : "Done"}")`,
           layoutOk(E.L) && E.done === (ru ? "Готово" : "Done"), JSON.stringify(E).slice(0, 600));
@@ -503,7 +521,7 @@ const SETUP_LAYOUT = `const v = document.querySelector('#view');
       const langs = [...document.querySelectorAll('[data-action=lang]')].map((x) => x.innerText.trim().replace(/\\s+/g, ' ') + ':' + x.getAttribute('aria-checked'));
       return { ...a, langs };`);
     check("Step 16 setup step 1: '🌍 Language', 1 of 4, the flag buttons of Settings with Telegram's language chosen, Skip and Next",
-      r.title === "🌍 Language" && r.head === "1 of 4" && r.langs.join() === "🇬🇧 English:true,🇷🇺 Русский:false" && r.nav.join() === "Skip,Next" &&
+      r.title === "🌍 Language" && r.head === "1 of 4" && r.langs.join() === "🇬🇧 English:true,🇷🇺 Русский:false,🇫🇷 Français:false,🇦🇲 Հայերեն:false" && r.nav.join() === "Skip,Next" &&
       !r.tabs && r.heights.join() === "48" && r.navOk && !r.cut.length && !r.sideways, JSON.stringify(r));
     r = await n.run(`${SERVER} const k = calls(); click('[data-action=lang][data-value=ru]'); await settled();
       const a = (() => { ${SETUP_LAYOUT} })(); const u = await server();
@@ -527,7 +545,7 @@ const SETUP_LAYOUT = `const v = document.querySelector('#view');
       const after1 = { saved: u.topics, nextOff: next.disabled, hintHidden: hint.hidden };
       click('[data-value=armenia]'); await settled(); const u2 = await server();
       const after0 = { saved: u2.topics, nextOff: document.querySelector('[data-action=setup-next]').disabled, hintHidden: document.querySelector('#setup-hint').hidden };
-      for (const t of ['politics_conflicts', 'economy_markets', 'armenia', 'russia', 'iran_war']) { click('[data-value=' + t + ']'); await wait(60); }
+      for (const t of ['politics_conflicts', 'economy_markets', 'armenia', 'tech_ai', 'iran_war']) { click('[data-value=' + t + ']'); await wait(60); }
       await settled(); return { after1, after0, u3: (await server()).topics, nextOff: document.querySelector('[data-action=setup-next]').disabled };`);
     check("Step 18 setup: one topic on enables Next and hides the hint (saved at once); switching it off again disables Next",
       r.after1.saved.join() === "armenia" && !r.after1.nextOff && r.after1.hintHidden && r.after0.saved.length === 0 && r.after0.nextOff &&
@@ -574,17 +592,20 @@ const SETUP_LAYOUT = `const v = document.querySelector('#view');
 for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
   const w = await openBrowser({ width, port });
   try {
-    for (const lang of ["en", "ru"]) {
+    for (const lang of ["en", "ru", "fr", "hy"]) {
       for (const scheme of ["light", "dark"]) {
         await fetch(`${BASE}/__reset`, { method: "POST" });
         await w.open(`${BASE}/app/?theme=${scheme}&as=new&tg_lang=${lang}`, scheme);
+        const G = await w.run(LANG_GRID);
+        check(`${width} px, ${LANG_NAME[lang]}, ${scheme}: Step 19: setup's language step is the 2x2 grid, en ru fr hy`, G.ok && G.order === "en,ru,fr,hy", JSON.stringify(G));
         const S = await w.run(`const out = []; for (let i = 0; i < 4; i++) { out.push((() => { ${SETUP_LAYOUT} })());
-          if (i === 1) { click('[data-value=russia]'); await wait(250); }   // Step 18: Next waits for one topic
+          if (i === 1) { click('[data-value=tech_ai]'); await wait(250); }   // Step 18: Next waits for one topic
           if (i < 3) { click('[data-action=setup-next]'); await wait(250); } } return out;`);
-        const ru = lang === "ru";
-        check(`${width} px, ${ru ? "Russian" : "English"}, ${scheme}: the four setup steps (language first) keep the layout rules`,
+        check(`${width} px, ${LANG_NAME[lang]}, ${scheme}: the four setup steps (language first) keep the layout rules`,
           S.every((x) => x.heights.join() === "48" && x.navOk && !x.cut.length && !x.sideways && !x.tabs) &&
-          S.map((x) => x.head).join() === (ru ? "1 из 4,2 из 4,3 из 4,4 из 4" : "1 of 4,2 of 4,3 of 4,4 of 4"), JSON.stringify(S).slice(0, 600));
+          S.every((x, i) => new RegExp(`^${i + 1}[^0-9]+4$`).test(x.head)) &&
+          (lang === "ru" ? S.map((x) => x.head).join() === "1 из 4,2 из 4,3 из 4,4 из 4" : lang !== "en" || S.map((x) => x.head).join() === "1 of 4,2 of 4,3 of 4,4 of 4"),
+          JSON.stringify(S).slice(0, 600));
       }
     }
   } catch (e) {
@@ -605,8 +626,8 @@ for (const [width, port] of [[360, 9334], [390, 9336], [430, 9335]]) {
       const sec = document.querySelector('#announce');
       return { head: text('#adm-announce .adm-head .row-title'), aud: [...sec.querySelectorAll('[data-action=ann-audience]')].map((b) => b.textContent + ':' + b.getAttribute('aria-pressed')),
         foot: text('#announce .section-foot') };`);
-    check("Admin: Announcement section with the English field and the audience (All users, English, Russian)",
-      r.head === "Announcement" && r.aud.join() === "All users:true,English:false,Russian:false" && /English, Russian/.test(r.foot), JSON.stringify(r));
+    check("Admin: Announcement section with the English field and the audience (All users, English, Russian, French, Armenian)",
+      r.head === "Announcement" && r.aud.join() === "All users:true,English:false,Russian:false,French:false,Armenian:false" && /English, Russian/.test(r.foot), JSON.stringify(r));
     r = await a.run(`${SERVER} const t0 = window.__toasts.length; const i = document.querySelector('#ann-en'); i.value = 'New: Economy & Markets from 5 December.';
       i.dispatchEvent(new Event('input', { bubbles: true })); click('[data-action=ann-translate]');
       await until(() => document.querySelectorAll('.ann-text').length, 8000); await wait(300);

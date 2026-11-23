@@ -4,6 +4,7 @@ import { test, describe, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import worker, { HOURLY_CRON } from "../src/index.js";
 import { runTick } from "../src/cron.js";
+import { dueAlerts } from "../src/watch.js";
 import { assessHealth } from "../src/health.js";
 import { ALL, OWNER, TZ, addStory, addUser, fakeD1, mockFetch, yerevan } from "./helpers.mjs";
 
@@ -232,36 +233,46 @@ describe("digest cron", () => {
 describe("health alerts", () => {
   const now = yerevan(16, 0);
   const run = (id, startedAt, status, finished = true) => ({ id, started_at: startedAt, finished_at: finished ? startedAt + 90 : null, status });
+  const kinds = (h) => h.candidates.map((c) => c.kind);
 
   test("healthy: nothing", () => {
     const h = assessHealth({ runs: [run(5, now - 3000, "ok")], lastOk: [{ started_at: now - 3000 }], meta: [] }, now, TZ);
-    assert.equal(h.alert, null);
+    assert.deepEqual(h.candidates, []);
     assert.deepEqual(h.problems, []);
   });
-  test("a failed run alerts once, naming the status and time", () => {
+  test("a failed run: one candidate naming the status and time, a What to do line; the same run never again", () => {
     const h = assessHealth({ runs: [run(6, yerevan(15, 7), "ai_failed"), run(5, yerevan(14, 7), "ok")],
       lastOk: [{ started_at: yerevan(14, 7) }], meta: [] }, now, TZ);
-    assert.match(h.alert, /the hourly news job failed \(status ai_failed, started 15:07\)/);
-    assert.doesNotMatch(h.alert, /[—–]/);
+    assert.deepEqual(kinds(h), ["job_failed"]);
+    assert.match(h.candidates[0].text, /the hourly news job failed \(status ai_failed, started 15:07/);
+    assert.match(h.candidates[0].text, /\nWhat to do: open GitHub Actions/);
+    assert.doesNotMatch(h.candidates[0].text, /[—–]/);
     const meta = h.writes.map((w) => ({ key: w.params[0], value: w.params[1] }));
-    const again = assessHealth({ runs: [run(6, yerevan(15, 7), "ai_failed")], lastOk: [{ started_at: yerevan(14, 7) }],
-      meta: meta.map((m) => ({ ...m, value: m.key === "last_alert_at" ? String(now - 4 * 3600) : m.value })) }, now, TZ);
-    assert.equal(again.alert, null, "the same failed run must not alert twice");
+    const again = assessHealth({ runs: [run(6, yerevan(15, 7), "ai_failed")], lastOk: [{ started_at: yerevan(14, 7) }], meta }, now, TZ);
+    assert.deepEqual(kinds(again), [], "the same failed run must not alert twice");
   });
-  test("no successful run for 3 hours", () => {
-    const h = assessHealth({ runs: [], lastOk: [{ started_at: now - 3 * 3600 - 60 }], meta: [] }, now, TZ);
-    assert.match(h.alert, /no successful hourly job run since 12:59/);
+  test("Step 19: no successful run for 2 hours (not 3)", () => {
+    assert.deepEqual(kinds(assessHealth({ runs: [], lastOk: [{ started_at: now - 2 * 3600 + 60 }], meta: [] }, now, TZ)), []);
+    const h = assessHealth({ runs: [], lastOk: [{ started_at: now - 2 * 3600 - 60 }], meta: [] }, now, TZ);
+    assert.deepEqual(kinds(h), ["no_run"]);
+    assert.match(h.candidates[0].text, /no successful hourly job run since 13:59/);
+    assert.match(h.candidates[0].text, /What to do: check GitHub Actions/);
   });
   test("a run stuck in running for 30+ minutes", () => {
     const h = assessHealth({ runs: [run(7, now - 40 * 60, "running", false)], lastOk: [{ started_at: now - 3600 }], meta: [] }, now, TZ);
-    assert.match(h.alert, /started at 15:20 never finished/);
+    assert.deepEqual(kinds(h), ["job_stuck"]);
+    assert.match(h.candidates[0].text, /started at 15:20 .*never finished/);
   });
-  test("at most one alert per 3 hours", () => {
-    const base = { runs: [], lastOk: [], meta: [{ key: "last_alert_at", value: String(now - 2 * 3600) }] };
-    assert.equal(assessHealth(base, now, TZ).alert, null);
-    assert.ok(assessHealth({ ...base, meta: [{ key: "last_alert_at", value: String(now - 3 * 3600) }] }, now, TZ).alert);
+  test("Step 19: at most one alert per kind per UTC day; another kind still goes out", () => {
+    const today = new Date(now * 1000).toISOString().slice(0, 10);
+    const c = [{ kind: "no_run", text: "a" }, { kind: "feeds_down", text: "b" }];
+    const { due, record } = dueAlerts(c, [{ key: "alert_days", value: JSON.stringify({ no_run: today }) }], now);
+    assert.deepEqual(due.map((x) => x.kind), ["feeds_down"]);
+    assert.deepEqual(JSON.parse(record(["feeds_down"]).params[1]), { no_run: today, feeds_down: today });
+    const tomorrow = dueAlerts(c, [{ key: "alert_days", value: JSON.stringify({ no_run: today, feeds_down: today }) }], now + 86400);
+    assert.equal(tomorrow.due.length, 2);
   });
-  test("cron sends the alert to the owner and stores the throttle", async () => {
+  test("cron sends the alert to the owner once a day and records it (Admin's last alert too)", async () => {
     const { db, sqlite } = fakeD1();
     const sent = [];
     const out = await runTick(db, { send: async () => ({}), alert: async (t) => sent.push(t) }, now);
@@ -269,6 +280,7 @@ describe("health alerts", () => {
     assert.match(sent[0], /no successful hourly job run yet/);
     assert.equal(Number(sqlite.prepare("SELECT value FROM meta WHERE key='last_alert_at'").get().value), now);
     await runTick(db, { send: async () => ({}), alert: async (t) => sent.push(t) }, now + 300);
+    await runTick(db, { send: async () => ({}), alert: async (t) => sent.push(t) }, now + 4 * 3600);
     assert.equal(sent.length, 1);
   });
 });

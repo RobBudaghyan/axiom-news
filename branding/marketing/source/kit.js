@@ -67,29 +67,37 @@ async function loadDigest(el, lang, maxStories = 99, quotes = true) {
   emojify(el);
 }
 
+// Step 19: the six main topics (Technology & AI in, Russia out), names as in config/i18n/<lang>.json:
+// [emoji, tint, en, ru, fr, hy]; CUSTOM is a reader's own topic.
 const TOPICS = [
-  ["🏛️", "0, 122, 255", "Politics & Conflicts", "Политика и конфликты"],
-  ["📈", "48, 176, 199", "Economy & Markets", "Экономика и рынки"],
-  ["🇦🇲", "255, 149, 0", "Armenia", "Армения"],
-  ["🇷🇺", "88, 86, 214", "Russia", "Россия"],
-  ["🇮🇷", "52, 199, 89", "Iran War", "Война в Иране"],
-  ["🇺🇦", "255, 204, 0", "Ukraine War", "Война на Украине"],
+  ["🏛️", "0, 122, 255", "Politics & Conflicts", "Политика и конфликты", "Politique et conflits", "Քաղաքականություն"],
+  ["📈", "48, 176, 199", "Economy & Markets", "Экономика и рынки", "Économie et marchés", "Տնտեսություն և շուկաներ"],
+  ["💻", "88, 86, 214", "Technology & AI", "Технологии и ИИ", "Technologie et IA", "Տեխնոլոգիաներ և ԱԲ"],
+  ["🇦🇲", "255, 149, 0", "Armenia", "Армения", "Arménie", "Հայաստան"],
+  ["🇮🇷", "52, 199, 89", "Iran War", "Война в Иране", "Guerre en Iran", "Իրանի պատերազմ"],
+  ["🇺🇦", "255, 204, 0", "Ukraine War", "Война на Украине", "Guerre en Ukraine", "Ուկրաինայի պատերազմ"],
 ];
-const CUSTOM = ["🏎️", "142, 142, 147", "Formula 1", "Формула-1"];
+const CUSTOM = ["🏎️", "142, 142, 147", "Formula 1", "Формула-1", "Formule 1", "Ֆորմուլա 1"];
 const TIMES = Array.from({ length: 18 }, (_, i) => `${String(i + 6).padStart(2, "0")}:00`);
-const LANGS = [["🇬🇧", "English", "en"], ["🇷🇺", "Русский", "ru"]];
+const LANGS = [["🇬🇧", "English", "en"], ["🇷🇺", "Русский", "ru"], ["🇫🇷", "Français", "fr"], ["🇦🇲", "Հայերեն", "hy"]];
 const TEXT = {
   en: { topics: "Your topics.", times: "Your times.", lang: "Your language.", free: "Free", mine: "My topics",
         next: "Next digest", today: "Today at", name: "Axiom News", link: "t.me/axiom_news_bot" },
   ru: { topics: "Ваши темы.", times: "Ваше время.", lang: "Ваш язык.", free: "Бесплатно", mine: "Мои темы",
         next: "Следующая сводка", today: "Сегодня в", name: "Axiom News", link: "t.me/axiom_news_bot" },
+  fr: { topics: "Vos sujets.", times: "Vos heures.", lang: "Votre langue.", free: "Gratuit", mine: "Mes sujets",
+        next: "Prochain résumé", today: "Aujourd'hui à", name: "Axiom News", link: "t.me/axiom_news_bot" },
+  hy: { topics: "Ձեր թեմաները։", times: "Ձեր ժամերը։", lang: "Ձեր լեզուն։", free: "Անվճար", mine: "Իմ թեմաները",
+        next: "Հաջորդ ամփոփումը", today: "Այսօր, ժամը", name: "Axiom News", link: "t.me/axiom_news_bot" },
 };
 const CLOCK = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.2v5l3.2 2"/></svg>`;
 
 // The Mini App's components (same structure and proportions as worker/public/app).
-function topicRow([e, tint, en, ru], lang) {
+const LANG_INDEX = { en: 2, ru: 3, fr: 4, hy: 5 };
+function topicRow(t, lang) {
+  const [e, tint] = t;
   return `<div class="row"><span class="sq" style="background: rgba(${tint}, 0.18)">${emo(e, "")}</span>` +
-    `<span class="row-title">${lang === "ru" ? ru : en}</span><span class="switch"><span class="knob"></span></span></div>`;
+    `<span class="row-title">${t[LANG_INDEX[lang] ?? 2]}</span><span class="switch"><span class="knob"></span></span></div>`;
 }
 function setSwitch(row, k) {   // k: 0 off .. 1 on
   const sw = row.querySelector(".switch");

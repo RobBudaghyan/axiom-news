@@ -55,7 +55,7 @@ class LateScoreWindow(unittest.TestCase):
 
     def test_translation_eligible(self):
         cfg = load_digest_config()
-        tags = ["armenia", "russia"]
+        tags = ["armenia", "tech_ai"]
         rows = self.db.query(translate.ELIGIBLE_SQL, translate.eligible_params(T0, cfg, tags))
         self.assertIn(1, [r["id"] for r in rows])
         self.assertNotIn(2, [r["id"] for r in rows])

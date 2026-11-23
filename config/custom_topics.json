@@ -15,6 +15,17 @@
   "resolve_per_run": 10,
   "resolve_budget_s": 25,
   "editor_floor": 3,
+  "_main_aliases": "Step 19 (owner): a custom topic is refused (\"X is a main topic, switch it on above\") only when it means a WHOLE main topic. Besides each main topic's own label in every language, these names count as the whole topic, with no AI call (compared after lower-casing and removing punctuation). Anything narrower (Stocks, Finance, Crypto, Oil, AI startups, Armenian diaspora) is a normal custom topic.",
+  "_not_main": "Step 19: names that are only PART of a main topic although they appear in its label (Technology & AI): when the AI calls one of them the same as a main topic, the code ignores that and makes it a normal custom topic.",
+  "not_main": ["AI", "A.I.", "Artificial intelligence", "ИИ", "Искусственный интеллект"],
+  "main_aliases": {
+    "politics_conflicts": ["Politics", "Conflicts", "Politics and conflicts", "World politics", "Political news", "Wars and conflicts", "Политика", "Конфликты", "Политика и конфликты", "Мировая политика"],
+    "economy_markets": ["Economy", "Markets", "Economy and markets", "Economics", "Economic news", "Business and economy", "Экономика", "Рынки", "Экономика и рынки", "Новости экономики"],
+    "tech_ai": ["Tech", "Technology", "Technologies", "Tech news", "Technology news", "Tech and AI", "Technology and AI", "Technology AI", "Технологии", "Технологии и ИИ", "Новости технологий"],
+    "armenia": ["Armenia", "Armenian news", "Armenia news", "News from Armenia", "Армения", "Новости Армении", "Hayastan"],
+    "iran_war": ["Iran war", "War in Iran", "War with Iran", "Iran conflict", "Война в Иране", "Война с Ираном"],
+    "ukraine_war": ["Ukraine war", "War in Ukraine", "Russia Ukraine war", "Russian Ukrainian war", "Война на Украине", "Война в Украине", "Война России и Украины"]
+  },
   "editions": {
     "en":    {"hl": "en-US", "gl": "US", "ceid": "US:en", "name": "English (United States)"},
     "en_gb": {"hl": "en-GB", "gl": "GB", "ceid": "GB:en", "name": "English (United Kingdom)"},

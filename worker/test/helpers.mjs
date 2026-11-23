@@ -8,11 +8,11 @@ import { zonedToUtc } from "../src/digest.js";
 
 const SCHEMA = readFileSync(fileURLToPath(new URL("../../db/schema.sql", import.meta.url)), "utf8");
 export const TZ = "Asia/Yerevan";
-export const ALL = ["politics_conflicts", "economy_markets", "armenia", "russia", "iran_war", "ukraine_war"];
+export const ALL = ["politics_conflicts", "economy_markets", "tech_ai", "armenia", "iran_war", "ukraine_war"];
 export const OWNER = 42;
 export const TOPIC_ROWS = [
   ["politics_conflicts", "Politics & Conflicts", "🏛️", 1], ["economy_markets", "Economy & Markets", "📈", 2],
-  ["armenia", "Armenia", "🇦🇲", 3], ["russia", "Russia", "🇷🇺", 4],
+  ["tech_ai", "Technology & AI", "💻", 3], ["armenia", "Armenia", "🇦🇲", 4],
   ["iran_war", "Iran War", "🇮🇷", 5], ["ukraine_war", "Ukraine War", "🇺🇦", 6],
 ];
 
