@@ -78,7 +78,9 @@ bot @axiom_news_bot at the end.
   App. Shared: two readers with "Colombia" (or "Colombian news") follow one topic. The Worker checks
   each new name ONCE with AI (sensible news topic; not nonsense, offensive or a private person;
   normalised name in four languages, emoji, 2-5 Google News searches, a boost cap 0-2); 5 checks a
-  reader a day (owner unlimited); a main topic is refused; blocked names cannot come back. The
+  reader a day (owner unlimited); only a name for a WHOLE main topic is refused (Step 19: its labels
+  and `main_aliases` with no AI call, e.g. Economy, Markets, Tech, Armenian news; anything narrower,
+  e.g. Stocks, Finance, Crypto, Oil, AI startups, AI, is a normal custom topic); blocked names cannot come back. The
   hourly job searches Google News for topics with an active, unpaused follower (40 requests a run,
   8 new headlines a topic, no-AI dedupe against the pool); pass 1 and the editor know the custom
   topics (sport and the like count as news for them); digests give them their own section. Each
@@ -265,6 +267,7 @@ bot @axiom_news_bot at the end.
 | 2026-11-19 | Branding visuals built in code (HTML/SVG/CSS, headless Edge, ffmpeg), the logo as outlines from Montserrat ExtraBold fitted to the old 320 px photo (Step 17b) | no AI images or stock art (owner); the old logo existed only as a soft JPEG |
 | 2026-11-23 | Technology & AI (`tech_ai`) is a main topic, Russia is not; existing users got tech_ai; Russia stories re-tagged (owner, Step 19) | the owner's choice of topics; Russian sources stay for Politics, Ukraine War and Russian readers |
 | 2026-11-23 | Eight tech feeds; Bloomberg tech capped at 4 a run; The Verge, Wired (all), TechCrunch, The Register, CNBC tech, BBC tech and The Economist science left out (Step 19) | quality and noise: the left-out ones are mostly reviews, deals, start-up rounds or overlap; about 100 to 120 items a weekday, under 1% of free D1 writes |
+| 2026-11-23 | Custom topic rule eased: refused only when it means a WHOLE main topic; `main_aliases` match with no AI call; the check prompt lists narrower examples; `not_main` (AI, ИИ, artificial intelligence) overrides the AI's "same as Technology & AI" (owner, Step 19) | Stocks and Finance were refused because Economy & Markets exists; the real model still called "AI" the main topic because the label contains it |
 | 2026-11-23 | tech_ai boost cap 1, more specific than Economy & Markets (Step 19) | +2 would lift routine launches; a chip export ban is a tech story first |
 
 ## Current status

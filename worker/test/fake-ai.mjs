@@ -41,6 +41,12 @@ export function topicAnswer(prompt) {
   if (/armenian news|новости армении/i.test(input)) {
     return { verdict: "accept", reason_code: "ok", same_as: "armenia", ...empty, reason: "Armenia is a main topic." };
   }
+  if (/^(ai|ии)$/i.test(input)) {   // Step 19: what the real model answered for "AI": the main topic, names filled
+    return { verdict: "accept", reason_code: "ok", same_as: "tech_ai", reason: "A good news topic.",
+      names: { en: "Artificial intelligence", ru: "Искусственный интеллект", hy: "Արհեստական բանականություն", fr: "Intelligence artificielle" },
+      emoji: "🤖", definition: "News about AI.", queries: [{ q: "artificial intelligence", ed: "en" }, { q: "AI", ed: "en" }], boost_max: 1,
+      keywords: { en: ["AI", "artificial intelligence", "OpenAI", "Anthropic", "chatbot"], ru: ["ИИ", "нейросеть", "OpenAI", "чат-бот", "искусственный интеллект"] } };
+  }
   const names = k ? k.names : { en: input, ru: input, hy: input, fr: input };
   const same = readers.find((r) => r.name.toLowerCase() === names.en.toLowerCase());
   return {

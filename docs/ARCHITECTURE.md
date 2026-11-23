@@ -513,6 +513,11 @@ the icon centring (28 checks since Step 5).
   country and war topics and above Economy & Markets.
 - **Feeds:** eight tech feeds (FT, Bloomberg capped at 4 a run, WSJ, NYT, The Guardian, MIT Technology
   Review, Ars Technica, Wired AI); measurements in `reports/step-19-topics.md`.
+- **Custom topic rule (Part 2):** a reader's topic is refused as a main topic only when it means the
+  WHOLE main topic: its labels in every language and `config/custom_topics.json` `main_aliases` match
+  with no AI call; the check prompt gives the AI the same rule with narrower examples (Stocks, Finance,
+  Crypto, Oil, AI startups); `not_main` (AI, ИИ, artificial intelligence) wins over the AI's answer.
+  `worker/scripts/step19-topic-check.mjs` asks the real model about a list of names (no D1).
 - Pass 1 keeps tech news with wide impact (gadget reviews, ordinary launches, small funding rounds stay
   out); the editor has a `tech_ai` boost rule and 4/6/8 examples.
 

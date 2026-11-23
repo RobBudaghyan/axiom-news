@@ -113,11 +113,19 @@ current; judge whether it is the kind of thing news covers.
    For "accept" the reason_code is "ok".
 2. REASON. One short, polite sentence in ${language} for the reader, at most 120 characters. For a
    rejection say why, without repeating anything offensive. Never use the em dash or en dash.
-3. SAME AS. Readers share topics. If the topic means the same as one of the topics below (the same
-   subject in other words, a synonym, a translation, "Colombian news" for "Colombia"), give that tag;
-   otherwise "". Only a clear match: a narrower or wider topic is different ("Bogota" is not "Colombia").
+3. SAME AS. Readers share topics. Give a tag from the lists below only for a clear match, else "".
+   - A MAIN TOPIC tag only when the topic means that WHOLE main topic, in other words or another
+     language ("Economy", "Markets", "Economic news" for economy_markets; "Tech", "Technology" for
+     tech_ai; "Armenian news" for armenia). A topic NARROWER than a main topic is NOT the same: it is a
+     reader topic of its own, so give "" ("Stocks", "Finance", "Banking", "Crypto", "Oil", "Gold",
+     "AI startups", "AI" or "Artificial intelligence" alone (only one part of Technology & AI),
+     "OpenAI", "Chips", "Cybersecurity", "Armenian diaspora", "Yerevan", "Iranian nuclear programme"
+     are all "").
    MAIN TOPICS:
 ${mains}
+   - A READER TOPIC tag when it is the same subject in other words, a synonym or a translation
+     ("Colombian news" for "Colombia"). A narrower or wider topic is different ("Bogota" is not
+     "Colombia").
    READER TOPICS:
 ${others}
 4. For an accepted topic (also fill these when SAME AS matches):
@@ -372,10 +380,11 @@ export function topicNorms(topic) {
   return new Set([...Object.values(names).map(normName), ...parseJson(topic.aliases, [])].filter(Boolean));
 }
 
-// The main topic whose label (in any language) is this name, or null.
-export function mainMatch(norm, mainTopics) {
+// The main topic whose label (in any language) or whole-topic alias (config main_aliases, Step 19)
+// is this name, or null. Only a name for the WHOLE main topic matches; a narrower one never does.
+export function mainMatch(norm, mainTopics, aliases = TOPICS_CFG.main_aliases ?? {}) {
   for (const m of mainTopics) {
-    const labels = [m.label_en, ...Object.keys(DICTS).map((l) => topicLabel(l, m.tag, m.label_en))];
+    const labels = [m.label_en, ...Object.keys(DICTS).map((l) => topicLabel(l, m.tag, m.label_en)), ...(aliases[m.tag] ?? [])];
     if (labels.some((x) => normName(x) === norm)) return m;
   }
   return null;
@@ -413,7 +422,7 @@ export async function addTopic(ctx, body) {
   const same = existing.find((e) => topicNorms(e).has(norm));
   if (same) return join(ctx, same, input, norm, followed, false, result);
   // 2. a main topic: refused (owner)
-  const main = mainMatch(norm, mainTopics);
+  const main = mainMatch(norm, mainTopics, cfg.main_aliases);
   if (main) return refuseMain(ctx, main, input, false, result);
   // 3. the daily limit (owner exempt) and the AI guard
   if (!isOwner && checks >= cfg.checks_per_day) return { error: "topic_checks_limit", vars: { max: cfg.checks_per_day } };
@@ -432,9 +441,11 @@ export async function addTopic(ctx, body) {
     return result("failed", { reason }, [...logs, checkRow(user.id, now, input, "failed", null, calls.map((c) => c.error).join("; "), true)]);
   }
   const a = answer;
+  // Step 19: a name that is only part of a main topic (config not_main, e.g. "AI") is never redirected
+  const partOnly = (cfg.not_main ?? []).some((x) => normName(x) === norm);
   if (a.sameAs) {
     const m = mainTopics.find((x) => x.tag === a.sameAs);
-    if (m) return refuseMain(ctx, m, input, true, result, logs);
+    if (m && !(partOnly && a.names.en)) return refuseMain(ctx, m, input, true, result, logs);
     const c = existing.find((x) => x.tag === a.sameAs);
     if (c) return join(ctx, c, input, norm, followed, true, result, logs);
   }
@@ -449,7 +460,7 @@ export async function addTopic(ctx, body) {
   // the normalised name may be an existing topic the AI did not name (or one made a moment ago)
   const byName = existing.find((e) => [...norms].some((x) => topicNorms(e).has(x)));
   if (byName) return join(ctx, byName, input, norm, followed, true, result, logs);
-  const m2 = [...norms].map((x) => mainMatch(x, mainTopics)).find(Boolean);
+  const m2 = [...norms].map((x) => mainMatch(x, mainTopics, cfg.main_aliases)).find(Boolean);
   if (m2) return refuseMain(ctx, m2, input, true, result, logs);
   // 5. a new shared topic
   const aliases = [...new Set([norm].filter((x) => !Object.values(a.names).map(normName).includes(x)))];

@@ -12,10 +12,19 @@ migration must change together.
   backfill, 48 h replay. Details and numbers: `reports/step-19-topics.md`. Tests: Worker 343, Python 185,
   click-through 164 (one earlier run had 3 timing failures in edit mode; the rerun passed all).
 
+- **Part 2: custom topic rule (2026-11-23).** Refused only when the name means a WHOLE main topic:
+  labels in every language plus `main_aliases` (Economy, Markets, Tech, Technology, Armenian news,
+  Politics, War in Ukraine and the like, in English and Russian) with no AI call; the check prompt has
+  the same rule with narrower examples; `not_main` (AI, ИИ, artificial intelligence) wins over the
+  model, which still called "AI" Technology & AI. Real model (`worker/scripts/step19-topic-check.mjs`):
+  Stocks, Finance, Crypto, Oil, AI startups, AI, Banking, Chips, Cybersecurity, Armenian diaspora,
+  Russia are added as custom topics; Economy, Markets, Economic news, Tech news, Новости технологий go
+  to the main topic; "World news" is too broad. Staging Worker 1e149933, api-check 11 of 11. Tests:
+  Worker 346 (two rules broken on purpose, both caught), Python 185.
+
 ## Next
-- **Part 2: custom topic rule** (only a custom topic that means a WHOLE main topic is redirected;
-  Stocks, Finance, Crypto, Oil, AI startups and the like become normal custom topics).
-- Parts 3 to 7: the owner's message was cut off in the middle of Part 2, so they are not known yet.
+- Parts 3 to 7: the owner's message was cut off in the middle of Part 2 ("...AI startups,
+  Armenian"), so they are not known yet. Part 2's own list may have had more examples after that.
 
 ## Ship (owner pre-approved "ship it" for the whole step), in this order
 1. Merge `step-19` into `main` and push (the job's new topics, prompts and feeds).
