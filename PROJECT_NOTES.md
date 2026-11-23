@@ -377,9 +377,16 @@ bot @axiom_news_bot at the end.
   menu (still work typed); a new Admin dashboard (health line, key numbers, limits, sections that open with
   a tap, only active custom topics, grouped errors); staging silent (`USER_SENDS` off). Worker 341 tests,
   Python 177, click-through 164. Details in `reports/step-18-beta-fixes.md`.
+- **Step 19 done (2026-11-23): topics, languages, welcome video, alerts, branding, shipped (owner
+  pre-approved).** Technology & AI in and Russia out (eight tech feeds, boost cap 1, migration); custom topics
+  refused only for a whole main topic; French and Armenian on (en, ru, fr, hy, a 2x2 grid); the welcome video
+  is the logo plus how it works; alerts once a day per kind with a "What to do" line, `daily_stats`, backups
+  via D1 Time Travel (7 days, `OWNER_GUIDE.md`); branding in four languages. Worker 359 tests, Python 185,
+  click-through 248, 33 of 33 rules broken on purpose caught. Details in
+  `reports/step-19-topics-languages-branding.md`.
 
 ## Next step
-Live (Step 18 shipped; owner checks on his phone). Watch the first days: new readers' welcome, setup and sample digest; Admin "Free limit used" (D1
+Live (Step 19 shipped; the owner checks the new-user flow on his phone and redoes the BotFather previews). Watch the first days: new readers' welcome, setup and sample digest; Admin "Free limit used" (D1
 writes projected about 31% a day); Worker CPU per tick (2 ms after the launch); the editor (45 stories a
 call). Open: staging in its own free Cloudflare account (guide in `reports/step-17c-database-writes.md`),
 the BotFather profile previews (owner).

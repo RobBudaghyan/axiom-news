@@ -88,7 +88,7 @@ migration must change together.
    fit a phone row).
 
 ## Next
-- Part 7: ship and check.
+- Step 19 is done and shipped (Part 7 below). Before and after numbers: `reports/step-19-topics-languages-branding.md`.
 
 ## Ship (owner pre-approved "ship it" for the whole step), in this order
 1. Merge `step-19` into `main` and push (the job's new topics, prompts and feeds).
@@ -97,9 +97,6 @@ migration must change together.
    `node scripts/migrate-step19.mjs --dry`, then without `--dry` (production users and stories).
 4. `node scripts/setup-bot.mjs` (real bot) and `AXIOM_ENV=staging node scripts/setup-bot.mjs` (TEST
    bot): the new bot descriptions.
-
-## Waiting on the owner
-- The rest of the Step 19 brief (Parts 3 to 7, and the end of Part 2's examples).
 
 ## Baseline before shipping (production, read-only, 2026-11-23, last 24 h)
 24 runs, average 105 s (longest 353 s); job D1 writes 22,720, reads 575,294; 3,201 new items; tokens
