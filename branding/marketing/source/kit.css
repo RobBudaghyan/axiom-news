@@ -1,0 +1,81 @@
+/* Marketing kit: shared styles. Inter (SIL OFL, from branding/source/fonts), the three looks as CSS
+   variables (red, light, dark: the Mini App's own light and dark colours), the Mini App's components
+   (grouped card, rows with a tinted square, the iOS switch, the 6-column button grid) and the digest
+   as Telegram shows a rich message. Everything sized in CSS px; pages render at 2x. */
+@font-face { font-family: Inter; font-weight: 400; src: url(../../source/fonts/inter-latin-400-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+2000-206F, U+20AC; }
+@font-face { font-family: Inter; font-weight: 500; src: url(../../source/fonts/inter-latin-500-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+2000-206F, U+20AC; }
+@font-face { font-family: Inter; font-weight: 600; src: url(../../source/fonts/inter-latin-600-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+2000-206F, U+20AC; }
+@font-face { font-family: Inter; font-weight: 700; src: url(../../source/fonts/inter-latin-700-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+2000-206F, U+20AC; }
+@font-face { font-family: Inter; font-weight: 400; src: url(../../source/fonts/inter-cyrillic-400-normal.woff2) format("woff2"); unicode-range: U+0400-04FF; }
+@font-face { font-family: Inter; font-weight: 500; src: url(../../source/fonts/inter-cyrillic-500-normal.woff2) format("woff2"); unicode-range: U+0400-04FF; }
+@font-face { font-family: Inter; font-weight: 600; src: url(../../source/fonts/inter-cyrillic-600-normal.woff2) format("woff2"); unicode-range: U+0400-04FF; }
+@font-face { font-family: Inter; font-weight: 700; src: url(../../source/fonts/inter-cyrillic-700-normal.woff2) format("woff2"); unicode-range: U+0400-04FF; }
+
+:root, .look-red {
+  --bg: #b1161c; --fg: #ffffff; --fg-2: rgba(255, 255, 255, 0.74); --line: rgba(255, 255, 255, 0.42);
+  --card: #ffffff; --text: #000000; --text-2: #8a8a8e; --sep: rgba(60, 60, 67, 0.22);
+  --accent: #b1161c; --accent-text: #b1161c; --accent-soft: rgba(177, 22, 28, 0.06); --track: #e9e9eb;
+  --btn: #ffffff; --btn-text: #000000;
+  --shadow: 0 1px 2px rgba(60, 0, 0, 0.10), 0 30px 70px rgba(60, 0, 0, 0.30);
+  --logo-bar: #ffffff; --logo-axiom: #b1161c; --logo-news: #ffffff;
+}
+.look-light {
+  --bg: #f2f2f7; --fg: #000000; --fg-2: #6e6e73; --line: rgba(0, 0, 0, 0.18);
+  --card: #ffffff; --text: #000000; --text-2: #8a8a8e; --sep: rgba(60, 60, 67, 0.22);
+  --accent: #b1161c; --accent-text: #b1161c; --accent-soft: rgba(177, 22, 28, 0.06); --track: #e9e9eb;
+  --btn: #ffffff; --btn-text: #000000;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 24px 60px rgba(0, 0, 0, 0.08);
+  --logo-bar: #b1161c; --logo-axiom: #ffffff; --logo-news: #b1161c;
+}
+.look-dark {
+  --bg: #000000; --fg: #ffffff; --fg-2: #98989f; --line: rgba(255, 255, 255, 0.28);
+  --card: #1c1c1e; --text: #ffffff; --text-2: #98989f; --sep: rgba(84, 84, 88, 0.65);
+  --accent: #d0232a; --accent-text: #ff6b6b; --accent-soft: rgba(255, 107, 107, 0.12); --track: #39393d;
+  --btn: #1c1c1e; --btn-text: #ffffff;
+  --shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 30px 80px rgba(0, 0, 0, 0.6);
+  --logo-bar: #d0232a; --logo-axiom: #ffffff; --logo-news: #ffffff;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+body { font-family: Inter, sans-serif; background: var(--bg); color: var(--fg);
+  -webkit-font-smoothing: antialiased; font-feature-settings: "cv11", "ss01"; }
+.emo { height: 1.15em; width: auto; vertical-align: -0.2em; margin: 0 0.04em; }
+
+/* big calm headline */
+.head { margin: 0; font-weight: 700; letter-spacing: -0.035em; line-height: 1.06; color: var(--fg); }
+.label { margin: 0; font-size: 14px; color: var(--fg-2); }
+
+/* the Mini App's components */
+.group { background: var(--card); border-radius: 16px; overflow: hidden; color: var(--text); box-shadow: var(--shadow); }
+.row { position: relative; display: flex; align-items: center; gap: 14px; height: 58px; padding: 0 16px; }
+.row + .row::before { content: ""; position: absolute; top: 0; left: 62px; right: 0; border-top: 0.5px solid var(--sep); }
+.sq { flex: 0 0 32px; width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; }
+.sq img { width: 19px; height: 19px; }
+.row-title { flex: 1 1 auto; font-size: 18px; letter-spacing: -0.012em; white-space: nowrap; }
+.switch { position: relative; flex: 0 0 51px; width: 51px; height: 31px; border-radius: 16px; background: var(--track); }
+.switch .knob { position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 1px rgba(0, 0, 0, 0.16); }
+.grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.btn { height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
+  background: var(--btn); color: var(--btn-text); font-size: 17px; font-weight: 500; letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums; position: relative; overflow: hidden; box-shadow: var(--shadow); }
+.btn .fill { position: absolute; inset: 0; background: var(--accent); opacity: 0; }
+.btn .off, .btn .on { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 9px; }
+.btn .on { color: #fff; font-weight: 600; opacity: 0; }
+.btn .emo { height: 20px; vertical-align: 0; margin: 0; }
+.clock { flex: 0 0 52px; width: 52px; height: 52px; border-radius: 13px; background: var(--accent); display: grid; place-items: center; }
+
+/* the digest message (real HTML from data/digest-*.html) */
+.msg { background: var(--card); color: var(--text); border-radius: 26px; font-size: 15px; line-height: 1.42; position: relative; overflow: hidden; }
+.msg .inner { padding: 22px 22px 8px; }
+.msg p { margin: 0 0 10px; }
+.msg p:first-child b { font-weight: 700; }
+.msg a { color: var(--accent-text); text-decoration: none; }
+.msg i { color: var(--text-2); }
+.msg b { font-weight: 600; }
+.msg table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 4px 0 12px; }
+.msg th { border: 1px solid var(--sep); border-radius: 9px; padding: 7px 10px; font-weight: 600; font-size: 14.5px; background: var(--accent-soft); }
+.msg blockquote { margin: -4px 0 12px; padding: 7px 10px 7px 12px; border-left: 3px solid var(--accent);
+  background: var(--accent-soft); border-radius: 4px 8px 8px 4px; font-size: 14px; }
+.msg hr { border: 0; border-top: 1px solid var(--sep); margin: 14px 0; }

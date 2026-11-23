@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Axiom News Story</title>
+<!-- Instagram Story, 1080 x 1920 (540 x 960 CSS px at 2x). setup({len: "05"|"08"|"10"|"15"|"20",
+     look: "red"|"light"|"dark", lang: "en"|"ru"}), then frame(t) draws the exact state at t seconds.
+     Instagram's safe zones: no text above y = 125 or below y = 790 (CSS px; 250 and 340 device px).
+     Each length is its own edit of the same scenes; motion speeds never change (the 20 s one is calmer). -->
+<link rel="stylesheet" href="kit.css">
+<style>
+  .scene { position: absolute; inset: 0; opacity: 0; will-change: opacity, transform; }
+  .abs { position: absolute; }
+  .logo { left: 50%; top: 50%; width: 300px; }
+  .digest { left: 50px; top: 150px; width: 440px; height: 640px; box-shadow: var(--shadow); }
+  .digest .scroll { position: absolute; inset: 0;
+    -webkit-mask-image: linear-gradient(transparent 0, #000 26px, #000 calc(100% - 90px), transparent 100%); }
+  .digest .inner { will-change: transform; }
+  .h { left: 50px; right: 50px; top: 150px; font-size: 48px; }
+  .topics { left: 50px; width: 440px; top: 236px; }
+  .mine-label { left: 66px; top: 606px; }
+  .mine { left: 50px; width: 440px; top: 630px; }
+  .times { left: 50px; width: 440px; top: 236px; }
+  .next { left: 50px; width: 440px; top: 464px; display: flex; align-items: center; gap: 16px; height: 86px; padding: 0 17px; }
+  .next small { display: block; font-size: 14px; color: var(--text-2); margin-bottom: 3px; }
+  .next b { display: block; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .langs { left: 50px; width: 440px; top: 236px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .langs .btn { height: 60px; font-size: 18px; }
+  /* on red, chosen (red) buttons sit on a white panel, as in the app on its light background */
+  .look-red .panel { background: #fff; padding: 10px; border-radius: 24px; box-shadow: var(--shadow); left: 40px; width: 460px; }
+  .look-red .panel .btn { background: #f2f2f7; box-shadow: none; }
+  .story { left: 50px; width: 440px; top: 338px; box-shadow: var(--shadow); }
+  .story .layer { position: absolute; left: 0; right: 0; top: 0; }
+  .shot { left: 70px; top: 150px; width: 400px; height: 640px; border-radius: 30px; overflow: hidden; box-shadow: var(--shadow);
+    background: var(--card); }
+  .shot img { display: block; width: 100%; will-change: transform; }
+  .end-logo { left: 50%; top: 318px; width: 232px; }
+  .end-name { left: 0; right: 0; top: 466px; text-align: center; font-size: 30px; font-weight: 600; letter-spacing: -0.025em; }
+  .end-link { left: 0; right: 0; top: 510px; text-align: center; font-size: 19px; font-weight: 500; color: var(--fg-2); letter-spacing: 0.005em; }
+  .end-free { left: 50%; top: 556px; height: 34px; padding: 0 16px; border-radius: 17px; border: 1.5px solid var(--line);
+    display: flex; align-items: center; font-size: 15px; font-weight: 500; color: var(--fg); white-space: nowrap; }
+</style>
+<script src="../../source/logo-paths.js"></script>
+<script src="kit.js"></script>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+  // [scene, start, end] in seconds, per length; P is the pace of steps inside a scene
+  const EDITS = {
+    "05": { P: 1, s: [["logo", 0, 1.6], ["digest", 1.6, 3.7], ["end", 3.7, 5]] },
+    "08": { P: 1, s: [["logo", 0, 1.8], ["digest", 1.8, 4.2], ["topics", 4.2, 6.5], ["end", 6.5, 8]] },
+    "10": { P: 1, s: [["logo", 0, 1.9], ["digest", 1.9, 4.4], ["topics", 4.4, 6.5], ["times", 6.5, 8.4], ["end", 8.4, 10]] },
+    "15": { P: 1, s: [["logo", 0, 2.5], ["digest", 2.5, 6], ["topics", 6, 8.5], ["times", 8.5, 11], ["lang", 11, 13], ["end", 13, 15]] },
+    "20": { P: 1.25, s: [["logo", 0, 3], ["digest", 3, 7.5], ["topics", 7.5, 10.5], ["times", 10.5, 13.2], ["lang", 13.2, 15.6],
+                        ["settings", 15.6, 18.2], ["end", 18.2, 20]] },
+  };
+  const IN = 0.75, OUT = 0.42, LEAD = 0;   // a scene enters over IN s after the previous one has left (no see-through overlap), leaves over OUT s
+  let EDIT, LANG, LOOK, scenes = [];
+
+  // ---- scenes: build(el) returns draw(lt, dur) (lt = seconds since the scene's start)
+  const SCENES = {
+    logo(el) {
+      el.innerHTML = `<div class="abs logo">${lockupSVG()}</div>`;
+      const logo = $(".logo", el);
+      return (lt, dur) => {   // complete on the first frame, then settles
+        const k = outCubic(prog(lt, 0, Math.min(2.4, dur)));
+        logo.style.transform = `translate(-50%, -50%) scale(${mix(1.075, 1, k).toFixed(5)})`;
+      };
+    },
+    async digest(el) {
+      el.innerHTML = `<div class="abs msg digest" data-in="0" data-rise="120" data-len="1.4"><div class="scroll"><div class="inner"></div></div></div>`;
+      const inner = $(".inner", el);
+      await loadDigest(inner, LANG, 6);
+      return (lt, dur) => {
+        const max = Math.max(0, inner.scrollHeight - 640 + 30);
+        const span = Math.max(0.1, dur - 1.1);
+        const dist = Math.min(max, 58 * span);
+        inner.style.transform = `translateY(${(-dist * inOutSine(prog(lt, 0.95, dur - 0.05))).toFixed(2)}px)`;
+      };
+    },
+    topics(el) {
+      const T = TEXT[LANG];
+      el.innerHTML = `<h1 class="abs head h" data-in="0">${T.topics}</h1>` +
+        `<div class="abs group topics" data-in="0.09">${TOPICS.map((t) => topicRow(t, LANG)).join("")}</div>` +
+        `<p class="abs label mine-label" data-in="0.16">${T.mine}</p>` +
+        `<div class="abs group mine" data-in="0.18">${topicRow(CUSTOM, LANG)}</div>`;
+      const rows = $$(".row", el);   // 0..5 main, 6 Formula 1
+      const order = [0, 1, 2, 6, 3, 5];
+      return (lt, dur) => {
+        const step = 0.2 * EDIT.P, last = dur - OUT - 0.05;
+        rows.forEach((r) => setSwitch(r, 0));
+        order.forEach((i, n) => {
+          const a = 0.5 + n * step;
+          if (a + 0.3 <= last) setSwitch(rows[i], outCubic(prog(lt, a, a + 0.3)));
+        });
+      };
+    },
+    times(el) {
+      const T = TEXT[LANG];
+      el.innerHTML = `<h1 class="abs head h" data-in="0">${T.times}</h1>` +
+        `<div class="abs grid times panel" data-in="0.09">${TIMES.map((x) => btn(x)).join("")}</div>` +
+        `<div class="abs group next"><span class="clock">${CLOCK}</span><span><small>${T.next}</small><b>${T.today} 14:00</b></span></div>`;
+      const btns = $$(".btn", el), next = $(".next", el);
+      const pick = [3, 8, 14];   // 09:00, 14:00, 20:00 (the defaults)
+      return (lt, dur) => {
+        const step = 0.28 * EDIT.P, last = dur - OUT - 0.05;
+        btns.forEach((b) => setBtn(b, 0));
+        pick.forEach((i, n) => { const a = 0.5 + n * step; if (a + 0.3 <= last) setBtn(btns[i], outCubic(prog(lt, a, a + 0.3))); });
+        const na = 0.5 + 3 * step;
+        const k = na + 0.5 <= last ? outCubic(prog(lt, na, na + 0.6)) : 0;
+        next.style.opacity = k;
+        next.style.transform = `translateY(${(1 - k) * 18}px)`;
+      };
+    },
+    async lang(el) {
+      const T = TEXT[LANG], from = LANG === "en" ? "ru" : "en";
+      el.innerHTML = `<h1 class="abs head h" data-in="0">${T.lang}</h1>` +
+        `<div class="abs langs panel" data-in="0.09">${LANGS.map(([f, name]) => btn(`${emo(f)}<span>${name}</span>`)).join("")}</div>` +
+        `<div class="abs msg story" data-in="0.16"><div class="layer" data-l="${from}"><div class="inner"></div></div>` +
+        `<div class="layer" data-l="${LANG}"><div class="inner"></div></div></div>`;
+      for (const layer of $$(".layer", el)) await loadDigest($(".inner", layer), layer.dataset.l, 1);
+      const [bEn, bRu] = $$(".btn", el), story = $(".story", el);
+      const lf = $(`.layer[data-l=${from}]`, el), lt_ = $(`.layer[data-l=${LANG}]`, el);
+      const btnFrom = from === "en" ? bEn : bRu, btnTo = from === "en" ? bRu : bEn;
+      return (lt, dur) => {
+        const s = 0.85 * EDIT.P;
+        const k = inOutCubic(prog(lt, s, s + 0.55));
+        setBtn(btnFrom, 1 - k); setBtn(btnTo, k);
+        lf.style.opacity = 1 - k; lt_.style.opacity = k;
+        story.style.height = `${mix(lf.offsetHeight, lt_.offsetHeight, k).toFixed(2)}px`;
+      };
+    },
+    async settings(el) {
+      const theme = LOOK === "dark" ? "dark" : "light";
+      el.innerHTML = `<div class="abs shot" data-in="0"><img src="shots/settings-${LANG}-${theme}.png"></div>`;
+      const img = $("img", el);
+      return (lt, dur) => {
+        const max = img.offsetHeight - 640;
+        img.style.transform = `translateY(${(-max * 0.62 * inOutSine(prog(lt, 0.7, dur - 0.1))).toFixed(2)}px)`;
+      };
+    },
+    end(el) {
+      const T = TEXT[LANG];
+      el.innerHTML = `<div class="abs end-logo" data-in="0">${lockupSVG()}</div>` +
+        `<div class="abs end-name" data-in="0.1">${T.name}</div>` +
+        `<div class="abs end-link" data-in="0.18">${T.link}</div>` +
+        `<div class="abs end-free" data-in="0.26">${T.free}</div>`;
+      return () => {};
+    },
+  };
+  const centred = (el) => el.classList.contains("end-logo") || el.classList.contains("end-free");
+
+  window.setup = async ({ len, look, lang }) => {
+    EDIT = EDITS[len]; LANG = lang; LOOK = look;
+    document.documentElement.lang = lang;
+    document.body.className = `look-${look}`;
+    const stage = $("#stage");
+    stage.innerHTML = "";
+    scenes = [];
+    for (const [name, a, b] of EDIT.s) {
+      const el = document.createElement("div");
+      el.className = `scene s-${name}`;
+      stage.append(el);
+      const draw = await SCENES[name](el);
+      scenes.push({ name, a, b, el, draw, parts: $$("[data-in]", el) });
+    }
+    await document.fonts.ready;
+    await imagesReady(stage);
+    window.frame(0);
+    return true;
+  };
+
+  window.frame = (t) => {
+    const n = scenes.length;
+    scenes.forEach((s, i) => {
+      const first = i === 0, last = i === n - 1;
+      const start = first ? s.a : s.a - LEAD;
+      const lt = t - start;
+      const vis = t >= start - 0.001 && (last || t <= s.b + 0.001);
+      if (!vis) { s.el.style.opacity = 0; s.el.style.visibility = "hidden"; return; }
+      s.el.style.visibility = "visible";
+      const out = last ? 0 : inOutCubic(prog(t, s.b - OUT, s.b));
+      s.el.style.opacity = (1 - out).toFixed(4);
+      s.el.style.transform = `translateY(${(-16 * out).toFixed(2)}px)`;
+      for (const p of s.parts) {   // staggered entrance: rise and fade in
+        const k = first ? 1 : outCubic(prog(lt, +p.dataset.in, +p.dataset.in + (+p.dataset.len || IN)));
+        const y = (1 - k) * (+p.dataset.rise || 30);
+        p.style.opacity = k.toFixed(4);
+        p.style.transform = (centred(p) ? "translateX(-50%) " : "") + `translateY(${y.toFixed(2)}px)`;
+      }
+      s.draw(Math.max(0, lt), s.b - start);
+    });
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Axiom News feed</title>
+<!-- Instagram feed, 1080 x 1350 (540 x 675 CSS px at 2x). setup({lang, slide: "post" | 1 | 2 | 3 | 4}).
+     post: the single portrait post. 1-4: the carousel (logo on red; what you get, with a real digest;
+     topics, with a custom topic; times, languages, the link and Free). -->
+<link rel="stylesheet" href="kit.css">
+<style>
+  .page { position: absolute; inset: 0; overflow: hidden; }
+  .abs { position: absolute; }
+  .h { left: 44px; right: 44px; top: 54px; font-size: 40px; }
+  .sub { left: 44px; right: 44px; top: 104px; margin: 0; font-size: 17px; line-height: 1.38; color: var(--fg-2); letter-spacing: -0.01em; text-wrap: balance; }
+  .msg { box-shadow: var(--shadow); }
+  .fadecard { -webkit-mask-image: linear-gradient(#000 70%, transparent 100%); }
+  .pill { height: 32px; padding: 0 15px; border-radius: 16px; border: 1.5px solid var(--line); display: inline-flex; align-items: center;
+    font-size: 14px; font-weight: 500; color: var(--fg); }
+  .link { font-size: 16px; font-weight: 500; color: var(--fg-2); }
+  .hint { font-size: 13px; color: var(--fg-2); }
+  .grid .btn { height: 50px; font-size: 15.5px; }
+  .langs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .langs .btn { height: 52px; }
+</style>
+<script src="../../source/logo-paths.js"></script>
+<script src="kit.js"></script>
+</head>
+<body>
+<div class="page" id="page"></div>
+<script>
+  const COPY = {
+    en: { line: "A short digest of the important news, at the times you choose.",
+          get: "What you get.", getSub: "A short digest of the important news, from outlets like the Financial Times, The Economist and Bloomberg.",
+          topicsSub: "Six main topics, and up to three of your own.", hint: "e.g. Formula 1, Japan, AI",
+          timesSub: "From 06:00 to 23:00, up to five a day.", langs: "Available in several languages." },
+    ru: { line: "Короткая сводка важных новостей в выбранное вами время.",
+          get: "Что вы получаете.", getSub: "Короткая сводка важных новостей из изданий вроде Financial Times, The Economist и Bloomberg.",
+          topicsSub: "Шесть основных тем и до трёх своих.", hint: "например: Формула-1, Япония, ИИ",
+          timesSub: "С 06:00 до 23:00, до пяти раз в день.", langs: "Доступно на нескольких языках." },
+  };
+  const page = $("#page");
+  const SLIDES = {
+    async post(L, T, C) {
+      document.body.className = "look-red";
+      page.innerHTML = `<div class="abs" style="left:50%;top:58px;width:196px;transform:translateX(-50%)">${lockupSVG()}</div>` +
+        `<p class="abs sub" style="top:178px;left:70px;right:70px;text-align:center;color:#fff;font-size:21px;font-weight:600;letter-spacing:-0.018em;line-height:1.28">${C.line}</p>` +
+        `<p class="abs link" style="left:0;right:0;top:252px;text-align:center">${T.link}</p>` +
+        `<div class="abs msg" style="left:50px;right:50px;top:300px;height:420px;border-radius:24px 24px 0 0"><div class="inner"></div></div>`;
+      await loadDigest($(".inner"), L, 3);
+    },
+    async 1(L, T) {
+      document.body.className = "look-red";
+      page.innerHTML = `<div class="abs" style="left:50%;top:50%;width:300px;transform:translate(-50%,-50%)">${lockupSVG()}</div>`;
+    },
+    async 2(L, T, C) {
+      document.body.className = "look-light";
+      page.innerHTML = `<h1 class="abs head h">${C.get}</h1><p class="abs sub">${C.getSub}</p>` +
+        `<div class="abs msg fadecard" style="left:44px;right:44px;top:186px;height:448px"><div class="inner"></div></div>`;
+      await loadDigest($(".inner"), L, 3);
+    },
+    async 3(L, T, C) {
+      document.body.className = "look-light";
+      page.innerHTML = `<h1 class="abs head h">${T.topics}</h1><p class="abs sub">${C.topicsSub}</p>` +
+        `<div class="abs group" style="left:44px;right:44px;top:156px">${TOPICS.map((t) => topicRow(t, L)).join("")}</div>` +
+        `<p class="abs label" style="left:60px;top:519px">${T.mine}</p>` +
+        `<div class="abs group" style="left:44px;right:44px;top:542px">${topicRow(CUSTOM, L)}</div>` +
+        `<p class="abs hint" style="left:60px;top:610px;margin:0">${C.hint}</p>`;
+      $$(".row").forEach((r, i) => setSwitch(r, [1, 1, 1, 0, 0, 1, 1][i]));
+    },
+    async 4(L, T, C) {
+      document.body.className = "look-light";
+      page.innerHTML = `<h1 class="abs head h">${T.times}</h1><p class="abs sub">${C.timesSub}</p>` +
+        `<div class="abs grid" style="left:44px;right:44px;top:156px">${TIMES.map((x) => btn(x)).join("")}</div>` +
+        `<p class="abs label" style="left:46px;top:342px;font-size:15px;color:var(--fg);font-weight:500">${C.langs}</p>` +
+        `<div class="abs langs" style="left:44px;right:44px;top:372px">${LANGS.map(([f, n]) => btn(`${emo(f)}<span>${n}</span>`)).join("")}</div>` +
+        `<div class="abs" style="left:0;right:0;top:494px;display:flex;flex-direction:column;align-items:center;gap:12px">` +
+        `<div style="width:132px">${lockupSVG()}</div><span class="link" style="margin-top:6px">${T.link}</span><span class="pill">${T.free}</span></div>`;
+      $$(".grid .btn").forEach((b, i) => setBtn(b, [3, 8, 14].includes(i) ? 1 : 0));
+      $$(".langs .btn").forEach((b, i) => setBtn(b, (L === "en" ? 0 : 1) === i ? 1 : 0));
+    },
+  };
+  window.setup = async ({ lang, slide }) => {
+    document.documentElement.lang = lang;
+    await SLIDES[slide](lang, TEXT[lang], COPY[lang]);
+    await document.fonts.ready;
+    await imagesReady();
+    return true;
+  };
+  window.frame = () => {};
+</script>
+</body>
+</html>

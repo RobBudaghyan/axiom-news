@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>How it works</title>
+<!-- "How it works" for the bot: 8 s, 1280 x 720 (640 x 360 CSS px at 2x), loops cleanly, no words,
+     so one file fits every language. A phone-width screen in the Mini App's light style: topics switch
+     on, digest times are chosen, a digest arrives. Labels are drawn as soft bars; only emoji, times
+     and switches show. The last frame equals the first. -->
+<link rel="stylesheet" href="kit.css">
+<style>
+  body { background: #b1161c; }
+  .screen { position: absolute; left: 50%; top: 50%; width: 390px; height: 660px; margin: -330px 0 0 -195px;
+    transform: scale(0.47); background: #f2f2f7; border-radius: 52px; overflow: hidden;
+    box-shadow: 0 2px 4px rgba(60, 0, 0, 0.12), 0 40px 90px rgba(60, 0, 0, 0.38); --shadow: none; }
+  .view { position: absolute; inset: 0; padding: 34px 16px 0; will-change: transform, opacity; }
+  .bar { display: block; height: 13px; border-radius: 7px; background: rgba(0, 0, 0, 0.13); }
+  .bar.t { height: 30px; border-radius: 10px; background: rgba(0, 0, 0, 0.82); width: 150px; margin: 6px 0 22px 4px; }
+  .bar.s { height: 10px; background: rgba(0, 0, 0, 0.09); margin: 0 0 9px 4px; }
+  .row .bar { flex: 0 0 auto; }
+  .gap { height: 22px; }
+  .next { display: flex; align-items: center; gap: 14px; height: 76px; padding: 0 14px; margin-top: 20px; }
+  .next .clock { flex-basis: 46px; width: 46px; height: 46px; }
+  .chat { padding: 0; background: #f2f2f7; }
+  .chat .top { height: 92px; background: rgba(255, 255, 255, 0.92); border-bottom: 0.5px solid rgba(60, 60, 67, 0.2);
+    display: flex; align-items: flex-end; gap: 12px; padding: 0 18px 14px; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; background: #b1161c; display: grid; place-items: center; overflow: hidden; }
+  .avatar svg { width: 30px; }
+  .bubble { position: absolute; left: 12px; right: 44px; bottom: 26px; border-radius: 20px 20px 20px 6px; padding: 16px 16px 30px; }
+  .bubble .pill { height: 30px; border-radius: 9px; border: 1px solid rgba(60, 60, 67, 0.16); background: rgba(177, 22, 28, 0.06);
+    display: flex; align-items: center; justify-content: center; gap: 8px; margin: 12px 0 14px; }
+  .bubble .story { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
+  .bubble .story .emo { height: 17px; vertical-align: 0; margin: 0; }
+  .bubble .quote { border-left: 3px solid #b1161c; background: rgba(177, 22, 28, 0.06); border-radius: 3px 8px 8px 3px; padding: 9px 10px 1px; margin: 4px 0 14px; }
+  .bubble .quote .bar { height: 9px; margin-bottom: 8px; background: rgba(0, 0, 0, 0.1); }
+  .bubble .time { position: absolute; right: 14px; bottom: 9px; font-size: 13px; color: #8e8e93; font-variant-numeric: tabular-nums; }
+  .grid .btn { font-size: 15px; letter-spacing: -0.02em; }
+  .red { background: rgba(177, 22, 28, 0.55) !important; }
+</style>
+<script src="../../source/logo-paths.js"></script>
+<script src="kit.js"></script>
+</head>
+<body>
+<div class="screen">
+  <div class="view v-topics"></div>
+  <div class="view v-times"></div>
+  <div class="view chat v-chat"></div>
+</div>
+<script>
+  const W = [148, 172, 96, 84, 110, 132];   // label bar widths (the names' lengths, roughly)
+  const vT = $(".v-topics"), vTi = $(".v-times"), vC = $(".v-chat");
+  const row = ([e, tint], w) => `<div class="row"><span class="sq" style="background: rgba(${tint}, 0.18)">${emo(e, "")}</span>` +
+    `<span class="bar" style="width:${w}px"></span><span style="flex:1"></span><span class="switch"><span class="knob"></span></span></div>`;
+  vT.innerHTML = `<span class="bar t"></span><span class="bar s" style="width:58px"></span>` +
+    `<div class="group">${TOPICS.map((t, i) => row(t, W[i])).join("")}</div><div class="gap"></div>` +
+    `<span class="bar s" style="width:76px"></span><div class="group">${row(CUSTOM, 104)}</div>`;
+  vTi.innerHTML = `<span class="bar t"></span><span class="bar s" style="width:96px"></span>` +
+    `<div class="grid">${TIMES.map((x) => btn(x)).join("")}</div>` +
+    `<div class="group next"><span class="clock">${CLOCK}</span><span style="flex:1"><span class="bar s" style="width:90px;margin:0 0 9px"></span>` +
+    `<span class="bar" style="width:150px;height:16px;background:rgba(0,0,0,.75)"></span></span></div>`;
+  const story = (emos, w1, w2, quote) => `<div class="story">${emos.map((e) => emo(e)).join("")}<span class="bar" style="width:${w1}px;background:rgba(0,0,0,.7)"></span></div>` +
+    `<div class="story"><span class="bar" style="width:${w2}px;background:rgba(0,0,0,.7)"></span><span class="bar red" style="width:58px"></span></div>` +
+    (quote ? `<div class="quote"><span class="bar" style="width:96%"></span><span class="bar" style="width:88%"></span><span class="bar" style="width:62%"></span></div>` : "");
+  vC.innerHTML = `<div class="top"><span class="avatar">${lockupSVG()}</span><span><span class="bar" style="width:110px;height:13px;background:rgba(0,0,0,.75);margin-bottom:7px"></span>` +
+    `<span class="bar" style="width:52px;height:10px"></span></span></div>` +
+    `<div class="msg bubble"><span class="bar" style="width:200px;background:rgba(0,0,0,.75)"></span>` +
+    `<div class="pill">${emo("📈")}<span class="bar" style="width:120px;height:11px"></span></div>` +
+    story(["🇪🇺", "⚡"], 200, 150, true) + story(["🇪🇺", "🤝"], 180, 120, true) + story(["🇨🇳", "📈"], 196, 90, false) +
+    `<span class="time">14:00</span></div>`;
+  // the avatar is the logo's colours on red: white bar, red AXIOM, white NEWS
+  document.body.style.setProperty("--logo-bar", "#fff"); document.body.style.setProperty("--logo-axiom", "#b1161c");
+  document.body.style.setProperty("--logo-news", "#fff");
+
+  const rowsT = $$(".row", vT), btns = $$(".btn", vTi), next = $(".next", vTi), bubble = $(".bubble", vC);
+  const ON = [0, 1, 2, 6, 3, 5];   // the order the switches turn on (6 = the custom topic)
+  const PICK = [3, 8, 14];         // 09:00, 14:00, 20:00
+  const slide = (el, x, o) => { el.style.transform = `translateX(${x.toFixed(2)}px)`; el.style.opacity = o.toFixed(4); };
+
+  window.setup = async () => { await document.fonts.ready; await imagesReady(); window.frame(0); return true; };
+  window.frame = (t) => {
+    // 0.0-2.4 topics switch on; 2.5-3.1 slide to times; 3.2-4.4 times chosen; 4.9-5.5 slide to the chat;
+    // 5.6-6.4 the digest arrives; 7.25-8.0 back to the start (the topics view, every switch off)
+    rowsT.forEach((r) => setSwitch(r, 0));
+    ON.forEach((i, n) => { const a = 0.45 + n * 0.28; setSwitch(rowsT[i], outCubic(prog(t, a, a + 0.32))); });
+    const s1 = inOutCubic(prog(t, 2.5, 3.1)), s2 = inOutCubic(prog(t, 4.9, 5.5));
+    btns.forEach((b) => setBtn(b, 0));
+    PICK.forEach((i, n) => { const a = 3.25 + n * 0.32; setBtn(btns[i], outCubic(prog(t, a, a + 0.3))); });
+    const nk = outCubic(prog(t, 4.2, 4.7));
+    next.style.opacity = nk; next.style.transform = `translateY(${(1 - nk) * 14}px)`;
+    const back = inOutCubic(prog(t, 7.25, 8.0));   // chat fades out, the topics view (reset) fades in
+    if (t < 7.25) {
+      slide(vT, -390 * s1, 1);
+      slide(vTi, 390 * (1 - s1) - 390 * s2, 1);
+      slide(vC, 390 * (1 - s2), 1);
+    } else {
+      rowsT.forEach((r) => setSwitch(r, 0));
+      slide(vT, 0, back); vT.style.transform = `translateY(${((1 - back) * 16).toFixed(2)}px)`;
+      slide(vTi, 390, 0);
+      slide(vC, 0, 1 - back);
+    }
+    const bk = outCubic(prog(t, 5.6, 6.5));
+    bubble.style.opacity = bk;
+    bubble.style.transform = `translateY(${((1 - bk) * 60).toFixed(2)}px)`;
+    if (t < 2.5) { vTi.style.opacity = 0; }
+    if (t < 4.9) { vC.style.opacity = 0; }
+    if (t === 0) { slide(vT, 0, 1); }
+  };
+</script>
+</body>
+</html>
