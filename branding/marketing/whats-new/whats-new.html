@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>What's new</title>
+<script>
+  // ============ EDIT ONLY THESE THREE LINES, then run:  node branding/marketing/whats-new/render.mjs ============
+  const CARD = {
+    label: "What's new",
+    title: "Your own topics",
+    text: "Add up to three topics of your own in Settings, for example Formula 1 🏎️",
+  };
+  // ================================================================================================================
+  window.KIT_BASE = "../source/";
+</script>
+<!-- What's new card: 1080 x 1350 (feed) and 1080 x 1920 (Story, text inside Instagram's safe zones).
+     setup({shape: "feed" | "story"}). The logo, a small label, a title, one or two short sentences, the link. -->
+<link rel="stylesheet" href="../source/kit.css">
+<style>
+  body { background: var(--bg); }
+  .page { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .logo { width: 150px; }
+  .label { height: 30px; padding: 0 14px; border-radius: 15px; border: 1.5px solid var(--line); display: inline-flex; align-items: center;
+    font-size: 14px; font-weight: 600; letter-spacing: 0.01em; color: var(--fg); }
+  .title { margin: 0; font-size: 44px; font-weight: 700; letter-spacing: -0.035em; line-height: 1.08; max-width: 440px; text-wrap: balance; }
+  .text { margin: 0; font-size: 20px; line-height: 1.4; color: var(--fg-2); max-width: 420px; text-wrap: balance; letter-spacing: -0.01em; }
+  .link { font-size: 16px; font-weight: 500; color: var(--fg-2); }
+  .spacer { flex: 1 1 auto; }
+  .feed { padding: 60px 0 52px; }
+  .story { padding: 150px 0 190px; }   /* safe zones: nothing above 125 or below 790 CSS px */
+  .feed .label, .story .label { margin-bottom: 22px; }
+  .title { margin-bottom: 18px; }
+</style>
+<script src="../../source/logo-paths.js"></script>
+<script src="../source/kit.js"></script>
+</head>
+<body class="look-red">
+<div class="page" id="page"></div>
+<script>
+  const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+  window.setup = async ({ shape }) => {
+    const page = $("#page");
+    page.className = `page ${shape}`;
+    page.innerHTML = `<div class="logo">${lockupSVG()}</div><div class="spacer"></div>` +
+      `<span class="label">${esc(CARD.label)}</span><h1 class="title">${esc(CARD.title)}</h1><p class="text">${esc(CARD.text)}</p>` +
+      `<div class="spacer"></div><span class="link">t.me/axiom_news_bot</span>`;
+    emojify(page);
+    await document.fonts.ready;
+    await imagesReady();
+    return true;
+  };
+  window.frame = () => {};
+</script>
+</body>
+</html>
