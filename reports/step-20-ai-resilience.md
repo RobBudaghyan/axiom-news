@@ -60,10 +60,12 @@ about 3,100 tokens, and Groq calls were limited to 3,500 tokens, so **each Groq 
    translations of the last 48 h).
 
 ## Tests
-- Python 216 tests (31 new, `tests/test_step20.py`), Worker 375 (14 new, `worker/test/step20.test.mjs`),
-  click-through PASS. **35 of 35 new rules broken on purpose were caught**
-  (`venv/Scripts/python scripts/step20_mutations.py`); two tests were too weak at first (a model whose retries
-  ran out, an unreadable ledger in the Worker) and were strengthened.
+- Python 217 tests (32 new, `tests/test_step20.py`), Worker 373 (14 new, `worker/test/step20.test.mjs`).
+  **35 of 35 new rules broken on purpose were caught** (`venv/Scripts/python scripts/step20_mutations.py`); two
+  tests were too weak at first (a model whose retries ran out, an unreadable ledger in the Worker) and were
+  strengthened. The Mini App click-through passed for the new Admin rows except 3 checks that failed only because
+  of my preview's demo data (a paid day makes the demo's health line amber); the demo data was moved to yesterday,
+  and the check was stopped before its rerun finished (the computer went off), so it was not rerun.
 - Staging, real AI (`AXIOM_ENV=staging`):
   - **(a) free Gemini forced to 503, paid key off:** pass 1 and the editor ran on Groq, **$0 spent**; the
     translations waited (no strong free model: the main key is 402). With the old Groq sizes this run made only
@@ -72,7 +74,13 @@ about 3,100 tokens, and Groq calls were limited to 3,500 tokens, so **each Groq 
     1 to 3 a run); Russian translations through the emergency key with the meaning check (13 of 13, $0.0096).
     It also showed two problems, both fixed and tested: a Groq JSON 400 counted as an outage, and paid pass-1
     chunks too big for the 12k answer limit.
-  - **(b) every free option forced to fail** and **(c) the cap:** see below.
+  - **(b) every free option forced to fail:** the emergency key served pass 1 (25 stories in 240 s), each paid
+    call logged in `ai_spend` with why; the alert text the hourly tick sends (staging never sends alerts):
+    "the paid emergency Gemini key was used today: $0.0999 so far (10 calls ...). Why: gemini-3.5-flash-lite:
+    HTTP 402; ... openai/gpt-oss-20b: HTTP 400". The paid editor answer ran past the 12k limit (60 stories):
+    fixed, the paid editor now asks for 20 + 5.
+  - **(c) the cap:** staging's day stopped at **$0.0999** of $0.10; the next paid calls were refused before any
+    request: "emergency key not used: daily cap $0.10 (spent $0.0999 today)".
   - **(d) the owner's bad Armenian example** through the real meaning check: read back as "Ukrainian
     deception says that Russian special services posted 20 million fortune-telling job announcements on
     Discord"; the model said the meaning changed ("intelligence" as "deception", "espionage" as

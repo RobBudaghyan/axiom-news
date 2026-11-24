@@ -61,31 +61,49 @@ class GroqPool:
             self.sleep(wait)
         return wait
 
+    ROUNDS = 4   # when every model is only briefly busy (a per-minute 429), wait and go round again
+
     def generate(self, prompt: str, schema: dict | None) -> CallResult:
         last: AIError | None = None
-        order = [self.current] + [m for m in self.members if m is not self.current]
-        for m in order:
-            if m.dead:
-                continue
-            self.current = m
-            try:
-                return m.generate(prompt, schema)
-            except AIError as exc:
-                last = exc
-                text = str(exc).lower()
-                if exc.kind == "rate_limit":
-                    ra = exc.retry_after if exc.retry_after is not None else 60
-                    if ra > 120 or "per day" in text or "(rpd)" in text or "(tpd)" in text:
-                        m.dead = "daily limit"
-                    else:
-                        self.busy_until[m.model] = self.clock() + ra
+        for n in range(self.ROUNDS):
+            only_busy = True
+            order = ([self.current] + [m for m in self.members if m is not self.current] if n == 0
+                     else sorted(self.members, key=lambda m: self.busy_until.get(m.model, 0)))   # the first free first
+            for m in order:
+                if m.dead:
                     continue
-                if exc.kind == "network" or (exc.kind == "http" and (exc.status or 0) >= 500):
-                    continue
-                if exc.kind == "http" and exc.status in (400, 404) and "model" in text:
-                    m.dead = f"HTTP {exc.status}"
-                    continue
-                raise          # an answer problem (too large, truncated, invalid): the caller decides
+                self.current = m
+                try:
+                    return m.generate(prompt, schema)
+                except AIError as exc:
+                    last = exc
+                    text = str(exc).lower()
+                    if exc.kind == "rate_limit":
+                        ra = exc.retry_after if exc.retry_after is not None else 60
+                        if ra > 120 or "per day" in text or "(rpd)" in text or "(tpd)" in text:
+                            m.dead = "daily limit"
+                        else:
+                            self.busy_until[m.model] = self.clock() + ra
+                        continue
+                    only_busy = False
+                    if exc.kind == "network" or (exc.kind == "http" and (exc.status or 0) >= 500):
+                        continue
+                    if exc.kind == "too_large":
+                        continue   # Step 20 (seen live): gpt-oss-20b refused a request qwen accepted; the next model may
+                                   # take it (if none does, the last error, too_large, goes to the caller, which splits)
+                    if exc.kind == "http" and exc.status in (400, 404) and "model" in text:
+                        m.dead = f"HTTP {exc.status}"
+                        continue
+                    raise          # an answer problem (too large, truncated, invalid): the caller decides
+            alive = self.alive()
+            if not (only_busy and alive):
+                break
+            # Step 20 (seen live): all three models answered a per-minute 429 "try again in 1 s" at once;
+            # that is not an outage: wait for the first one to be free and go round again
+            wait = min(max(0.0, self.busy_until.get(m.model, 0) - self.clock()) for m in alive) + 0.5
+            if wait > 65:
+                break
+            self.sleep(wait)
         raise last or AIError(self.name, "every Groq model is out for this run", kind="rate_limit")
 
 

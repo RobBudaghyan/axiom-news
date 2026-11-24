@@ -98,7 +98,8 @@ class Settings:
     editor_topic_floor: dict = field(default_factory=lambda: {"armenia": 3})
     editor_max_calls: int = 4            # Step 8: a 2nd call in the same run only while unscored candidates remain
                                          # (Step 17c: 2 -> 4 with half the size, the same 180 a run)
-    editor_groq_new: int = 10            # Groq's 8k tokens/minute (prompt + reply) fits far fewer
+    editor_groq_new: int = 8             # Groq's 8k tokens/minute (prompt + reply) fits far fewer (Step 20: 10 -> 8,
+                                         # a 12-story editor prompt was 5,900 tokens and one model refused it, 413)
     editor_paid_new: int = 20            # Step 20: on the paid key (12k answer limit; 60 candidates ran past it)
     editor_paid_compare: int = 5
     editor_groq_per_topic: int = 1

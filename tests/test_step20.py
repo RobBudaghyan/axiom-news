@@ -152,6 +152,25 @@ class GroqRotation(unittest.TestCase):
         res = pool.generate("p", None)
         self.assertEqual((res.model, pool.model, pool.busy_until["a"]), ("b", "b", 7))
 
+    def test_every_model_briefly_busy_waits_and_goes_round_again(self):
+        busy = lambda: FakeResponse(429, {"error": {"message": "ITPM"}}, {"retry-after": "1"})  # noqa: E731
+        a = self.member("a", [busy(), FakeResponse(200, GROQ_OK)])
+        b = self.member("b", [busy()])
+        sleeps = []
+        pool = chain.GroqPool([a, b], sleep=sleeps.append, clock=Clock(0))
+        self.assertEqual(pool.generate("p", None).model, "a")
+        self.assertEqual(sleeps, [1.5])
+
+    def test_too_large_for_one_model_tries_the_next(self):
+        a = self.member("a", [FakeResponse(413, {"error": {"message": "Request too large"}})])
+        b = self.member("b", [FakeResponse(200, GROQ_OK)])
+        pool = chain.GroqPool([a, b], sleep=lambda s: None, clock=Clock(0))
+        self.assertEqual(pool.generate("p", None).model, "b")
+        only = chain.GroqPool([self.member("c", [FakeResponse(413, {"error": {"message": "big"}})])], sleep=lambda s: None, clock=Clock(0))
+        with self.assertRaises(ai.AIError) as cm:
+            only.generate("p", None)
+        self.assertEqual(cm.exception.kind, "too_large")
+
     def test_a_daily_limit_takes_a_model_out(self):
         a = self.member("a", [FakeResponse(429, {"error": {"message": "Limit tokens per day (TPD)"}}, {"retry-after": "3600"})])
         b = self.member("b", [FakeResponse(200, GROQ_OK), FakeResponse(200, GROQ_OK)])

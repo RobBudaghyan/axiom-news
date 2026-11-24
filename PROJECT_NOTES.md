@@ -394,7 +394,21 @@ bot @axiom_news_bot at the end.
   click-through 248, 33 of 33 rules broken on purpose caught. Details in
   `reports/step-19-topics-languages-branding.md`.
 
+- **Step 20 done (2026-11-24): AI resilience and translation quality, shipped (owner approved in chat).** The chain:
+  free Gemini models one by one with 503 retries inside the run's retry time, then three Groq models in rotation
+  (now ~30 items a call, was 2 or 3), then the paid emergency key only for work every free option failed on
+  ($0.10 a day, $1 a month, checked against each call's worst case; `ai_spend`; one alert a day; Admin shows each
+  run's provider and the spend). Translations: strong models only, terms glossary, source title, a meaning check
+  with an immediate redo, Latin words in Armenian and Russian rejected. The worker's topic check uses the same
+  order and caps. Python 217 tests, Worker 373, 35 of 35 rules broken on purpose caught. Details in
+  `reports/step-20-ai-resilience.md`.
+
 ## Next step
+**The owner: make the main Gemini key free again** (it answers 402 "prepayment credits are depleted": AI Studio >
+Projects > remove billing, or a new project with no billing). Until then pass 1 and the editor run on Groq and
+translations on the emergency key under its $0.10 a day cap, so Armenian and Russian readers may get some stories
+later than usual (held until translated). Then: finish the Armenian re-translation of the last 48 h with
+`scripts/step20_retranslate.py --skip-done` (part done on 2026-11-24, the rest waits for the free key or the cap).
 Live (Step 19 shipped; the owner checks the new-user flow on his phone and redoes the BotFather previews). Watch the first days: new readers' welcome, setup and sample digest; Admin "Free limit used" (D1
 writes projected about 31% a day); Worker CPU per tick (2 ms after the launch); the editor (45 stories a
 call). Open: staging in its own free Cloudflare account (guide in `reports/step-17c-database-writes.md`),
@@ -407,8 +421,14 @@ the BotFather profile previews (owner).
   passes or its 24 h end (Step 10); if it is the only story of a digest, that digest is English.
   Russian digests run about 7% longer, so on busy days a story or two
   fewer fits. No real Russian reader yet: the first live Russian run is still to be seen.
-- **Gemini 503 overloads** were frequent on 2026-11-13; fallback runs are slow (Groq ~1
-  chunk/min).
+- **Gemini 503 overloads** (2026-11-13, 2026-11-23): handled since Step 20 by the chain (retries, other free
+  models, three Groq models, then the emergency key under its caps). Groq's first-pass quality is a little
+  lower (fewer existing stories shown, so more duplicates for the editor to merge).
+- **The emergency key's $0.10 a day** covers about two first-pass calls or about 25 translated stories with
+  their meaning checks. On a day with no free Gemini model at all, translations stop at the cap and wait.
+- **Free tier of the translation models (Gemini 4 Hydrogen, 3.8 Flash) is not yet checked** (the main key was
+  on Prepay during Step 20). If they turn out not to be free, the chain moves to the next model by itself
+  (a 429 "limit: 0" takes a model out for the run).
 - **AI grouping is the weakest part:** some over-merged stories and near-duplicates. Guarded by
   prompt and code, but it needs watching.
 - **D1 use (Step 17c):** after Steps 17 and 17c a normal day is about 34k writes and 1.0M to 1.2M reads
