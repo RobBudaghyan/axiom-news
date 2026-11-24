@@ -1,7 +1,28 @@
 # Owner guide
 
 Short, practical notes for running Axiom News. Commands run from the project folder in PowerShell unless
-it says `cd worker` first. Nothing here needs a card or costs money.
+it says `cd worker` first. Nothing here needs a card or costs money, except the emergency key below.
+
+## AI keys and the emergency key (Step 20)
+- **GEMINI_API_KEY** must be a Google AI Studio project **with no billing** (the free tier). Check: AI Studio >
+  Projects shows the project as Free. If a call answers HTTP 402 "prepayment credits are depleted", the project
+  is still on Prepay: unlink its billing account (or make a new project with no billing and put its key in
+  `.env`, then `venv/Scripts/python scripts/set_secrets.py github`, `worker-staging` and `worker-prod`).
+- **GEMINI_EMERGENCY_API_KEY** is a separate project with $10 of Prepay credits (bought 2026-11-23, they expire
+  2027-11-23; auto-reload off; Google's own monthly cap $2). It is used ONLY when every free option failed for
+  that call. Our own hard caps: **$0.10 a day and $1 a month** (UTC), checked before each call against its worst
+  case, in `config/ai_budget.json` (`emergency`). A normal day spends $0.
+- The order, every call: free Gemini models one by one (a 503 is retried a few times), then Groq's three models
+  in rotation, then the emergency key. Translations use only the strong models (free Gemini 4 Hydrogen, then
+  3.8 Flash; then the emergency key), never Groq; if none can, the story waits (readers get it later).
+- Every translation is read back into English by a second call and compared with the original; a changed
+  meaning is redone at once. News words with two meanings are in `config/glossary.yaml` (`terms`).
+- Admin > AI shows which provider served each recent run, the emergency spend today and this month, the
+  credits left (our own count) and the expiry date.
+
+| Alert | When | What to do |
+|---|---|---|
+| Emergency key used | the paid key spent money today (once a day: amount and why) | nothing if it is one bad day; if it repeats, check that the main key is free and which free models fail (Admin > AI) |
 
 ## Alerts (Step 19)
 The bot sends you no regular reports. It writes only when something needs you, at most once a day per

@@ -54,13 +54,17 @@ function seed() {
   const call = sqlite.prepare("INSERT INTO ai_calls (run_id, at, provider, model, ok, items, input_tokens, output_tokens, ms, error, kind) " +
     "VALUES (?,?,?,?,?,?,?,?,?,?,?)");
   const hourStart = Math.floor(now / H) * H;
+  // Step 20: one bad hour yesterday where the free options failed and the paid emergency key served (preview
+  // only; yesterday, so the demo's health line stays green as the click-through expects)
+  sqlite.prepare("INSERT INTO ai_spend (at, source, model, kind, input_tokens, output_tokens, usd, reason) VALUES (?, 'job', " +
+    "'gemini-3.1-flash-lite', 'batch', 23100, 9800, 0.0205, 'gemini-3.5-flash-lite: HTTP 503 x3; openai/gpt-oss-120b: HTTP 429')").run(hourStart - 26 * H + 600);
   let rnd = 7;
   const r = (a, b) => { rnd = (rnd * 1103515245 + 12345) % 2147483648; return a + (rnd % (b - a + 1)); };
   for (let k = 168; k >= 0; k--) {
     const start = hourStart - k * H + 7 * 60 + r(0, 50);
     if (start > now) continue;
     const kind = k === 70 ? "ai_failed" : k % 23 === 5 ? "partial" : "ok";
-    const provider = kind === "ai_failed" ? null : k % 9 === 0 ? "gemini+gemini-fallback+groq" : k % 4 === 0 ? "gemini+gemini-fallback" : "gemini";
+    const provider = kind === "ai_failed" ? null : k === 26 ? "groq+emergency" : k % 9 === 0 ? "gemini+gemini-fallback+groq" : k % 4 === 0 ? "gemini+gemini-fallback" : "gemini";
     const fetched = r(150, 260), fresh = fetched - r(10, 40), created = kind === "ai_failed" ? 0 : r(28, 62);
     const calls = provider ? provider.split("+").length + (k % 3 === 0 ? 1 : 0) : 2;
     const tin = provider ? r(21000, 27000) * calls : 0, tout = provider ? r(9000, 16000) * Math.min(calls, 2) : 0;
@@ -71,7 +75,7 @@ function seed() {
     const id = Number(info.lastInsertRowid);
     const models = provider ? provider.split("+") : ["gemini", "gemini-fallback"];
     for (const [i, p] of models.entries()) {
-      const model = p === "gemini" ? "gemini-3.5-flash-lite" : p === "gemini-fallback" ? "gemini-3.1-flash-lite" : "openai/gpt-oss-120b";
+      const model = p === "gemini" ? "gemini-3.5-flash-lite" : p === "gemini-fallback" || p === "emergency" ? "gemini-3.1-flash-lite" : "openai/gpt-oss-120b";
       const ok = kind === "ai_failed" ? 0 : i === models.length - 1 ? 1 : (k % 4 === 0 ? 0 : 1);
       call.run(id, start + 20 + i * 40, p === "gemini-fallback" ? "gemini" : p, model, ok, fresh, ok ? r(20000, 26000) : null,
         ok ? r(9000, 15000) : null, r(6000, 80000), ok ? null : "HTTP 503: This model is currently experiencing high demand", "batch");

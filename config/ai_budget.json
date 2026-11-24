@@ -1,9 +1,42 @@
 {
-  "_comment": "Step 13: the AI budget guard (job/guard.py and worker/src/guard.js, kept identical by tests/fixtures/guard_cases.json). Calls are counted per model since midnight Pacific time (when Gemini's free day resets). Level 1 delays new custom-topic checks; level 2 also delays translations (stories wait, Step 10 rule). Pass 1 and the editor never wait. The soft limits are ours, below Google's real daily caps (which the API does not show); raise or lower them here.",
+  "_comment": "Step 13: the AI budget guard (job/guard.py and worker/src/guard.js, kept identical by tests/fixtures/guard_cases.json). Calls are counted per model since midnight Pacific time (when Gemini's free day resets). Level 1 delays new custom-topic checks; level 2 also delays translations (stories wait, Step 10 rule). Pass 1 and the editor never wait. The soft limits are ours, below Google's real daily caps (which the API does not show); raise or lower them here. Step 20: 'chain' is the order of free providers, 'emergency' the paid key's hard caps and prices (job/ai.py, worker/src/spend.js).",
   "reset_tz": "America/Los_Angeles",
   "primary_model": "gemini-3.5-flash-lite",
   "gemini_models": ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"],
   "soft_limits": {"gemini-3.5-flash-lite": 250, "gemini-3.1-flash-lite": 250},
   "check_ratio": 0.8,
-  "recent_429_minutes": 60
+  "recent_429_minutes": 60,
+  "chain": {
+    "_comment": "Step 20. Pass 1, the editor and keywords: each free Gemini model on its own (its own quota and its own 503s), then Groq's models in rotation (each its own per-minute limit), then the emergency key. Translations: only the strong models, never Groq. A free Gemini 503 is retried after these waits while the run's retry time lasts.",
+    "gemini_free": ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3-flash-preview", "gemini-3.8-flash"],
+    "groq": ["openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b"],
+    "translate_free": ["gemini-4-hydrogen", "gemini-3.8-flash"],
+    "retry_503_s": [5, 15, 30],
+    "retry_budget_s": 150,
+    "worker_gemini_free": ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"],
+    "worker_retry_503_ms": 1500
+  },
+  "emergency": {
+    "_comment": "Step 20. GEMINI_EMERGENCY_API_KEY: a separate AI Studio project with $10 of Prepay credits (bought 2026-11-23, they expire after 12 months; auto-reload off; Google's own monthly cap $2, which can lag about 10 minutes). Used ONLY when every free option failed for that call. Hard caps in code, per UTC day and month, checked BEFORE a call against its worst case (prompt tokens plus max_output_tokens at the price). Cheapest model that passes our checks: 3.1 Flash-Lite for pass 1, the editor and topic checks; translations need a strong model.",
+    "model": "gemini-3.1-flash-lite",
+    "translate_models": ["gemini-3-flash-preview", "gemini-3.8-flash"],
+    "daily_cap_usd": 0.10,
+    "monthly_cap_usd": 1.00,
+    "credits_usd": 10.00,
+    "credits_bought": "2026-11-23",
+    "credits_expire": "2027-11-23",
+    "max_output_tokens": 12000,
+    "prices_checked": "2026-11-23",
+    "prices_per_million": {
+      "gemini-3.1-flash-lite": [0.25, 1.50],
+      "gemini-3.5-flash-lite": [0.30, 2.50],
+      "gemini-3-flash-preview": [0.50, 3.00],
+      "gemini-3.8-flash": [0.75, 3.75],
+      "gemini-4-hydrogen": [1.50, 7.50]
+    },
+    "prices_from": {
+      "2027-01-01": {"gemini-3.8-flash": [1.50, 7.50]}
+    },
+    "unknown_price": [3.00, 15.00]
+  }
 }

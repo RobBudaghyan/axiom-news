@@ -39,10 +39,20 @@ Rules:
    written in {language}. The description keeps the same sentences as the English.
 8. A story with "retry_note" was translated before and rejected by a check: read the note and
    fix exactly that.
+9. Meaning: these are news stories. Every word takes its NEWS meaning (intelligence = spy
+   agencies, special services = security agencies, strike = an attack, sanctions = penalties).
+   TERMS below gives the right word for the ambiguous ones. Never guess a word you do not know:
+   choose the plain, common news word.
+10. "source_title" is the original headline of the article the story comes from, often in
+   Russian, Armenian or another language. Use it only to understand what the story means; you
+   translate the English headline and description, nothing else.
 {style}
 
 NAMES:
 {names}
+
+TERMS (news meaning: the word to use):
+{terms}
 
 STORIES (JSON):
 {stories}
@@ -59,6 +69,60 @@ If a story has an empty description, give an empty description.
   "ru": "Russian: standard press style (like RBC or Kommersant). The English word digest is always сводка (never дайджест). Headlines in the past tense for events that happened (Бахрейн перехватил, not перехватывает), as Russian news sites write them. In Russian typography a dash between subject and predicate is common: never use it, rephrase or use a colon. Quotation marks: «». Ukrainian place names in their usual Russian press form (Киев, Харьков, Запорожье). Ukraine always takes на, never в: на Украине, на Украину, с Украины (never в Украине, в Украину); the war is война на Украине. Armenia's Prime Minister is премьер-министр.",
   "hy": "Eastern Armenian, reformed (Soviet-era) orthography as used in Armenia today, standard press style (like Armenpress or Azatutyun): write և (never եւ), lower-case month names and adjectives (սեպտեմբեր, հայկական), only Armenian letters (no Latin, Greek or Cyrillic letter inside a word). Headlines in the past tense for events that happened, as Armenian news sites write them. End every sentence with the Armenian full stop ։ (never a colon). Write foreign names in Armenian letters as Armenian media do (Շարմազանով, not a new spelling). Quotation marks: «».",
   "fr": "French: standard press style (like Le Monde or AFP), with all accents (é, è, ê, à, ç, ô, î, ï) and apostrophes (l'ONU, d'Iran, qu'il). Use a no-break space before : ; ! ? and inside « ». Write Armenian names as French media do (Erevan, Pachinian)."
+}
+```
+
+## Meaning check template
+
+Step 20: a second call for every translation that passed the code checks. The model reads each
+translation back into English, word for word, and compares it with the English original. The
+job rejects a story when the model says the meaning changed, or when an ambiguous term of
+`config/glossary.yaml` (with `back` stems) is missing from the reading back ("Ukrainian
+deception" for "Ukrainian intelligence"). A rejected story is redone at once with the problem as
+its note, and checked again.
+
+```text
+You check translations of short news stories from English into {language}. For each story below
+you get the English original and the {language} translation.
+
+1. Read the translation back into English, literally, word for word, as it is written (do not
+   fix it and do not look at the original while you do this). Put it in "back".
+2. Compare "back" with the English original. The meaning has changed if a word is used in a
+   wrong sense (intelligence read as cleverness or deception, special services as some other
+   service, a job advert as fortune-telling), a fact, number, name, place or time is different,
+   missing or invented, or who did what to whom changed. Small differences of style, word order
+   or a synonym are fine.
+3. "same_meaning": true only if nothing changed. Otherwise false, and "problem": one short
+   English sentence naming the wrong words and the right meaning.
+
+STORIES (JSON):
+{stories}
+
+Answer with JSON only, one item for every story, with the same ids:
+{"items": [{"id": "S12", "back": "...", "same_meaning": true, "problem": ""}]}
+```
+
+## Meaning check schema
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "back": {"type": "string"},
+          "same_meaning": {"type": "boolean"},
+          "problem": {"type": "string"}
+        },
+        "required": ["id", "back", "same_meaning", "problem"]
+      }
+    }
+  },
+  "required": ["items"]
 }
 ```
 

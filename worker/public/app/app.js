@@ -838,7 +838,8 @@
   }
 
   // ---------------------------------------------------------------- admin
-  const PROVIDER = { gemini: "Gemini", "gemini-fallback": "Gemini backup", groq: "Groq" };
+  const PROVIDER = { gemini: "Gemini", "gemini-fallback": "Gemini backup", groq: "Groq", emergency: "Emergency key (paid)",
+    gemini_paid: "Emergency key (paid)" };
   const providerLabel = (p) => (p ? p.split("+").map((x) => PROVIDER[x] || x).join(" + ") : "No AI call");
   const STATUS = { ok: ["Done", ""], partial: ["Partly done", "warn"], ai_failed: ["AI failed", "bad"], error: ["Failed", "bad"], running: ["Running", "mute"] };
   function duration(s) {
@@ -858,7 +859,8 @@
     return e;
   }
   const kindLabel = (k) => (k === "editor" ? "editor" : k === "topic_check" ? "topic check"
-    : /^translate_/.test(k || "") ? `translation (${k.slice(10)})` : "first pass");
+    : /^translate_/.test(k || "") ? `translation (${k.slice(10)})` : /^backcheck_/.test(k || "") ? `meaning check (${k.slice(10)})`
+    : k === "topic_keywords" ? "keywords" : k === "announce_translate" ? "announcement" : "first pass");
   const badge = (text, kind = "") => `<span class="badge ${kind}">${esc(text)}</span>`;
   const kv = (title, value, sub = "") => row({ title, sub, right: `<span class="kv-num">${value}</span>` });
 
@@ -1018,7 +1020,23 @@
             `${l.rejected_24h ? ` (${l.rejected_24h} rejected by checks)` : ""} · ${plural(l.calls_24h, "call", "calls")}` +
             ` · ${plural(l.held_24h, "story", "stories")} held` + `${l.held_holds_24h ? ` (${l.held_released_24h} of ${l.held_holds_24h} sent later)` : ""}`),
         right: l.code === "en" ? "" : l.fallbacks_24h ? badge(`${l.fallbacks_24h} in English`, "warn") : "" })).join("");
+      // Step 20: the paid emergency key and which provider served each recent run
+      const E = A.emergency;
+      const usd = (v) => `$${Number(v || 0).toFixed(2)}`;
+      const spent = (v) => (v ? `$${Number(v).toFixed(4)}` : "$0");
+      const emRows = E ? kv("Spent today (UTC)", `${spent(E.today)} of ${usd(E.daily_cap)}`, E.calls_today ? plural(E.calls_today, "paid call", "paid calls") : "Not used today")
+        + kv("Spent this month", `${spent(E.month)} of ${usd(E.monthly_cap)}`)
+        + kv("Credits left (estimate)", `${usd(E.credits_left)} of ${usd(E.credits)}`, `Bought ${esc(E.bought || "?")} · expire ${esc(E.expires || "?")}`)
+        + kv("Model", esc(E.model || "?"), `Translations: ${esc((E.translate_models || []).join(", "))}`) : "";
+      const runRows = (A.runs || []).map((r) => {
+        const st = STATUS[r.status] || [r.status, "mute"];
+        return row({ title: `<span class="tnum">${esc(when(r.started_at, tz))}</span> · ${esc(providerLabel(r.provider))}`,
+          sub: esc(`${duration(r.duration_s) || "running"} · ${n(r.items_in)} items in${r.items_left ? `, ${n(r.items_left)} left` : ""} · ${plural(r.stories, "story", "stories")}`),
+          right: st[1] && st[1] !== "mute" ? badge(st[0], st[1]) : mute(st[0]) });
+      }).join("");
       return `<div class="adm-part">${seg}<div class="group">${models}</div></div>` +
+        (runRows ? sub("Recent runs", runRows, "Which provider served each run: Gemini, Gemini backup (another free model), Groq, or the paid emergency key.") : "") +
+        (emRows ? sub("Emergency key (paid)", emRows, "Used only when every free option failed. Hard caps: per day and per month (UTC). Credits left is our own count of every paid call.") : "") +
         sub("AI budget, today", guardRows, "Over 80% of a soft limit, or a 429 from Gemini in the last hour: new topic checks wait. Over the limit: translations wait too. The first pass and the editor never wait.") +
         sub("Languages, last 24 h", langRows || row({ title: "No data" }), "A story with no translation yet is held and sent later; a digest goes out in English only when none of its stories is translated.");
     };

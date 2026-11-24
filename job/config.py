@@ -16,6 +16,7 @@ ENV_KEYS = (
     "TELEGRAM_BOT_TOKEN", "OWNER_TELEGRAM_ID", "GEMINI_API_KEY", "GEMINI_MODEL",
     "GROQ_API_KEY", "GROQ_MODEL", "CLOUDFLARE_ACCOUNT_ID", "D1_DATABASE_ID",
     "CLOUDFLARE_D1_TOKEN", "DEFAULT_TIMEZONE", "AXIOM_DEBUG_DIR", "GEMINI_FALLBACK_MODEL",
+    "GEMINI_EMERGENCY_API_KEY", "AXIOM_AI_FORCE",
 )
 
 
@@ -66,10 +67,20 @@ class Settings:
     existing_max: int = 250
     gemini_max_input_tokens: int = 25000  # est. prompt tokens per Gemini call: one normal hour
                                           # (~230 items); bigger backlogs are split
-    groq_chunk_tokens: int = 3500        # est. prompt tokens per Groq call (estimate runs ~10% low
-    groq_reply_tokens: int = 3500        # on Cyrillic); prompt + reply room must stay <= 8000 TPM
-    groq_existing_max: int = 30          # fewer existing stories per Groq chunk (TPM)
-    groq_max_chunks_per_run: int = 8     # keeps a fallback run to a few minutes
+    # Step 20: the fixed prompt grew to ~2,600 tokens (10 existing stories) / ~3,100 (30), so 3,500-token
+    # chunks held only 2 or 3 items (2026-11-23 outage: 6 or 7 stories a run). Now ~30 items a call;
+    # prompt + reply room stays <= 8,000 tokens a minute per Groq model, and three models take turns.
+    groq_chunk_tokens: int = 5000        # est. prompt tokens per Groq call (estimate runs ~10% low on Cyrillic)
+    groq_reply_tokens: int = 2800        # answers to ~30 items were 1-2k tokens; a truncated one is split in two
+    groq_existing_max: int = 10          # fewer existing stories per Groq chunk (TPM)
+    groq_max_chunks_per_run: int = 16    # Step 20: 8 -> 16, three models in rotation (each its own 8k TPM)
+    # Step 20: run time. The 503 retries stop well before run_budget_s; no new pass-1 call starts after
+    # pass1_budget_s (the rest waits for the next run, so the editor and translations still get time).
+    run_budget_s: float = 840
+    pass1_budget_s: float = 480
+    emergency_max_chunks: int = 2        # pass-1 calls on the paid key per run (the caps decide first)
+    emergency_chunk_tokens: int = 14000  # ~100 items: the answer must fit the paid key's 12k output limit
+                                         # (staging: 195 items ran past it and were cut off)
     retention_days: int = 7              # items, stories, sent
     log_retention_days: int = 30         # job_runs, ai_calls, errors
     fetch_workers: int = 16
@@ -88,6 +99,8 @@ class Settings:
     editor_max_calls: int = 4            # Step 8: a 2nd call in the same run only while unscored candidates remain
                                          # (Step 17c: 2 -> 4 with half the size, the same 180 a run)
     editor_groq_new: int = 10            # Groq's 8k tokens/minute (prompt + reply) fits far fewer
+    editor_paid_new: int = 20            # Step 20: on the paid key (12k answer limit; 60 candidates ran past it)
+    editor_paid_compare: int = 5
     editor_groq_per_topic: int = 1
     editor_groq_compare: int = 2
     editor_groq_items: int = 2
@@ -95,6 +108,7 @@ class Settings:
     translate_batch: int = 80            # stories per Gemini call (a normal hour has 2-6; a catch-up about 70)
     translate_groq_batch: int = 12       # Groq's 8k tokens/minute fits far fewer
     translate_groq_max_chunks: int = 3
+    translate_paid_batch: int = 12       # Step 20: stories per call on the paid key (its 12k answer limit; Armenian is long)
 
 
 def load_topics() -> list[dict]:

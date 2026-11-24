@@ -8,8 +8,14 @@ translated here, ahead of time, and stored in `story_translations`:
 - stories: the last 24 h, not merged away, passing the editorial bar or the topic path of
   config/digest.json (the same rule as worker/src/digest.js qualifies() with every topic
   followed; tests/fixtures/eligible_cases.json keeps the two in step);
-- batching: one call per language per run (up to translate_batch stories), same provider chain
-  as the other passes (Groq in small chunks for its per-minute limit);
+- batching: one call per language per run (up to translate_batch stories). Step 20: only the strong
+  chain (`plans.translate`: the strongest free Gemini models, then the emergency key within its caps),
+  never Groq; no provider = the stories wait (the Step 10 hold);
+- Step 20 meaning check: a second call reads every translation that passed the code checks back
+  into English and compares it with the original (a word in a wrong sense, an invented or missing
+  fact); ambiguous news terms (config/glossary.yaml `terms`) must survive the reading back. A
+  drifted story is redone at once with the problem as its note, then checked again. The model also
+  sees the source's original title as context;
 - guards, in code: the same numbers as the English (both ways), glossary names
   (config/glossary.yaml), the right script, a sane length, no dashes. A rejected story gets an
   ok = 0 row with the reason, which is shown to the model on the retry next hour;
@@ -73,6 +79,9 @@ WHERE g >= ?4 OR (main_topic IN (SELECT u.value FROM json_each(?7) u)
 ORDER BY g DESC, id DESC"""
 
 EXISTING_SQL = "SELECT story_id, ok, src, note FROM story_translations WHERE lang = ? AND story_id IN ({qs})"
+# Step 20: the original title of each story's best link (context for the translator)
+SOURCE_TITLE_SQL = ("SELECT i.story_id, i.title FROM items i JOIN stories s ON s.id = i.story_id "
+                    "WHERE i.story_id IN ({qs}) AND i.url = s.best_url")
 UPSERT_SQL = ("INSERT INTO story_translations (story_id, lang, ok, headline, description, src, note, provider, "
               "created_at) VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT(story_id, lang) DO UPDATE SET ok=excluded.ok, "
               "headline=excluded.headline, description=excluded.description, src=excluded.src, "
@@ -95,6 +104,9 @@ RUSSIAN_DIGEST = re.compile(r"дайджест", re.I)
 RUSSIAN_V_UKRAINE = re.compile(r"(?<![\w-])[вВ]о?\s+Украин[еу](?!\w)")
 # An Armenian sentence that ends with a colon instead of the Armenian full stop ։.
 ARMENIAN_COLON_END = re.compile(r":(?=\s+[Ա-Ֆ]|\s*$)")
+# Step 20: a Latin word inside Armenian or Russian text that is not in the English (seen: the Polish
+# "że" inside an Armenian sentence, twice). Names like Discord or CNPC are in the English, so they pass.
+LATIN_WORD = re.compile(r"[A-Za-zÀ-ɏ]+")
 # A number with its group or decimal separators: 3,500 / 3 500 / 3.5 / 3,5 all compare as digits.
 NUMBER = re.compile(r"\d+(?:[   .,'’]\d+)*")
 
@@ -109,6 +121,32 @@ def load_glossary(path: Path = GLOSSARY) -> list[dict]:
     return yaml.safe_load(path.read_text(encoding="utf-8"))["names"]
 
 
+def load_terms(path: Path = GLOSSARY) -> list[dict]:
+    """Step 20: ambiguous news words with their news meaning per language."""
+    return yaml.safe_load(path.read_text(encoding="utf-8")).get("terms") or []
+
+
+def term_hits(english: str, terms: list[dict]) -> list[dict]:
+    low = english.lower()
+    return [t for t in terms if any(re.search(rf"(?<![\w-]){re.escape(f.lower())}(?![\w])", low) for f in t["en"])]
+
+
+def meaning_problems(english: str, back: str, same: bool, problem: str, terms: list[dict]) -> list[str]:
+    """Step 20: the meaning check's verdict on one story, plus the term rule in code: an ambiguous
+    term of the English (with `back` stems) must be in the translation read back into English."""
+    out = []
+    if not same:
+        out.append(f"meaning changed: {(problem or 'the reading back differs from the English').strip()[:200]}")
+    low = (back or "").lower()
+    if not low.strip():
+        out.append("meaning check gave no reading back")
+        return out
+    for t in term_hits(english, terms):
+        if t.get("back") and not any(b in low for b in t["back"]):
+            out.append(f"meaning: '{t['en'][0]}' ({t['sense'].split(',')[0]}) is lost in the translation")
+    return out
+
+
 def load_digest_config(path: Path = DIGEST) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -118,6 +156,8 @@ class TranslatePrompt:
     template: str
     schema: dict
     notes: dict
+    check_template: str = ""
+    check_schema: dict | None = None
 
 
 def load_translate_prompt(path: Path = TRANSLATE_PROMPT) -> TranslatePrompt:
@@ -125,7 +165,11 @@ def load_translate_prompt(path: Path = TRANSLATE_PROMPT) -> TranslatePrompt:
     template = re.search(r"## Prompt template\s+```text\r?\n(.*?)\r?\n```", text, re.S).group(1)
     notes = json.loads(re.search(r"## Language notes\s+```json\r?\n(.*?)\r?\n```", text, re.S).group(1))
     schema = json.loads(re.search(r"## Output schema\s+```json\r?\n(.*?)\r?\n```", text, re.S).group(1))
-    return TranslatePrompt(template.replace("\r\n", "\n"), schema, notes)
+    check = re.search(r"## Meaning check template.*?```text\r?\n(.*?)\r?\n```", text, re.S)
+    check_schema = re.search(r"## Meaning check schema\s+```json\r?\n(.*?)\r?\n```", text, re.S)
+    return TranslatePrompt(template.replace("\r\n", "\n"), schema, notes,
+                           check.group(1).replace("\r\n", "\n") if check else "",
+                           json.loads(check_schema.group(1)) if check_schema else None)
 
 
 # ---------------------------------------------------------------- which stories
@@ -260,6 +304,12 @@ def check_translation(lang: str, english: dict, raw_head: str, raw_desc: str,
     added = tr_nums - en_nums - number_words(f"{en_head}\n{en_desc}")
     if added:
         problems.append(f"number(s) not in the English: {', '.join(sorted(added))}")
+    if lang in ("hy", "ru"):
+        english_words = {w.casefold() for w in LATIN_WORD.findall(f"{en_head} {en_desc}")}
+        stray = sorted({w for w in LATIN_WORD.findall(both)
+                        if w.casefold() not in english_words and not re.fullmatch(r"[IVXLC]+", w)})   # Roman numerals pass
+        if stray:
+            problems.append(f"Latin word(s) not in the English: {', '.join(stray[:5])}")
     low = both.casefold()
     for g in glossary_hits(f"{en_head}\n{en_desc}", glossary):
         form = g.get(lang)
@@ -278,6 +328,9 @@ class LangResult:
     rejected: int = 0
     unanswered: int = 0
     calls: int = 0
+    check_calls: int = 0           # Step 20: meaning-check calls (counted in calls too)
+    drifted: int = 0               # translations the meaning check rejected (before the redo)
+    redone: int = 0                # stories translated again at once after a drift
     input_tokens: int = 0
     output_tokens: int = 0
     provider: str | None = None
@@ -307,7 +360,8 @@ class TranslateResult:
         if not self.langs:
             return f"translate: {self.status} (no reader languages besides English)"
         parts = [f"{lang} {r.ok} ok of {r.todo} to do, {r.rejected} rejected, {r.unanswered} unanswered, "
-                 f"{r.calls} calls via {r.provider}, tokens in {r.input_tokens} out {r.output_tokens}"
+                 f"{r.calls} calls ({r.check_calls} meaning checks, {r.drifted} drifted, {r.redone} redone) "
+                 f"via {r.provider}, tokens in {r.input_tokens} out {r.output_tokens}"
                  for lang, r in self.langs.items()]
         return f"translate: {self.status}, {self.eligible} eligible stories; " + "; ".join(parts)
 
@@ -320,12 +374,15 @@ class Translator:
                  glossary: list[dict] | None = None, prompt: TranslatePrompt | None = None,
                  digest_cfg: dict | None = None, topic_tags: list[str] | None = None,
                  on_call: Callable | None = None, log: Callable[[str], None] = print,
-                 debug_dir: str | Path | None = None, dry_run: bool = False):
+                 debug_dir: str | Path | None = None, dry_run: bool = False, terms: list[dict] | None = None,
+                 meaning_check: bool = True):
         self.db = db
+        self.meaning_check = meaning_check
         self.plans = plans
         self.s = settings or Settings()
         self.languages = languages or load_languages()
         self.glossary = glossary if glossary is not None else load_glossary()
+        self.terms = load_terms() if terms is None else terms
         self.prompt = prompt or load_translate_prompt()
         self.cfg = digest_cfg or load_digest_config()
         self.tags = topic_tags or list(self.cfg["topic_specificity"])
@@ -367,9 +424,13 @@ class Translator:
         english = " ".join(f"{s.get('headline') or s['summary']} {s.get('description') or ''}" for s in stories)
         names = [g for g in glossary_hits(english, self.glossary) if g.get(lang)]
         name_lines = "\n".join(f"- {' / '.join(g['en'])}: {g[lang]}" for g in names) or "(none)"
+        terms = [t for t in term_hits(english, self.terms) if t.get(lang)]
+        term_lines = "\n".join(f"- {' / '.join(t['en'])} ({t['sense']}): {t[lang]}" for t in terms) or "(none)"
         items = []
         for s in stories:
             item = {"id": f"S{s['id']}", "headline": english_headline(s), "description": s.get("description") or ""}
+            if s.get("source_title") and s["source_title"] != item["headline"]:
+                item["source_title"] = s["source_title"]       # Step 20: context only
             if s.get("retry_note"):
                 item["retry_note"] = s["retry_note"]
             items.append(item)
@@ -377,6 +438,7 @@ class Translator:
             "{language}": self.languages["english_names"][lang],
             "{style}": self.prompt.notes.get(lang, ""),
             "{names}": name_lines,
+            "{terms}": term_lines,
             "{stories}": json.dumps(items, ensure_ascii=False, indent=1),
         }
         out = self.prompt.template
@@ -401,18 +463,19 @@ class Translator:
     def translate(self, lang: str, stories: list[dict], now: int, res: LangResult) -> list[tuple]:
         """Translates `stories` (at most one batch per provider) and returns the rows to write:
         (story_id, lang, ok, headline, description, src, note, provider, created_at). Stories no
-        provider answered get no row (they are retried next hour)."""
+        provider answered (or whose meaning check found no provider) get no row: they wait for the
+        next hour, and are held from their readers meanwhile (Step 10)."""
         rows: list[tuple] = []
-        queue = list(stories)
+        queue = self.with_source_titles(list(stories))
         kind = f"translate_{lang}"
         for plan in self.plans:
             if not queue:
                 break
             p = plan.provider
-            small = p.name == "groq"
-            size = self.s.translate_groq_batch if small else self.s.translate_batch
-            max_chunks = self.s.translate_groq_max_chunks if small else 1
-            chunks = [queue[i:i + size] for i in range(0, len(queue), size)][:max_chunks]
+            if p.name == "groq":
+                continue          # Step 20: translations never use Groq (the weaker fallback)
+            size = self.s.translate_paid_batch if plan.paid else self.s.translate_batch
+            chunks = [queue[i:i + size] for i in range(0, len(queue), size)][:1]
             done: set[int] = set()
             for chunk in chunks:
                 answer = self._call(plan, lang, chunk, res, kind)
@@ -432,7 +495,11 @@ class Translator:
                         second = self._check(lang, chunk, again, plan.label, now)
                         if sum(1 for r in second if r[2]) >= len(chunk) - bad:
                             checked = second
+                if self.meaning_check:
+                    checked = self._meaning_pass(plan, lang, chunk, checked, res, now)
                 for r in checked:
+                    if r is None:
+                        continue
                     done.add(r[0])
                     rows.append(r)
                     if r[2]:
@@ -444,6 +511,116 @@ class Translator:
             queue = [s for s in queue if s["id"] not in done]
         res.unanswered += len(queue)
         return rows
+
+    def with_source_titles(self, stories: list[dict]) -> list[dict]:
+        """Step 20: each story's original title (its best link's article, often Russian or Armenian)
+        as context for the translator. A failed read leaves the stories as they are."""
+        need = [s["id"] for s in stories if "source_title" not in s]
+        if not need:
+            return stories
+        titles: dict[int, str] = {}
+        try:
+            for rows in self.db.batch(in_list_statements(SOURCE_TITLE_SQL, need)):
+                for r in rows:
+                    titles.setdefault(int(r["story_id"]), r["title"])
+        except Exception as exc:
+            self.log(f"translate: source titles not read: {type(exc).__name__}: {exc}")
+        return [{**s, "source_title": s.get("source_title") or titles.get(s["id"])} for s in stories]
+
+    # ------------------------------------------------------------ Step 20: the meaning check
+
+    def render_check(self, lang: str, pairs: list[tuple[dict, tuple]]) -> str:
+        items = [{"id": f"S{s['id']}", "english": f"{english_headline(s)}\n{s.get('description') or ''}".strip(),
+                  "translation": f"{r[3]}\n{r[4] or ''}".strip()} for s, r in pairs]
+        out = self.prompt.check_template
+        for key, value in {"{language}": self.languages["english_names"][lang],
+                           "{stories}": json.dumps(items, ensure_ascii=False, indent=1)}.items():
+            out = out.replace(key, value)
+        return out
+
+    def _ask_check(self, start_plan, lang: str, pairs: list[tuple[dict, tuple]], res: LangResult) -> dict[int, dict] | None:
+        """One meaning-check answer: the strong chain from the translator's own provider on, so a
+        failing provider is skipped. None = no provider could check (the stories then wait)."""
+        prompt = self.render_check(lang, pairs)
+        kind = f"backcheck_{lang}"
+        plans = self.plans[self.plans.index(start_plan):] if start_plan in self.plans else self.plans
+        for plan in plans:
+            p = plan.provider
+            if p.name == "groq":
+                continue
+            for attempt in range(2):
+                out = None
+                res.calls += 1
+                res.check_calls += 1
+                try:
+                    out = p.generate(prompt, self.prompt.check_schema)
+                    res.input_tokens += out.input_tokens or 0
+                    res.output_tokens += out.output_tokens or 0
+                    self._dump(p.name, f"check_{lang}", res.calls, prompt, out.text)
+                    answer = self._parse(p.name, out.text)
+                    if not answer:
+                        raise ai.AIError(p.name, "meaning check: answer has no usable items", kind="invalid")
+                except ai.AIError as exc:
+                    self.on_call(p, False, len(pairs), out, str(exc), kind)
+                    res.notes.append(str(exc)[:300])
+                    if exc.kind in ("invalid", "empty") and attempt == 0:
+                        continue
+                    break
+                self.on_call(p, True, len(pairs), out, None, kind)
+                return answer
+        return None
+
+    def _judge(self, lang: str, pairs: list[tuple[dict, tuple]], answer: dict[int, dict]) -> dict[int, list[str]]:
+        """story id -> meaning problems (empty = same meaning). A story the answer left out has the
+        problem 'not checked'."""
+        out = {}
+        for s, r in pairs:
+            a = answer.get(s["id"])
+            if a is None:
+                out[s["id"]] = ["meaning check left it out"]
+                continue
+            same = a.get("same_meaning")
+            same = same if isinstance(same, bool) else str(same).lower() == "true"
+            out[s["id"]] = meaning_problems(src_text(s), str(a.get("back") or ""), same,
+                                            str(a.get("problem") or ""), self.terms)
+        return out
+
+    def _meaning_pass(self, plan, lang: str, chunk: list[dict], checked: list[tuple], res: LangResult,
+                      now: int) -> list[tuple | None]:
+        """Checks every translation that passed the code checks; a drifted one is redone at once with
+        the problem as its note and checked again; still drifted = rejected (ok 0, the note says why).
+        A translation no provider could check gets no row (it waits, like an unanswered story)."""
+        by_id = {s["id"]: s for s in chunk}
+        good = [(by_id[r[0]], r) for r in checked if r[2]]
+        if not good:
+            return checked
+        answer = self._ask_check(plan, lang, good, res)
+        if answer is None:
+            keep = {r[0] for r in checked if not r[2]}
+            return [r for r in checked if r[0] in keep]
+        verdict = self._judge(lang, good, answer)
+        drifted = [sid for sid, probs in verdict.items() if probs]
+        res.drifted += len(drifted)
+        final = {r[0]: r for r in checked}
+        if drifted:
+            redo = [{**by_id[sid], "retry_note": "; ".join(verdict[sid])[:300]} for sid in drifted]
+            res.redone += len(redo)
+            again = self._call(plan, lang, redo, res, f"translate_{lang}")
+            second: list[tuple] = []
+            if again is not None:
+                second = [r for r in self._check(lang, redo, again, plan.label, now) if r[2]]
+            answer2 = self._ask_check(plan, lang, [(by_id[r[0]], r) for r in second], res) if second else None
+            verdict2 = self._judge(lang, [(by_id[r[0]], r) for r in second], answer2) if answer2 else {}
+            fixed = {r[0]: r for r in second if r[0] in verdict2 and not verdict2[r[0]]}
+            for sid in drifted:
+                s = by_id[sid]
+                if sid in fixed:
+                    final[sid] = fixed[sid]
+                else:
+                    note = "; ".join(verdict2.get(sid) or verdict[sid])[:300]
+                    final[sid] = (sid, lang, 0, None, None, src_text(s), note, plan.label, now)
+                    self.log(f"translate {lang}: S{sid} rejected by the meaning check: {note}")
+        return [final[r[0]] for r in checked]
 
     def _check(self, lang: str, chunk: list[dict], answer: dict[int, dict], label: str, now: int) -> list[tuple]:
         """Rows for the stories the answer covers (stories it left out get none)."""
@@ -486,7 +663,7 @@ class Translator:
             return answer
         return None
 
-    def _dump(self, provider: str, lang: str, n: int, prompt: str, text: str) -> None:
+    def _dump(self, provider: str, lang: str, n, prompt: str, text: str) -> None:
         if not self.debug_dir:
             return
         self.debug_dir.mkdir(parents=True, exist_ok=True)

@@ -360,3 +360,19 @@ CREATE TABLE IF NOT EXISTS daily_stats (
   d1_rows_written  INTEGER,
   written_at       INTEGER
 ) WITHOUT ROWID;
+
+-- Step 20: money spent on the paid emergency Gemini key (GEMINI_EMERGENCY_API_KEY). One row per paid call,
+-- written by the job and by the Worker (topic checks). Never pruned: the caps (per UTC day and month) and
+-- the credits left are sums over it. A normal day has no row at all.
+CREATE TABLE IF NOT EXISTS ai_spend (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  at            INTEGER NOT NULL,
+  source        TEXT NOT NULL,                       -- 'job' or 'worker'
+  model         TEXT NOT NULL,
+  kind          TEXT,                                -- batch, editor, translate_hy, backcheck_hy, topic_check...
+  input_tokens  INTEGER,
+  output_tokens INTEGER,
+  usd           REAL NOT NULL,                       -- estimated from the token counts and config/ai_budget.json prices
+  reason        TEXT                                 -- why every free option failed for that call
+);
+CREATE INDEX IF NOT EXISTS idx_ai_spend_at ON ai_spend(at);

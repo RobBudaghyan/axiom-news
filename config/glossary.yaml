@@ -46,3 +46,34 @@ names:
   # Sanae Takaichi, Japan's prime minister (Step 14). Takaiti is the Russian spelling read back into English.
   - {en: [Takaichi, Takaiti], ru: Такаити, hy: Տակաիչի, fr: Takaichi}
   - {en: [Sanae], ru: Санаэ, hy: Սանաե, fr: Sanae}
+
+# Step 20: news words with more than one meaning. A bad Armenian digest said "Ukrainian deception" for
+# "Ukrainian intelligence" and "fortune-telling job ads" for espionage job ads. The terms whose English
+# form is in a batch go into the translation prompt with their news meaning and the word to use.
+#   en:    English forms to look for (whole words, any case)
+#   sense: the news meaning, shown to the model
+#   ru/hy/fr: the word to use (a suggestion: grammar may decline it)
+#   back:  for the meaning check: when the English has the term, the translation read back into English
+#          must contain one of these stems (lower case). No `back` = the term is too ambiguous to check.
+terms:
+  - {en: [intelligence], sense: "spy agencies or the information they gather, never cleverness or deception", ru: разведка, hy: հետախուզություն, fr: renseignement, back: [intelligence, spy, spies, espionage, reconnaissance]}
+  - {en: [special services, secret services, security services], sense: "state security and spy agencies", ru: спецслужбы, hy: հատուկ ծառայություններ, fr: services secrets, back: [special service, secret service, security service, intelligence service, spy agenc, intelligence agenc, security agenc]}
+  - {en: [espionage, spying], sense: "spying for a state", ru: шпионаж, hy: լրտեսություն, fr: espionnage, back: [espionage, spy, spie]}
+  - {en: [sabotage], sense: "deliberate damage or attacks behind the lines", ru: диверсии, hy: դիվերսիա, fr: sabotage, back: [sabotage, subversi, diversion]}
+  - {en: [job ads, job adverts, job advertisements, job listings, job offers, job postings], sense: "advertised jobs (here often fake ones used to recruit agents)", ru: объявления о работе, hy: աշխատանքի հայտարարություններ, fr: offres d'emploi, back: [job, vacanc, employment, work]}
+  - {en: [recruit, recruits, recruited, recruiting, recruitment], sense: "hiring or enlisting people (for spying, an army, a group)", ru: вербовка, hy: հավաքագրում, fr: recrutement, back: [recruit, enlist, hire, hiring]}
+  - {en: [sanction, sanctions, sanctioned], sense: "economic or political penalties on a country, firm or person", ru: санкции, hy: պատժամիջոցներ, fr: sanctions, back: [sanction, penalt, restrictive measure]}
+  - {en: [strike, strikes, airstrike, airstrikes], sense: "a military attack (удар, հարված, frappe) unless the story is about workers stopping work (забастовка, գործադուլ, grève)", ru: удар, hy: հարված, fr: frappe}
+  - {en: [shelling], sense: "artillery fire", ru: обстрел, hy: հրետակոծություն, fr: bombardement, back: [shell, bombard, artillery]}
+  - {en: [ceasefire, truce], sense: "an agreed stop to fighting", ru: прекращение огня, hy: հրադադար, fr: cessez-le-feu, back: [ceasefire, cease-fire, truce, armistice]}
+  - {en: [troops], sense: "soldiers", ru: войска, hy: զորքեր, fr: troupes, back: [troop, soldier, force, military, army]}
+  - {en: [drone, drones], sense: "an unmanned aircraft", ru: беспилотник, hy: անօդաչու թռչող սարք, fr: drone, back: [drone, unmanned, uav]}
+  - {en: [conscription, conscripts, mobilisation, mobilization], sense: "calling people up to the army", ru: призыв, hy: զորակոչ, fr: conscription, back: [conscript, draft, mobili, call-up, call up]}
+  - {en: [detained, detention], sense: "held by police or security forces", ru: задержан, hy: ձերբակալվել, fr: interpellé, back: [detain, arrest, custody, held, detention]}
+  - {en: [bill], sense: "a draft law (unless it is clearly money owed)", ru: законопроект, hy: օրինագիծ, fr: projet de loi}
+  - {en: [charges, charged], sense: "criminal accusations (unless it is clearly a price or fee)", ru: обвинения, hy: մեղադրանքներ, fr: inculpé}
+  - {en: [polls], sense: "opinion polls, or the election itself (at the polls)", ru: опросы, hy: հարցումներ, fr: sondages}
+  - {en: [interest rates, rate cut, rate hike], sense: "a central bank's interest rate", ru: процентная ставка, hy: տոկոսադրույք, fr: taux d'intérêt, back: [rate]}
+  - {en: [bonds, Treasuries], sense: "government or company debt securities", ru: облигации, hy: պարտատոմսեր, fr: obligations, back: [bond, treasur, debt]}
+  - {en: [tariff, tariffs], sense: "import taxes", ru: пошлины, hy: մաքսատուրքեր, fr: droits de douane, back: [tariff, dut, levy, levies]}
+  - {en: [posted], sense: "published (online)", ru: опубликовали, hy: հրապարակել, fr: publié, back: [post, publish, place, put up, upload]}

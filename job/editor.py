@@ -710,11 +710,12 @@ class Editor:
         for plan in self.plans:
             p = plan.provider
             small = p.name == "groq"
+            paid = getattr(plan, "paid", False)   # Step 20: the answer must fit the paid key's 12k output limit
             new, compare = choose(
                 pool, self.topic_order,
-                self.s.editor_groq_new if small else self.s.editor_new,
+                self.s.editor_groq_new if small else self.s.editor_paid_new if paid else self.s.editor_new,
                 self.s.editor_groq_per_topic if small else self.s.editor_per_topic,
-                self.s.editor_groq_compare if small else self.s.editor_compare)
+                self.s.editor_groq_compare if small else self.s.editor_paid_compare if paid else self.s.editor_compare)
             if not new:
                 return "skipped", small     # everything is edited already
             cands = new + compare

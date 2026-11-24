@@ -6,6 +6,7 @@ import { CONFIG, afterSendStatements, candidateStatement, holdStatements, nextSl
 import { HEALTH_STATEMENTS, assessHealth } from "./health.js";
 import { errorStatement, shouldFlushUsage, takeUsage, usageStatement } from "./db.js";
 import { asTopicRows, guardAlert, withCustomTopics } from "./custom.js";
+import { spendAlert, spendAlertStatements } from "./spend.js";
 import { countStatement } from "./guard.js";
 import { reminderStatement, runReminders } from "./onboard.js";
 import { activeStatement, runAnnouncementBatch } from "./announce.js";
@@ -85,15 +86,16 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
                    { sql: DUE_CUSTOM_SQL, params: [now, cfg.max_users_per_tick] },
                    reminderStatement(now), activeStatement()] : []),   // Step 15: one reminder, announcements
     ...(guard ? [countStatement(now),
-                 { sql: "SELECT key, value FROM meta WHERE key IN ('ai_guard', 'ai_guard_alert_day')", params: [] }] : []),
+                 { sql: "SELECT key, value FROM meta WHERE key IN ('ai_guard', 'ai_guard_alert_day')", params: [] },
+                 ...spendAlertStatements(now)] : []),   // Step 20: the emergency key's spend today
     ...(watch ? WATCH_STATEMENTS(now) : []),
   ];
   const got = await db.batch(reads);
   const [runs, lastOk, meta] = got;
   let [due = [], topics = [], custom = [], reminders = [], announcing = []] = digests ? got.slice(3, 8) : [];
   const after = digests ? 8 : 3;
-  const [guardCounts, guardMeta] = guard ? got.slice(after, after + 2) : [];
-  const watchGot = watch ? got.slice(after + (guard ? 2 : 0), after + (guard ? 2 : 0) + 2) : null;
+  const [guardCounts, guardMeta, spendRows, spendMeta] = guard ? got.slice(after, after + 4) : [];
+  const watchGot = watch ? got.slice(after + (guard ? 4 : 0), after + (guard ? 4 : 0) + 2) : null;
   const writes = [];
   const out = { due: due.length, sent: 0, quiet: 0, blocked: 0, failed: 0, stories: 0, cut: 0, alert: false };
 
@@ -212,6 +214,17 @@ export async function runTick(db, io, now, opts = {}, cfg = CONFIG) {
         out.guard_alert = true;
       } catch (e) {
         writes.push(errorStatement(`AI budget alert to owner failed: ${e.message}`, now));
+      }
+    }
+    // Step 20: one alert on any UTC day the paid emergency key spent money (amount and why)
+    const sp = spendAlert(spendRows, spendMeta, now);
+    if (sp) {
+      try {
+        await io.alert(sp.text);
+        writes.push(...sp.writes);
+        out.spend_alert = true;
+      } catch (e) {
+        writes.push(errorStatement(`emergency spend alert to owner failed: ${e.message}`, now));
       }
     }
   }

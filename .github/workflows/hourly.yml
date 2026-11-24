@@ -20,6 +20,7 @@ on:
         default: "20"
     secrets:
       GEMINI_API_KEY: { required: true }
+      GEMINI_EMERGENCY_API_KEY: { required: false }   # Step 20: the paid key, only when every free option failed
       GROQ_API_KEY: { required: true }
       CLOUDFLARE_ACCOUNT_ID: { required: true }
       D1_DATABASE_ID: { required: true }
@@ -36,7 +37,7 @@ jobs:
     concurrency:
       group: hourly-job
       cancel-in-progress: false
-    timeout-minutes: 20
+    timeout-minutes: 25   # Step 20: the job stops new AI work by about 14 min (run_budget_s)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -47,6 +48,7 @@ jobs:
       - name: Run the hourly job
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_EMERGENCY_API_KEY: ${{ secrets.GEMINI_EMERGENCY_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}

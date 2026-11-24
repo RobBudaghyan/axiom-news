@@ -75,6 +75,35 @@ def _retry_delay(resp: requests.Response) -> float | None:
     return None
 
 
+# ---------------------------------------------------------------- Step 20: run state shared by providers
+
+class RetryBudget:
+    """Seconds the whole run may spend waiting before retrying a free Gemini 503, shared by every
+    model and pass, and never past the run's deadline (monotonic time). A 503 storm then costs a run
+    a few minutes at most, not one long wait per call."""
+
+    def __init__(self, seconds: float, deadline: float | None = None, clock: Callable[[], float] = time.monotonic):
+        self.left = seconds
+        self.deadline = deadline
+        self.clock = clock
+
+    def take(self, delay: float) -> bool:
+        if delay > self.left:
+            return False
+        if self.deadline is not None and self.clock() + delay + 60 > self.deadline:
+            return False
+        self.left -= delay
+        return True
+
+
+@dataclass
+class KeyState:
+    """One API key's state in this run: `dead` is set by a 402 ("prepayment credits are depleted")
+    or a refused key, and then no model on that key is called again this run."""
+    label: str
+    dead: str | None = None
+
+
 # ---------------------------------------------------------------- Gemini
 
 class GeminiProvider:
@@ -86,7 +115,8 @@ class GeminiProvider:
     def __init__(self, api_key: str, model: str, *, timeout: float = 180,
                  max_output_tokens: int = 32768, thinking_level: str | None = "low",
                  session: requests.Session | None = None,
-                 retry_delays: tuple[float, ...] = (5, 20), sleep: Callable[[float], None] = time.sleep):
+                 retry_delays: tuple[float, ...] = (5, 20), sleep: Callable[[float], None] = time.sleep,
+                 budget: "RetryBudget | None" = None, key: "KeyState | None" = None):
         self.model = model
         self.retry_delays = retry_delays   # waits before retrying a 500/503 ("high demand")
         self.sleep = sleep
@@ -94,6 +124,13 @@ class GeminiProvider:
         self.timeout = timeout
         self.max_output_tokens = max_output_tokens
         self.thinking_level = thinking_level
+        # Step 20: the run's shared retry time, and the key's state (a 402 or a dead key stops every
+        # model on it for the rest of the run). `down`: this model's retries ran out once this run,
+        # so later calls try once, with no long waits.
+        self.budget = budget
+        self.key = key or KeyState("gemini")
+        self.down = False
+        self.dead: str | None = None
         self.session = session or requests.Session()
         # key goes in a header, never in the URL (keeps it out of logs and error text)
         self.session.headers.update({"x-goog-api-key": api_key})
@@ -129,8 +166,13 @@ class GeminiProvider:
         if self.thinking_level:
             config["thinkingConfig"] = {"thinkingLevel": self.thinking_level}
         body = {"contents": [{"role": "user", "parts": [{"text": prompt}]}], "generationConfig": config}
+        if self.key.dead:
+            raise AIError(self.name, f"{self.model}: key unusable this run ({self.key.dead})", kind="billing")
+        if self.dead:
+            raise AIError(self.name, f"{self.model}: unusable this run ({self.dead})", kind="http")
         t0 = time.monotonic()
-        for delay in (*self.retry_delays, None):
+        delays = () if self.down else self.retry_delays
+        for delay in (*delays, None):
             try:
                 resp = self.session.post(f"{self.BASE}/models/{self.model}:generateContent",
                                          json=body, timeout=self.timeout)
@@ -138,12 +180,24 @@ class GeminiProvider:
                 raise AIError(self.name, f"network error {type(exc).__name__}", kind="network") from None
             if resp.status_code not in (500, 503) or delay is None:
                 break
+            if self.budget is not None and not self.budget.take(delay):
+                break                      # the run's retry time is used up: hand on now
             self.retries += 1
             self.sleep(delay)
         ms = int((time.monotonic() - t0) * 1000)
+        if resp.status_code in (500, 503):
+            self.down = True               # Step 20: later calls this run try once
         if resp.status_code != 200:
+            detail = _error_detail(resp)
             kind = "rate_limit" if resp.status_code == 429 else "http"
-            raise AIError(self.name, f"HTTP {resp.status_code}: {_error_detail(resp)}", kind=kind,
+            if resp.status_code == 402 or (resp.status_code == 403 and "billing" in detail.lower()):
+                kind = "billing"           # Step 20: e.g. "prepayment credits are depleted": the whole key
+                self.key.dead = f"HTTP {resp.status_code}"
+            elif resp.status_code in (400, 401, 403) and "API key" in detail:
+                self.key.dead = f"HTTP {resp.status_code}"
+            elif resp.status_code == 404 or (resp.status_code == 429 and ("limit: 0" in detail or "PerDay" in detail)):
+                self.dead = f"HTTP {resp.status_code}"   # no such model, or no free quota left today
+            raise AIError(self.name, f"HTTP {resp.status_code}: {detail}", kind=kind,
                           status=resp.status_code, retry_after=_retry_delay(resp))
         data = resp.json()
         usage = data.get("usageMetadata") or {}
@@ -165,8 +219,10 @@ class GeminiProvider:
             raise AIError(self.name, f"response blocked: finishReason={finish}", kind="blocked")
         if not text.strip():
             raise AIError(self.name, f"empty response text (finishReason={finish})", kind="empty")
+        self.down = False
         return CallResult(self.name, self.model, text, in_tok, out_tok, ms, finish,
-                          extra={"thoughts_tokens": usage.get("thoughtsTokenCount")})
+                          extra={"thoughts_tokens": usage.get("thoughtsTokenCount"),
+                                 "service_tier": usage.get("serviceTier")})
 
 
 # ---------------------------------------------------------------- Groq
@@ -189,8 +245,10 @@ class GroqProvider:
     def __init__(self, api_key: str, model: str, *, timeout: float = 120,
                  max_output_tokens: int = 3000, reasoning_effort: str | None = "low",
                  session: requests.Session | None = None,
-                 sleep: Callable[[float], None] = time.sleep):
+                 sleep: Callable[[float], None] = time.sleep, wait_429: bool = True):
         self.model = model
+        self.wait_429 = wait_429     # Step 20: in a GroqPool a 429 moves on to the next model instead
+        self.dead: str | None = None
         self.timeout = timeout
         self.max_output_tokens = max_output_tokens
         self.reasoning_effort = reasoning_effort
@@ -228,8 +286,8 @@ class GroqProvider:
         if schema is not None:
             body["response_format"] = {"type": "json_schema",
                                        "json_schema": {"name": "story_batch", "schema": schema}}
-        if self.reasoning_effort:
-            body["reasoning_effort"] = self.reasoning_effort
+        if self.reasoning_effort and self.model.startswith("openai/gpt-oss"):
+            body["reasoning_effort"] = self.reasoning_effort   # Step 20: only gpt-oss takes "low"
         t0 = time.monotonic()
         for attempt in range(3):
             try:
@@ -239,13 +297,16 @@ class GroqProvider:
             self._record_limits(resp)
             # The TPM window rolls: a 429 with a short "try again in N s" is waited out.
             delay = _retry_delay(resp) if resp.status_code == 429 else None
-            if delay is None or delay > 65 or attempt == 2:
+            if delay is None or delay > 65 or attempt == 2 or not self.wait_429:
                 break
             self.sleep(delay + 1)
         ms = int((time.monotonic() - t0) * 1000)
         if resp.status_code != 200:
             kind = {429: "rate_limit", 413: "too_large"}.get(resp.status_code, "http")
-            raise AIError(self.name, f"HTTP {resp.status_code}: {_error_detail(resp)}", kind=kind,
+            detail = _error_detail(resp)
+            if resp.status_code == 400 and ("validate JSON" in detail or "failed_generation" in resp.text):
+                kind = "invalid"   # Step 20: the model's answer broke the schema: a bad answer, not an outage
+            raise AIError(self.name, f"HTTP {resp.status_code}: {detail}", kind=kind,
                           status=resp.status_code, retry_after=_retry_delay(resp))
         data = resp.json()
         usage = data.get("usage") or {}

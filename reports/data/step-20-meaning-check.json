@@ -1,0 +1,15 @@
+{
+ "bad (the owner's example)": {
+  "back": "Ukrainian deception says that Russian special services posted 20 million fortune-telling job announcements on Discord. Ukraine's defense deception reported that Russian special services posted more than 20 million fortune-telling job announcements in Europe on Discord.",
+  "same_meaning": false,
+  "problem": "The word 'intelligence' was translated as 'deception' and 'espionage' was translated as 'fortune-telling'.",
+  "verdict": "REJECTED: meaning changed: The word 'intelligence' was translated as 'deception' and 'espionage' was translated as 'fortune-telling'.; meaning: 'intelligence' (spy agencies or the information they gather) is lost in the translation; meaning: 'espionage' (spying for a state) is lost in the translation; meaning: 'sabotage' (deliberate damage or attacks behind the lines) is lost in the translation"
+ },
+ "good": {
+  "back": "Ukrainian intelligence reports that Russian special services posted 20 million espionage job announcements on Discord. Ukraine's defense intelligence reported that Russian special services posted more than 20 million disguised job announcements on Discord, offering cash for espionage and sabotage tasks in Europe.",
+  "same_meaning": true,
+  "problem": "",
+  "verdict": "accepted"
+ },
+ "spent_usd": 0.000851
+}

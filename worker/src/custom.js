@@ -15,6 +15,7 @@
 import TOPICS_CFG from "../../config/custom_topics.json" with { type: "json" };
 import { DICTS, FORBIDDEN, LANGS, t, topicLabel } from "./i18n.js";
 import { BUDGET, countStatement, guardState } from "./guard.js";
+import { callCost, spendInsert, spendStatement, whyNot, worstCost } from "./spend.js";
 
 export { TOPICS_CFG };
 const DAY = 86400;
@@ -258,15 +259,22 @@ export function validateAnswer(data, lang, cfg = TOPICS_CFG) {
 const GEMINI = "https://generativelanguage.googleapis.com/v1beta/models";
 const GROQ = "https://api.groq.com/openai/v1/chat/completions";
 
-// The providers this Worker can use, in order (the same chain as the hourly job). A provider
-// without its key is skipped.
-export function providers(env) {
+// The providers this Worker can use, in order (Step 20: the same order as the hourly job): the free
+// Gemini models one by one, Groq's models in rotation, then the paid emergency key, only when every
+// free option failed and only under the caps (src/spend.js). A provider without its key is skipped.
+export function providers(env, cfg = BUDGET) {
+  const ch = cfg.chain ?? {};
   const out = [];
   if (env.GEMINI_API_KEY) {
-    out.push({ name: "gemini", model: env.GEMINI_MODEL || "gemini-3.5-flash-lite" });
-    out.push({ name: "gemini", model: env.GEMINI_FALLBACK_MODEL || "gemini-3.1-flash-lite" });
+    const models = [...(ch.worker_gemini_free ?? ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"])];
+    if (env.GEMINI_MODEL) models[0] = env.GEMINI_MODEL;
+    if (env.GEMINI_FALLBACK_MODEL && models.length > 1) models[1] = env.GEMINI_FALLBACK_MODEL;
+    for (const model of [...new Set(models)]) out.push({ name: "gemini", model });
   }
-  if (env.GROQ_API_KEY) out.push({ name: "groq", model: env.GROQ_MODEL || "openai/gpt-oss-120b" });
+  if (env.GROQ_API_KEY) {
+    for (const model of ch.groq ?? [env.GROQ_MODEL || "openai/gpt-oss-120b"]) out.push({ name: "groq", model });
+  }
+  if (env.GEMINI_EMERGENCY_API_KEY && cfg.emergency?.model) out.push({ name: "gemini_paid", model: cfg.emergency.model, paid: true });
   return out;
 }
 
@@ -286,14 +294,15 @@ async function post(url, headers, body, timeoutMs) {
 async function callOne(p, env, prompt, timeoutMs, schema = CHECK_SCHEMA, maxTokens = 2048, schemaName = "topic_check") {
   let res;
   try {
-    res = p.name === "gemini"
-      ? await post(`${GEMINI}/${p.model}:generateContent`, { "x-goog-api-key": env.GEMINI_API_KEY }, {
+    res = p.name === "gemini" || p.name === "gemini_paid"
+      ? await post(`${GEMINI}/${p.model}:generateContent`, { "x-goog-api-key": p.name === "gemini_paid" ? env.GEMINI_EMERGENCY_API_KEY : env.GEMINI_API_KEY }, {
           contents: [{ role: "user", parts: [{ text: prompt }] }],
           generationConfig: { temperature: 0.2, maxOutputTokens: maxTokens, responseMimeType: "application/json",
             responseJsonSchema: schema, thinkingConfig: { thinkingLevel: "low" } },
         }, timeoutMs)
       : await post(GROQ, { authorization: `Bearer ${env.GROQ_API_KEY}` }, {
-          model: p.model, temperature: 0.2, max_completion_tokens: maxTokens, reasoning_effort: "low",
+          model: p.model, temperature: 0.2, max_completion_tokens: maxTokens,
+          ...(p.model.startsWith("openai/gpt-oss") ? { reasoning_effort: "low" } : {}),   // Step 20: only gpt-oss takes it
           messages: [{ role: "user", content: prompt }],
           response_format: { type: "json_schema", json_schema: { name: schemaName, schema } },
         }, timeoutMs);
@@ -306,7 +315,7 @@ async function callOne(p, env, prompt, timeoutMs, schema = CHECK_SCHEMA, maxToke
     const msg = String(data?.error?.message ?? data?.error ?? "").slice(0, 200);
     return { ok: false, code: res.status, error: `${p.name}: HTTP ${res.status}: ${msg}` };
   }
-  if (p.name === "gemini") {
+  if (p.name === "gemini" || p.name === "gemini_paid") {
     const u = data?.usageMetadata ?? {};
     const parts = data?.candidates?.[0]?.content?.parts ?? [];
     const text = parts.filter((x) => !x.thought).map((x) => x.text ?? "").join("");
@@ -328,31 +337,68 @@ function parseAnswer(text) {
 // Asks each provider in turn until one gives a usable answer. Returns {answer, calls}: calls are
 // ai_calls rows to write (every attempt). Step 15: opts.schema, opts.validate(data, lang),
 // opts.maxTokens and opts.schemaName let another caller (the announcement) use the same chain.
+// Step 20: a free Gemini 503 is tried once more after a short wait; Groq's models take turns; the paid
+// key comes last, only with opts.db (its spend is read first, and the call is refused if its worst
+// case would pass a cap). A paid call's row carries usd and reason: aiCallStatements writes ai_spend too.
 export async function askAI(env, prompt, lang, now, opts = {}) {
   const calls = [];
   const timeoutMs = opts.timeoutMs ?? 12000;
   const validate = opts.validate ?? validateAnswer;
-  for (const p of providers(env)) {
+  const maxTokens = opts.maxTokens ?? 2048;
+  const cfg = opts.budget ?? BUDGET;
+  const wait = opts.sleep ?? ((ms) => new Promise((r) => setTimeout(r, ms)));
+  const retryMs = cfg.chain?.worker_retry_503_ms ?? 1500;
+  for (const p of providers(env, cfg)) {
+    let usd = null;
+    if (p.paid) {
+      if (!opts.db) continue;
+      let sums = null;
+      try { [[sums]] = await opts.db.batch([spendStatement(now)]); } catch { sums = null; }
+      const why = whyNot(sums, worstCost(p.model, prompt, maxTokens, now, cfg.emergency), now, cfg.emergency);
+      if (why) {
+        calls.push({ at: now, provider: p.name, model: p.model, ok: 0, input_tokens: null, output_tokens: null, ms: 0,
+                     error: `emergency key not used: ${why}`, code: null });
+        continue;
+      }
+    }
     const t0 = Date.now();
-    const r = await callOne(p, env, prompt, timeoutMs, opts.schema ?? CHECK_SCHEMA, opts.maxTokens ?? 2048, opts.schemaName ?? "topic_check");
+    let r = await callOne(p, env, prompt, timeoutMs, opts.schema ?? CHECK_SCHEMA, maxTokens, opts.schemaName ?? "topic_check");
+    if (p.name === "gemini" && (r.code === 503 || r.code === 500)) {
+      calls.push({ at: now, provider: p.name, model: p.model, ok: 0, input_tokens: null, output_tokens: null, ms: Date.now() - t0, error: r.error, code: r.code });
+      await wait(retryMs);
+      r = await callOne(p, env, prompt, timeoutMs, opts.schema ?? CHECK_SCHEMA, maxTokens, opts.schemaName ?? "topic_check");
+    }
     let answer = null, error = r.error;
     if (r.ok) {
       try { answer = validate(parseAnswer(r.text), lang); if (!answer) error = `${p.name}: unusable answer`; }
       catch { error = `${p.name}: invalid JSON`; }
     }
+    if (p.paid && (r.in != null || r.out != null)) usd = callCost(p.model, r.in, r.out, now, cfg.emergency);
     calls.push({ at: now, provider: p.name, model: p.model, ok: answer ? 1 : 0, input_tokens: r.in ?? null,
-                 output_tokens: r.out ?? null, ms: Date.now() - t0, error: answer ? null : error, code: r.code ?? null });
+                 output_tokens: r.out ?? null, ms: Date.now() - t0, error: answer ? null : error, code: r.code ?? null,
+                 ...(usd != null ? { usd, reason: freeFailures(calls) } : {}) });
     if (answer) return { answer, calls };
   }
   return { answer: null, calls };
 }
 
+// "Why" for a paid call: the free calls that failed before it ("gemini-3.5-flash-lite: HTTP 503 x2; ...").
+export function freeFailures(calls) {
+  const n = new Map();
+  for (const c of calls) {
+    if (c.ok || c.provider === "gemini_paid") continue;
+    const k = `${c.model}: ${c.code ? `HTTP ${c.code}` : String(c.error ?? "failed").split(": ").slice(-1)[0].slice(0, 40)}`;
+    n.set(k, (n.get(k) ?? 0) + 1);
+  }
+  return [...n].map(([k, v]) => (v > 1 ? `${k} x${v}` : k)).join("; ") || "every free option failed";
+}
+
 export function aiCallStatements(calls, kind = "topic_check") {
-  return calls.map((c) => ({
+  return calls.flatMap((c) => [{
     sql: "INSERT INTO ai_calls (at, provider, model, ok, items, input_tokens, output_tokens, ms, error, kind, code) " +
          "VALUES (?1, ?2, ?3, ?4, 1, ?5, ?6, ?7, ?8, ?10, ?9)",
     params: [c.at, c.provider, c.model, c.ok, c.input_tokens, c.output_tokens, c.ms, c.error ? String(c.error).slice(0, 500) : null, c.code, kind],
-  }));
+  }, ...(c.usd ? [spendInsert({ ...c, kind })] : [])]);   // Step 20: the paid key's spend
 }
 
 // ------------------------------------------------------------------ the flow
@@ -434,7 +480,7 @@ export async function addTopic(ctx, body) {
   }
   // 4. one AI call (Gemini, its second model, then Groq)
   const prompt = checkPrompt({ input, lang, mainTopics, existing, now }, cfg);
-  const { answer, calls } = await (ctx.ask ?? askAI)(env, prompt, lang, now);
+  const { answer, calls } = await (ctx.ask ?? askAI)(env, prompt, lang, now, { db });
   const logs = aiCallStatements(calls);
   if (!answer) {
     const reason = t(lang, "errors.topic_later");

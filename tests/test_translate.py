@@ -66,13 +66,14 @@ def responder(fix=lambda item: item, lang_fn=ru):
     return respond
 
 
-def make(db, providers, settings=None, languages=LANGS, dry_run=False):
+def make(db, providers, settings=None, languages=LANGS, dry_run=False, meaning_check=False):
+    """Step 20: the Step 9 and 10 rules are tested without the meaning check (tests/test_step20.py has it)."""
     s = settings or Settings()
     plans = [ProviderPlan(p, 25000, 0, 4, label=p.name) for p in providers]
     calls = []
     tr = translate.Translator(db, plans, settings=s, languages=languages, glossary=GLOSSARY,
                               on_call=lambda p, ok, n, res, err, kind: calls.append((p.name, ok, n, kind, err)),
-                              log=lambda _m: None, dry_run=dry_run)
+                              log=lambda _m: None, dry_run=dry_run, terms=[], meaning_check=meaning_check)
     return tr, calls
 
 
@@ -330,18 +331,25 @@ class WholeAnswerRetry(unittest.TestCase):
 
 
 class Providers(unittest.TestCase):
-    def test_fallback_chain_and_groq_chunks(self):
+    def test_fallback_chain_never_groq(self):
+        """Step 20 (owner): translations use only the strong models; Groq is skipped and the stories wait."""
         db = new_db()
         add_user(db, 1, "ru")
         for i in range(30):
             add_story(db, f"Story {i}")
-        g1, g2 = FakeProvider("gemini", [DOWN]), FakeProvider("gemini-b", [DOWN])
+        g1, g2 = FakeProvider("gemini", [DOWN]), FakeProvider("gemini-b", [responder()])
         groq = FakeProvider("groq", [responder(), responder(), responder()])
         tr, calls = make(db, [g1, g2, groq])
         res = tr.run(T0)
-        self.assertEqual([len(stories_in(p)) for p in groq.prompts], [12, 12, 6])
-        self.assertEqual((len(rows(db)), res.langs["ru"].provider), (30, "groq"))
-        self.assertEqual([c[1] for c in calls], [False, False, True, True, True])
+        self.assertEqual((len(rows(db)), res.langs["ru"].provider, groq.prompts), (30, "gemini-b", []))
+        self.assertEqual([c[1] for c in calls], [False, True])
+        db2 = new_db()
+        add_user(db2, 1, "ru")
+        add_story(db2, "Story")
+        groq2 = FakeProvider("groq", [responder()])
+        tr2, _ = make(db2, [FakeProvider("gemini", [DOWN]), groq2])
+        res2 = tr2.run(T0)
+        self.assertEqual((rows(db2), groq2.prompts, res2.langs["ru"].unanswered), ({}, [], 1))
 
     def test_every_provider_down_writes_nothing_and_says_so(self):
         db = new_db()

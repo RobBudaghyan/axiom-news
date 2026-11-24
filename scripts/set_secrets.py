@@ -4,8 +4,8 @@ printing a value. Each value goes to the tool through stdin (never on a command 
 Usage (from the project folder):
     venv/Scripts/python scripts/set_secrets.py check      # which .env names are set (no values)
     venv/Scripts/python scripts/set_secrets.py webhook    # create TELEGRAM_WEBHOOK_SECRET in .env if empty
-    venv/Scripts/python scripts/set_secrets.py github     # gh secret set (the 5 the job needs)
-    venv/Scripts/python scripts/set_secrets.py worker-prod      # wrangler secret put, production Worker (6)
+    venv/Scripts/python scripts/set_secrets.py github     # gh secret set (the 6 the job needs)
+    venv/Scripts/python scripts/set_secrets.py worker-prod      # wrangler secret put, production Worker (9)
     venv/Scripts/python scripts/set_secrets.py worker-staging   # the staging Worker: .env with .env.staging on top
                                                                 # (its own webhook secret; no GitHub dispatch token)
 
@@ -27,9 +27,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 ENV = ROOT / ".env"
-GITHUB = ("GEMINI_API_KEY", "GROQ_API_KEY", "CLOUDFLARE_ACCOUNT_ID", "D1_DATABASE_ID", "CLOUDFLARE_D1_TOKEN")
+GITHUB = ("GEMINI_API_KEY", "GEMINI_EMERGENCY_API_KEY", "GROQ_API_KEY", "CLOUDFLARE_ACCOUNT_ID", "D1_DATABASE_ID", "CLOUDFLARE_D1_TOKEN")
 WORKER = ("TELEGRAM_BOT_TOKEN", "TELEGRAM_WEBHOOK_SECRET", "OWNER_TELEGRAM_ID", "GITHUB_DISPATCH_TOKEN",
           "GEMINI_API_KEY", "GROQ_API_KEY",   # Step 13: the custom-topic check
+          "GEMINI_EMERGENCY_API_KEY",         # Step 20: the paid key, only when every free option failed (hard caps)
           # Step 17: the hourly check of the account's free limits (D1 rows, Worker CPU); a token with
           # Account Analytics Read only. Production only: the limits are per account, one check is enough.
           "CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_ANALYTICS_TOKEN")

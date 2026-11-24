@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import time
@@ -22,7 +23,9 @@ from pathlib import Path
 from datetime import datetime, timezone
 from typing import Callable
 
-from job import ai, custom, dupes, editor, guard, translate
+import requests
+
+from job import ai, chain, custom, dupes, editor, guard, translate
 from job.config import Prompt, Settings, load_env, load_prompt, load_sources, load_topics
 from job.d1 import D1, in_list_statements, insert_statements, seen_hashes
 from job.fetch import (Entry, FeedResult, candidates, feed_caps, feed_health, fetch_all, select_new,
@@ -42,7 +45,7 @@ MAX_SKIPPED_SHARE = 0.10
 ITEM_COLUMNS = ("id", "url_hash", "source_key", "source_name", "tier", "url", "title", "snippet",
                 "published_at", "fetched_at", "status", "story_id", "headline_only", "hint_topic")
 PENDING_COLUMNS = ("id", "source_name", "tier", "url", "title", "snippet", "published_at", "fetched_at",
-                   "headline_only")
+                   "headline_only", "source_key", "hint_topic")
 HTTP_CODE = re.compile(r"HTTP (\d{3})")
 
 
@@ -54,6 +57,7 @@ class ProviderPlan:
     max_chunks: int         # max calls per run
     reply_tokens: int = 0   # reserved reply size, for tokens-per-minute pacing (Groq)
     label: str = ""         # name used in job_runs.provider (default: provider name)
+    paid: bool = False      # Step 20: the emergency key; gets only work every free option failed on
 
     def __post_init__(self):
         self.label = self.label or self.provider.name
@@ -129,6 +133,32 @@ def best_item(items: list[dict], summary: str | None = None) -> dict:
     return min(items, key=lambda i: link_key(i, summary))
 
 
+class PlanList(list):
+    """Step 20: the provider chain for pass 1, the editor and keywords (the list itself), plus the
+    strong chain for translations (`translate`, never Groq), the emergency key's SpendGuard and the
+    run's retry budget. Plain lists still work where only the main chain is needed (tests)."""
+
+    def __init__(self, plans=(), translate=None, spend=None, budget=None, forced=""):
+        super().__init__(plans)
+        self.translate = translate if translate is not None else [p for p in plans if p.provider.name != "groq"]
+        self.spend = spend
+        self.budget = budget
+        self.forced = forced
+
+
+def degraded_order(items: list[dict], followed: set[str], source_topics: dict[str, list[str]]) -> list[dict]:
+    """Step 20: when the main model is down, the most important items go first and the rest waits:
+    items of a topic some active reader follows (a custom topic's Google items, or a feed whose topics
+    are followed), then by source tier (1 is the best), then the newest."""
+    def key(i):
+        tags = set(source_topics.get(i.get("source_key") or "", []))
+        if i.get("hint_topic"):
+            tags.add(i["hint_topic"])
+        when = i.get("published_at") if i.get("published_at") is not None else i.get("fetched_at") or 0
+        return (0 if tags & followed else 1, int(i.get("tier") or 9), -int(when), i["id"])
+    return sorted(items, key=key)
+
+
 class Job:
     def __init__(self, db, plans: list[ProviderPlan], *, settings: Settings | None = None,
                  topics: list[dict] | None = None, sources: list[dict] | None = None,
@@ -169,6 +199,9 @@ class Job:
         self.debug_dir = Path(debug_dir) if debug_dir else None   # saves raw prompts/answers
         self.editor_enabled = editor_enabled   # tests of the first pass alone switch it off
         self.translate_enabled = translate_enabled
+        self.spend_log: list[tuple] = []       # Step 20: ai_spend rows (paid calls) of this run
+        self.followed: set[str] | None = None
+        self.t_start = clock()
 
     # ------------------------------------------------------------ steps
 
@@ -253,8 +286,8 @@ class Job:
     def load_pending(self) -> list[dict]:
         """Pending items in D1 (earlier runs' failures) and this run's held items."""
         rows = self.db.query(
-            "SELECT id, source_name, tier, url, title, snippet, published_at, fetched_at, headline_only "
-            "FROM items "
+            "SELECT id, source_name, tier, url, title, snippet, published_at, fetched_at, headline_only, "
+            "source_key, hint_topic FROM items "
             "WHERE status = 'pending' ORDER BY coalesce(published_at, fetched_at), id")
         rows += [{c: h[c] for c in PENDING_COLUMNS} for h in self.held.values()]
         rows.sort(key=lambda r: (r["published_at"] if r["published_at"] is not None else r["fetched_at"], r["id"]))
@@ -288,18 +321,31 @@ class Job:
         just that chunk on. An answer that covers only part of its chunk is kept, and the
         skipped items are sent once more (then handed on)."""
         queue = pending
-        for plan in self.plans:
+        failed_ids: set[int] = set()      # Step 20: items whose call failed on the last free provider
+        for n_plan, plan in enumerate(self.plans):
             if not queue:
                 break
+            waiting: list[dict] = []
+            if plan.paid:
+                # Step 20: the emergency key only for items every free option FAILED on; items a free
+                # provider had no time or calls left for are not failures: they wait for the next run.
+                waiting = [i for i in queue if i["id"] not in failed_ids]
+                queue = [i for i in queue if i["id"] in failed_ids]
+                if not queue:
+                    queue = waiting
+                    continue
+            if n_plan > 0:
+                queue = degraded_order(queue, self.followed_topics(), self.source_topics())
             p = plan.provider
             fixed = ai.estimate_tokens(self.render([], self.load_existing(now, plan.existing_max), now))
             work = [(c, False) for c in ai.make_chunks(queue, plan.budget_tokens, fixed)]
             leftover: list[dict] = []
+            failed_now: set[int] = set()
             calls = 0
             while work:
                 chunk, retried = work.pop(0)
-                if calls >= plan.max_chunks:
-                    leftover.extend(chunk)
+                if calls >= plan.max_chunks or self.clock() - self.t_start > self.s.pass1_budget_s:
+                    leftover.extend(chunk)      # out of calls or time: not a failure
                     continue
                 existing = self.load_existing(now, plan.existing_max)
                 prompt = self.render(chunk, existing, now)
@@ -323,10 +369,13 @@ class Job:
                         work.insert(0, (chunk, True))
                     elif exc.kind in CONTENT_FAILURES:
                         leftover.extend(chunk)
+                        failed_now.update(i["id"] for i in chunk)
                     else:                       # provider is down/limited: hand the rest on
                         leftover.extend(chunk)
+                        failed_now.update(i["id"] for i in chunk)
                         for rest, _ in work:
                             leftover.extend(rest)
+                            failed_now.update(i["id"] for i in rest)
                         work = []
                     continue
                 self._log_call(p, True, len(chunk), res, None)
@@ -339,14 +388,35 @@ class Job:
                                            f"items; {'handing them on' if retried else 'resending them'}")
                     if retried:
                         leftover.extend(missing)
+                        failed_now.update(i["id"] for i in missing)
                     else:
                         work.insert(0, (missing, True))
                 else:   # a few skipped items count as not news (items_unaccounted)
                     self.apply(stories, chunk, existing, not_news, now, stats)
                 if plan.label not in stats.providers:
                     stats.providers.append(plan.label)
-            queue = leftover
+            if not plan.paid:
+                failed_ids = failed_now
+            queue = leftover + waiting
         return queue
+
+    def followed_topics(self) -> set[str]:
+        """Step 20: the topics active readers follow (main topics on, custom topics in the run)."""
+        if self.followed is None:
+            tags: set[str] = {t.tag for t in self.custom_topics}
+            try:
+                for r in self.db.query("SELECT DISTINCT topics FROM users WHERE blocked = 0"):
+                    try:
+                        tags.update(json.loads(r["topics"] or "[]"))
+                    except (TypeError, ValueError):
+                        pass
+            except Exception:
+                tags.update(self.main_order)
+            self.followed = tags
+        return self.followed
+
+    def source_topics(self) -> dict[str, list[str]]:
+        return {s["key"]: list(s.get("topics") or []) for s in self.sources}
 
     def check_answer(self, provider: str, text: str, chunk: list[dict],
                      existing: list[dict]) -> tuple[list[ai.StoryOut], set[int], list[dict]]:
@@ -386,6 +456,12 @@ class Job:
                                res.input_tokens if res else None, res.output_tokens if res else None,
                                res.ms if res else None, (error or "")[:500] or None, kind,
                                int(m.group(1)) if m else None))
+        # Step 20: every paid call that cost money goes to ai_spend, with why the free options failed
+        usd = getattr(p, "last_cost", None) if p.name == "gemini_paid" else None
+        if usd:
+            self.spend_log.append((int(self.clock()), "job", p.model, kind,
+                                   res.input_tokens if res else None, res.output_tokens if res else None,
+                                   round(float(usd), 6), chain.free_failures(self.calls_log[:-1])[:300]))
 
     def apply(self, stories: list[ai.StoryOut], chunk: list[dict], existing: list[dict],
               not_news: set[int], now: int, stats: RunStats) -> None:
@@ -520,8 +596,8 @@ class Job:
         run: stories without a translation are retried next hour, and their digests go out in
         English meanwhile."""
         tr = translate.Translator(
-            self.db, self.plans, settings=self.s, topic_tags=self.topic_order, log=self.log,
-            digest_cfg=self.merged_digest_cfg(),
+            self.db, getattr(self.plans, "translate", self.plans), settings=self.s, topic_tags=self.topic_order,
+            log=self.log, digest_cfg=self.merged_digest_cfg(),
             on_call=lambda p, ok, n, res, err, kind: self._log_call(p, ok, n, res, err, kind=kind),
             debug_dir=self.debug_dir)
         try:
@@ -770,6 +846,9 @@ class Job:
             "ai_calls", ("at", "provider", "model", "ok", "items", "input_tokens", "output_tokens", "ms",
                          "error", "kind", "code", "run_id"),
             [(*c, run_id) for c in self.calls_log])
+        stmts += insert_statements(   # Step 20: the paid key's spend (a normal run has none)
+            "ai_spend", ("at", "source", "model", "kind", "input_tokens", "output_tokens", "usd", "reason"),
+            self.spend_log)
         errors = list(stats.ai_errors) + ([error] if status == "error" and error else [])
         stmts += insert_statements("errors", ("at", "component", "message"),
                                    [(now, "job", e[:1000]) for e in errors]
@@ -817,25 +896,89 @@ class Job:
         return "\n".join(lines)
 
 
-def build_from_env(env: dict[str, str], settings: Settings) -> tuple[D1, list[ProviderPlan]]:
+class ForcedFailSession(requests.Session):
+    """Step 20 tests on staging only (AXIOM_AI_FORCE): every POST answers this HTTP status without
+    reaching the provider, so the real chain code handles a real-looking outage."""
+
+    def __init__(self, status: int):
+        super().__init__()
+        self.status = status
+
+    def post(self, url, *args, **kwargs):   # noqa: D401
+        resp = requests.Response()
+        resp.status_code = self.status
+        resp._content = json.dumps({"error": {"code": self.status, "message": f"forced {self.status} (AXIOM_AI_FORCE test)",
+                                              "status": "UNAVAILABLE"}}).encode()
+        resp.headers["content-type"] = "application/json"
+        resp.url = url
+        return resp
+
+
+def parse_force(value: str | None) -> dict:
+    """AXIOM_AI_FORCE (staging tests only): comma list of gemini503 (every free Gemini model of pass 1,
+    the editor and keywords), translate503 (the free translation models too), groq503, nopaid."""
+    parts = {x.strip() for x in (value or "").split(",") if x.strip()}
+    if parts and os.environ.get("AXIOM_ENV") != "staging":
+        raise SystemExit("AXIOM_AI_FORCE is for staging tests only (AXIOM_ENV=staging)")
+    return {k: k in parts for k in ("gemini503", "translate503", "groq503", "nopaid")}
+
+
+def build_from_env(env: dict[str, str], settings: Settings, budget_cfg: dict | None = None,
+                   now: int | None = None) -> tuple[D1, "PlanList"]:
+    """Step 20: the chain from config/ai_budget.json. Pass 1, editor, keywords: each free Gemini model,
+    Groq's models in rotation, then the emergency key (only if every free option failed for a call,
+    under hard caps). Translations: the strong free models, then the emergency key's translation
+    models; never Groq."""
     missing = [k for k in ("GEMINI_API_KEY", "GROQ_API_KEY", "CLOUDFLARE_ACCOUNT_ID", "D1_DATABASE_ID",
                            "CLOUDFLARE_D1_TOKEN") if not env.get(k)]
     if missing:
         raise SystemExit(f"missing settings: {', '.join(missing)} (see .env.example)")
+    cfg = budget_cfg or guard.load_budget()
+    ch, em = cfg.get("chain") or {}, cfg.get("emergency") or {}
+    force = parse_force(env.get("AXIOM_AI_FORCE"))
+    now = int(time.time()) if now is None else now
     db = D1(env["CLOUDFLARE_ACCOUNT_ID"], env["D1_DATABASE_ID"], env["CLOUDFLARE_D1_TOKEN"])
-    gemini = ai.GeminiProvider(env["GEMINI_API_KEY"], env.get("GEMINI_MODEL") or "gemini-3.5-flash-lite")
-    gemini_b = ai.GeminiProvider(env["GEMINI_API_KEY"],
-                                 env.get("GEMINI_FALLBACK_MODEL") or "gemini-3.1-flash-lite")
-    groq = ai.GroqProvider(env["GROQ_API_KEY"], env.get("GROQ_MODEL") or "openai/gpt-oss-120b",
-                           max_output_tokens=settings.groq_reply_tokens)
-    plans = [
-        ProviderPlan(gemini, settings.gemini_max_input_tokens, settings.existing_max, max_chunks=4),
-        # A 503 "high demand" is per model, so a second Gemini model is tried before Groq.
-        ProviderPlan(gemini_b, settings.gemini_max_input_tokens, settings.existing_max, max_chunks=4,
-                     label="gemini-fallback"),
-        ProviderPlan(groq, settings.groq_chunk_tokens, settings.groq_existing_max,
-                     max_chunks=settings.groq_max_chunks_per_run, reply_tokens=groq.max_output_tokens),
-    ]
+    budget = ai.RetryBudget(float(ch.get("retry_budget_s", 150)), time.monotonic() + settings.run_budget_s)
+    delays = tuple(float(x) for x in ch.get("retry_503_s", (5, 15, 30)))
+    free_key = ai.KeyState("free")
+
+    def gemini(model, failing=False):
+        return ai.GeminiProvider(env["GEMINI_API_KEY"], model, retry_delays=delays, budget=budget, key=free_key,
+                                 session=ForcedFailSession(503) if failing else None)
+
+    models = list(ch.get("gemini_free") or ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"])
+    if env.get("GEMINI_MODEL"):           # the workflow may pin the first two (as before Step 20)
+        models[0] = env["GEMINI_MODEL"]
+    if env.get("GEMINI_FALLBACK_MODEL") and len(models) > 1:
+        models[1] = env["GEMINI_FALLBACK_MODEL"]
+    models = list(dict.fromkeys(models))
+    plans = PlanList(forced=",".join(k for k, v in force.items() if v))
+    for i, m in enumerate(models):
+        plans.append(ProviderPlan(gemini(m, force["gemini503"]), settings.gemini_max_input_tokens,
+                                  settings.existing_max, max_chunks=4, label="gemini" if i == 0 else "gemini-fallback"))
+    groq_models = list(ch.get("groq") or [env.get("GROQ_MODEL") or "openai/gpt-oss-120b"])
+    pool = chain.GroqPool([ai.GroqProvider(env["GROQ_API_KEY"], m, max_output_tokens=settings.groq_reply_tokens,
+                                           wait_429=False, session=ForcedFailSession(503) if force["groq503"] else None)
+                           for m in groq_models])
+    plans.append(ProviderPlan(pool, settings.groq_chunk_tokens, settings.groq_existing_max,
+                              max_chunks=settings.groq_max_chunks_per_run, reply_tokens=settings.groq_reply_tokens))
+    translate_plans = [ProviderPlan(gemini(m, force["translate503"]), settings.gemini_max_input_tokens,
+                                    settings.existing_max, max_chunks=1, label=m)
+                       for m in ch.get("translate_free") or ["gemini-3.8-flash"]]
+    spend = None
+    if env.get("GEMINI_EMERGENCY_API_KEY") and em and not force["nopaid"]:
+        spend = chain.SpendGuard.load(db, em, now)
+        paid_key = ai.KeyState("paid")
+        plans.append(ProviderPlan(chain.EmergencyProvider(env["GEMINI_EMERGENCY_API_KEY"], em["model"], spend, key=paid_key),
+                                  settings.emergency_chunk_tokens, settings.existing_max,
+                                  max_chunks=settings.emergency_max_chunks, label="emergency", paid=True))
+        for m in em.get("translate_models") or [em["model"]]:
+            translate_plans.append(ProviderPlan(chain.EmergencyProvider(env["GEMINI_EMERGENCY_API_KEY"], m, spend, key=paid_key),
+                                                settings.gemini_max_input_tokens, settings.existing_max, max_chunks=1,
+                                                label=f"emergency:{m}", paid=True))
+    plans.translate = translate_plans
+    plans.spend = spend
+    plans.budget = budget
     return db, plans
 
 

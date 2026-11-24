@@ -247,9 +247,13 @@ describe("Step 13: adding a custom topic", () => {
     const r = await add(binding, A, "Colombia");
     assert.equal(r.body.result.kind, "failed");
     const rows = sqlite.prepare("SELECT provider, model, ok, code, kind FROM ai_calls ORDER BY id").all();
+    // Step 20: each free Gemini model once more after a short wait, then Groq's three models in turn
     assert.deepEqual(rows.map((x) => `${x.provider}/${x.ok}/${x.code}/${x.kind}`),
-      ["gemini/0/503/topic_check", "gemini/0/503/topic_check", "groq/0/503/topic_check"]);
-    assert.notEqual(rows[0].model, rows[1].model);
+      ["gemini/0/503/topic_check", "gemini/0/503/topic_check", "gemini/0/503/topic_check", "gemini/0/503/topic_check",
+       "groq/0/503/topic_check", "groq/0/503/topic_check", "groq/0/503/topic_check"]);
+    assert.equal(rows[0].model, rows[1].model);
+    assert.notEqual(rows[1].model, rows[2].model);
+    assert.equal(new Set(rows.slice(4).map((x) => x.model)).size, 3);
   });
 
   test("Gemini's 429 then the backup model: logged as 429, the guard counts it", async () => {

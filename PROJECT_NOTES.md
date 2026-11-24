@@ -53,9 +53,14 @@ bot @axiom_news_bot at the end.
   key numbers (active users, digests today and delivered, stories today, last and next run), actions, the
   free limits (D1, Worker CPU, AI per model), then sections closed until tapped (Pipeline, AI, Feeds,
   Users, Custom topics, Announcement, Feedback, Tips, Errors). Red there is the system red, not the brand.
-- **AI:** Gemini free tier, falling back to Groq; if both fail, items wait an hour. About 82
-  calls/day (about 57 first pass + 25 editor), independent of user count; plus about 20 a day per
-  reader language other than English while someone reads it (Step 9).
+- **AI (Step 20):** every call goes down one chain: the free Gemini models one by one (a 503 retried with
+  backoff inside the run's retry time), then Groq's three models in rotation, then the paid emergency key
+  (`GEMINI_EMERGENCY_API_KEY`, $10 of credits) ONLY when every free option failed for that call, under hard
+  caps in code ($0.10 a UTC day, $1 a month, checked against each call's worst case; spend in `ai_spend`).
+  When degraded, items of followed topics and better sources go first; the rest waits. Translations use only
+  the strong models (free Gemini 4 Hydrogen, then 3.8 Flash; then the emergency key), never Groq, and each one
+  is read back into English and compared (the meaning check). About 82 calls/day for pass 1 and the editor,
+  plus about 40 a day per reader language other than English (translation and meaning check).
 - **Hosting:** GitHub Actions hourly job, plus Cloudflare Worker + D1 (webhook, Mini App API,
   static Mini App, digest cron).
 - **Two copies (Step 16, owner): production and staging.** Production: Worker `axiom-news`, D1
@@ -274,6 +279,10 @@ bot @axiom_news_bot at the end.
 | 2026-11-23 | Alerts only when action is needed: one per kind per UTC day, each with a "What to do" line; new kinds: digests failing (3+ and 20%), 10+ feeds down 3 runs, Google silent 24 h; no news run after 2 h (was 3); table `daily_stats` (one row a day, never pruned); backups are D1 Time Travel, 7 days on the free plan, steps in `OWNER_GUIDE.md` (owner, Step 19) | the owner wants no reports, only actionable alerts, and a long-term record that the 30-day log prune does not delete |
 | 2026-11-23 | Branding in four languages: description and about name the six topics (Technology & AI, no Russia) and "Stocks or Formula 1"; profile previews, share cards, 60 Story videos, feed post and carousel, What's new card re-rendered; the kits fall back to Segoe UI for Armenian (owner, Step 19) | Inter has no Armenian letters; Windows' generic sans-serif drew them badly |
 | 2026-11-23 | tech_ai boost cap 1, more specific than Economy & Markets (Step 19) | +2 would lift routine launches; a chip export ban is a tech story first |
+| 2026-11-23 | AI chain (Step 20, owner): free Gemini models one by one (3.5 and 3.1 Flash-Lite, 3 Flash preview, 3.8 Flash), a 503 retried after 5, 15, 30 s while the run's 150 s of retry time lasts (then that model is tried once per call for the rest of the run), then Groq gpt-oss-120b, qwen3.8-27b and gpt-oss-20b in rotation, then the emergency key | on 2026-11-23 Gemini's free tier answered 503 for about 5 hours; runs took 9 to 11 min on one Groq model and 667 items piled up. Each Groq model has its own 8k tokens a minute |
+| 2026-11-23 | The emergency key (separate project, $10 Prepay, expires 2027-11-23) only for work every free option FAILED on (not for work a free provider had no time or calls left for); caps $0.10 a day and $1 a month in code, checked before a call against its worst case (the prompt plus the whole 12k answer limit at the price), fail closed if the ledger cannot be read; one alert a day when it spent; model 3.1 Flash-Lite (pass 1, editor, topic checks), 3 Flash preview then 3.8 Flash (translations) (owner) | Google's own $2 cap can lag about 10 minutes; 3.1 Flash-Lite is the cheapest model that passes our checks ($0.25 / $1.50 per million tokens); 3.5 Flash-Lite wrote the Polish "że" inside 13 of 53 Armenian translations in 48 h |
+| 2026-11-23 | A 402 "prepayment credits are depleted" stops every model on that key for the run (Step 20) | the main key answered 402 on every model; without this each call would try four models first |
+| 2026-11-23 | Translations: only the strong models, never Groq; the source's original title as context; 21 news terms with two meanings in four languages (`config/glossary.yaml` `terms`); a meaning check (a second call reads the translation back into English and compares; a term with `back` stems must survive); a drifted story is redone at once with the problem as its note; a Latin word in Armenian or Russian must be in the English (owner, Step 20) | the owner found "Ukrainian deception ... fortune-telling job ads" for "Ukrainian intelligence ... espionage job ads" |
 
 ## Current status
 - **Step 1 done:** repo, docs, topics, prompt, lessons, 116 verified feeds.

@@ -82,7 +82,7 @@ export async function draftAnnouncement(db, env, body, now) {
   const texts = { en: english }, notes = {};
   let calls = [];
   if (others.length) {
-    const r = await askAI(env, translatePrompt(english, others), "en", now, {
+    const r = await askAI(env, translatePrompt(english, others), "en", now, { db,
       schema: translateSchema(others), schemaName: "announcement", maxTokens: 4096, timeoutMs: 20000,
       validate: (data) => (data && typeof data.translations === "object" ? data.translations : null) });
     calls = r.calls;

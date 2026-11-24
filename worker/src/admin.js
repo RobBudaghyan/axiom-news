@@ -2,6 +2,7 @@
 // CPU only shapes a few dozen rows. Only reached after the API checked the owner id.
 import { CONFIG, parseList } from "./digest.js";
 import { LANGS } from "./i18n.js";
+import { shapeSpend, spendStatement } from "./spend.js";
 
 const H = 3600, DAY = 86400;
 export const D1_FREE = { rows_read: 5_000_000, rows_written: 100_000 };   // per day, reset 00:00 UTC
@@ -67,6 +68,11 @@ export function adminStatements(now) {
     // Step 18: new stories since 00:00 UTC (created today means updated today: the updated_at index)
     { sql: "SELECT count(*) AS n, sum(final_score >= 7) AS strong FROM stories WHERE updated_at >= ?1 AND created_at >= ?1 AND merged_into IS NULL",
       params: [dayStart] },
+    // Step 20: the paid emergency key (today, this month, everything since the credits were bought) and
+    // which provider served each of the last runs
+    spendStatement(now),
+    { sql: "SELECT id, started_at, finished_at, status, provider, items_pending_in, items_left_pending, stories_created " +
+           "FROM job_runs ORDER BY id DESC LIMIT 12", params: [] },
   ];
 }
 
@@ -122,7 +128,7 @@ export function feedReport(health, now, cfg = CONFIG) {
 
 export function shapeAdmin(rows, now, cfg = CONFIG) {
   const [[last], [lastOk], [s24], [s7], models, metaRows, users, errors, [jobD1], sizes = [],
-         readers = [], translated = [], trCalls = [], fallbacks = [], holds = [], [today0] = []] = rows;
+         readers = [], translated = [], trCalls = [], fallbacks = [], holds = [], [today0] = [], [spend0] = [], runs = []] = rows;
   const sizeOf = new Map(sizes.map((r) => [r.user_id, r]));
   const meta = Object.fromEntries(metaRows.map((r) => [r.key, r.value]));
 
@@ -184,6 +190,10 @@ export function shapeAdmin(rows, now, cfg = CONFIG) {
       })),
     },
     feeds: feedReport(jsonOr(meta.feed_health, null), now, cfg),
+    emergency: shapeSpend(spend0, now),   // Step 20
+    runs: runs.map((r) => ({ id: r.id, started_at: r.started_at, status: r.status, provider: r.provider ?? null,
+      duration_s: r.finished_at ? r.finished_at - r.started_at : null, items_in: num(r.items_pending_in),
+      items_left: num(r.items_left_pending), stories: num(r.stories_created) })),
     users: {
       count: list.length,
       active: list.filter((u) => !u.all_off && !u.blocked).length,
@@ -282,6 +292,9 @@ export function adminSummary(A, now) {
 
   const ai = aiModels(A);
   for (const m of ai) if (m.calls >= 4 && m.failed / m.calls >= 0.5) add(1, `${m.model}: ${m.failed} of ${m.calls} AI calls failed (24 h).`);
+  const E = A.emergency;
+  if (E && E.today > 0) add(1, `The paid emergency key was used today ($${E.today.toFixed(4)}).`);
+  if (E && E.today >= E.daily_cap * 0.9) add(2, "The paid emergency key reached its daily cap: work waits.");
   const g = A.custom?.guard;
   if (g && Math.max(g.level ?? 0, g.job_level ?? 0) >= 2) add(1, "AI budget: topic checks and translations wait.");
   else if (g && Math.max(g.level ?? 0, g.job_level ?? 0) === 1) add(1, "AI budget: new topic checks wait.");
