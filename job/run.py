@@ -777,6 +777,14 @@ class Job:
             left = self.run_ai(pending, now, stats)
             self.flush_held()
             stats.items_left_pending = len(left)
+            for plan in self.plans:   # Step 20: what the Groq pool did (busy, bad answers, models out)
+                ev = getattr(plan.provider, "events", None)
+                if ev:
+                    counts: dict[str, int] = {}
+                    for e in ev:
+                        k = e if "out for the run" in e else e.split(" ")[0] + " " + e.split(": ", 1)[1].split(" ")[0]
+                        counts[k] = counts.get(k, 0) + 1
+                    stats.ai_errors.append("groq pool: " + "; ".join(f"{k} x{n}" for k, n in counts.items())[:600])
             stats.ai_calls = len(self.calls_log)
             try:   # a grouping failure must not fail the run; digests then just skip dedupe
                 regrouped = dupes.update_groups(self.db, now)

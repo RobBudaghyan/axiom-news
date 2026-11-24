@@ -32,6 +32,7 @@ class GroqPool:
         self.clock = clock
         self.current = members[0]
         self.busy_until: dict[str, float] = {}
+        self.events: list[str] = []      # Step 20: why a model was skipped (the job logs a summary)
         self.max_output_tokens = members[0].max_output_tokens
 
     @property
@@ -65,12 +66,14 @@ class GroqPool:
 
     def generate(self, prompt: str, schema: dict | None) -> CallResult:
         last: AIError | None = None
+        tried_bad: set[str] = set()     # models that gave a bad answer (or a 5xx) to THIS prompt
         for n in range(self.ROUNDS):
-            only_busy = True
             order = ([self.current] + [m for m in self.members if m is not self.current] if n == 0
                      else sorted(self.members, key=lambda m: self.busy_until.get(m.model, 0)))   # the first free first
             for m in order:
-                if m.dead:
+                if m.dead or m.model in tried_bad:
+                    continue
+                if n > 0 and self.busy_until.get(m.model, 0) > self.clock():
                     continue
                 self.current = m
                 try:
@@ -82,25 +85,28 @@ class GroqPool:
                         ra = exc.retry_after if exc.retry_after is not None else 60
                         if ra > 120 or "per day" in text or "(rpd)" in text or "(tpd)" in text:
                             m.dead = "daily limit"
+                            self.events.append(f"{m.model}: out for the run (daily limit: {str(exc)[:120]})")
                         else:
                             self.busy_until[m.model] = self.clock() + ra
+                            self.events.append(f"{m.model}: busy {ra:.0f} s")
                         continue
-                    only_busy = False
-                    if exc.kind == "network" or (exc.kind == "http" and (exc.status or 0) >= 500):
-                        continue
-                    if exc.kind == "too_large":
-                        continue   # Step 20 (seen live): gpt-oss-20b refused a request qwen accepted; the next model may
-                                   # take it (if none does, the last error, too_large, goes to the caller, which splits)
                     if exc.kind == "http" and exc.status in (400, 404) and "model" in text:
                         m.dead = f"HTTP {exc.status}"
+                        self.events.append(f"{m.model}: out for the run (HTTP {exc.status})")
                         continue
-                    raise          # an answer problem (too large, truncated, invalid): the caller decides
-            alive = self.alive()
-            if not (only_busy and alive):
+                    if exc.kind in ("network", "too_large", "invalid", "truncated") or (exc.kind == "http" and (exc.status or 0) >= 500):
+                        # Step 20 (seen live): gpt-oss-20b broke the JSON on most calls and refused a request qwen
+                        # accepted (413); another model may do it. If none does, the last error goes to the caller.
+                        tried_bad.add(m.model)
+                        self.events.append(f"{m.model}: {exc.kind}, next model")
+                        continue
+                    raise
+            # Step 20 (seen live): models that are only briefly busy (a per-minute 429 "try again in 1 to 15 s")
+            # are not an outage: wait for the first one to be free and go round again
+            waiting = [m for m in self.alive() if m.model not in tried_bad and self.busy_until.get(m.model, 0) > self.clock()]
+            if not waiting:
                 break
-            # Step 20 (seen live): all three models answered a per-minute 429 "try again in 1 s" at once;
-            # that is not an outage: wait for the first one to be free and go round again
-            wait = min(max(0.0, self.busy_until.get(m.model, 0) - self.clock()) for m in alive) + 0.5
+            wait = min(self.busy_until[m.model] - self.clock() for m in waiting) + 0.5
             if wait > 65:
                 break
             self.sleep(wait)

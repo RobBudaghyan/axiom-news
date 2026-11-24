@@ -156,10 +156,28 @@ class GroqRotation(unittest.TestCase):
         busy = lambda: FakeResponse(429, {"error": {"message": "ITPM"}}, {"retry-after": "1"})  # noqa: E731
         a = self.member("a", [busy(), FakeResponse(200, GROQ_OK)])
         b = self.member("b", [busy()])
-        sleeps = []
-        pool = chain.GroqPool([a, b], sleep=sleeps.append, clock=Clock(0))
+        sleeps, clock = [], Clock(0)
+
+        def sleep(s):
+            sleeps.append(s)
+            clock.t += s
+        pool = chain.GroqPool([a, b], sleep=sleep, clock=clock)
         self.assertEqual(pool.generate("p", None).model, "a")
         self.assertEqual(sleeps, [1.5])
+
+    def test_one_bad_answer_and_one_busy_model_still_waits_for_the_busy_one(self):
+        """Seen live: gpt-oss-20b broke the JSON, qwen said 'try again in 14 s'; the pool gave up."""
+        bad = FakeResponse(400, {"error": {"message": "Failed to validate JSON."}, "failed_generation": "{"})
+        a = self.member("a", [bad])
+        b = self.member("b", [FakeResponse(429, {"error": {"message": "ITPM"}}, {"retry-after": "14"}), FakeResponse(200, GROQ_OK)])
+        sleeps, clock = [], Clock(0)
+
+        def sleep(s):
+            sleeps.append(s)
+            clock.t += s
+        pool = chain.GroqPool([a, b], sleep=sleep, clock=clock)
+        self.assertEqual(pool.generate("p", None).model, "b")
+        self.assertEqual((sleeps, a.session.posts), ([14.5], 1))
 
     def test_too_large_for_one_model_tries_the_next(self):
         a = self.member("a", [FakeResponse(413, {"error": {"message": "Request too large"}})])
@@ -170,6 +188,13 @@ class GroqRotation(unittest.TestCase):
         with self.assertRaises(ai.AIError) as cm:
             only.generate("p", None)
         self.assertEqual(cm.exception.kind, "too_large")
+
+    def test_a_bad_answer_from_one_model_goes_to_the_next(self):
+        bad = FakeResponse(400, {"error": {"message": "Failed to validate JSON. Please adjust your prompt.", "failed_generation": "{"}})
+        a = self.member("a", [bad])
+        b = self.member("b", [FakeResponse(200, GROQ_OK)])
+        pool = chain.GroqPool([a, b], sleep=lambda s: None, clock=Clock(0))
+        self.assertEqual(pool.generate("p", None).model, "b")
 
     def test_a_daily_limit_takes_a_model_out(self):
         a = self.member("a", [FakeResponse(429, {"error": {"message": "Limit tokens per day (TPD)"}}, {"retry-after": "3600"})])
