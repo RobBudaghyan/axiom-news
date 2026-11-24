@@ -400,7 +400,7 @@ bot @axiom_news_bot at the end.
   ($0.10 a day, $1 a month, checked against each call's worst case; `ai_spend`; one alert a day; Admin shows each
   run's provider and the spend). Translations: strong models only, terms glossary, source title, a meaning check
   with an immediate redo, Latin words in Armenian and Russian rejected. The worker's topic check uses the same
-  order and caps. Python 217 tests, Worker 373, 35 of 35 rules broken on purpose caught. Details in
+  order and caps. Python 219 tests, Worker 373, click-through 248, 36 of 36 rules broken on purpose caught. Details in
   `reports/step-20-ai-resilience.md`.
 
 ## Next step

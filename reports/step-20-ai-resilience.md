@@ -60,12 +60,12 @@ about 3,100 tokens, and Groq calls were limited to 3,500 tokens, so **each Groq 
    translations of the last 48 h).
 
 ## Tests
-- Python 217 tests (32 new, `tests/test_step20.py`), Worker 373 (14 new, `worker/test/step20.test.mjs`).
-  **35 of 35 new rules broken on purpose were caught** (`venv/Scripts/python scripts/step20_mutations.py`); two
+- Python 219 tests (34 new, `tests/test_step20.py`), Worker 373 (14 new, `worker/test/step20.test.mjs`).
+  **36 of 36 new rules broken on purpose were caught** (`venv/Scripts/python scripts/step20_mutations.py`); two
   tests were too weak at first (a model whose retries ran out, an unreadable ledger in the Worker) and were
-  strengthened. The Mini App click-through passed for the new Admin rows except 3 checks that failed only because
-  of my preview's demo data (a paid day makes the demo's health line amber); the demo data was moved to yesterday,
-  and the check was stopped before its rerun finished (the computer went off), so it was not rerun.
+  strengthened; later live fixes added 3 more (36 of 36). Mini App click-through **248 of 248** (one Russian
+  edit-mode check failed once and passed on the rerun: flaky, not touched by this step). Admin screenshot:
+  `reports/step-20/admin-ai-emergency.jpg` (demo data).
 - Staging, real AI (`AXIOM_ENV=staging`):
   - **(a) free Gemini forced to 503, paid key off:** pass 1 and the editor ran on Groq, **$0 spent**; the
     translations waited (no strong free model: the main key is 402). With the old Groq sizes this run made only
@@ -88,4 +88,37 @@ about 3,100 tokens, and Groq calls were limited to 3,500 tokens, so **each Groq 
     good version: accepted. $0.0009.
 
 ## Armenian and French, last 48 h
-French: no French reader yet, so there were no French translations to redo. Armenian: see below.
+- **French:** no French reader yet, so there were no French translations to redo.
+- **Armenian:** 80 current translations in 48 h; the new code checks alone reject 16 of them (13 with the Polish
+  "że"). On 2026-11-24 the 12 worst (all made by Groq) were translated again with the new rules on production
+  (`scripts/step20_retranslate.py`): **12 of 12 replaced**, 7 calls, **$0.0144** on the emergency key (the free key
+  is still 402). The other 68 are next: `venv/Scripts/python scripts/step20_retranslate.py --langs hy --skip-done`
+  (it stops at the daily cap; run it again the next day, or it goes fast once the main key is free).
+- "Read back" is the meaning check's word-for-word reading of the OLD translation. Full record:
+  `reports/data/step-20-retranslate.json`. **Please judge the Armenian.**
+
+| # | English | Before (old) | Old, read back into English | After (new) |
+|---|---|---|---|---|
+| 1 | US intelligence chief warns of potential technology outages | ԱՄՆ-ի տեղեկատվական ղեկավարն զգուշացրել է հնարավոր տեխնոլոգիական անընդհատություններ | "The US information head has warned of possible technological continuities" | ԱՄՆ հետախուզության ղեկավարը զգուշացրել է տեխնոլոգիական հնարավոր խափանումների մասին |
+| 2 | FSB arrests Russian citizen in Crimea suspected of spying for Ukrainian intelligence | ՖՍԲ-ն բռնել է քրիմիայում ռուս քաղաքացի, որը կասկածվում է ուկրաինյան գաղտնազգայնության համար | "The FSB has caught a Russian citizen in Crimea, who is suspected for Ukrainian secret-ness" | ԱԴԾ-ն Ղրիմում ձերբակալել է Ռուսաստանի քաղաքացու, որը կասկածվում է ուկրաինական հետախուզության օգտին լրտեսության մեջ |
+| 3 | Global technology stocks and AI sector face sharp declines and market warnings | Աշխարհի տեխնոլոգիական և AI բաժինները հանդիպեցին խիստ իջեցումներով, և բանկը զգուշացրել է AI‑ի պարտքի պղպջակները | "The world's technological and AI sections met with severe decreases" | Տեխնոլոգիական բաժնետոմսերի համաշխարհային շուկան և AI ոլորտը բախվել են կտրուկ անկումների և շուկայական նախազգուշացումների |
+| 4 | California sues OpenAI over model security and public safety | Կալիֆորնիա գործ է ներկայացրել OpenAI‑ի դեմ՝ մոդելի անվտանգության և հանրային անվտանգության համար | "California has presented a case against OpenAI" (and "law agent ... plotting" for "attorney general ... alleging") | Կալիֆոռնիան դատի է տվել OpenAI-ին մոդելների անվտանգության և հանրային ապահովության համար |
+| 5 | Denmark expels Russian official over alleged assassination plot | Դանիա դուրս է հանել ռուս պաշտոնականին, կասկածելով սպանության պլանով | "Denmark has taken out a Russian official, suspecting with a murder plan" | Դանիան արտաքսել է ռուս պաշտոնյային սպանության ենթադրյալ դավադրության պատճառով |
+| 6 | Moscow considers response options after attacks on ships in Benghazi | Մոսկվա կհաշվի արձագանքների տարբերակները Բենղազիում նավակների հարվածներից հետո | "Moscow will count response options after boat strikes in Benghazi" | Մոսկվան դիտարկել է պատասխան գործողությունների տարբերակները Բենգազիում նավերի վրա հարձակումներից հետո |
+| 7 | Pashinyan pledges to resign if constitutional referendum fails | Փաշինյանը խոստացավ հրաժարվել, եթե սահմանադրական ռեֆերենդը չհաջողվի | (not read back) | Փաշինյանը խոստացել է հրաժարական տալ, եթե սահմանադրական հանրաքվեն ձախողվի |
+| 8 | European Central Bank warns of debt bubble risks in artificial intelligence market | Եվրոպական կենտրոնական բանկը զգուշացրել է AI շուկայի պարտքի պղպջակները ռիսկերը | (rejected by the new Latin-word check: "AI" is not in the English) | Եվրոպական կենտրոնական բանկը զգուշացրել է արհեստական բանականության շուկայում պարտքային փուչիկի ռիսկերի մասին |
+| 9 | EU and Indonesia sign comprehensive trade and tariff agreement | ԵՄ-ը և Ինդոնեզիան ստորագրեցին ամբողջական առևտրի և տարֆների համաձայնագիր | "signed a complete trade and tariffs agreement" (meaning kept; "տարֆների" is not a word) | ԵՄ-ն և Ինդոնեզիան ստորագրել են առևտրի և մաքսատուրքերի համապարփակ համաձայնագիր |
+| 10 | Analytics warn AI compute provider CoreWeave faces risk of financial collapse | Անալիտիկները զգուշացնում են, որ CoreWeave-ի ֆինանսական անկման ռիսկը բարձր է | "Analysts warn that CoreWeave's financial collapse risk is high" (meaning kept) | Վերլուծաբանները զգուշացրել են AI հաշվարկային ծառայություններ մատուցող CoreWeave-ի ֆինանսական փլուզման ռիսկի մասին |
+
+One new translation to look at with care: "European natural gas prices climb above 90 euros" became "... բարձրացել են
+մեկ մեգավատտ-ժամի դիմաց 90 եվրոյից" ("rose from 90 euros"?); the meaning check accepted it.
+
+## Production after shipping (2026-11-24)
+- Shipped 13:43 UTC (owner approved in chat): Worker `bb45a898`, `ai_spend` in the production database, job code
+  `8d3fab3`, then `5455256` (13:58, two fixes found in the first production run, below).
+- First production run with Step 20 (13:43): **60 new stories in 128 s** (the runs before made 1 to 3). It showed
+  that all three Groq models can answer a 1-second per-minute 429 at the same moment; the pool then gave up and
+  the paid key took over ($0.023). Fixed (the pool waits and goes round again) and checked on staging: **152 new
+  stories in one run on Groq alone, $0**. A Groq editor call refused as too large by one model now tries the next.
+- 3,446 items had piled up; items older than 24 h expire as before, so news from the outage hours that was never
+  processed is skipped, not sent late.

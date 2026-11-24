@@ -1,0 +1,200 @@
+{
+ "made_at": 1795528692,
+ "hours": 48.0,
+ "langs": {
+  "hy": {
+   "result": {
+    "todo": 12,
+    "ok": 12,
+    "rejected": 0,
+    "unanswered": 0,
+    "calls": 7,
+    "check_calls": 4,
+    "drifted": 0,
+    "redone": 0,
+    "input_tokens": 6975,
+    "output_tokens": 3637,
+    "provider": "emergency:gemini-3-flash-preview",
+    "notes": [
+     "gemini: HTTP 402: Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at https://ai.google.dev/gemini-api/docs/billing#prepay. ",
+     "gemini: gemini-3.8-flash: key unusable this run (HTTP 402)",
+     "gemini: gemini-4-hydrogen: key unusable this run (HTTP 402)",
+     "gemini: gemini-3.8-flash: key unusable this run (HTTP 402)"
+    ]
+   },
+   "rows": [
+    {
+     "id": 13005,
+     "english": "Analytics warn AI compute provider CoreWeave faces risk of financial collapse\nReports indicated that major AI computing provider CoreWeave has accumulated 47 billion dollars in debt, raising concerns of a potential financial collapse.",
+     "old_provider": "groq",
+     "old": "Անալիտիկները զգուշացնում են, որ CoreWeave-ի ֆինանսական անկման ռիսկը բարձր է\nՀաշվետվություններն ցույց են տալիս, որ AI հաշվարկների մեծ պրովայդերը CoreWeave-ն հավաքել է 47 միլիարդ դոլար պարտք, ինչը բարձրացնում է ֆինանսական անկման ռիսկը.",
+     "old_problems": [],
+     "old_back": "Analysts warn that CoreWeave's financial collapse risk is high. Reports show that the large AI computing provider CoreWeave has accumulated 47 billion dollars debt, which raises the financial collapse risk.",
+     "old_same_meaning": true,
+     "old_check_problem": "",
+     "result": "replaced",
+     "new": "Վերլուծաբանները զգուշացրել են AI հաշվարկային ծառայություններ մատուցող CoreWeave-ի ֆինանսական փլուզման ռիսկի մասին\nԶեկույցները ցույց են տվել, որ արհեստական բանականության հաշվարկային ծառայություններ մատուցող խոշորագույն CoreWeave ընկերությունը կուտակել է 47 միլիարդ դոլարի պարտք, ինչը ֆինանսական հնարավոր փլուզման մտահոգություններ է առաջացրել։",
+     "new_provider": "emergency:gemini-3-flash-preview"
+    },
+    {
+     "id": 13051,
+     "english": "Moscow considers response options after attacks on ships in Benghazi\nMoscow stated it will consider response options following Ukrainian-linked attacks on Russian vessels docked in Benghazi, Libya.",
+     "old_provider": "groq",
+     "old": "Մոսկվա կհաշվի արձագանքների տարբերակները Բենղազիում նավակների հարվածներից հետո\nՄոսկվայից հայտարարեց, որ կհաշվի տարբերակները՝ արձագանքելու Ուկրաինայից կապված հարվածների համար, որոնք ուղղված են ռուս նավակներին Բենղազիում, Լիբիա.",
+     "old_problems": [],
+     "old_back": "Moscow will count response options after boat strikes in Benghazi. From Moscow it was announced that it will count options to respond for Ukrainian-linked strikes, which are directed at Russian boats in Benghazi, Libya.",
+     "old_same_meaning": false,
+     "old_check_problem": "The word 'boats' was used instead of 'ships' and 'count' instead of 'consider'.",
+     "result": "replaced",
+     "new": "Մոսկվան դիտարկել է պատասխան գործողությունների տարբերակները Բենգազիում նավերի վրա հարձակումներից հետո\nՄոսկվան հայտարարել է, որ կդիտարկի պատասխան գործողությունների տարբերակները Լիբիայի Բենգազի նավահանգստում կայանված ռուսական նավերի վրա Ուկրաինայի հետ կապված հարձակումներից հետո։",
+     "new_provider": "emergency:gemini-3-flash-preview"
+    },
+    {
+     "id": 13159,
+     "english": "Denmark expels Russian official over alleged assassination plot\nDenmark expelled a Russian official following revelations of a foiled plot to assassinate Ukrainian rapper Albert Vasiliev in Poland and Denmark.",
+     "old_provider": "groq",
+     "old": "Դանիա դուրս է հանել ռուս պաշտոնականին, կասկածելով սպանության պլանով\nԴանիա դուրս է հանել ռուս պաշտոնականին, հետևելով տեղեկություններին, որ պլանավորված էր սպանել ուկրաինայի ռապեր Ալբերտ Վասիլևը Պոլանդում և Դանիայում.",
+     "old_problems": [],
+     "old_back": "Denmark has taken out a Russian official, suspecting with a murder plan. Denmark has taken out a Russian official, following information that it was planned to kill Ukraine's rapper Albert Vasiliev in Poland and Denmark.",
+     "old_same_meaning": false,
+     "old_check_problem": "The word 'expelled' was translated as 'taken out' and 'official' as 'official person' but 'Poland' was written as 'Poland' in Armenian letters instead of the Armenian word 'Lehastan'.",
+     "result": "replaced",
+     "new": "Դանիան արտաքսել է ռուս պաշտոնյային սպանության ենթադրյալ դավադրության պատճառով\nԴանիան արտաքսել է ռուս պաշտոնյային այն բանից հետո, երբ բացահայտվել է Լեհաստանում և Դանիայում ուկրաինացի ռեփեր Ալբերտ Վասիլևի սպանության կանխված դավադրությունը։",
+     "new_provider": "emergency:gemini-3-flash-preview"
+    },
+    {
+     "id": 13200,
+     "english": "California sues OpenAI over model security and public safety\nCalifornia Attorney General Rob Bonta sued OpenAI, alleging the company endangered public safety by developing and testing powerful AI models without adequate safeguards.",
+     "old_provider": "groq",
+     "old": "Կալիֆորնիա գործ է ներկայացրել OpenAI‑ի դեմ՝ մոդելի անվտանգության և հանրային անվտանգության համար\nԿալիֆորնիայի իրավունքի գործակալ Ռոբ Բոնտան ներկայացրել է գործ OpenAI‑ի դեմ, հողամասելով, որ ընկերությունը վտանգել է հանրային անվտանգությունը՝ զարգացնելով և փորձարկելով ուժեղ AI մոդելներ առանց բավարար պաշտպանությունների.",
+     "old_problems": [],
+     "old_back": "California has presented a case against OpenAI for model safety and public safety. California's law agent Rob Bonta presented a case against OpenAI, plotting that the company endangered public safety by developing and testing strong AI models without sufficient protections.",
+     "old_same_meaning": false,
+     "old_check_problem": "The word 'attorney general' was translated as 'law agent' and 'alleging' was mistranslated as 'plotting'.",
+     "result": "replaced",
+     "new": "Կալիֆոռնիան դատի է տվել OpenAI-ին մոդելների անվտանգության և հանրային ապահովության համար\nԿալիֆոռնիայի գլխավոր դատախազ Ռոբ Բոնտան դատի է տվել OpenAI-ին՝ պնդելով, որ ընկերությունը վտանգել է հանրային անվտանգությունը՝ առանց համապատասխան երաշխիքների մշակելով և փորձարկելով արհեստական բանականության հզոր մոդելներ։",
+     "new_provider": "emergency:gemini-3-flash-preview"
+    },
+    {
+     "id": 13218,
+     "english": "Global technology stocks and AI sector face sharp declines and market warnings\nTechnology stock declines in 2026 reached levels comparable to the 2000 dot-com crash, while the European Central Bank warned of debt bubble risks linked to artificial intelligence investments.",
+     "old_provider": "groq",
+     "old": "Աշխարհի տեխնոլոգիական և AI բաժինները հանդիպեցին խիստ իջեցումներով, և բանկը զգուշացրել է AI‑ի պարտքի պղպջակները\n2026 թվականին տեխնոլոգիական բաժնի իջեցումները հասան 2000-ի դոտ-կոմի պնդված մակարդակին, իսկ Եվրոպական կենտրոնական բանկը զգուշացրել է արհեստական բանականության ներդրումների հետ կապված պարտքի պղպջակների ռիսկերը.",
+     "old_problems": [],
+     "old_back": "The world's technological and AI sections met with severe decreases, and the bank warned of AI debt bubbles. In 2026 technological section decreases reached the 2000 dot-com's asserted level, and the European Central Bank warned of debt bubble risks related to artificial intelligence investments.",
+     "old_same_meaning": false,
+     "old_check_problem": "The word 'stocks' was translated as 'sections' and 'comparable' as 'asserted'.",
+     "result": "replaced",
+     "new": "Տեխնոլոգիական բաժնետոմսերի համաշխարհային շուկան և AI ոլորտը բախվել են կտրուկ անկումների և շուկայական նախազգուշացումների\n2026 թվականին տեխնոլոգիական բաժնետոմսերի անկումը հասել է 2000 թվականի դոթքոմների փլուզմանը համադրելի մակարդակի, մինչդեռ Եվրոպական կենտրոնական բանկը զգուշացրել է արհեստական բանականության ներդրումների հետ կապված պարտքային փուչիկի ռիսկերի մասին։",
+     "new_provider": "emergency:gemini-3-flash-preview"
+    },
+    {
+     "id": 13226,
+     "english": "EU and Indonesia sign comprehensive trade and tariff agreement\nThe European Union signed comprehensive trade agreements with Indonesia to eliminate most tariffs on goods and boost bilateral investments.",
+     "old_provider": "groq",
+     "old": "ԵՄ-ը և Ինդոնեզիան ստորագրեցին ամբողջական առևտրի և տարֆների համաձայնագիր\nԵվրոպական միությունը ստորագրեց ամբողջական առևտրի համաձայնագիր Ինդոնեզիայի հետ, որպեսզի հեռացնի մեծ մասը ապրանքների տարֆներից և բարձրացնի երկկողմանի ներդրումները.",
+     "old_problems": [],
+     "old_back": "The EU and Indonesia signed a complete trade and tariffs agreement. The European Union signed a complete trade agreement with Indonesia, in order to remove the majority from goods' tariffs and raise bilateral investments.",
+     "old_same_meaning": true,
+     "old_check_problem": "",
+     "result": "replaced",
+     "new": "ԵՄ-ն և Ինդոնեզիան ստորագրել են առևտրի և մաքսատուրքերի համապարփակ համաձայնագիր\nԵվրոպական միությունը Ինդոնեզիայի հետ ստորագրել է առևտրային համապարփակ համաձայնագրեր՝ ապրանքների մաքսատուրքերի մեծ մասը վերացնելու և երկկողմ ներդրումները խթանելու նպատակով։",
+     "new_provider": "emergency:gemini-3-flash-preview"
+    },
+    {
+     "id": 13283,
+     "english": "US intelligence chief warns of potential technology outages\nUS intelligence authorities issued warnings regarding vulnerability to additional technology disruptions following a series of infrastructure failures affecting air travel and major digital services.",
+     "old_provider": "groq",
+     "old": "ԱՄՆ-ի տեղեկատվական ղեկավարն զգուշացրել է հնարավոր տեխնոլոգիական անընդհատություններ\nԱՄՆ-ի տեղեկատվական մարմինները թողել են զգուշացում՝ ենթադրելով, որ ենթակառուցվածքի ձախողումների հաջորդականությանց հետո հնարավոր են լրացուցիչ տեխնոլոգիական անընդհատություններ, որոնք ազդում են օդային ճանապարհորդության և մեծ թվային ծառայությունների վրա.",
+     "old_problems": [],
+     "old_back": "The US information head has warned of possible technological continuities. The US information bodies have left a warning, assuming that after a sequence of infrastructure failures additional technological continuities are possible, which affect air travel and large digital services.",
+     "old_same_meaning": false,
+     "old_check_problem": "The word 'intelligence' was translated as 'information' and 'outages' was mistranslated as 'continuities'.",
+     "result": "replaced",
+     "new": "ԱՄՆ հետախուզության ղեկավարը զգուշացրել է տեխնոլոգիական հնարավոր խափանումների մասին\nԱՄՆ հետախուզական մարմինները նախազգուշացումներ են հրապարակել տեխնոլոգիական լրացուցիչ խափանումների նկատմամբ խոցելիության վերաբերյալ՝ օդային փոխադրումների և հիմնական թվային ծառայությունների վրա ազդող ենթակառուցվածքային մի շարք ձախողումներից հետո։",
+     "new_provider": "emergency:gemini-3-flash-preview"
+    },
+    {
+     "id": 13339,
+     "english": "FSB arrests Russian citizen in Crimea suspected of spying for Ukrainian intelligence\nRussia's Federal Security Service arrested a Russian citizen in Crimea on treason charges, accusing them of gathering and transmitting intelligence to Ukrainian military intelligence.",
+     "old_provider": "groq",
+     "old": "ՖՍԲ-ն բռնել է քրիմիայում ռուս քաղաքացի, որը կասկածվում է ուկրաինյան գաղտնազգայնության համար\nՌուսաստանի Ֆեդերալ անվտանգության ծառայությունը բռնել է քրիմիայում ռուս քաղաքացի, մեղադրում նրան՝ հավաքել և փոխանցել տեղեկատվություն ուկրաինայի ռազմական գաղտնազգայնությանը.",
+     "old_problems": [],
+     "old_back": "The FSB has caught a Russian citizen in Crimea, who is suspected for Ukrainian secret-ness. Russia's Federal Security Service has caught a Russian citizen in Crimea, accuses him of collecting and passing information to Ukraine's military secret-ness.",
+     "old_same_meaning": false,
+     "old_check_problem": "The word 'intelligence' was mistranslated as 'secret-ness' and 'arrested' as 'caught'.",
+     "result": "replaced",
+     "new": "ԱԴԾ-ն Ղրիմում ձերբակալել է Ռուսաստանի քաղաքացու, որը կասկածվում է ուկրաինական հետախուզության օգտին լրտեսության մեջ\nՌուսաստանի անվտանգության դաշնային ծառայությունը Ղրիմում պետական դավաճանության մեղադրանքով ձերբակալել է Ռուսաստանի մի քաղաքացու՝ նրան մեղադրելով ուկրաինական ռազմական հետախուզության համար տեղեկություններ հավաքելու և փոխանցելու մեջ։",
+     "new_provider": "emergency:gemini-3-flash-preview"
+    },
+    {
+     "id": 13362,
+     "english": "European natural gas prices climb above 90 euros per megawatt-hour\nEuropean natural gas prices climbed above 90 euros per megawatt-hour as colder weather lifted heating demand.",
+     "old_provider": "groq",
+     "old": "Եվրոպական բնական գազի գինը գերազանցեց 90 եվրո մեկ մեգավատ-ժամ\nԵվրոպական բնական գազի գինը բարձրացավ 90 եվրո մեկ մեգավատ-ժամից, քանի որ սառը եղանակը բարձրացրեց ջերմային պահանջը.",
+     "old_problems": [],
+     "old_back": "The European natural gas price exceeded 90 euros one megawatt-hour. The European natural gas price rose from 90 euros one megawatt-hour, because the cold weather raised the thermal demand.",
+     "old_same_meaning": true,
+     "old_check_problem": "",
+     "result": "replaced",
+     "new": "Եվրոպայում բնական գազի գները բարձրացել են մեկ մեգավատտ-ժամի դիմաց 90 եվրոյից\nԵվրոպայում բնական գազի գները բարձրացել են մեկ մեգավատտ-ժամի դիմաց 90 եվրոյից, քանի որ ցուրտ եղանակը մեծացրել է ջեռուցման պահանջարկը։",
+     "new_provider": "emergency:gemini-3-flash-preview"
+    },
+    {
+     "id": 13394,
+     "english": "Nvidia drops to fourth place after capitalization falls 14 percent\nNvidia dropped out of the top three largest companies globally to fourth place following a 14 percent drop in capitalization.",
+     "old_provider": "groq",
+     "old": "Nvidia‑ը ընկավ չորրորդ տեղը, կապիտալիզացիան իջեց 14 տոկոս\nNvidia‑ը դուրս եկավ աշխարհի երեք ամենամեծ ընկերություններից և ընկավ չորրորդ տեղը, հետևելով 14 տոկոս կապիտալիզացիայի իջեցմանը.",
+     "old_problems": [],
+     "old_back": "Nvidia fell to fourth place, capitalization dropped 14 percent. Nvidia came out of the world's three largest companies and fell to fourth place, following a 14 percent capitalization drop.",
+     "old_same_meaning": true,
+     "old_check_problem": "",
+     "result": "replaced",
+     "new": "Nvidia-ն նահանջել է չորրորդ հորիզոնական կապիտալիզացիայի 14 տոկոս անկումից հետո\nNvidia-ն աշխարհի երեք խոշորագույն ընկերությունների շարքից նահանջել է չորրորդ հորիզոնական՝ կապիտալիզացիայի 14 տոկոս անկումից հետո։",
+     "new_provider": "emergency:gemini-3-flash-preview"
+    },
+    {
+     "id": 13494,
+     "english": "European Central Bank warns of debt bubble risks in artificial intelligence market\nThe European Central Bank warned that soaring debt investments in artificial intelligence companies pose potential risks to the global financial system.",
+     "old_provider": "groq",
+     "old": "Եվրոպական կենտրոնական բանկը զգուշացրել է AI շուկայի պարտքի պղպջակների ռիսկերը\nԵվրոպական կենտրոնական բանկը զգուշացրել է, որ արհեստական բանականության ընկերությունների բարձրացող պարտքի ներդրումները կարող են վտանգավոր լինել գլոբալ ֆինանսական համակարգի համար.",
+     "old_problems": [
+      "Latin word(s) not in the English: AI"
+     ],
+     "result": "replaced",
+     "new": "Եվրոպական կենտրոնական բանկը զգուշացրել է արհեստական բանականության շուկայում պարտքային փուչիկի ռիսկերի մասին\nԵվրոպական կենտրոնական բանկը զգուշացրել է, որ արհեստական բանականության ընկերություններում պարտքային ներդրումների կտրուկ աճը պոտենցիալ ռիսկեր է պարունակում համաշխարհային ֆինանսական համակարգի համար։",
+     "new_provider": "emergency:gemini-3-flash-preview"
+    },
+    {
+     "id": 13521,
+     "english": "Pashinyan pledges to resign if constitutional referendum fails\nPrime Minister Nikol Pashinyan has pledged to resign if the upcoming referendum on Armenia's new constitution fails to pass.",
+     "old_provider": "groq",
+     "old": "Փաշինյանը խոստացավ հրաժարվել, եթե սահմանադրական ռեֆերենդը չհաջողվի\nՊրեմիեր-մինիստրը Նիկոլա Փաշինյանը խոստացել է հրաժարվել, եթե Հայաստանի նոր սահմանադրության ռեֆերենդը չանցնի.",
+     "old_problems": [],
+     "result": "replaced",
+     "new": "Փաշինյանը խոստացել է հրաժարական տալ, եթե սահմանադրական հանրաքվեն ձախողվի\nՎարչապետ Նիկոլ Փաշինյանը խոստացել է հրաժարական տալ, եթե Հայաստանի նոր սահմանադրության վերաբերյալ առաջիկա հանրաքվեն չընդունվի։",
+     "new_provider": "emergency:gemini-3-flash-preview"
+    }
+   ]
+  },
+  "fr": {
+   "result": {
+    "todo": 0,
+    "ok": 0,
+    "rejected": 0,
+    "unanswered": 0,
+    "calls": 0,
+    "check_calls": 0,
+    "drifted": 0,
+    "redone": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "provider": null,
+    "notes": []
+   },
+   "rows": []
+  }
+ },
+ "spent_usd": 0.014398,
+ "calls": 7
+}
