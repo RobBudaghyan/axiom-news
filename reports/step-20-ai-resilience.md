@@ -60,8 +60,8 @@ about 3,100 tokens, and Groq calls were limited to 3,500 tokens, so **each Groq 
    translations of the last 48 h).
 
 ## Tests
-- Python 219 tests (34 new, `tests/test_step20.py`), Worker 373 (14 new, `worker/test/step20.test.mjs`).
-  **36 of 36 new rules broken on purpose were caught** (`venv/Scripts/python scripts/step20_mutations.py`); two
+- Python 221 tests (36 new, `tests/test_step20.py`), Worker 373 (14 new, `worker/test/step20.test.mjs`).
+  **37 of 37 new rules broken on purpose were caught** (`venv/Scripts/python scripts/step20_mutations.py`); two
   tests were too weak at first (a model whose retries ran out, an unreadable ledger in the Worker) and were
   strengthened; later live fixes added 3 more (36 of 36). Mini App click-through **248 of 248** (one Russian
   edit-mode check failed once and passed on the rerun: flaky, not touched by this step). Admin screenshot:
@@ -120,5 +120,12 @@ One new translation to look at with care: "European natural gas prices climb abo
   that all three Groq models can answer a 1-second per-minute 429 at the same moment; the pool then gave up and
   the paid key took over ($0.023). Fixed (the pool waits and goes round again) and checked on staging: **152 new
   stories in one run on Groq alone, $0**. A Groq editor call refused as too large by one model now tries the next.
+- Second production run (14:07, `5455256`): **89 new stories**, editor OK. gpt-oss-20b broke the JSON format on most
+  of its calls and each broken chunk went toward the paid key; the paid key then reached the **$0.10 daily cap**
+  ($0.0632 spent plus the worst case of the next call), so today's Russian translations wait until 00:00 UTC.
+  Fixed in `d9dbdeb` (14:43): a bad answer from one Groq model goes to the next Groq model, and the pool waits for a
+  model that is only briefly busy. The run log now says what the pool did. Staging after the fix: **117 new
+  stories, $0** (qwen did most of the work; gpt-oss-120b hit a longer Groq limit; Groq's limits are shared by
+  production and staging, so staging tests cost production some Groq room).
 - 3,446 items had piled up; items older than 24 h expire as before, so news from the outage hours that was never
   processed is skipped, not sent late.
